@@ -1,0 +1,196 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>Registration Page</title>
+        <link rel="stylesheet" href="../css/registration.css">
+    </head>
+
+    <body>
+        <div class="banner">
+            <div class="banner-content">
+                <img src="../images/logo.png" />
+                <div class="webname">
+                    <h1 id="webname">Red Bank Foundation</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="navi">
+                <div class="menu scan">
+                    <a href="../html/scanner.html"><img src="../images/scanner.png" /></a>
+                    <p>Scan QR</p>
+                </div>
+
+                <div class="menu regis">
+                    <img src="../images/registration.png" />
+                    <p>Register</p>
+                </div>
+
+                <div class="menu log">
+                    <a href="../html/log.html"><img src="../images/log.png" /></a>
+                    <p>Log</p>
+                </div>
+            </div>
+
+            <div class="main-panel">
+                <h1>Donor Registration</h1>
+
+                <div class="registration-field">
+                    <div class="reg-row">
+                        <div class="reg-req">
+                            <label for="fname">First Name:</label>
+                            <input type="text" class="req-name">
+                        </div>
+
+                        <div class="reg-req">
+                            <label for="mname">Middle Name:</label>
+                            <input type="text" class="req-name">
+                        </div>
+
+                        <div class="reg-req">
+                            <label for="lname">Last Name:</label>
+                            <input type="text" class="req-name">
+                        </div>
+                    </div>
+
+                    <div class="reg-row">
+                        <div class="reg-req">
+                            <label for="al1">Address Line 1:</label>
+                            <input type="text" class="req-add" placeholder="House number, Building, Street number, Street name">
+                        </div>
+
+                        <div class="reg-req">
+                            <label for="al2">Address Line 2:</label>
+                            <input type="text" class="req-add" placeholder="Subdivision/Village, Barangay">
+                        </div>
+                    </div>
+                    
+                    <div class="reg-row">
+                        <div class="reg-req">
+                            <label for="city">City:</label>
+                            <input type="text" class="req-loc">
+                        </div>
+
+                        <div class="reg-req">
+                            <label for="prov">Province:</label>
+                            <input type="text" class="req-loc">
+                        </div>
+
+                        <div class="reg-req">
+                            <label for="zip">Zip Code:</label>
+                            <input type="text" class="req-loc">
+                        </div>
+                    </div>
+
+                    <div class="reg-row">
+                        <div class="reg-req">
+                            <label for="email">Email Address:</label>
+                            <input type="text" class="req-con">
+                        </div>
+
+                        <div class="reg-req">
+                            <label for="num">Mobile Number:</label>
+                            <input type="text" class="req-con">
+                        </div>
+
+                        <div class="reg-req">
+                            <label>Sex:</label>
+
+                            <div class="opt-row">
+                                <div class="opt-rad">
+                                    <input type="radio" name="sex" id="male" value="male" class="req-sex">
+                                    <label for="male">male</label>
+                                </div>
+
+                                <div class="opt-rad">
+                                    <input type="radio" name="sex" id="female" value="female" class="req-sex">
+                                    <label for="female">female</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="reg-row">
+                        <div class="reg-req">
+                            <label>Blood Type:</label>
+
+                            <div class="bld-opt">
+                                <div class="opt-row">
+                                    <div class="opt-rad">
+                                        <input type="radio" name="blood" id="O+" value="O+" class="req-bld">
+                                        <label for="O+">O+</label>
+                                    </div>
+
+                                    <div class="opt-rad">
+                                        <input type="radio" name="blood" id="A+" value="A+" class="req-bld">
+                                        <label for="A+">A+</label>
+                                    </div>
+
+                                    <div class="opt-rad">
+                                        <input type="radio" name="blood" id="B+" value="B+" class="req-bld">
+                                        <label for="B+">B+</label>
+                                    </div>
+
+                                    <div class="opt-rad">
+                                        <input type="radio" name="blood" id="AB+" value="AB+" class="req-bld">
+                                        <label for="AB+">AB+</label>
+                                    </div>
+                                </div>
+
+                                <div class="opt-row">
+                                    <div class="opt-rad">
+                                        <input type="radio" name="blood" id="O-" value="O-" class="req-bld">
+                                        <label for="O-">O-</label>
+                                    </div>
+
+                                    <div class="opt-rad">
+                                        <input type="radio" name="blood" id="A-" value="A-" class="req-bld">
+                                        <label for="A-">A-</label>
+                                    </div>
+
+                                    <div class="opt-rad">
+                                        <input type="radio" name="blood" id="B-" value="B-" class="req-bld">
+                                        <label for="B-">B-</label>
+                                    </div>
+
+                                    <div class="opt-rad">
+                                        <input type="radio" name="blood" id="AB-" value="AB-" class="req-bld">
+                                        <label for="AB-">AB-</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-field">
+                    <button class="btn regis" id="regis-btn">Register Donor</button>
+                </div>
+            </div>
+
+            <div class="right-panel"></div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+            
+            </div>
+        </div>
+    </body>
+
+    <script>
+        const webName = document.getElementById("webname");
+        const regisBtn = document.getElementById("regis-btn");
+
+        webName.onclick =   function goHome() {
+                                location.href = "../html/landing.html";
+                            }
+
+        regisBtn.onclick =  function registerDonor() {
+                                alert("Donor registered!");
+                                location.href = "../html/scanner.html";
+                            }
+    </script>
+</html>

@@ -1,0 +1,146 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+  color: black;
+  background-color: #f9fdff;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.banner {
+  height: 0.75in;
+  border-bottom: 5px solid #c15555;
+}
+
+.banner-content {
+  padding: 0.125in;
+  gap: 0.25in;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.banner-content img {
+  height: 0.5in;
+}
+
+.webname h1 {
+  font-size: 30;
+  color: #8a2d2d;
+}
+
+.webname h1:hover {
+  text-decoration: underline;
+}
+
+.main-content {
+  height: 80%;
+  background-color: #c15555;
+  display: flex;
+  flex-direction: row;
+}
+
+.navi {
+  height: 100%;
+  width: 1in;
+  background-color: #c15555;
+
+  display: flex;
+  flex-direction: column;
+  padding-top: 0.5in;
+  gap: 0.25in;
+  align-items: center;
+}
+
+.menu img {
+  height: 0.5in;
+}
+
+.menu p {
+  margin-top: 5px;
+}
+
+.menu:hover {
+  transform: scale(1.125);
+}
+
+.main-panel {
+  height: 100%;
+  width: 15in;
+  background-color: #f9fdff;
+  padding: 0.5in;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5in;
+}
+
+.main-panel h1 {
+  display: inline;
+  background-color: #c15555;
+  font-size: 56;
+  color: #f9fdff;
+  padding: 0.25in;
+}
+
+.log-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-row {
+  display: flex;
+  flex-direction: row;
+  padding-top: 0.125in;
+  padding-bottom: 0.125in;
+  padding-left: 0.25in;
+  padding-right: 0.25in;
+  font-size: 30;
+  font-weight: bold;
+  border-top: 7.5px solid #8a2d2d;
+  border-bottom: 7.5px solid #8a2d2d;
+}
+
+.col-date {
+  width: 4in;
+}
+
+.col-user, .col-type {
+  width: 3in;
+}
+
+.col-act {
+  flex: 1;
+}
+
+.log-row {
+  display: flex;
+  flex-direction: row;
+  padding-top: 0.125in;
+  padding-bottom: 0.125in;
+  padding-left: 0.25in;
+  padding-right: 0.25in;
+  font-size: 24;
+  border-bottom: 5px solid #8a2d2d;
+}
+
+.right-panel {
+  flex: 1;
+  background-color: #c15555;
+}
+
+.footer {
+  border-top: 5px solid #c15555;
+  background-color: #8a2d2d;
+  flex: 1;
+}
+
+.footer-content {
+  padding: 0.125in;
+  text-align: center;
+  color: #f9fdff;
+}

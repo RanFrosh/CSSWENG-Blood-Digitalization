@@ -1,0 +1,156 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>Activity Log</title>
+        <link rel="stylesheet" href="../css/log.css">
+    </head>
+
+    <body>
+        <div class="banner">
+            <div class="banner-content">
+                <img src="../images/logo.png" />
+                <div class="webname">
+                    <h1 id="webname">Red Bank Foundation</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="navi">
+                <div class="menu scan">
+                    <a href="../html/scanner.html"><img src="../images/scanner.png" /></a>
+                    <p>Scan QR</p>
+                </div>
+
+                <div class="menu regis">
+                    <a href="../html/registration.html"><img src="../images/registration.png" /></a>
+                    <p>Register</p>
+                </div>
+
+                <div class="menu log">
+                    <img src="../images/log.png" />
+                    <p>Log</p>
+                </div>
+            </div>
+
+            <div class="main-panel">
+                <h1>Activity Log</h1>
+
+                <div class="log-field">
+                    <div class="header-row">
+                        <div class="col-date">
+                            <p>Date and Time &#8593;</p>
+                        </div>
+                        
+                        <div class="col-user">
+                            <p>User</p>
+                        </div>
+
+                        <div class="col-type">
+                            <p>User Type</p>
+                        </div>
+                        
+                        <div class="col-act">
+                            <p>Activity</p>
+                        </div>
+                    </div>
+
+                    <div class="log-row">
+                        <div class="col-date">
+                            <p>2026-06-03 | 06:31:12</p>
+                        </div>
+
+                        <div class="col-user">
+                            <p>Jason Doe</p>
+                        </div>
+
+                        <div class="col-type">
+                            <p>Admin</p>
+                        </div>
+
+                        <div class="col-act">
+                            <p>Register donor (John Doe)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="log-row">
+                        <div class="col-date">
+                            <p>2026-06-03 | 06:32:10</p>
+                        </div>
+
+                        <div class="col-user">
+                            <p>John Doe</p>
+                        </div>
+
+                        <div class="col-type">
+                            <p>Donor</p>
+                        </div>
+
+                        <div class="col-act">
+                            <p>Check in</p>
+                        </div>
+                    </div>
+
+                    <div class="log-row">
+                        <div class="col-date">
+                            <p>2026-06-03 | 06:34:27</p>
+                        </div>
+
+                        <div class="col-user">
+                            <p>John Doe</p>
+                        </div>
+
+                        <div class="col-type">
+                            <p>Donor</p>
+                        </div>
+
+                        <div class="col-act">
+                            <p>Claim sponsor perk (004)</p>
+                        </div>
+                    </div>
+
+                    <div class="log-row">
+                        <div class="col-date">
+                            <p>2026-06-03 | 07:01:45</p>
+                        </div>
+
+                        <div class="col-user">
+                            <p>Jane Doe</p>
+                        </div>
+
+                        <div class="col-type">
+                            <p>Internal Staff</p>
+                        </div>
+
+                        <div class="col-act">
+                            <p>Update donor data (John Doe)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel"></div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+            
+            </div>
+        </div>
+    </body>
+
+    <script>
+        const webName = document.getElementById("webname");
+        const regisBtn = document.getElementById("regis-btn");
+
+        webName.onclick =   function goHome() {
+                                location.href = "../html/landing.html";
+                            }
+
+        regisBtn.onclick =  function registerDonor() {
+                                alert("Donor registered!");
+                                location.href = "../html/scanner.html";
+                            }
+    </script>
+</html>

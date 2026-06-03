@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>Landing Page</title>
+        <link rel="stylesheet" href="../css/landing.css">
+    </head>
+
+    <body>
+        <div class="banner">
+            <div class="banner-content">
+                <img src="../images/logo.png" />
+                <div class="webname">
+                    <h1>Red Bank Foundation</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="margin"></div>
+
+            <div class="left-panel">
+                <h1>Welcome!</h1>
+
+                <div class="login-field">
+                    <label for="uname">Username:</label>
+                    <input type="text" class="uname">
+                    <label for="pass">Password:</label>
+                    <input type="password" class="pass">
+
+                    <div class="forgot-pass">
+                        <p>Forgot password?</p>
+                    </div>
+                </div>
+
+                <div class="button-field">
+                    <button class="btn login" id="login-btn">Log in</button>
+                    <button class="btn signup">Sign up &#8594;</button>
+                </div>
+            </div>
+
+            <div class="main-panel">
+                <div class="event-field">
+                    <div class="header">
+                        <h1 class="headline">A small act, 
+                            <br>
+                            a lifesaving impact.
+                        </h1>
+                    </div>
+
+                    <div class="event-list">
+                        <div class="event">
+                            <div class="event-img">
+                                <img src="../images/event.png" />
+                            </div>
+                            
+                            <div class="event-details">
+                                <h3>Event title</h3>
+                                <p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more."</p>
+                            </div>
+                        </div>
+
+                        <div class="event">
+                            <div class="event-img">
+                                <img src="../images/event.png" />
+                            </div>
+                            
+                            <div class="event-details">
+                                <h3>Event title</h3>
+                                <p>"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more."</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                    <div class="carousel">
+                        <img src="../images/carousel.png" />
+                    </div>
+                </div>
+
+                <div class="image-field">
+                    <img src="../images/blood.png" />
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+                <p>additional text info like copyright etc</p>
+            </div>
+        </div>
+    </body>
+
+    <script>
+        const loginBtn = document.getElementById("login-btn");
+
+        loginBtn.onclick =  function goToView() {
+            let view = prompt("Type 1 for admin, 2 for int. staff, 3 for RB director.");
+            if (view == 1) { location.href = "../html/log.html"; }
+            else if (view == 2) { location.href = "../html/search.html"; }
+            else { location.href = "../html/analytics.html" }
+        }
+    </script>
+</html>

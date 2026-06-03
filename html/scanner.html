@@ -1,0 +1,88 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>Scanner</title>
+        <link rel="stylesheet" href="../css/scanner.css">
+    </head>
+
+    <body>
+        <div class="banner">
+            <div class="banner-content">
+                <img src="../images/logo.png" />
+                <div class="webname">
+                    <h1 id="webname">Red Bank Foundation</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="navi">
+                <div class="menu scan">
+                    <img src="../images/scanner.png" />
+                    <p>Scan QR</p>
+                </div>
+
+                <div class="menu regis">
+                    <a href="../html/registration.html"><img src="../images/registration.png" /></a>
+                    <p>Register</p>
+                </div>
+
+                <div class="menu log">
+                    <a href="../html/log.html"><img src="../images/log.png" /></a>
+                    <p>Log</p>
+                </div>
+            </div>
+
+            <div class="left-panel">
+                <h1>Instructions:</h1>
+
+                <div class="instructions">
+                    <div class="step">
+                        <p>Open the Red Bank Foundation app.</p>
+                    </div>
+
+                    <div class="step">
+                        <p>Go to user profile.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <p>Show QR code to scanner.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-panel">
+                <div class="scanner-field">
+                    <div class="header">
+                        <h1 class="headline">Verify User</h1>
+                    </div>
+
+                    <div class="camera">
+                        <img id="camera" src="../images/camera.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+            
+            </div>
+        </div>
+    </body>
+
+    <script>
+        const webName = document.getElementById("webname");
+        const cam = document.getElementById("camera");
+
+        webName.onclick =   function goHome() {
+                                location.href = "../html/landing.html";
+                            }
+
+        cam.onclick =   function openProfile() {
+                            alert("User verified!");
+                            location.href = "../html/log.html";
+                        }
+    </script>
+</html>
