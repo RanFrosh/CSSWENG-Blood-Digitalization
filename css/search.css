@@ -142,6 +142,7 @@ body {
   height: 1.25in;
   width: 4.5in;
   background-color: #c15555;
+  border-radius: 20px;
   display: flex;
   flex-direction: row;
   gap: 0.25in;
