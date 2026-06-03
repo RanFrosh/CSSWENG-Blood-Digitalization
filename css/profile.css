@@ -81,7 +81,6 @@ body {
 
 .left-panel h1 {
   font-size: 42;
-  font-weight: normal;
   margin-top: 0.25in;
 }
 
@@ -95,6 +94,8 @@ body {
   display: flex;
   flex-direction: row;
   font-size: 18;
+  align-items: center;
+  gap: 0.125in;
 }
 
 .main-panel {
@@ -107,11 +108,69 @@ body {
   gap: 0.5in;
 }
 
-.scanner-field {
-  width: 10in;
+.data-field {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 0.25in;
+  margin-right: 0.25in;
+  gap: 0.75in;
+}
+
+.data-field h1 {
+  color: #f9fdff;
+  font-size: 56;
+  margin-bottom: -0.5in;
+}
+
+.donor-data {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.col-data {
+    width: 3.5in;
+    display: flex;
+    flex-direction: column;
+    background-color: #8a2d2d;
+    gap: 0.125in;
+    padding: 0.25in;
+}
+
+.row-data {
+    display: flex;
+    flex-direction: row;
+    font-size: 21;
+    color: #f9fdff;
+    gap: 0.125in;
+    align-items: center;
+}
+
+.donor-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5in;
+}
+
+.row-act {
+    display: flex;
+    flex-direction: row;
+    background-color: #8a2d2d;
+    border-radius: 20px;
+    gap: 0.125in;
+    padding: 0.25in;
+}
+
+.row-act:hover {
+    transform: scale(1.03125);
+}
+
+.col-act {
+    display: flex;
+    flex-direction: column;
+    font-size: 21;
+    color: #f9fdff;
+    gap: 0.125in;
 }
 
 .headline {
