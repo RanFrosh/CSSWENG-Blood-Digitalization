@@ -1,0 +1,96 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>Claim Perks</title>
+        <link rel="stylesheet" href="../css/perk.css">
+    </head>
+
+    <body>
+        <div class="banner">
+            <div class="banner-content">
+                <img src="../images/logo.png" />
+                <div class="webname">
+                    <h1 id="webname">Red Bank Foundation</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="navi">
+                <div class="menu search">
+                    <a href="../html/search.html"><img src="../images/search.png" /></a>
+                    <p>Search</p>
+                </div>
+
+                <div class="menu events">
+                    <img src="../images/planner.png" />
+                    <p>Events</p>
+                </div>
+
+                <div class="menu events">
+                    <a href="../html/profile.html"><img src="../images/user.png" /></a>
+                    <p>Profile</p>
+                </div>
+            </div>
+
+            <div class="left-panel">
+                <h1>Instructions:</h1>
+
+                <div class="instructions">
+                    <div class="step">
+                        <p>Open the Red Bank Foundation app.</p>
+                    </div>
+
+                    <div class="step">
+                        <p>Go to user profile.</p>
+                    </div>
+
+                    <div class="step">
+                        <p>Go to sponsor perks.</p>
+                    </div>
+
+                    <div class="step">
+                        <p>Select a claimable perk.</p>
+                    </div>
+                    
+                    <div class="step">
+                        <p>Show QR code to scanner.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-panel">
+                <div class="scanner-field">
+                    <div class="header">
+                        <h1 class="headline">Claim Sponsor Perk</h1>
+                    </div>
+
+                    <div class="camera">
+                        <img id="camera" src="../images/camera.png" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-content">
+            
+            </div>
+        </div>
+    </body>
+
+    <script>
+        const webName = document.getElementById("webname");
+        const cam = document.getElementById("camera");
+
+        webName.onclick =   function goHome() {
+                                location.href = "../html/landing.html";
+                            }
+
+        cam.onclick =   function openProfile() {
+                            alert("Sponser perk claimed!");
+                            location.href = "../html/profile.html";s
+                        }
+    </script>
+</html>
