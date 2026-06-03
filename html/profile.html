@@ -22,6 +22,11 @@
                     <a href="../html/search.html"><img src="../images/search.png" /></a>
                     <p>Search</p>
                 </div>
+
+                <div class="menu events">
+                    <img src="../images/planner.png" />
+                    <p>Events</p>
+                </div>
             </div>
 
             <div class="left-panel">
@@ -56,13 +61,58 @@
             </div>
 
             <div class="main-panel">
-                <div class="scanner-field">
-                    <div class="header">
-                        <h1 class="headline">Verify User</h1>
+                <div class="data-field">
+                    <h1>Donor Data</h1>
+
+                    <div class="donor-data">
+                        <div class="col-data">
+                            <div class="row-data">
+                                <h3>Total visits:</h3>
+                                <p>7</p>
+                            </div>
+                            
+                            <div class="row-data">
+                                <h3>Latest visit:</h3>
+                                <p>2026-05-23</p>
+                            </div>
+                        </div>
+
+                        <div class="col-data">
+                            <div class="row-data">
+                                <h3>Perks claimed:</h3>
+                                <p>2</p>
+                            </div>
+                        </div>
+
+                        <div class="col-data">
+                            <div class="row-data">
+                                <h3>Blood donated:</h3>
+                                <p>3.15L</p>
+                            </div>
+
+                            <div class="row-data">
+                                <h3>Blood bags filled:</h3>
+                                <p>9</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="camera">
-                        <img id="camera" src="../images/camera.png" />
+                    <h1>Donor Actions</h1>
+
+                    <div class="donor-actions">
+                        <div class="row-act">
+                            <div class="col-act">
+                                <h3>Update donor analytics</h3>
+                                <p>Record new donor data after onsite procedures</p>
+                            </div>
+                        </div>
+
+                        <div class="row-act" id="claim">
+                            <div class="col-act">
+                                <h3>Claim sponsor perks</h3>
+                                <p>Verify donor eligibility and authorize claiming</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -77,15 +127,14 @@
 
     <script>
         const webName = document.getElementById("webname");
-        const cam = document.getElementById("camera");
+        const claim = document.getElementById("claim");
 
         webName.onclick =   function goHome() {
                                 location.href = "../html/landing.html";
                             }
 
-        cam.onclick =   function openProfile() {
-                            alert("User verified!");
-                            location.href = "../html/log.html";
+        claim.onclick =   function claimPerks() {
+                            location.href = "../html/perk.html";
                         }
     </script>
 </html>
