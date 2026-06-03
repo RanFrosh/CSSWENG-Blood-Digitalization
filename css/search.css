@@ -125,6 +125,10 @@ body {
   border-radius: 10px;
 }
 
+.btn:hover {
+  text-decoration: underline;
+}
+
 .search-results {
   display: flex;
   flex-direction: column;
