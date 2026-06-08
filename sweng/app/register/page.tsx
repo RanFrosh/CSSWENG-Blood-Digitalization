@@ -72,7 +72,7 @@ export default function RegisterPage() {
 
                         {/* Log Button */}
                         <Link 
-                            href = "/profile" 
+                            href = "/log" 
                             className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
                         >
 
