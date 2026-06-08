@@ -1,7 +1,5 @@
 "use client"
-import Image from "next/image";
 import { supabase } from "@/db/supa";
-import { useState } from "react";
 import { useRouter } from "next/navigation";                
 
 export default function Home() {
