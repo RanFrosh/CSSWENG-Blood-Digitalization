@@ -89,7 +89,7 @@ export default function Home() {
 
                         <button 
                             className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
-                            //onClick to be added
+                            onClick = {() => router.push('/register')}
                         >
                             Sign up &#8594;
                         </button>
