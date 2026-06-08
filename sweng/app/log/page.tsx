@@ -82,6 +82,7 @@ export default function LogPage() {
 
                 </div>
 
+                {/* Main Panel */}
                 <div className = "h-full w-[15in] bg-[#f9fdff] p-[0.5in] flex flex-col gap-[0.5in]">
 
                     <h1 className = "inline bg-[#c15555] text-[56px] text-[#f9fdff] p-[0.25in]">Activity Log</h1>
