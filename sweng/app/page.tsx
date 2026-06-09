@@ -1,14 +1,16 @@
 "use client"
-import { supabase } from "@/db/supa";
+import { clientSupa } from "@/db/supaclient";
 import { ChangeEvent, useState } from "react";
 import { profiles as profileSchema } from "@/db/models/profiles";
 import { InferSelectModel } from 'drizzle-orm';
-import { testing } from "./action";
+import { create_account } from "./back/create_account/create_account";
 
 type Profile = InferSelectModel<typeof profileSchema>;
+const supabase = await clientSupa();
 
 export default function Home() {
   const [error, setError] = useState("");
+  const [log, setLog] = useState('No logged in user');
   const [namer, setNamer] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -28,10 +30,11 @@ export default function Home() {
   async function handleSignup(e: React.SubmitEvent) {
     e.preventDefault();
     try {
-      await testing(namer, email, roler, password);
+      const res = await create_account(namer, email, roler, password);
+      setError(res.message);
       name();
     } catch (error: any) {
-      alert(error.message);
+      setError(error.message)
     }
   }
   return (
@@ -39,12 +42,18 @@ export default function Home() {
     <button onClick={name1}>
       Hide list of users.
     </button>
+    <button onClick={() => (
+      setError("")
+    )}>
+      Clear error
+    </button>
     <button onClick={name}>
       Show list of users.
     </button>
     <div>
       Testing user creation and authentication.
       {error}
+      {log}
       <ul>
       {profileList.map((profile) => (
         <li key={profile.id}>
@@ -55,7 +64,7 @@ export default function Home() {
     </div>
     <form onSubmit={handleSignup}>
       <input
-        type="name"
+        type="text"
         placeholder="name"
         value={namer}
         onChange={(e: ChangeEvent<HTMLInputElement>) => setNamer(e.target.value)}>
@@ -81,7 +90,7 @@ export default function Home() {
       <button type="submit">
         Sign up
       </button>
-      <button type="submit">
+      <button>
         Sign in
       </button>
     </form>

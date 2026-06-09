@@ -1,5 +1,12 @@
 import postgres from 'postgres'
 import { drizzle } from "drizzle-orm/postgres-js"; 
 
-const client = postgres(process.env.NEXT_PUBLIC_SUPABASE_URL!, { prepare: false });
+
+const connectionString = process.env.DATABASE_URL!;
+
+const client = postgres(connectionString, {
+    prepare: false,
+    ssl: 'require',
+    max: 5});
+
 export const orm = drizzle(client);
