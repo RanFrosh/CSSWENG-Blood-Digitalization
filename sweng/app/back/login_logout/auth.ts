@@ -1,23 +1,40 @@
-import { serverSupa } from "@/db/supaserver";
+"use server" // Added this
 
-export async function login (prevData: FormData, curData: FormData) {
+import { serverSupa } from "@/db/supaserver";
+import { revalidatePath } from "next/cache";
+
+export async function login (formData: FormData) {
+
     const supabase = await serverSupa();
-    if (prevData) {
+
+    // Ask Supabase if a session exists
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
         console.error('Already logged in');
         return { success: false, data: null, message: 'Already logged in' };
-    } else {
-        const email = curData.get('email') as string;
-        const password = curData.get('password') as string;
+    } 
+    
+    else {
+
+        const email = formData.get('email') as string;
+        const password = formData.get('password') as string;
+
         const { error } = await supabase.auth.signInWithPassword({ email: email, password: password });
+        
         if (error) {
+            console.error("Login error", error.message)
             return { success: false, data: null, message: error.message }
         }
-        return { success: true, data: null, message: 'Logged in successfully' }
+
+        revalidatePath('/');
     }
 }
 
 export async function logout () {
+
     const supabase = await serverSupa();
     await supabase.auth.signOut();
-    return { success: true, data: null, message: 'Logged out successfully' }
+
+    revalidatePath('/');
 }

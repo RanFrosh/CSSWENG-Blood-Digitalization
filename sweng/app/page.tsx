@@ -1,99 +1,67 @@
-"use client"
-import { clientSupa } from "@/db/supaclient";
-import { ChangeEvent, useState } from "react";
-import { profiles as profileSchema } from "@/db/models/profiles";
-import { InferSelectModel } from 'drizzle-orm';
-import { create_account } from "./back/create_account/create_account";
+import { createServerClient } from '@supabase/ssr' 
+import { cookies } from 'next/headers'
+import { login, logout } from './back/login_logout/auth' 
 
-type Profile = InferSelectModel<typeof profileSchema>;
-const supabase = await clientSupa();
+export default async function TestPage() {
+    const cookieStore = await cookies();
+    
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, 
+        {
+            cookies: {
+                get(name: string) {
+                    return cookieStore.get(name)?.value;
+                },
+            },
+        }
+    );
 
-export default function Home() {
-  const [error, setError] = useState("");
-  const [log, setLog] = useState('No logged in user');
-  const [namer, setNamer] = useState("");
-  const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-  const [roler, setRoler] = useState("");
-  const [profileList, setProfileList] = useState<Profile[]>([]);
-  async function name() {
-     const { data, error } = await supabase.from("profiles").select("*");
-     if (error) {
-      setError("Could not fetch profiles");
-      } else {
-        setProfileList(data); 
-      }
-  }
-  async function name1() {
-     setProfileList([]);
-  }
-  async function handleSignup(e: React.SubmitEvent) {
-    e.preventDefault();
-    try {
-      const res = await create_account(namer, email, roler, password);
-      setError(res.message);
-      name();
-    } catch (error: any) {
-      setError(error.message)
-    }
-  }
-  return (
-    <>
-    <button onClick={name1}>
-      Hide list of users.
-    </button>
-    <button onClick={() => (
-      setError("")
-    )}>
-      Clear error
-    </button>
-    <button onClick={name}>
-      Show list of users.
-    </button>
-    <div>
-      Testing user creation and authentication.
-      {error}
-      {log}
-      <ul>
-      {profileList.map((profile) => (
-        <li key={profile.id}>
-          {profile.name}
-        </li>
-      ))} 
-      </ul>
-    </div>
-    <form onSubmit={handleSignup}>
-      <input
-        type="text"
-        placeholder="name"
-        value={namer}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => setNamer(e.target.value)}>
-      </input>
-      <input
-        type="email"
-        placeholder="email"
-        value={email}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}>
-      </input>
-      <input
-        type="password"
-        placeholder="password"
-        value={password}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}>
-      </input>
-      <input
-        type="text"
-        placeholder="roler"
-        value={roler}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => setRoler(e.target.value)}>
-      </input>
-      <button type="submit">
-        Sign up
-      </button>
-      <button>
-        Sign in
-      </button>
-    </form>
-    </>
-  );
+    const { data: { session } } = await supabase.auth.getSession();
+
+    return (
+        <main className="p-10 font-mono text-black">
+            
+            <h1 className="text-3xl font-bold mb-6">Auth Tester</h1>
+            
+            <div className="p-4 bg-gray-100 rounded-lg mb-8 border border-gray-300">
+                <h2 className="font-bold text-lg mb-2">Status:</h2>
+                {session ? (
+                    <p className="text-green-700 font-bold">✅ Logged in as: {session.user.email}</p>
+                ) : (
+                    <p className="text-red-500 font-bold">❌ No active session</p>
+                )}
+            </div>
+
+            <div className="flex flex-row gap-8">
+
+                {/* Login Form */}
+                <form 
+                    action={async (formData) => {
+                        "use server";
+                        await login(formData);
+                    }} 
+                    className="flex flex-col gap-3 p-6 border-2 border-black rounded-lg w-[300px]"
+                >
+                    <h2 className="font-bold text-xl border-b pb-2">Log In</h2>
+                    <input type="email" name="email" placeholder="Email" className="p-2 border rounded" required />
+                    <input type="password" name="password" placeholder="Password" className="p-2 border rounded" required />
+                    <button type="submit" className="bg-[#8a2d2d] text-white p-2 rounded font-bold hover:bg-red-800 transition-colors">Submit</button>
+                </form>
+
+                {/* Logout Form */}
+                <form 
+                    action={async () => {
+                        "use server";
+                        await logout();
+                    }} 
+                    className="flex flex-col gap-3 p-6 border-2 border-black rounded-lg w-[300px]"
+                >
+                    <h2 className="font-bold text-xl border-b pb-2">Log Out</h2>
+                    <button type="submit" className="bg-gray-800 text-white p-2 rounded font-bold hover:bg-black transition-colors">Sign Out</button>
+                </form>
+            </div>
+
+        </main>
+    );
 }
