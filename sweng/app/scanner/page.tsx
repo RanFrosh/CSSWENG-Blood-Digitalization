@@ -32,7 +32,7 @@ export default function ScannerPage() {
 
                         {/* Scanner Button */}
                         <Link
-                            href = "/perk"
+                            href = "/scanner"
                             className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
                         >
                             <img src = "/images/scanner.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform"/>
