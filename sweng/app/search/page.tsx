@@ -13,6 +13,9 @@ export default function SearchPage() {
         router.push('/'); 
     };
 
+    const viewDonor = () => {
+        router.push('/profile'); 
+    };
 
     return (
 
@@ -30,14 +33,14 @@ export default function SearchPage() {
                     {/* Buttons */}
                     <div className = "flex flex-col gap-6 mt-8">
 
-                        {/* Scanner Button */}
+                        {/* Search Button */}
                         <Link
-                            href = "/scanner"
+                            href = "/search"
                             className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
                         >
-                            <img src = "/images/scanner.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform"/>
+                            <img src = "/images/search.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform"/>
 
-                            <p className = "mt-2 text-sm font-bold text-black">Scan QR</p>
+                            <p className = "mt-2 text-sm font-bold text-black">Search</p>
 
                         </Link>
 
@@ -81,7 +84,7 @@ export default function SearchPage() {
 
                             <div className = "flex flex-row justify-between h-[1.5in]">
 
-                                <div className = "h-[1.25in] w-[4.5in] bg-[#c15555] rounded-[20px] flex flex-row gap-[0.25in] transition-transform duration-200 hover:scale-[1.0625]" id="donor">
+                                <div className = "h-[1.25in] w-[4.5in] bg-[#c15555] rounded-[20px] flex flex-row gap-[0.25in] transition-transform duration-200 hover:scale-[1.0625]" id="donor" onClick={viewDonor}>
 
                                     <div className = "h-[1in] pl-[0.125in] pt-[0.125in] flex">
                                         <img src = "/images/user.png"/>

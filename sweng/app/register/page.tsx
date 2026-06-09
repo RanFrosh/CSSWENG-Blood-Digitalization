@@ -227,7 +227,9 @@ export default function RegisterPage() {
                     </div>
 
                     <div className = "flex flex-end">
-                        <button className = "w-[2in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline">Register Donor</button>
+                        <button className = "w-[2in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" onClick={registerDonor}>
+                            Register Donor
+                        </button>
                     </div>
                 </div>
 

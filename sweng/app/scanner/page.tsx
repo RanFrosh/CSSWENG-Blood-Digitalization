@@ -13,6 +13,10 @@ export default function ScannerPage() {
         router.push('/'); 
     };
 
+    const verifyDonor = () => {
+        alert("Donor verified!");
+        router.push('/log'); 
+    };
 
     return (
 
@@ -101,7 +105,8 @@ export default function ScannerPage() {
                         </div>
 
                         <div className = "w-[85%]">
-                            <img src = "/images/camera.png" />
+                            <img src = "/images/camera.png" onClick={verifyDonor}/>
+                            
                         </div>
                     </div>
                 </div>

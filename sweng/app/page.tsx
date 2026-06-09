@@ -14,11 +14,11 @@ export default function Home() {
         const view = prompt("Type 1 for admin, 2 for int. staff, 3 for RB director.")
 
         if (view === "1") { 
-            router.push("/staff/interview"); // Replaces log.html
+            router.push("/log"); // Replaces log.html
         } else if (view === "2") { 
-            router.push("/staff/check-in");  // Replaces search.html
+            router.push("/search");  // Replaces search.html
         } else if (view === "3") { 
-            router.push("/director");        // Replaces analytics.html
+            router.push("/analytics");        // Replaces analytics.html
         }
     }
 
@@ -74,7 +74,6 @@ export default function Home() {
 
                         <button 
                             className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
-                            onClick = {() => router.push('/register')}
                         >
                             Sign up &#8594;
                         </button>

@@ -1,10 +1,18 @@
 "use client"
 import { supabase } from "@/db/supa";
+import { useRouter } from "next/navigation"; 
 import Link from "next/link";            
 
 import Header from "@/components/Header";
 
 export default function PerkPage() {
+
+    const router = useRouter();
+    
+    const returnToDonor = () => {
+        alert("Perk claimed! Returning to donor profile.");
+        router.push('/profile'); 
+    };
   
     return (
 
@@ -45,7 +53,7 @@ export default function PerkPage() {
 
                         </Link>
 
-                        {/* Log Button */}
+                        {/* Profile Button */}
                         <Link 
                             href = "/profile" 
                             className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
@@ -101,7 +109,7 @@ export default function PerkPage() {
                         </div>
 
                         <div className = "w-[85%]">
-                            <img src = "/images/camera.png" />
+                            <img src = "/images/camera.png" onClick={returnToDonor}/>
                         </div>
                     </div>
                 </div>
