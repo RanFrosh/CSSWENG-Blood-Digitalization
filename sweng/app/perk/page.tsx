@@ -1,19 +1,11 @@
 "use client"
 import { supabase } from "@/db/supa";
-import { useRouter } from "next/navigation";    
 import Link from "next/link";            
 
 import Header from "@/components/Header";
 
-export default function ScannerPage() {
+export default function PerkPage() {
   
-    const router = useRouter();
-
-    const goHome = () => {
-        router.push('/'); 
-    };
-
-
     return (
 
         <main className = "flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -30,38 +22,38 @@ export default function ScannerPage() {
                     {/* Buttons */}
                     <div className = "flex flex-col gap-6 mt-8">
 
-                        {/* Scanner Button */}
+                        {/* Search Button */}
                         <Link
-                            href = "/perk"
+                            href = "/search"
                             className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
                         >
-                            <img src = "/images/scanner.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform"/>
+                            <img src = "/images/search.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform"/>
 
-                            <p className = "mt-2 text-sm font-bold text-black">Scan QR</p>
+                            <p className = "mt-2 text-sm font-bold text-black">Search</p>
 
                         </Link>
 
-                        {/* Register Button */}
+                        {/* Events Button */}
                         <Link 
-                            href = "/register" 
+                            href = "/events" 
                             className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
                         >
 
-                            <img src = "/images/registration.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
+                            <img src = "/images/planner.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
                             
-                            <p className = "mt-2 text-sm font-bold text-black">Register</p>
+                            <p className = "mt-2 text-sm font-bold text-black">Events</p>
 
                         </Link>
 
                         {/* Log Button */}
                         <Link 
-                            href = "/log" 
+                            href = "/profile" 
                             className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
                         >
 
-                            <img src = "/images/log.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
+                            <img src = "/images/user.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
                             
-                            <p className = "mt-2 text-sm font-bold text-black">Log</p>
+                            <p className = "mt-2 text-sm font-bold text-black">Profile</p>
 
                         </Link>
 
@@ -85,6 +77,14 @@ export default function ScannerPage() {
                         </div>
                         
                         <div className = "h-[0.75in] flex items-center border-b-[5px] border-[#8a2d2d]">
+                            <p>Go to sponser perks.</p>
+                        </div>
+
+                        <div className = "h-[0.75in] flex items-center border-b-[5px] border-[#8a2d2d]">
+                            <p>Select a claimable perk.</p>
+                        </div>
+
+                        <div className = "h-[0.75in] flex items-center border-b-[5px] border-[#8a2d2d]">
                             <p>Show QR code to scanner.</p>
                         </div>
 
@@ -97,7 +97,7 @@ export default function ScannerPage() {
                     <div className = "flex flex-col w-[10in] gap-[0.25in]">
 
                         <div className = "header">
-                            <h1 className = "text-[56px] text-[#f9fdff]">Verify User</h1>
+                            <h1 className = "text-[56px] text-[#f9fdff]">Claim Sponsor Perk</h1>
                         </div>
 
                         <div className = "w-[85%]">
