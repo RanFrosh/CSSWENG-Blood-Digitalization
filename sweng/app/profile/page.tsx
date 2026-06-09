@@ -13,6 +13,9 @@ export default function ProfilePage() {
         router.push('/'); 
     };
 
+    const claimPerks = () => {
+        router.push('/perk'); 
+    };
 
     return (
 
@@ -53,15 +56,15 @@ export default function ProfilePage() {
 
                         </Link>
 
-                        {/* Log Button */}
+                        {/* Profile Button */}
                         <Link 
-                            href = "/log" 
+                            href = "/profile" 
                             className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
                         >
 
-                            <img src = "/images/log.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
+                            <img src = "/images/user.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
                             
-                            <p className = "mt-2 text-sm font-bold text-black">Log</p>
+                            <p className = "mt-2 text-sm font-bold text-black">Profile</p>
 
                         </Link>
 
@@ -158,7 +161,7 @@ export default function ProfilePage() {
                                 </div>
                             </div>
 
-                            <div className = "flex flex-row bg-[#8a2d2d] rounded-[20px] gap-[0.125in] p-[0.25in] transition-transform duration-200 hover:scale-[1.03125]">
+                            <div className = "flex flex-row bg-[#8a2d2d] rounded-[20px] gap-[0.125in] p-[0.25in] transition-transform duration-200 hover:scale-[1.03125]" onClick={claimPerks}>
                                 <div className = "flex flex-col text-[21px] text-[#f9fdff] gap-[0.125in]">
                                     <h3>Claim sponsor perks</h3>
                                     <p>Verify donor eligibility and authorize claiming</p>
