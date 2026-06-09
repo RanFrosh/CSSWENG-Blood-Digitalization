@@ -16,14 +16,10 @@ export default function Header() {
             <div className = "p-[0.125in] gap-[0.25in] flex flex-row items-center">
 
                 <img 
-                    className = "h-[0.5in]" 
-                    src = "/images/logo.png" 
+                    className = "h-[0.5in] w-auto cursor-pointer pl-[0.25in]" 
+                    src = "/images/redbank_logo.png"
                     onClick = {goHome}
                 />
-
-                <div className = "text-[30px] text-[#8a2d2d] hover:underline">
-                    <h1>Red Bank Foundation</h1>
-                </div>
 
             </div>
 
