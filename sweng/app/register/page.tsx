@@ -26,10 +26,10 @@ export default function RegisterPage() {
             <Header/>
 
             {/* Main Content */}
-            <div className = "h-[80%] bg-[#c15555] flex flex-row">
+            <div className = "flex-1 bg-[#c15555] flex flex-row">
 
-                {/* Left Panel */}
-                <div className = "h-full w-[1.3in] bg-[#c15555] flex flex-col pt-[0.5in] gap-[0.25] items-center">
+                {/* Navigation Panel */}
+                <div className = "shrink-0 w-[1in] bg-[#c15555] flex flex-col pt-[0.5in] gap-[0.25] items-center">
 
                     {/* Buttons */}
                     <div className = "flex flex-col gap-6 mt-8">
@@ -37,35 +37,35 @@ export default function RegisterPage() {
                         {/* Scanner Button */}
                         <Link
                             href = "/scanner"
-                            className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
+                            className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[80px] mx-auto"
                         >
-                            <img src = "/images/scanner.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform"/>
+                            <img src = "/images/scanner.png" className = "w-15 h-15 object-contain group-hover:-translate-y-1 transition-transform"/>
 
-                            <p className = "mt-2 text-sm font-bold text-black">Scan QR</p>
+                            <p className = "mt-2 text-xs font-bold text-black font-['Montserrat']">Scan QR</p>
 
                         </Link>
 
                         {/* Register Button */}
                         <Link 
                             href = "/register" 
-                            className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
+                            className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[80px] mx-auto"
                         >
 
-                            <img src = "/images/registration.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
+                            <img src = "/images/registration.png" className = "w-15 h-15 object-contain group-hover:-translate-y-1 transition-transform" />
                             
-                            <p className = "mt-2 text-sm font-bold text-black">Register</p>
+                            <p className = "mt-2 text-xs font-bold text-black font-['Montserrat']">Register</p>
 
                         </Link>
 
                         {/* Log Button */}
                         <Link 
                             href = "/log" 
-                            className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[100px] mx-auto"
+                            className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[80px] mx-auto"
                         >
 
-                            <img src = "/images/log.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
+                            <img src = "/images/log.png" className = "w-15 h-15 object-contain group-hover:-translate-y-1 transition-transform" />
                             
-                            <p className = "mt-2 text-sm font-bold text-black">Log</p>
+                            <p className = "mt-2 text-xs font-bold text-black font-['Montserrat']">Log</p>
 
                         </Link>
 
@@ -74,29 +74,29 @@ export default function RegisterPage() {
                 </div>
 
                 {/* Main Panel */}
-                <div className = "h-full w-[15in] bg-[#f9fdff] p-[0.5in] flex flex-col gap-[0.5in]">
+                <div className = "w-[15in] bg-[#f9fdff] p-[0.5in] flex flex-col gap-[0.5in]">
 
-                    <h1 className = "inline bg-[#c15555] text-[#f9fdff] text-[56px] p-[0.25in]">Donor Registration</h1>
+                    <h1 className = "inline bg-[#c15555] text-[#f9fdff] text-[56px] p-[0.25in] font-['Montserrat'] font-semibold">Donor Registration</h1>
 
                     {/* Registration Field */}
-                    <div className = "flex flex-col gap-[0.5in]">
+                    <div className = "flex flex-col gap-[0.25in]">
 
                         {/* Name Fields */}
-                        <div className = "flex flex-row justify-between gap-[0.5in] text-[28px]">
+                        <div className = "flex flex-row justify-between text-[28px]">
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "fname">First Name:</label>
-                                <input type = "text" className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"/>
-                            </div>
+                                <input type = "text" className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
+                            </div>  
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "mname">Middle Name:</label>
-                                <input type = "text" className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"/>
+                                <input type = "text" className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "lname">Last Name:</label>
-                                <input type = "text" className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"/>
+                                <input type = "text" className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                                 
                             </div>
 
@@ -107,13 +107,13 @@ export default function RegisterPage() {
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "al1">Address Line 1:</label>
-                                <input type = "text" className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]" 
-                                    placeholder = "House number, Building, Street number, Street name"/>
+                                <input type = "text" className = "w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                    placeholder = "House no., Building, Street no., Street name"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "al2">Address Line 2:</label>
-                                <input type = "text" className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]" 
+                                <input type = "text" className = "w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
                                     placeholder = "Subdivision/Village, Barangay"/>
                             </div>
 
@@ -124,17 +124,17 @@ export default function RegisterPage() {
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "city">City:</label>
-                                <input type = "text" className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"/>
+                                <input type = "text" className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "prov">Province:</label>
-                                <input type = "text" className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"/>
+                                <input type = "text" className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "zip">Zip Code:</label>
-                                <input type="text" className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"/>
+                                <input type="text" className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                         </div>
@@ -144,12 +144,12 @@ export default function RegisterPage() {
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "email">Email Address:</label>
-                                <input type="text" className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"/>
+                                <input type="email" className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "num">Mobile Number:</label>
-                                <input type="text" className="w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"/>
+                                <input type="tel" className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
@@ -226,8 +226,8 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    <div className = "flex flex-end">
-                        <button className = "w-[2in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" onClick={registerDonor}>
+                    <div className = "flex flex-end -mt-[0.6in]">
+                        <button className = "w-[2in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline ml-auto text-[21px]" onClick={registerDonor}>
                             Register Donor
                         </button>
                     </div>
@@ -236,11 +236,12 @@ export default function RegisterPage() {
                 <div className = "flex-1 bg-[#c15555]"></div>
             </div>
 
-            <div className = "border-t-[5px] border-[#c15555] bg-[#8a2d2d] flex-1">
-
-                <div className = "p-[0.125in] items-center text-[#f9fdff]">
+            <div className = "bg-[#1b4054] h-[0.75in] shrink-0">
                 
+                <div className = "p-[0.125in] text-center text-[#f9fdff]">
+
                 </div>
+
             </div>
             
         </main>
