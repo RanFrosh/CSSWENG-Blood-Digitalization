@@ -1,103 +1,193 @@
 "use client"
-import Image from "next/image";
 import { supabase } from "@/db/supa";
-import { useState } from "react";
+import { useRouter } from "next/navigation";                
 
 export default function Home() {
-  const [error, setError] = useState("");
-  const [cities, setCities] = useState<any[]>([]);
-  async function name() {
-     const { data, error } = await supabase.from("city").select("*");
-     if (error) {
-      setError("Could not fetch cities");
-      } else {
-        setCities(data); 
-      }
-  }
-  async function name1() {
-     setCities([]);
-  }
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            {error}
-          </h1>
-          <button onClick={name} className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Click here to reveal cities.
-          </button>
-          <button onClick={name1} className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            Click here to hide cities.
-          </button>
-          <div className="mt-8 w-full">
-            <h2 className="text-xl font-bold mb-4">Cities List:</h2>
-            <ul className="grid grid-cols-1 gap-2">
-              {cities.map((city) => (
-                <li key={city.id} className="p-3 border rounded bg-zinc-100 dark:bg-zinc-900">
-                  {city.name}
-                </li>
-              ))}
-              {cities.length === 0 && (
-                <p className="text-zinc-500 italic">No cities revealed yet.</p>
-              )}
-            </ul>
-          </div>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+  
+    const router = useRouter();
+
+    // To be replaced once Supabase is set up
+    const handleLogin = () => {
+
+        const view = prompt("Type 1 for admin, 2 for int. staff, 3 for RB director.")
+
+        if (view === "1") { 
+            router.push("/staff/interview"); // Replaces log.html
+        } else if (view === "2") { 
+            router.push("/staff/check-in");  // Replaces search.html
+        } else if (view === "3") { 
+            router.push("/director");        // Replaces analytics.html
+        }
+    }
+
+    return (
+
+        <main className = "flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+            {/* Header */}
+            <div className = "h-[0.75in] border-b-[5px] border-b-[#c15555]">
+
+                <div className = "p-[0.125in] gap-[0.25in] flex flex-row items-center">
+
+                    <img 
+                        className = "h-[0.5in]" 
+                        src = "/images/logo.png" 
+                    />
+
+                    <div className = "text-[30px] text-[#8a2d2d] hover:underline">
+                        <h1>Red Bank Foundation</h1>
+                    </div>
+
+                </div>
+
+            </div>
+
+            {/* Main Content */}
+            <div className = "flex-1 bg-[#c15555] flex flex-row">
+
+                <div className = "w-[1in] bg-[#c15555]"></div>
+
+                {/* Left Panel */}
+                <div className = "w-[3.25in] bg-[#f9fdff] p-[0.25in] flex flex-col gap-[0.5in]">
+
+                    <h1 className = "text-[42px] font-normal mt-[0.25in]">
+                        Welcome!
+                    </h1>
+
+                    <div className = "text-[18px] flex flex-col">
+
+                        <label className = "mb-[5px]" htmlFor = "uname">Username:</label>
+
+                        <input 
+                            type = "text" 
+                            className = "w-full mb-[15px] border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"
+                        />
+
+                        <label className = "mb-[5px]" htmlFor = "pass">Password:</label>
+                        
+                        <input 
+                            type = "password" 
+                            className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"
+                        />
+
+                        <div className = "text-[12px] text-[#8a2d2d] w-full text-end">
+                            <p className = "inline hover:underline cursor-pointer">Forgot password?</p>
+                        </div>
+
+                    </div>
+
+                    <div className = "w-[3in] flex flex-row gap-[0.25in]">
+
+                        <button 
+                            className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" 
+                            onClick = {handleLogin}
+                        >
+                            Log in
+                        </button>
+
+                        <button 
+                            className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
+                            onClick = {() => router.push('/register')}
+                        >
+                            Sign up &#8594;
+                        </button>
+                    </div>
+
+                </div>
+
+                {/* Main Panel */}
+                <div className = "flex-1 bg-[#c15555] p-[0.75in] pr-[0.25in] flex flex-row gap-[0.5in]">
+
+                    <div className = "w-[8.5in] flex flex-col gap-[0.5in]">
+                        
+                        <div className = "header">
+
+                            <h1 className = "text-[#f9fdff] text-[56px]">A small act, 
+                                <br />
+                                a lifesaving impact.
+                            </h1>
+
+                        </div>
+
+                        {/* Event List */}
+                        <div className = "w-[8in] flex flex-col gap-[15px]">
+
+                            <div className = "h-[1in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
+
+                                <img 
+                                    className="h-[1in] w-[1in] rounded-md"
+                                    src="/images/event.png" 
+                                />
+                                
+                                <div className = "flex flex-col gap-[0.125in]">
+
+                                    <h3 className = "font-bold">Event title</h3>
+
+                                    <p className = "text-justify">
+                                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more."
+                                    </p>
+                                
+                                </div>
+
+                            </div>
+
+                            <div className = "h-[1in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
+                                
+                                <img 
+                                    className="h-[1in] w-[1in] rounded-md"
+                                    src="/images/event.png" 
+                                />
+                                
+                                <div className = "flex flex-col gap-[0.125in]">
+
+                                    <h3 className = "font-bold">Event title</h3>
+
+                                    <p className = "text-justify">
+                                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more."
+                                    </p>
+                                
+                                </div>
+
+                            </div>
+                            
+                        </div>
+
+                        {/* Carousel */}
+                        <div className = "w-[8in] -mt-[0.5in] flex justify-center">
+                            
+                            <img 
+                                className = "h-[1in]"
+                                src = "/images/carousel.png" 
+                            />
+
+                        </div>
+
+                    </div>
+
+                    <div className = "w-[4in] overflow-hidden">
+                        
+                        <img 
+                            className = "h-full w-full object-cover"
+                            src = "/images/blood.png" 
+                        />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {/* Footer */}
+            <div className = "border-t-[5px] border-[#c15555] bg-[#8a2d2d] flex-1">
+                
+                <div className = "p-[0.125in] text-center text-[#f9fdff]">
+                    <p>additional text info like copyright etc</p>
+                </div>
+
+            </div>
+
+        </main>
+    );
 }
