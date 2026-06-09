@@ -3,6 +3,8 @@ import { supabase } from "@/db/supa";
 import { useRouter } from "next/navigation";    
 import Link from "next/link";            
 
+import Header from "@/components/Header";
+
 export default function RegisterPage() {
   
     const router = useRouter();
@@ -21,22 +23,7 @@ export default function RegisterPage() {
         <main className = "flex flex-col min-h-screen bg-[#f9fdff] text-black">
 
             {/* Header */}
-            <div className = "h-[0.75in] border-b-[5px] border-b-[#c15555]">
-
-                <div className = "p-[0.125in] gap-[0.25in] flex flex-row items-center">
-
-                    <img 
-                        className = "h-[0.5in]" 
-                        src = "/images/logo.png" 
-                    />
-
-                    <div className = "text-[30px] text-[#8a2d2d] hover:underline">
-                        <h1>Red Bank Foundation</h1>
-                    </div>
-
-                </div>
-
-            </div>
+            <Header/>
 
             {/* Main Content */}
             <div className = "h-[80%] bg-[#c15555] flex flex-row">
@@ -54,7 +41,7 @@ export default function RegisterPage() {
                         >
                             <img src = "/images/scanner.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform"/>
 
-                            <p className = "mt-2 text-sm font-bold text-black-700">Scan QR</p>
+                            <p className = "mt-2 text-sm font-bold text-black">Scan QR</p>
 
                         </Link>
 
@@ -66,7 +53,7 @@ export default function RegisterPage() {
 
                             <img src = "/images/registration.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
                             
-                            <p className = "mt-2 text-sm font-bold text-black-700">Register</p>
+                            <p className = "mt-2 text-sm font-bold text-black">Register</p>
 
                         </Link>
 
@@ -78,7 +65,7 @@ export default function RegisterPage() {
 
                             <img src = "/images/log.png" className = "w-20 h-20 object-contain group-hover:-translate-y-1 transition-transform" />
                             
-                            <p className = "mt-2 text-sm font-bold text-black-700">Log</p>
+                            <p className = "mt-2 text-sm font-bold text-black">Log</p>
 
                         </Link>
 

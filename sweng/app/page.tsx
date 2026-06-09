@@ -1,6 +1,8 @@
 "use client"
 import { supabase } from "@/db/supa";
-import { useRouter } from "next/navigation";                
+import { useRouter } from "next/navigation";   
+
+import Header from "@/components/Header";
 
 export default function Home() {
   
@@ -25,22 +27,7 @@ export default function Home() {
         <main className = "flex flex-col min-h-screen bg-[#f9fdff] text-black">
 
             {/* Header */}
-            <div className = "h-[0.75in] border-b-[5px] border-b-[#c15555]">
-
-                <div className = "p-[0.125in] gap-[0.25in] flex flex-row items-center">
-
-                    <img 
-                        className = "h-[0.5in]" 
-                        src = "/images/logo.png" 
-                    />
-
-                    <div className = "text-[30px] text-[#8a2d2d] hover:underline">
-                        <h1>Red Bank Foundation</h1>
-                    </div>
-
-                </div>
-
-            </div>
+            <Header/>
 
             {/* Main Content */}
             <div className = "flex-1 bg-[#c15555] flex flex-row">
