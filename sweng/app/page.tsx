@@ -32,10 +32,10 @@ export default function Home() {
             {/* Main Content */}
             <div className = "flex-1 bg-[#c15555] flex flex-row">
 
-                <div className = "w-[1in] bg-[#c15555]"></div>
+                <div className = "w-[1in] shrink-0 bg-[#c15555]"></div>
 
                 {/* Left Panel */}
-                <div className = "w-[3.25in] bg-[#f9fdff] p-[0.25in] flex flex-col gap-[0.5in]">
+                <div className = "w-[3.25in] shrink-0 bg-[#f9fdff] p-[0.25in] flex flex-col gap-[0.5in]">
 
                     <h1 className = "text-[42px] font-normal mt-[0.25in]">
                         Welcome!
@@ -82,9 +82,9 @@ export default function Home() {
                 </div>
 
                 {/* Main Panel */}
-                <div className = "flex-1 bg-[#c15555] p-[0.75in] pr-[0.25in] flex flex-row gap-[0.5in]">
+                <div className = "flex-1 bg-[#c15555] p-[0.5in] flex flex-row gap-[0.5in]">
 
-                    <div className = "w-[8.5in] flex flex-col gap-[0.5in]">
+                    <div className = "flex-1 flex flex-col gap-[0.5in]">
                         
                         <div className = "header">
 
@@ -96,7 +96,7 @@ export default function Home() {
                         </div>
 
                         {/* Event List */}
-                        <div className = "w-[8in] flex flex-col gap-[15px]">
+                        <div className = "flex-1 flex flex-col gap-[15px]">
 
                             <div className = "h-[1in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
 
@@ -141,7 +141,7 @@ export default function Home() {
                         </div>
 
                         {/* Carousel */}
-                        <div className = "w-[8in] -mt-[0.5in] flex justify-center">
+                        <div className = "flex-1 -mt-[0.5in] flex justify-center">
                             
                             <img 
                                 className = "h-[1in]"
@@ -166,7 +166,7 @@ export default function Home() {
             </div>
 
             {/* Footer */}
-            <div className = "border-t-[5px] border-[#c15555] bg-[#8a2d2d] flex-1">
+            <div className = "border-t-[5px] border-[#c15555] bg-[#8a2d2d] h-[0.75in] shrink-0">
                 
                 <div className = "p-[0.125in] text-center text-[#f9fdff]">
                     <p>additional text info like copyright etc</p>
