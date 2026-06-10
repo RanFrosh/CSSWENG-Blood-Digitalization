@@ -65,11 +65,11 @@ export default function Home() {
                                 type = "password" 
                                 name = "password"
                                 id = "pass"
-                                className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"
+                                className = "w-full border-2 border-gray-300 rounded-md focus:border-[#1b4054]"
                                 required
                             />
 
-                            <div className = "text-[12px] text-[#8a2d2d] w-full text-end">
+                            <div className = "text-[12px] text-[#1b4054] w-full text-end">
                                 <p className = "inline hover:underline cursor-pointer">Forgot password?</p>
                             </div>
 
@@ -79,14 +79,14 @@ export default function Home() {
     
                             <button 
                                 type = "submit"
-                                className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" 
+                                className = "w-[1in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" 
                             >
                                 Log in
                             </button>
 
                             <button 
                                 type = "button"
-                                className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
+                                className = "w-[1in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
                             >
                                 Sign up &#8594;
                             </button>
