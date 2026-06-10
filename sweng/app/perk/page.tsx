@@ -1,5 +1,5 @@
 "use client"
-import { supabase } from "@/db/supa";
+
 import { useRouter } from "next/navigation"; 
 import Link from "next/link";            
 

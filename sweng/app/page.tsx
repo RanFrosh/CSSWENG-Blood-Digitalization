@@ -1,8 +1,10 @@
 "use client"
-import { supabase } from "@/db/supa";
+
 import { useRouter } from "next/navigation";   
 
 import Header from "@/components/Header";
+
+import { login } from "./back/login_logout/auth";
 
 export default function Home() {
   
@@ -42,43 +44,56 @@ export default function Home() {
                         Welcome!
                     </h1>
 
-                    <div className = "text-[18px] flex flex-col">
+                    <form action = {async (formData) => { await login(formData); }} className = "flex flex-col gap-[0.5in]">
+            
+                        <div className = "text-[18px] flex flex-col">
 
-                        <label className = "mb-[5px]" htmlFor = "uname">Username:</label>
+                            {/* Changed to Email since Supabase auth expects an email by default */}
+                            <label className="mb-[5px]" htmlFor = "uname">Email:</label>
 
-                        <input 
-                            type = "text" 
-                            className = "w-full mb-[15px] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] pr-[10px]"
-                        />
+                            <input 
+                                type = "email" 
+                                name = "email"
+                                id = "uname"
+                                className = "w-full mb-[15px] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] pr-[10px]"
+                                required
+                            />
 
-                        <label className = "mb-[5px]" htmlFor = "pass">Password:</label>
-                        
-                        <input 
-                            type = "password" 
-                            className = "w-full border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] pr-[10px]"
-                        />
+                            <label className="mb-[5px]" htmlFor="pass">Password:</label>
+                            
+                            <input 
+                                type = "password" 
+                                name = "password"
+                                id = "pass"
+                                className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"
+                                required
+                            />
 
-                        <div className = "text-[12px] text-[#1b4054] w-full text-end">
-                            <p className = "inline hover:underline cursor-pointer text-[#1b4054]">Forgot password?</p>
+                            <div className = "text-[12px] text-[#8a2d2d] w-full text-end">
+                                <p className = "inline hover:underline cursor-pointer">Forgot password?</p>
+                            </div>
+
                         </div>
 
-                    </div>
+                        <div className = "w-[3in] flex flex-row gap-[0.25in]">
+    
+                            <button 
+                                type = "submit"
+                                className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" 
+                            >
+                                Log in
+                            </button>
 
-                    <div className = "w-[3in] flex flex-row gap-[0.25in]">
-
-                        <button 
-                            className = "w-[1in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" 
-                            onClick = {handleLogin}
-                        >
-                            Log in
-                        </button>
-
-                        <button 
-                            className = "w-[1in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
-                        >
-                            Sign up &#8594;
-                        </button>
-                    </div>
+                            <button 
+                                type = "button"
+                                className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
+                            >
+                                Sign up &#8594;
+                            </button>
+                            
+                        </div>
+                        
+                    </form>
 
                 </div>
 
