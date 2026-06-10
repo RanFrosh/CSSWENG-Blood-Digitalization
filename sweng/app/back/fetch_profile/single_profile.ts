@@ -8,11 +8,7 @@ import { InferSelectModel } from "drizzle-orm";
 
 type Profile = InferSelectModel<typeof profiles>;
 
-export async function getProfile (): Promise<{ 
-    success: boolean; 
-    data: Profile | null; 
-    message: string 
-}> 
+export async function getProfile () {  
     {
     const supabase = await serverSupa();
     const { data: { user } } = await supabase.auth.getUser();
@@ -36,4 +32,5 @@ export async function getProfile (): Promise<{
         console.error("try block failed on single profile: " + err.message);
         return { success: false, data: null, message: err.message };
     }   
+    }
 }
