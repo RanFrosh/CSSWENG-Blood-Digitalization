@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 import Header from "@/components/Header";
 
-import { login } from "./back/login_logout/auth";
+import { login } from "@/app/back/login_logout/auth";
 
 export default function Home() {
   
@@ -114,7 +114,7 @@ export default function Home() {
                         {/* Event List */}
                         <div className = "flex-1 flex flex-col gap-[15px]">
 
-                            <div className = "h-[1.25in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
+                            <div className = "h-auto p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
 
                                 <img 
                                     className="h-[1in] w-[1in] rounded-md"
@@ -134,7 +134,7 @@ export default function Home() {
 
                             </div>
 
-                            <div className = "h-[1.25in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
+                            <div className = "h-auto p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
                                 
                                 <img 
                                     className="h-[1in] w-[1in] rounded-md"
