@@ -13,7 +13,7 @@ export async function login (formData: FormData) {
 
     if (user) {
         console.error('Already logged in');
-        return { success: false, data: null, message: 'Already logged in' };
+        return { success: false, message: 'Already logged in' };
     } 
     
     else {
@@ -25,7 +25,7 @@ export async function login (formData: FormData) {
         
         if (error) {
             console.error("Login error", error.message)
-            return { success: false, data: null, message: error.message }
+            return { success: false, message: error.message }
         }
 
         revalidatePath('/');

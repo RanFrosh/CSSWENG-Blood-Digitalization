@@ -13,7 +13,7 @@ export default function Home() {
     // To be replaced once Supabase is set up
     const handleLogin = () => {
 
-        const view = prompt("Type 1 for admin, 2 for int. staff, 3 for RB director.")
+        const view = prompt("Type 1 for super admin, 2 for int. staff, 3 for RB director.")
 
         if (view === "1") { 
             router.push("/log"); // Replaces log.html
