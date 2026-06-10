@@ -32,12 +32,13 @@ export default function Home() {
             {/* Main Content */}
             <div className = "flex-1 bg-[#c15555] flex flex-row">
 
+                {/* Margin */}
                 <div className = "w-[1in] shrink-0 bg-[#c15555]"></div>
 
                 {/* Left Panel */}
                 <div className = "w-[3.25in] shrink-0 bg-[#f9fdff] p-[0.25in] flex flex-col gap-[0.5in]">
 
-                    <h1 className = "text-[42px] font-normal mt-[0.25in]">
+                    <h1 className = "text-[42px] font-['Montserrat'] mt-[0.25in] text-[#1b4054]">
                         Welcome!
                     </h1>
 
@@ -47,18 +48,18 @@ export default function Home() {
 
                         <input 
                             type = "text" 
-                            className = "w-full mb-[15px] border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"
+                            className = "w-full mb-[15px] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] pr-[10px]"
                         />
 
                         <label className = "mb-[5px]" htmlFor = "pass">Password:</label>
                         
                         <input 
                             type = "password" 
-                            className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"
+                            className = "w-full border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] pr-[10px]"
                         />
 
-                        <div className = "text-[12px] text-[#8a2d2d] w-full text-end">
-                            <p className = "inline hover:underline cursor-pointer">Forgot password?</p>
+                        <div className = "text-[12px] text-[#1b4054] w-full text-end">
+                            <p className = "inline hover:underline cursor-pointer text-[#1b4054]">Forgot password?</p>
                         </div>
 
                     </div>
@@ -66,14 +67,14 @@ export default function Home() {
                     <div className = "w-[3in] flex flex-row gap-[0.25in]">
 
                         <button 
-                            className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" 
+                            className = "w-[1in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" 
                             onClick = {handleLogin}
                         >
                             Log in
                         </button>
 
                         <button 
-                            className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
+                            className = "w-[1in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
                         >
                             Sign up &#8594;
                         </button>
@@ -88,7 +89,7 @@ export default function Home() {
                         
                         <div className = "header">
 
-                            <h1 className = "text-[#f9fdff] text-[56px]">A small act, 
+                            <h1 className = "text-[#f9fdff] text-[56px] font-['Montserrat'] font-semibold">A small act, 
                                 <br />
                                 a lifesaving impact.
                             </h1>
@@ -98,7 +99,7 @@ export default function Home() {
                         {/* Event List */}
                         <div className = "flex-1 flex flex-col gap-[15px]">
 
-                            <div className = "h-[1in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
+                            <div className = "h-[1.25in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
 
                                 <img 
                                     className="h-[1in] w-[1in] rounded-md"
@@ -107,7 +108,7 @@ export default function Home() {
                                 
                                 <div className = "flex flex-col gap-[0.125in]">
 
-                                    <h3 className = "font-bold">Event title</h3>
+                                    <h3 className = "font-bold font-['Montserrat'] text-[#1b4054]">Event title</h3>
 
                                     <p className = "text-justify">
                                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
@@ -118,7 +119,7 @@ export default function Home() {
 
                             </div>
 
-                            <div className = "h-[1in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
+                            <div className = "h-[1.25in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
                                 
                                 <img 
                                     className="h-[1in] w-[1in] rounded-md"
@@ -127,7 +128,7 @@ export default function Home() {
                                 
                                 <div className = "flex flex-col gap-[0.125in]">
 
-                                    <h3 className = "font-bold">Event title</h3>
+                                    <h3 className = "font-bold font-['Montserrat'] text-[#1b4054]">Event title</h3>
 
                                     <p className = "text-justify">
                                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
@@ -141,7 +142,7 @@ export default function Home() {
                         </div>
 
                         {/* Carousel */}
-                        <div className = "flex-1 -mt-[0.5in] flex justify-center">
+                        <div className = "flex-1 -mt-[0.65in] flex justify-center">
                             
                             <img 
                                 className = "h-[1in]"
@@ -166,13 +167,13 @@ export default function Home() {
             </div>
 
             {/* Footer */}
-            <div className = "border-t-[5px] border-[#c15555] bg-[#8a2d2d] h-[0.75in] shrink-0">
-                
-                <div className = "p-[0.125in] text-center text-[#f9fdff]">
-                    <p>additional text info like copyright etc</p>
-                </div>
+                <div className = "bg-[#1b4054] h-[0.75in] shrink-0">
+                    
+                    <div className = "p-[0.125in] text-center text-[#f9fdff]">
+                        <p>additional text info like copyright etc</p>
+                    </div>
 
-            </div>
+                </div>
 
         </main>
     );
