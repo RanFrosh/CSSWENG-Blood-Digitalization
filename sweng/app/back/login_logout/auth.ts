@@ -32,7 +32,11 @@ export async function login (formData: FormData) {
         revalidatePath('/');
         const profile = await getProfile();
 
-        if (profile.data?.role === 'super_admin' || profile.data?.role === 'onsite_admin') {
+        if (profile.data?.role === 'super_admin') {
+            redirect('/list');
+        }
+
+        if (profile.data?.role === 'onsite_admin') {
             redirect('/log');
         }
 
