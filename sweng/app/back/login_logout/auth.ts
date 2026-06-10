@@ -3,6 +3,7 @@
 import { serverSupa } from "@/db/supaserver";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getProfile } from "../fetch_profile/single_profile";
 
 export async function login (formData: FormData) {
 
@@ -11,12 +12,12 @@ export async function login (formData: FormData) {
     // Ask Supabase if a session exists
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (user) {
-        console.error('Already logged in');
-        return { success: false, message: 'Already logged in' };
-    } 
+    // if (user) {
+    //     console.error('Already logged in');
+    //     return { success: false, message: 'Already logged in' };
+    // } 
     
-    else {
+    // else {
 
         const email = formData.get('email') as string;
         const password = formData.get('password') as string;
@@ -29,8 +30,25 @@ export async function login (formData: FormData) {
         }
 
         revalidatePath('/');
-        redirect('profile');
-    }
+        const profile = await getProfile();
+
+        if (profile.data?.role === 'super_admin' || profile.data?.role === 'onsite_admin') {
+            redirect('/log');
+        }
+
+        if (profile.data?.role === 'med_prof') {
+            redirect('/search');
+        }
+
+        if (profile.data?.role === 'director') {
+            redirect('/analytics');
+        }
+        else {
+            redirect('/');
+        }
+
+        revalidatePath('/');
+    // }
 }
 
 export async function logout () {
