@@ -1,65 +1,177 @@
-import { createServerClient } from '@supabase/ssr' 
-import { cookies } from 'next/headers'
-import { login, logout } from './back/login_logout/auth' 
+"use client"
+import { supabase } from "@/db/supa";
+import { useRouter } from "next/navigation";   
 
-export default async function TestPage() {
-    const cookieStore = await cookies();
-    
-    const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, 
-        {
-            cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value;
-                },
-            },
+import Header from "@/components/Header";
+
+export default function Home() {
+  
+    const router = useRouter();
+
+    // To be replaced once Supabase is set up
+    const handleLogin = () => {
+
+        const view = prompt("Type 1 for admin, 2 for int. staff, 3 for RB director.")
+
+        if (view === "1") { 
+            router.push("/log"); // Replaces log.html
+        } else if (view === "2") { 
+            router.push("/search");  // Replaces search.html
+        } else if (view === "3") { 
+            router.push("/analytics");        // Replaces analytics.html
         }
-    );
-
-    const { data: { session } } = await supabase.auth.getSession();
+    }
 
     return (
-        <main className="p-10 font-mono text-black">
-            
-            <h1 className="text-3xl font-bold mb-6">Auth Tester</h1>
-            
-            <div className="p-4 bg-gray-100 rounded-lg mb-8 border border-gray-300">
-                <h2 className="font-bold text-lg mb-2">Status:</h2>
-                {session ? (
-                    <p className="text-green-700 font-bold">✅ Logged in as: {session.user.email}</p>
-                ) : (
-                    <p className="text-red-500 font-bold">❌ No active session</p>
-                )}
+
+        <main className = "flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+            {/* Header */}
+            <Header/>
+
+            {/* Main Content */}
+            <div className = "flex-1 bg-[#c15555] flex flex-row">
+
+                <div className = "w-[1in] shrink-0 bg-[#c15555]"></div>
+
+                {/* Left Panel */}
+                <div className = "w-[3.25in] shrink-0 bg-[#f9fdff] p-[0.25in] flex flex-col gap-[0.5in]">
+
+                    <h1 className = "text-[42px] font-normal mt-[0.25in]">
+                        Welcome!
+                    </h1>
+
+                    <div className = "text-[18px] flex flex-col">
+
+                        <label className = "mb-[5px]" htmlFor = "uname">Username:</label>
+
+                        <input 
+                            type = "text" 
+                            className = "w-full mb-[15px] border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"
+                        />
+
+                        <label className = "mb-[5px]" htmlFor = "pass">Password:</label>
+                        
+                        <input 
+                            type = "password" 
+                            className = "w-full border-2 border-gray-300 rounded-md focus:border-[#8a2d2d]"
+                        />
+
+                        <div className = "text-[12px] text-[#8a2d2d] w-full text-end">
+                            <p className = "inline hover:underline cursor-pointer">Forgot password?</p>
+                        </div>
+
+                    </div>
+
+                    <div className = "w-[3in] flex flex-row gap-[0.25in]">
+
+                        <button 
+                            className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline" 
+                            onClick = {handleLogin}
+                        >
+                            Log in
+                        </button>
+
+                        <button 
+                            className = "w-[1in] bg-[#8a2d2d] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
+                        >
+                            Sign up &#8594;
+                        </button>
+                    </div>
+
+                </div>
+
+                {/* Main Panel */}
+                <div className = "flex-1 bg-[#c15555] p-[0.5in] flex flex-row gap-[0.5in]">
+
+                    <div className = "flex-1 flex flex-col gap-[0.5in]">
+                        
+                        <div className = "header">
+
+                            <h1 className = "text-[#f9fdff] text-[56px]">A small act, 
+                                <br />
+                                a lifesaving impact.
+                            </h1>
+
+                        </div>
+
+                        {/* Event List */}
+                        <div className = "flex-1 flex flex-col gap-[15px]">
+
+                            <div className = "h-[1in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
+
+                                <img 
+                                    className="h-[1in] w-[1in] rounded-md"
+                                    src="/images/event.png" 
+                                />
+                                
+                                <div className = "flex flex-col gap-[0.125in]">
+
+                                    <h3 className = "font-bold">Event title</h3>
+
+                                    <p className = "text-justify">
+                                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more."
+                                    </p>
+                                
+                                </div>
+
+                            </div>
+
+                            <div className = "h-[1in] p-[0.25in] bg-[#f9fdff] flex flex-row gap-[0.25in] items-center">
+                                
+                                <img 
+                                    className="h-[1in] w-[1in] rounded-md"
+                                    src="/images/event.png" 
+                                />
+                                
+                                <div className = "flex flex-col gap-[0.125in]">
+
+                                    <h3 className = "font-bold">Event title</h3>
+
+                                    <p className = "text-justify">
+                                        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Learn more."
+                                    </p>
+                                
+                                </div>
+
+                            </div>
+                            
+                        </div>
+
+                        {/* Carousel */}
+                        <div className = "flex-1 -mt-[0.5in] flex justify-center">
+                            
+                            <img 
+                                className = "h-[1in]"
+                                src = "/images/carousel.png" 
+                            />
+
+                        </div>
+
+                    </div>
+
+                    <div className = "w-[4in] overflow-hidden">
+                        
+                        <img 
+                            className = "h-full w-full object-cover"
+                            src = "/images/blood.png" 
+                        />
+
+                    </div>
+
+                </div>
+
             </div>
 
-            <div className="flex flex-row gap-8">
+            {/* Footer */}
+            <div className = "border-t-[5px] border-[#c15555] bg-[#8a2d2d] h-[0.75in] shrink-0">
+                
+                <div className = "p-[0.125in] text-center text-[#f9fdff]">
+                    <p>additional text info like copyright etc</p>
+                </div>
 
-                {/* Login Form */}
-                <form 
-                    action={async (formData) => {
-                        "use server";
-                        await login(formData);
-                    }} 
-                    className="flex flex-col gap-3 p-6 border-2 border-black rounded-lg w-[300px]"
-                >
-                    <h2 className="font-bold text-xl border-b pb-2">Log In</h2>
-                    <input type="email" name="email" placeholder="Email" className="p-2 border rounded" required />
-                    <input type="password" name="password" placeholder="Password" className="p-2 border rounded" required />
-                    <button type="submit" className="bg-[#8a2d2d] text-white p-2 rounded font-bold hover:bg-red-800 transition-colors">Submit</button>
-                </form>
-
-                {/* Logout Form */}
-                <form 
-                    action={async () => {
-                        "use server";
-                        await logout();
-                    }} 
-                    className="flex flex-col gap-3 p-6 border-2 border-black rounded-lg w-[300px]"
-                >
-                    <h2 className="font-bold text-xl border-b pb-2">Log Out</h2>
-                    <button type="submit" className="bg-gray-800 text-white p-2 rounded font-bold hover:bg-black transition-colors">Sign Out</button>
-                </form>
             </div>
 
         </main>
