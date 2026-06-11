@@ -4,13 +4,11 @@ import { orm } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { serverSupa } from "@/db/supaserver";
 import { profiles } from "@/db/models/profiles";
-import { InferSelectModel } from "drizzle-orm";
+import { SupabaseClient } from "@supabase/supabase-js";
 
-type Profile = InferSelectModel<typeof profiles>;
-
-export async function getProfile () {  
+export async function getProfile (client?: SupabaseClient) {  
     {
-    const supabase = await serverSupa();
+    const supabase = client ?? await serverSupa();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         console.error('Invalid request on single_profile, anonymous');

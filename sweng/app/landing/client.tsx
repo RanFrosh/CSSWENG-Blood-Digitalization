@@ -10,6 +10,8 @@ import { getProfile } from "../back/fetch_profile/single_profile";
 
 import { useActionState } from "react";
 
+import { logout } from "@/app/back/login_logout/auth";
+
 export default function Home({ initialProfile }: { initialProfile: any }) {
   
     const router = useRouter();
@@ -46,6 +48,7 @@ export default function Home({ initialProfile }: { initialProfile: any }) {
                         Welcome {state.profileName || "Guest"}!
                         <p>Status: {isPending ? "Logging in..." : state.message}</p>
                     </h1>
+
 
                     <form action = {formAction} className = "flex flex-col gap-[0.5in]">
             
@@ -95,8 +98,20 @@ export default function Home({ initialProfile }: { initialProfile: any }) {
                             </button>
                             
                         </div>
-                        
+
                     </form>
+
+                    <div className="mt-[0.25in]">
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    await logout();
+                                }}
+                                className="bg-red-500 text-white px-3 py-1 rounded-md text-sm cursor-pointer"
+                            >
+                                Logout (test)
+                            </button>
+                            </div>
 
                 </div>
 

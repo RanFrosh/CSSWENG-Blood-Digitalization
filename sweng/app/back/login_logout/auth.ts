@@ -12,12 +12,13 @@ export async function login (formData: FormData) {
     // Ask Supabase if a session exists
     const { data: { user } } = await supabase.auth.getUser();
 
-    // if (user) {
-    //     console.error('Already logged in');
-    //     return { success: false, message: 'Already logged in' };
-    // } 
+    if (user) {
+        console.error('Already logged in');
+        revalidatePath('/');
+        return { success: false, message: 'Already logged in' };
+    } 
     
-    // else {
+    else {
 
         const email = formData.get('email') as string;
         const password = formData.get('password') as string;
@@ -30,7 +31,7 @@ export async function login (formData: FormData) {
         }
 
         revalidatePath('/');
-        const profile = await getProfile();
+        const profile = await getProfile(supabase);
 
         if (profile.data?.role === 'super_admin') {
             redirect('/list');
@@ -52,13 +53,13 @@ export async function login (formData: FormData) {
         }
 
         revalidatePath('/');
-    // }
+    }
 }
 
 export async function logout () {
 
     const supabase = await serverSupa();
     await supabase.auth.signOut();
-
-    revalidatePath('/');
+    revalidatePath('/landing');
+    redirect('/landing');
 }
