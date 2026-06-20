@@ -1,5 +1,4 @@
 "use client"
-
 import { useRouter } from "next/navigation";    
 import Link from "next/link";     
 
@@ -15,6 +14,14 @@ export default function ProfilePage() {
 
     const claimPerks = () => {
         router.push('/perk'); 
+    };
+
+    const donor = {
+        name: "",
+        email: "",
+        number: "",
+        sex: "",
+        bloodType: "",
     };
 
     return (
@@ -35,36 +42,12 @@ export default function ProfilePage() {
 
                         {/* Search Button */}
                         <Link
-                            href = "/search"
+                            href = "/list"
                             className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[80px] mx-auto"
                         >
                             <img src = "/images/search.png" className = "w-15 h-15 object-contain group-hover:-translate-y-1 transition-transform"/>
 
                             <p className = "mt-2 text-xs font-bold text-black font-['Montserrat']">Search</p>
-
-                        </Link>
-
-                        {/* Events Button */}
-                        <Link 
-                            href = "/events" 
-                            className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[80px] mx-auto"
-                        >
-
-                            <img src = "/images/planner.png" className = "w-15 h-15 object-contain group-hover:-translate-y-1 transition-transform" />
-                            
-                            <p className = "mt-2 text-xs font-bold text-black font-['Montserrat']">Events</p>
-
-                        </Link>
-
-                        {/* Profile Button */}
-                        <Link 
-                            href = "/profile" 
-                            className = "flex flex-col items-center justify-center p-3 rounded-xl hover:bg-gray-200 transition-all cursor-pointer group w-[80px] mx-auto"
-                        >
-
-                            <img src = "/images/user.png" className = "w-15 h-15 object-contain group-hover:-translate-y-1 transition-transform" />
-                            
-                            <p className = "mt-2 text-xs font-bold text-black font-['Montserrat']">Donor</p>
 
                         </Link>
 
@@ -81,27 +64,27 @@ export default function ProfilePage() {
                         
                         <div className = "h-[0.5in] flex flex-col text-[18px]">
                             <h3 className = "font-bold font-['Montserrat'] text-[#1b4054]">Name:</h3>
-                            <p>John Sue Doe</p>
+                            <p>{donor.name}</p>
                         </div>
 
                         <div className= "h-[0.5in] flex flex-col text-[18px]">
                             <h3 className = "font-bold font-['Montserrat'] text-[#1b4054]">Email address:</h3>
-                            <p>john_doe@gmail.com</p>
+                            <p>{donor.email}</p>
                         </div>
                         
                         <div className= "h-[0.5in] flex flex-col text-[18px]">
                             <h3 className = "font-bold font-['Montserrat'] text-[#1b4054]">Mobile number:</h3>
-                            <p>0912-345-6789</p>
+                            <p>{donor.number}</p>
                         </div>
 
                         <div className= "h-[0.5in] flex flex-col text-[18px]">
                             <h3 className = "font-bold font-['Montserrat'] text-[#1b4054]">Sex:</h3>
-                            <p>Male</p>
+                            <p>{donor.sex}</p>
                         </div>
 
                         <div className= "h-[0.5in] flex flex-col text-[18px]">
                             <h3 className = "font-bold font-['Montserrat'] text-[#1b4054]">Blood type:</h3>
-                            <p>O+</p>
+                            <p>{donor.bloodType}</p>
                         </div>
                     </div>
                 </div>
@@ -145,26 +128,6 @@ export default function ProfilePage() {
                                 <div className = "flex flex-row text-[21px] gap-[0.125in] items-center">
                                     <h3 className="text-[24px] font-semibold font-['Montserrat'] text-[#1b4054]">Blood bags filled:</h3>
                                     <p>9</p>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <h1 className = "text-[56px] mb-[-0.25in] text-[#f9fdff] font-['Montserrat'] font-semibold">Donor Actions</h1>
-
-                        <div className = "flex flex-col gap-[0.25in]">
-
-                            <div className = "flex flex-row bg-[#1b4054] rounded-[20px] p-[0.25in] transition-transform duration-200 hover:scale-[1.03125]">
-                                <div className = "flex flex-col text-[21px] text-[#f9fdff]">
-                                    <h3 className="font-semibold font-['Montserrat'] text-[24px]">Update donor analytics</h3>
-                                    <p className="pl-[0.25in]">Record new donor data after onsite procedures</p>
-                                </div>
-                            </div>
-
-                            <div className = "flex flex-row bg-[#1b4054] rounded-[20px] p-[0.25in] transition-transform duration-200 hover:scale-[1.03125]" onClick={claimPerks}>
-                                <div className = "flex flex-col text-[21px] text-[#f9fdff]">
-                                    <h3 className="font-semibold font-['Montserrat'] text-[24px]">Claim sponsor perks</h3>
-                                    <p className="pl-[0.25in]">Verify donor eligibility and authorize claiming</p>
                                 </div>
                             </div>
 
