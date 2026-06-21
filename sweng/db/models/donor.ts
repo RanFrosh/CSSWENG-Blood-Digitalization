@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, bigserial, bigint, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, bigserial, bigint, doublePrecision, boolean } from "drizzle-orm/pg-core";
 import { city } from "./city";
 
 export const donor = pgTable("donor", {
@@ -18,10 +18,12 @@ export const donor = pgTable("donor", {
   sex: text("sex").notNull(),
   blood: text("blood").notNull(),
 
-  city_id: bigint("city_id", { mode: "bigint" }).references(() => city.id).notNull(),
+  city_id: bigint("city_id", { mode: "bigint" }).references(() => city.id, { onDelete: 'no action', onUpdate: 'no action'}).notNull(),
 
   photo_path: text("photo_path").notNull(),
 
   height: doublePrecision("height"),
   weight: doublePrecision("weight"),
+
+  active: boolean("active").default(true).notNull()
 });
