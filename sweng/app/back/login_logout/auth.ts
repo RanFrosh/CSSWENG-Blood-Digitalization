@@ -3,6 +3,7 @@
 import { serverSupa } from "@/db/supaserver";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getProfile } from "../fetch_profile/single_profile";
 
 export async function login (formData: FormData) {
 
@@ -13,7 +14,8 @@ export async function login (formData: FormData) {
 
     if (user) {
         console.error('Already logged in');
-        return { success: false, data: null, message: 'Already logged in' };
+        revalidatePath('/');
+        return { success: false, message: 'Already logged in' };
     } 
     
     else {
@@ -25,11 +27,32 @@ export async function login (formData: FormData) {
         
         if (error) {
             console.error("Login error", error.message)
-            return { success: false, data: null, message: error.message }
+            return { success: false, message: error.message }
         }
 
         revalidatePath('/');
-        redirect('profile');
+        const profile = await getProfile(supabase);
+
+        if (profile.data?.role === 'super_admin') {
+            redirect('/list');
+        }
+
+        if (profile.data?.role === 'onsite_admin') {
+            redirect('/log');
+        }
+
+        if (profile.data?.role === 'med_prof') {
+            redirect('/search');
+        }
+
+        if (profile.data?.role === 'director') {
+            redirect('/analytics');
+        }
+        else {
+            redirect('/');
+        }
+
+        revalidatePath('/');
     }
 }
 
@@ -37,6 +60,6 @@ export async function logout () {
 
     const supabase = await serverSupa();
     await supabase.auth.signOut();
-
-    revalidatePath('/');
+    revalidatePath('/landing');
+    redirect('/landing');
 }
