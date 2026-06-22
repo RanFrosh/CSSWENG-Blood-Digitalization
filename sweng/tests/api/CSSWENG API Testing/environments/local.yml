@@ -1,0 +1,6 @@
+name: local
+variables:
+  - secret: true
+    name: SUPABASE_URL
+  - secret: true
+    name: SUPABASE_ANON_KEY
