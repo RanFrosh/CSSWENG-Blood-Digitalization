@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
-import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
+import { softDeleteDonor } from "@/db/queries/donor-deletion";
 
 export async function DELETE(
   request: Request,
@@ -10,7 +8,6 @@ export async function DELETE(
   try {
     const { id } = params;
     const body = await request.json();
-
     const { reason } = body;
 
     if (!id) {
@@ -27,25 +24,18 @@ export async function DELETE(
       );
     }
 
-    const result = await orm
-      .update(donor)
-      .set({
-        active: false,
-        deleted_at: new Date(),
-        deleted_by: null, // temporary until auth/super admin ID is available
-        deletion_reason: reason,
-      })
-      .where(eq(donor.id, BigInt(id)))
-      .returning();
+    const deletedDonor = await softDeleteDonor({
+      donorId: id,
+      reason,
+      deletedBy: null,
+    });
 
-    if (result.length === 0) {
+    if (!deletedDonor) {
       return NextResponse.json(
         { success: false, error: "Donor not found" },
         { status: 404 }
       );
     }
-
-    const deletedDonor = result[0];
 
     return NextResponse.json({
       success: true,

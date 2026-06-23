@@ -27,7 +27,7 @@ export const donor = pgTable("donor", {
 
   active: boolean("active").default(true).notNull(),
 
-  deleted_at: timestamp("deleted_at", { withTimezone: true }),
+  delete_datetime: timestamp("deleted_at", { withTimezone: true }),
   deleted_by: bigint("deleted_by", { mode: "bigint" }),
-  deletion_reason: text("deletion_reason")
+  delete_reason: text("deletion_reason")
 });
