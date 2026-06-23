@@ -1,0 +1,23 @@
+import { LoginControl, LoginProvider } from "@/auth/abstract/login_abstract";
+import { ProfileProvider } from "@/auth/abstract/query_abstract";
+import { ApiResponse } from "@/types/api_res_type";
+import { ReadProfile } from "@/types/profile_type";
+
+export class ImpLoginController implements LoginControl {
+    private provider: LoginProvider;
+    private profileReader: ProfileProvider;
+
+    constructor(injectProvider: LoginProvider, injectProfileReader: ProfileProvider) {
+        this.provider = injectProvider;
+        this.profileReader = injectProfileReader;
+    }
+
+    public async invokeLogin(email: string, password: string): Promise<ApiResponse<ReadProfile>> {
+        const res = await this.provider.provideLogin(email, password);
+        if (res.success) {
+            const user = await this.profileReader.getCurrentUser();
+            return user;
+        }
+        return {success: false, message: res.message, data: undefined};
+    }
+}
