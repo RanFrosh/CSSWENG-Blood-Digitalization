@@ -1,4 +1,4 @@
-import { LoginProvider } from "@/auth/abstract/login_abstract";
+import { LoginProvider } from "@/abstract/auth/login_abstract";
 import { ApiResponse } from "@/types/api_res_type";
 import { SupabaseClient } from "@supabase/supabase-js";
 

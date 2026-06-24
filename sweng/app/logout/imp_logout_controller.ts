@@ -1,4 +1,4 @@
-import { LogoutControl, LogoutProvider } from "@/auth/abstract/logout_abstract";
+import { LogoutControl, LogoutProvider } from "@/abstract/auth/logout_abstract";
 import { ApiResponse } from "@/types/api_res_type";
 
 export class ImpLogoutController implements LogoutControl {

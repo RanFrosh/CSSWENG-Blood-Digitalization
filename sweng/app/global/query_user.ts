@@ -1,5 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { ProfileProvider } from "../abstract/query_abstract";
+import { ProfileProvider } from "../../abstract/auth/query_abstract";
 import { orm } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { profiles } from "@/db/models/profiles";

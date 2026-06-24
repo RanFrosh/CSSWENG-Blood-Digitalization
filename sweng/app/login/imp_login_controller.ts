@@ -1,5 +1,5 @@
-import { LoginControl, LoginProvider } from "@/auth/abstract/login_abstract";
-import { ProfileProvider } from "@/auth/abstract/query_abstract";
+import { LoginControl, LoginProvider } from "@/abstract/auth/login_abstract";
+import { ProfileProvider } from "@/abstract/auth/query_abstract";
 import { ApiResponse } from "@/types/api_res_type";
 import { ReadProfile } from "@/types/profile_type";
 
