@@ -1,13 +1,13 @@
 import { LoginControl, LoginProvider } from "@/abstract/auth/login_abstract";
-import { ProfileProvider } from "@/abstract/auth/query_abstract";
+import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { ApiResponse } from "@/types/api_res_type";
 import { ReadProfile } from "@/types/profile_type";
 
 export class ImpLoginController implements LoginControl {
     private provider: LoginProvider;
-    private profileReader: ProfileProvider;
+    private profileReader: ProfileSessionProvider;
 
-    constructor(injectProvider: LoginProvider, injectProfileReader: ProfileProvider) {
+    constructor(injectProvider: LoginProvider, injectProfileReader: ProfileSessionProvider) {
         this.provider = injectProvider;
         this.profileReader = injectProfileReader;
     }

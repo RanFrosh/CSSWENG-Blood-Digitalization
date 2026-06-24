@@ -1,12 +1,12 @@
 import { SupabaseClient } from "@supabase/supabase-js";
-import { ProfileSessionProvider } from "../../abstract/auth/query_abstract";
+import { ProfileSessionProvider } from "../../../abstract/auth/query_abstract";
 import { orm } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { profiles } from "@/db/models/profiles";
 import { ApiResponse } from "@/types/api_res_type";
 import { ReadProfile } from "@/types/profile_type";
 
-export class ProfileGetter implements ProfileSessionProvider {
+export class ImpProfileGetter implements ProfileSessionProvider {
     private database: SupabaseClient;
 
     constructor(injectDatabase: SupabaseClient) {
