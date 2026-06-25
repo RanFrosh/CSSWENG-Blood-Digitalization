@@ -1,9 +1,11 @@
 import { pgTable, text, timestamp, bigserial, bigint, doublePrecision, boolean } from "drizzle-orm/pg-core";
 import { city } from "./city";
+import { biological_sex } from "../enums/biological_sex";
+import { blood_type } from "../enums/blood_type";
 
 export const donor = pgTable("donor", {
   id: bigserial("id", { mode: "bigint" }).primaryKey(),
-  created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
@@ -15,8 +17,8 @@ export const donor = pgTable("donor", {
   street: text("street").notNull(),
   zip_code: text("zip_code").notNull(),
 
-  sex: text("sex").notNull(),
-  blood: text("blood").notNull(),
+  sex: biological_sex("sex").notNull(),
+  blood: blood_type("blood").notNull(),
 
   city_id: bigint("city_id", { mode: "bigint" }).references(() => city.id, { onDelete: 'no action', onUpdate: 'no action'}).notNull(),
 
