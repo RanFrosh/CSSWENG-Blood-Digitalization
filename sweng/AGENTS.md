@@ -1,5 +1,3 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+**@/abstract**: Refer to folder for current interfaces used in project.
+**@/db/enums**: Refer to folder for custom types used in project.
+**@/db/models**: Refer to folder for drizzle schemas used in project.

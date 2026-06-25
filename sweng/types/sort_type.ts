@@ -1,3 +1,10 @@
-const sorterBase = ['up', 'down'] as const;
+const directionBase = ['up', 'down'] as const;
 
-export type Sorter = typeof sorterBase[number];
+type one_direction = typeof directionBase[number];
+
+export type SorterShape<Skibidi> = {
+    col: keyof Skibidi
+    direction: one_direction
+}
+
+export type Sorter<Skibidi> = SorterShape<Skibidi>[];
