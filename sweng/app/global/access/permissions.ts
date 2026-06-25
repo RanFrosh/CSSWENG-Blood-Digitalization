@@ -1,9 +1,12 @@
 import { AccessType } from "@/db/enums/access_level";
 
 const permissions: Record<string, AccessType[]> = {
-    'retrieve_donors': ['super_admin', 'med_prof'],
-    'edit_donor': ['super_admin', 'med_prof'],
-    'delete_donor': ['super_admin']
+    'retrieve_donors': ['med_prof'],
+    'edit_donor': ['med_prof'],
+    'delete_donor': [],
+    'view_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'],
+    'create_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'],
+    'correct_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin']
 }
 
 export type Actions = keyof typeof permissions;
