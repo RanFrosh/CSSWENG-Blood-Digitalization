@@ -6,7 +6,8 @@ const permissions: Record<string, AccessType[]> = {
     'delete_donor': [],
     'view_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'],
     'create_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'],
-    'correct_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin']
+    'view_correct_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'],
+    'create_correct_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin']
 }
 
 export type Actions = keyof typeof permissions;
