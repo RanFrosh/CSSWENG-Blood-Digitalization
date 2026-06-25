@@ -1,7 +1,7 @@
 info:
-  name: Existing Donor Login
+  name: Existing Onsite Director Login
   type: http
-  seq: 1
+  seq: 4
 
 http:
   method: POST
@@ -22,8 +22,8 @@ http:
     type: json
     data: |-
       {
-        "email": "",
-        "password": ""
+        "email": "six_sevendirector@gmail.com",
+        "password": "676767"
       }
   auth: inherit
 
@@ -31,7 +31,7 @@ runtime:
   scripts:
     - type: tests
       code: |-
-        test("Donor successfully logs in and receives tokens", function() {
+        test("Onsite Director successfully logs in and receives tokens", function() {
           expect(res.getStatus()).to.equal(200);
           
           const body = res.getBody();
@@ -41,8 +41,8 @@ runtime:
           
           expect(body).to.have.property('user');
           
-          bru.setEnvVar("donor_token", body.access_token);
-          bru.setEnvVar("donor_id", body.user.id);
+          bru.setEnvVar("onsite_director_token", body.access_token);
+          bru.setEnvVar("onsite_director_id", body.user.id);
         });
 
 settings:

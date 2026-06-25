@@ -31,7 +31,7 @@ runtime:
   scripts:
     - type: tests
       code: |-
-        test("Donor successfully logs in and receives tokens", function() {
+        test("Onsite Admin successfully logs in and receives tokens", function() {
           expect(res.getStatus()).to.equal(200);
           
           const body = res.getBody();
@@ -41,7 +41,8 @@ runtime:
           
           expect(body).to.have.property('user');
           
-          bru.setEnvVar("donor_token", body.access_token);
+          bru.setEnvVar("onsite_admin_token", body.access_token);
+          bru.setEnvVar("onsite_admin_id", body.user.id);
         });
 
 settings:

@@ -4,3 +4,19 @@ variables:
     name: SUPABASE_URL
   - secret: true
     name: SUPABASE_ANON_KEY
+  - secret: true
+    name: med_prof_token
+  - secret: true
+    name: med_prof_id
+  - secret: true
+    name: onsite_admin_token
+  - secret: true
+    name: onsite_admin_id
+  - secret: true
+    name: onsite_director_token
+  - secret: true
+    name: onsite_director_id
+  - secret: true
+    name: staff_admin_token
+  - secret: true
+    name: staff_admin_id
