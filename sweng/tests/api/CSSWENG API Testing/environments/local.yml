@@ -20,3 +20,7 @@ variables:
     name: staff_admin_token
   - secret: true
     name: staff_admin_id
+  - secret: true
+    name: donor_token
+  - secret: true
+    name: donor_id
