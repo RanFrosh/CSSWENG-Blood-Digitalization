@@ -6,7 +6,6 @@ export type ViewCorrections = InferSelectModel<typeof corrected_event>;
 export type ViewCorrectionFilters = Partial<ViewCorrections>;
 
 export type CreateCorrections = InferInsertModel<typeof corrected_event>;
-export type CreateCorrectionFilters = Partial<CreateCorrections>;
 
 export type ViewEvents = InferSelectModel<typeof event_log>;
 export type ViewEventFilters = Partial<ViewEvents>;

@@ -2,17 +2,17 @@ import { ApiResponse } from "@/types/api_res_type";
 import { Sorter } from "@/types/sort_type";
 import { ViewCorrections,
     ViewCorrectionFilters,
-    CreateCorrectionFilters,
     ViewEvents,
     ViewEventFilters,
-    CreateEvents } from "@/types/event_type";
+    CreateEvents, 
+    CreateCorrections} from "@/types/event_type";
 
 export interface EventData {
     queryEvent(data: ViewEventFilters, sort: Sorter<ViewEvents>): Promise<ApiResponse<ViewEvents[]>>
     createEvent(data: CreateEvents): Promise<ApiResponse>
 
     queryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
-    createCorrection(data: CreateCorrectionFilters): Promise<ApiResponse>
+    createCorrection(data: CreateCorrections): Promise<ApiResponse>
 }
 
 export interface EventController {
@@ -20,5 +20,5 @@ export interface EventController {
     invokeCreateEvent(data: CreateEvents): Promise<ApiResponse>
 
     invokeQueryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
-    invokeCreateCorrection(data: CreateCorrectionFilters): Promise<ApiResponse>
+    invokeCreateCorrection(data: CreateCorrections): Promise<ApiResponse>
 }
