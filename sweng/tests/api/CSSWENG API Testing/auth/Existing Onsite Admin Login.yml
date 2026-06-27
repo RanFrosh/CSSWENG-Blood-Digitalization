@@ -22,8 +22,8 @@ http:
     type: json
     data: |-
       {
-        "email": "sahur@gmail.com",
-        "password": "676767"
+        "email": {{onsite_admin_email}},
+        "password": {{onsite_admin_pw}}
       }
   auth: inherit
 

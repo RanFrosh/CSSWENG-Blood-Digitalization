@@ -24,3 +24,31 @@ variables:
     name: donor_token
   - secret: true
     name: donor_id
+  - secret: true
+    name: super_admin_email
+  - secret: true
+    name: super_admin_pw
+  - secret: true
+    name: donor_email
+  - secret: true
+    name: donor_pw
+  - secret: true
+    name: med_prof_email
+  - secret: true
+    name: med_prof_pw
+  - secret: true
+    name: onsite_admin_email
+  - secret: true
+    name: onsite_admin_pw
+  - secret: true
+    name: onsite_director_email
+  - secret: true
+    name: onsite_director_pw
+  - secret: true
+    name: staff_admin_email
+  - secret: true
+    name: staff_admin_pw
+  - secret: true
+    name: super_admin_token
+  - secret: true
+    name: super_admin_id

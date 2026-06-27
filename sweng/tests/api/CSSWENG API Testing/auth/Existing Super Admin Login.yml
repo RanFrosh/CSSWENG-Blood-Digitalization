@@ -22,8 +22,8 @@ http:
     type: json
     data: |-
       {
-        "email": "",
-        "password": ""
+        "email": {{super_admin_email}},
+        "password": {{super_admin_pw}}
       }
   auth: inherit
 
