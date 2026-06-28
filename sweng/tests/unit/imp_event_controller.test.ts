@@ -4,7 +4,7 @@ import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { CreateEvents, CreateCorrections, ViewEventFilters, ViewCorrectionFilters, ViewEvents, ViewCorrections } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 
-// ─── Mocks ────────────────────────────────────────────────────────────────────
+// mocks
 
 jest.mock("@/app/global/helper_bouncer/bouncer", () => ({
   helpGateKeep: jest.fn(),
@@ -22,9 +22,7 @@ const mockEventModel: jest.Mocked<EventData> = {
 const mockProfileReader: jest.Mocked<ProfileSessionProvider> = {
   getCurrentUser: jest.fn(),
 };
-
-// ─── Fake Data ────────────────────────────────────────────────────────────────
-
+// fake data
 const fakeEvent = {
   id: BigInt(1),
   created_at: new Date(),
@@ -81,7 +79,7 @@ const newCorrection: CreateCorrections = {
 
 const noSort: Sorter<any> = [];
 
-// ─── Tests ────────────────────────────────────────────────────────────────────
+// tests 
 
 describe("ImpEventManager", () => {
   let controller: ImpEventManager;
@@ -91,7 +89,7 @@ describe("ImpEventManager", () => {
     controller = new ImpEventManager(mockEventModel, mockProfileReader);
   });
 
-  // ─── invokeQueryEvent ───────────────────────────────────────────────────
+  // invokeQueryEvent 
 
   describe("invokeQueryEvent", () => {
     it("returns events when user has permission", async () => {
@@ -138,7 +136,7 @@ describe("ImpEventManager", () => {
     });
   });
 
-  // ─── invokeCreateEvent ──────────────────────────────────────────────────
+  // invokeCreateEvent 
 
   describe("invokeCreateEvent", () => {
     it("creates event when user has permission", async () => {
@@ -185,7 +183,7 @@ describe("ImpEventManager", () => {
     });
   });
 
-  // ─── invokeQueryCorrection ──────────────────────────────────────────────
+  // invokeQueryCorrection
 
   describe("invokeQueryCorrection", () => {
     it("returns corrections when user has permission", async () => {
@@ -232,7 +230,7 @@ describe("ImpEventManager", () => {
     });
   });
 
-  // ─── invokeCreateCorrection ─────────────────────────────────────────────
+  // invokeCreateCorrection 
 
   describe("invokeCreateCorrection", () => {
     it("creates correction when user has permission", async () => {
