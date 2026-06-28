@@ -1,7 +1,7 @@
 info:
-  name: Existing Staff Admin Login
+  name: Existing Super Admin Login
   type: http
-  seq: 6
+  seq: 1
 
 http:
   method: POST
@@ -22,8 +22,8 @@ http:
     type: json
     data: |-
       {
-        "email": {{staff_admin_email}},
-        "password": {{staff_admin_pw}}
+        "email": {{super_admin_email}},
+        "password": {{super_admin_pw}}
       }
   auth: inherit
 
@@ -31,7 +31,7 @@ runtime:
   scripts:
     - type: tests
       code: |-
-        test("Staff Admin successfully logs in and receives tokens", function() {
+        test("Super admin successfully logs in and receives tokens", function() {
           expect(res.getStatus()).to.equal(200);
           
           const body = res.getBody();
@@ -41,8 +41,8 @@ runtime:
           
           expect(body).to.have.property('user');
           
-          bru.setEnvVar("staff_admin_token", body.access_token);
-          bru.setEnvVar("staff_admin_id", body.user.id);
+          bru.setEnvVar("super_admin_token", body.access_token);
+          bru.setEnvVar("super_admin_id", body.user.id);
         });
 
 settings:

@@ -1,7 +1,7 @@
 info:
-  name: Existing Super Admin Login
+  name: Existing Onsite Admin Login
   type: http
-  seq: 5
+  seq: 1
 
 http:
   method: POST
@@ -22,8 +22,8 @@ http:
     type: json
     data: |-
       {
-        "email": {{super_admin_email}},
-        "password": {{super_admin_pw}}
+        "email": {{onsite_admin_email}},
+        "password": {{onsite_admin_pw}}
       }
   auth: inherit
 
@@ -31,7 +31,7 @@ runtime:
   scripts:
     - type: tests
       code: |-
-        test("Super admin successfully logs in and receives tokens", function() {
+        test("Onsite Admin successfully logs in and receives tokens", function() {
           expect(res.getStatus()).to.equal(200);
           
           const body = res.getBody();
@@ -41,8 +41,8 @@ runtime:
           
           expect(body).to.have.property('user');
           
-          bru.setEnvVar("super_admin_token", body.access_token);
-          bru.setEnvVar("super_admin_id", body.user.id);
+          bru.setEnvVar("onsite_admin_token", body.access_token);
+          bru.setEnvVar("onsite_admin_id", body.user.id);
         });
 
 settings:

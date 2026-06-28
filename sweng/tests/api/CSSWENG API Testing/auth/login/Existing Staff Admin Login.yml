@@ -1,7 +1,7 @@
 info:
-  name: Existing Onsite Director Login
+  name: Existing Staff Admin Login
   type: http
-  seq: 4
+  seq: 1
 
 http:
   method: POST
@@ -22,8 +22,8 @@ http:
     type: json
     data: |-
       {
-        "email": {{onsite_director_email}},
-        "password": {{onsite_director_pw}}
+        "email": {{staff_admin_email}},
+        "password": {{staff_admin_pw}}
       }
   auth: inherit
 
@@ -31,7 +31,7 @@ runtime:
   scripts:
     - type: tests
       code: |-
-        test("Onsite Director successfully logs in and receives tokens", function() {
+        test("Staff Admin successfully logs in and receives tokens", function() {
           expect(res.getStatus()).to.equal(200);
           
           const body = res.getBody();
@@ -41,8 +41,8 @@ runtime:
           
           expect(body).to.have.property('user');
           
-          bru.setEnvVar("onsite_director_token", body.access_token);
-          bru.setEnvVar("onsite_director_id", body.user.id);
+          bru.setEnvVar("staff_admin_token", body.access_token);
+          bru.setEnvVar("staff_admin_id", body.user.id);
         });
 
 settings:
