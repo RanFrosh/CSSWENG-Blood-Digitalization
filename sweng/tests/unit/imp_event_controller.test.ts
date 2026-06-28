@@ -1,3 +1,7 @@
+// tests for ImpEventManager class in the controller layer
+// the controller checks permissions via helpGateKeep before calling the data model.
+// the tests mock helpGateKeep and the data model to verify that the controller behaves correctly.
+
 import { ImpEventManager } from "@/app/event_records/imp_event_controller";
 import { EventData } from "@/abstract/events/event_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
@@ -6,12 +10,14 @@ import { Sorter } from "@/types/sort_type";
 
 // mocks
 
+// mock helpGateKeep to simulate authorized and unauthorized users per test
 jest.mock("@/app/global/helper_bouncer/bouncer", () => ({
   helpGateKeep: jest.fn(),
 }));
 
 import { helpGateKeep } from "@/app/global/helper_bouncer/bouncer";
 
+// mock the data model so we don't hit a real database
 const mockEventModel: jest.Mocked<EventData> = {
   queryEvent: jest.fn(),
   createEvent: jest.fn(),
@@ -19,10 +25,14 @@ const mockEventModel: jest.Mocked<EventData> = {
   createCorrection: jest.fn(),
 };
 
+// mock the profile reader to simulate getting the current user
 const mockProfileReader: jest.Mocked<ProfileSessionProvider> = {
   getCurrentUser: jest.fn(),
 };
+
 // fake data
+
+// matches the event_log table structure in the database
 const fakeEvent = {
   id: BigInt(1),
   created_at: new Date(),
@@ -37,6 +47,7 @@ const fakeEvent = {
   street: "123 Main St",
 };
 
+// matches the correction_event table schema
 const fakeCorrection = {
   id: BigInt(2),
   created_at: new Date(),
@@ -84,12 +95,13 @@ const noSort: Sorter<any> = [];
 describe("ImpEventManager", () => {
   let controller: ImpEventManager;
 
+  // reset mocks before each test
   beforeEach(() => {
     jest.clearAllMocks();
     controller = new ImpEventManager(mockEventModel, mockProfileReader);
   });
 
-  // invokeQueryEvent 
+  // invokeQueryEvent (requires "view_event" permission)
 
   describe("invokeQueryEvent", () => {
     it("returns events when user has permission", async () => {
@@ -98,6 +110,7 @@ describe("ImpEventManager", () => {
 
       const result = await controller.invokeQueryEvent({ name: "Blood Drive" }, noSort);
 
+      // verify the correct persmission was checked  
       expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "view_event");
       expect(mockEventModel.queryEvent).toHaveBeenCalled();
       expect(result.success).toBe(true);
@@ -110,12 +123,13 @@ describe("ImpEventManager", () => {
       const result = await controller.invokeQueryEvent({}, noSort);
 
       expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "view_event");
-      expect(mockEventModel.queryEvent).not.toHaveBeenCalled();
+      expect(mockEventModel.queryEvent).not.toHaveBeenCalled(); // model must not be called if user is unauthorized
       expect(result.success).toBe(false);
       expect(result.message).toBe("Not authorized");
     });
 
     it("blocks when user has no role", async () => {
+      // this specifically tests the case where helpGateKeep returns a failure due to the user having no role
       (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Somehow there is no role" });
 
       const result = await controller.invokeQueryEvent({}, noSort);
@@ -136,7 +150,7 @@ describe("ImpEventManager", () => {
     });
   });
 
-  // invokeCreateEvent 
+  // invokeCreateEvent (requires "create_event" permission)
 
   describe("invokeCreateEvent", () => {
     it("creates event when user has permission", async () => {
@@ -157,7 +171,7 @@ describe("ImpEventManager", () => {
       const result = await controller.invokeCreateEvent(newEvent);
 
       expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "create_event");
-      expect(mockEventModel.createEvent).not.toHaveBeenCalled();
+      expect(mockEventModel.createEvent).not.toHaveBeenCalled(); // no insert should be attempted if user is unauthorized
       expect(result.success).toBe(false);
       expect(result.message).toBe("Not authorized");
     });
@@ -183,7 +197,7 @@ describe("ImpEventManager", () => {
     });
   });
 
-  // invokeQueryCorrection
+  // invokeQueryCorrection (requires "view_correct_event" permission)
 
   describe("invokeQueryCorrection", () => {
     it("returns corrections when user has permission", async () => {
@@ -230,7 +244,7 @@ describe("ImpEventManager", () => {
     });
   });
 
-  // invokeCreateCorrection 
+  // invokeCreateCorrection (requires "create_correct_event" permission)
 
   describe("invokeCreateCorrection", () => {
     it("creates correction when user has permission", async () => {

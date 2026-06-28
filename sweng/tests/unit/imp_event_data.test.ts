@@ -1,14 +1,21 @@
+// tests for ImpEventModel class in the data layer
+// the model builds and runs DB queries using the injected ORM. The tests mock the ORM to verify that the model behaves correctly.
+// we mock the ORM so no real database connection is needed.
+
 import { ImpEventModel } from "@/app/event_records/imp_event_data";
 import { CreateEvents, CreateCorrections, ViewEventFilters, ViewCorrectionFilters, ViewEvents, ViewCorrections } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 
 // mock ORM 
 
+// replace the real Drizzle ORM with a mock
 const mockOrm = {
   select: jest.fn(),
   insert: jest.fn(),
 } as any;
 
+// Drizzle uses method chaining: .select().from().where().orderBy() 
+// helper function that sets up the chain to resolve to a given return value. 
 function setupSelectChain(returnValue: any[]) {
   mockOrm.select.mockReturnValue({
     from: jest.fn().mockReturnValue({
@@ -19,6 +26,7 @@ function setupSelectChain(returnValue: any[]) {
   });
 }
 
+// Drizzle insert chain: .insert().values() (resolves with empty array on success)
 function setupInsertChain() {
   mockOrm.insert.mockReturnValue({
     values: jest.fn().mockResolvedValue([]),
@@ -27,6 +35,7 @@ function setupInsertChain() {
 
 // fake data
 
+// matches the event_log table structure
 const fakeEvent = {
   id: BigInt(1),
   created_at: new Date(),
@@ -41,6 +50,7 @@ const fakeEvent = {
   street: "123 Main St",
 };
 
+// matches the correction_log table structure
 const fakeCorrection = {
   id: BigInt(2),
   created_at: new Date(),
@@ -53,9 +63,10 @@ const fakeCorrection = {
   city_id: BigInt(5),
   zip_code: "1001",
   street: "456 Elm St",
-  ref_event_id: BigInt(1),
+  ref_event_id: BigInt(1), // references the original event that this correction is for
 };
 
+// empty sorter for tests that don't require sorting
 const noSort: Sorter<any> = [];
 
 // tests
@@ -63,12 +74,13 @@ const noSort: Sorter<any> = [];
 describe("ImpEventModel", () => {
   let model: ImpEventModel;
 
+  // reset mocks and create a new model instance before each test
   beforeEach(() => {
     jest.clearAllMocks();
     model = new ImpEventModel(mockOrm);
   });
 
-  // queryEvent 
+  // queryEvent fetches events from the event_log table based on filters and sorting
 
   describe("queryEvent", () => {
     it("returns events on success with filters", async () => {
@@ -83,6 +95,7 @@ describe("ImpEventModel", () => {
     });
 
     it("returns events with no filters", async () => {
+      // no filters means all events are returned
       setupSelectChain([fakeEvent]);
 
       const result = await model.queryEvent({}, noSort);
@@ -92,6 +105,7 @@ describe("ImpEventModel", () => {
     });
 
     it("sorts events ascending", async () => {
+      // test that the model can sort events in ascending order by a given column
       setupSelectChain([fakeEvent]);
       const sort: Sorter<ViewEvents> = [{ col: "name", direction: "up" }];
 
@@ -101,6 +115,7 @@ describe("ImpEventModel", () => {
     });
 
     it("sorts events descending", async () => {
+      // test that the model can sort events in descending order by a given column
       setupSelectChain([fakeEvent]);
       const sort: Sorter<ViewEvents> = [{ col: "name", direction: "down" }];
 
@@ -110,6 +125,7 @@ describe("ImpEventModel", () => {
     });
 
     it("returns failure on db error", async () => {
+      // simulate a database error by making the mock ORM throw an error when select is called
       mockOrm.select.mockImplementation(() => { throw new Error("DB connection lost"); });
 
       const result = await model.queryEvent({}, noSort);
@@ -120,7 +136,7 @@ describe("ImpEventModel", () => {
     });
   });
 
-  // createEvent 
+  // createEvent that inserts a new event into the event_log table
 
   describe("createEvent", () => {
     const newEvent: CreateEvents = {
@@ -145,6 +161,7 @@ describe("ImpEventModel", () => {
     });
 
     it("returns failure on db error", async () => {
+      // simulate insert failure
       mockOrm.insert.mockImplementation(() => { throw new Error("Insert failed"); });
 
       const result = await model.createEvent(newEvent);
@@ -154,7 +171,7 @@ describe("ImpEventModel", () => {
     });
   });
 
-  // queryCorrection 
+  // queryCorrection that fetches corrections from the correction_log table based on filters and sorting
 
   describe("queryCorrection", () => {
     it("returns corrections on success with filters", async () => {
@@ -206,7 +223,8 @@ describe("ImpEventModel", () => {
     });
   });
 
-  // createCorrection 
+  // createCorrection that inserts a new correction into corrected_event
+  // ref_event_id is required to link the correction to the original event
 
   describe("createCorrection", () => {
     const newCorrection: CreateCorrections = {
@@ -219,7 +237,7 @@ describe("ImpEventModel", () => {
       city_id: BigInt(5),
       zip_code: "1003",
       street: "321 Pine Rd",
-      ref_event_id: BigInt(1),
+      ref_event_id: BigInt(1), // required foreign key that links to the event being corrected
     };
 
     it("returns success when correction is created", async () => {
