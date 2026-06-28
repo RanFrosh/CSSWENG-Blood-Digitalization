@@ -1,21 +1,16 @@
 import { ImpEventManager } from "@/app/event_records/imp_event_controller";
 import { EventData } from "@/abstract/events/event_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { CreateEvents, CreateCorrections, ViewEventFilters, ViewCorrectionFilters } from "@/types/event_type";
+import { CreateEvents, CreateCorrections, ViewEventFilters, ViewCorrectionFilters, ViewEvents, ViewCorrections } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 
+// ─── Mocks ────────────────────────────────────────────────────────────────────
 
-// mock the entire event_records controller module so helpGateKeep is intercepted
-jest.mock("@/app/event_records/imp_event_controller", () => {
-  return {
-    ImpEventManager: jest.fn().mockImplementation((eventModel, profileReader) => ({
-      invokeQueryEvent: jest.fn(),
-      invokeCreateEvent: jest.fn(),
-      invokeQueryCorrection: jest.fn(),
-      invokeCreateCorrection: jest.fn(),
-    })),
-  };
-});
+jest.mock("@/app/global/helper_bouncer/bouncer", () => ({
+  helpGateKeep: jest.fn(),
+}));
+
+import { helpGateKeep } from "@/app/global/helper_bouncer/bouncer";
 
 const mockEventModel: jest.Mocked<EventData> = {
   queryEvent: jest.fn(),
@@ -28,7 +23,7 @@ const mockProfileReader: jest.Mocked<ProfileSessionProvider> = {
   getCurrentUser: jest.fn(),
 };
 
-// fake data 
+// ─── Fake Data ────────────────────────────────────────────────────────────────
 
 const fakeEvent = {
   id: BigInt(1),
@@ -86,40 +81,55 @@ const newCorrection: CreateCorrections = {
 
 const noSort: Sorter<any> = [];
 
-// tests
+// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe("ImpEventManager", () => {
-  let controller: any;
+  let controller: ImpEventManager;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    controller = new (ImpEventManager as any)(mockEventModel, mockProfileReader);
+    controller = new ImpEventManager(mockEventModel, mockProfileReader);
   });
 
-  // invokeQueryEvent
+  // ─── invokeQueryEvent ───────────────────────────────────────────────────
 
   describe("invokeQueryEvent", () => {
     it("returns events when user has permission", async () => {
-      controller.invokeQueryEvent.mockResolvedValue({ success: true, message: "Events retrieved", data: [fakeEvent] });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockEventModel.queryEvent.mockResolvedValue({ success: true, message: "Events retrieved", data: [fakeEvent] });
 
       const result = await controller.invokeQueryEvent({ name: "Blood Drive" }, noSort);
 
+      expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "view_event");
+      expect(mockEventModel.queryEvent).toHaveBeenCalled();
       expect(result.success).toBe(true);
-      expect(result.message).toBe("Events retrieved");
       expect(result.data).toEqual([fakeEvent]);
     });
 
-    it("returns failure when user lacks permission", async () => {
-      controller.invokeQueryEvent.mockResolvedValue({ success: false, message: "Unauthorized", data: undefined });
+    it("blocks and does not query when user lacks permission", async () => {
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Not authorized" });
 
-      const result = await controller.invokeQueryEvent({ name: "Blood Drive" }, noSort);
+      const result = await controller.invokeQueryEvent({}, noSort);
 
+      expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "view_event");
+      expect(mockEventModel.queryEvent).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
-      expect(result.message).toBe("Unauthorized");
+      expect(result.message).toBe("Not authorized");
+    });
+
+    it("blocks when user has no role", async () => {
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Somehow there is no role" });
+
+      const result = await controller.invokeQueryEvent({}, noSort);
+
+      expect(mockEventModel.queryEvent).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Somehow there is no role");
     });
 
     it("returns failure when model fails", async () => {
-      controller.invokeQueryEvent.mockResolvedValue({ success: false, message: "DB error", data: undefined });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockEventModel.queryEvent.mockResolvedValue({ success: false, message: "DB error", data: undefined });
 
       const result = await controller.invokeQueryEvent({}, noSort);
 
@@ -128,29 +138,45 @@ describe("ImpEventManager", () => {
     });
   });
 
-  // invokeCreateEvent 
+  // ─── invokeCreateEvent ──────────────────────────────────────────────────
 
   describe("invokeCreateEvent", () => {
     it("creates event when user has permission", async () => {
-      controller.invokeCreateEvent.mockResolvedValue({ success: true, message: "Event created" });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockEventModel.createEvent.mockResolvedValue({ success: true, message: "Event created" });
 
       const result = await controller.invokeCreateEvent(newEvent);
 
+      expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "create_event");
+      expect(mockEventModel.createEvent).toHaveBeenCalledWith(newEvent);
       expect(result.success).toBe(true);
       expect(result.message).toBe("Event created");
     });
 
-    it("returns failure when user lacks permission", async () => {
-      controller.invokeCreateEvent.mockResolvedValue({ success: false, message: "Forbidden" });
+    it("blocks and does not create when user lacks permission", async () => {
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Not authorized" });
 
       const result = await controller.invokeCreateEvent(newEvent);
 
+      expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "create_event");
+      expect(mockEventModel.createEvent).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
-      expect(result.message).toBe("Forbidden");
+      expect(result.message).toBe("Not authorized");
+    });
+
+    it("blocks when user has no role", async () => {
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Somehow there is no role" });
+
+      const result = await controller.invokeCreateEvent(newEvent);
+
+      expect(mockEventModel.createEvent).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Somehow there is no role");
     });
 
     it("returns failure when model fails", async () => {
-      controller.invokeCreateEvent.mockResolvedValue({ success: false, message: "Insert failed" });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockEventModel.createEvent.mockResolvedValue({ success: false, message: "Insert failed" });
 
       const result = await controller.invokeCreateEvent(newEvent);
 
@@ -159,30 +185,45 @@ describe("ImpEventManager", () => {
     });
   });
 
-  // invokeQueryCorrection 
+  // ─── invokeQueryCorrection ──────────────────────────────────────────────
 
   describe("invokeQueryCorrection", () => {
     it("returns corrections when user has permission", async () => {
-      controller.invokeQueryCorrection.mockResolvedValue({ success: true, message: "Corrections retrieved", data: [fakeCorrection] });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockEventModel.queryCorrection.mockResolvedValue({ success: true, message: "Corrections retrieved", data: [fakeCorrection] });
 
       const result = await controller.invokeQueryCorrection({ name: "Blood Drive Fix" }, noSort);
 
+      expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "view_correct_event");
+      expect(mockEventModel.queryCorrection).toHaveBeenCalled();
       expect(result.success).toBe(true);
-      expect(result.message).toBe("Corrections retrieved");
       expect(result.data).toEqual([fakeCorrection]);
     });
 
-    it("returns failure when user lacks permission", async () => {
-      controller.invokeQueryCorrection.mockResolvedValue({ success: false, message: "Unauthorized", data: undefined });
+    it("blocks and does not query when user lacks permission", async () => {
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Not authorized" });
 
       const result = await controller.invokeQueryCorrection({}, noSort);
 
+      expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "view_correct_event");
+      expect(mockEventModel.queryCorrection).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
-      expect(result.message).toBe("Unauthorized");
+      expect(result.message).toBe("Not authorized");
+    });
+
+    it("blocks when user has no role", async () => {
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Somehow there is no role" });
+
+      const result = await controller.invokeQueryCorrection({}, noSort);
+
+      expect(mockEventModel.queryCorrection).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Somehow there is no role");
     });
 
     it("returns failure when model fails", async () => {
-      controller.invokeQueryCorrection.mockResolvedValue({ success: false, message: "Query failed", data: undefined });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockEventModel.queryCorrection.mockResolvedValue({ success: false, message: "Query failed", data: undefined });
 
       const result = await controller.invokeQueryCorrection({}, noSort);
 
@@ -191,29 +232,45 @@ describe("ImpEventManager", () => {
     });
   });
 
-  // invokeCreateCorrection 
+  // ─── invokeCreateCorrection ─────────────────────────────────────────────
 
   describe("invokeCreateCorrection", () => {
     it("creates correction when user has permission", async () => {
-      controller.invokeCreateCorrection.mockResolvedValue({ success: true, message: "Correction created" });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockEventModel.createCorrection.mockResolvedValue({ success: true, message: "Correction created" });
 
       const result = await controller.invokeCreateCorrection(newCorrection);
 
+      expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "create_correct_event");
+      expect(mockEventModel.createCorrection).toHaveBeenCalledWith(newCorrection);
       expect(result.success).toBe(true);
       expect(result.message).toBe("Correction created");
     });
 
-    it("returns failure when user lacks permission", async () => {
-      controller.invokeCreateCorrection.mockResolvedValue({ success: false, message: "Forbidden" });
+    it("blocks and does not create when user lacks permission", async () => {
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Not authorized" });
 
       const result = await controller.invokeCreateCorrection(newCorrection);
 
+      expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "create_correct_event");
+      expect(mockEventModel.createCorrection).not.toHaveBeenCalled();
       expect(result.success).toBe(false);
-      expect(result.message).toBe("Forbidden");
+      expect(result.message).toBe("Not authorized");
+    });
+
+    it("blocks when user has no role", async () => {
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Somehow there is no role" });
+
+      const result = await controller.invokeCreateCorrection(newCorrection);
+
+      expect(mockEventModel.createCorrection).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Somehow there is no role");
     });
 
     it("returns failure when model fails", async () => {
-      controller.invokeCreateCorrection.mockResolvedValue({ success: false, message: "Correction insert failed" });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockEventModel.createCorrection.mockResolvedValue({ success: false, message: "Correction insert failed" });
 
       const result = await controller.invokeCreateCorrection(newCorrection);
 
