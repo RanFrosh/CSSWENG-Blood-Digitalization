@@ -83,6 +83,9 @@ describe("ImpEventModel", () => {
   // queryEvent fetches events from the event_log table based on filters and sorting
 
   describe("queryEvent", () => {
+    // Note: numeric fields (visitors, extractions, etc.) are currently sort-only
+    // update these tests once dev team implements numeric filtering
+
     it("returns events on success with filters", async () => {
       setupSelectChain([fakeEvent]);
       const filters: ViewEventFilters = { name: "Blood Drive" };
@@ -134,7 +137,126 @@ describe("ImpEventModel", () => {
       expect(result.message).toBe("DB connection lost");
       expect(result.data).toBeUndefined();
     });
-  });
+
+    // single filter (street)
+    it("returns events filtered by street only", async () => {
+      setupSelectChain([fakeEvent]);
+      const filters: ViewEventFilters = { street: "123 Main St" };
+
+      const result = await model.queryEvent(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeEvent]);
+    });
+
+    // single filter (zip_code) 
+    it("returns events filtered by zip_code only", async () => {
+      setupSelectChain([fakeEvent]);
+      const filters: ViewEventFilters = { zip_code: "1002" };
+
+      const result = await model.queryEvent(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeEvent]);
+    });
+
+    // multiple filters (name and street)
+    it("returns events filtered by name and street", async () => {
+      setupSelectChain([fakeEvent]);
+      const filters: ViewEventFilters = { name: "New Blood Drive", street: "123 Main St" };
+
+      const result = await model.queryEvent(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeEvent]);
+    });
+
+    // multiple filters (name and zip_code)
+    it("returns events filtered by name and zip_code", async () => {
+      setupSelectChain([fakeEvent]);
+      const filters: ViewEventFilters = { name: "New Blood Drive", zip_code: "1002" };
+
+      const result = await model.queryEvent(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeEvent]);
+    });
+
+    // multiple filters (street and zip_code)
+    it("returns events filtered by street and zip_code", async () => {
+      setupSelectChain([fakeEvent]);
+      const filters: ViewEventFilters = { street: "123 Main St", zip_code: "1002" };
+
+      const result = await model.queryEvent(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeEvent]);
+    });
+
+    // multiple filters (name, street, and zip_code)
+    it("returns events filtered by name, street, and zip_code", async () => {
+      setupSelectChain([fakeEvent]);
+      const filters: ViewEventFilters = { name: "New Blood Drive", street: "123 Main St", zip_code: "1002" };
+
+      const result = await model.queryEvent(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeEvent]);
+    });
+
+    // invalid filter
+    it("returns empty array when no events match filters", async () => {
+      setupSelectChain([]);
+      const filters: ViewEventFilters = { name: "Non-existent Event" };
+
+      const result = await model.queryEvent(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([]);
+    });
+
+    // TEST FOR SORTING WITH MULTIPLE COLUMNS
+
+    // sort by id ascending
+    it("sorts events by id ascending", async () => {
+      setupSelectChain([fakeEvent]);
+      const sort: Sorter<ViewEvents> = [{ col: "id", direction: "up" }];
+
+      const results = await model.queryEvent({}, sort);
+
+      expect(results.success).toBe(true);
+    });
+
+    // sort by id descending
+    it("sorts events by id descending", async () => {
+      setupSelectChain([fakeEvent]);
+      const sort: Sorter<ViewEvents> = [{ col: "id", direction: "down" }];
+
+      const results = await model.queryEvent({}, sort);
+
+      expect(results.success).toBe(true);
+    });
+
+    // sort by visitors ascending
+    it("sorts events by visitors ascending", async () => {
+      setupSelectChain([fakeEvent]);
+      const sort: Sorter<ViewEvents> = [{ col: "visitors", direction: "up" }];
+
+      const results = await model.queryEvent({}, sort);
+
+      expect(results.success).toBe(true);
+    });
+
+    // sort by visitors descending
+    it("sorts events by visitors descending", async () => {
+      setupSelectChain([fakeEvent]);
+      const sort: Sorter<ViewEvents> = [{ col: "visitors", direction: "down" }];
+
+      const results = await model.queryEvent({}, sort);
+
+      expect(results.success).toBe(true);
+    });
+  }); 
 
   // createEvent that inserts a new event into the event_log table
 
@@ -174,6 +296,9 @@ describe("ImpEventModel", () => {
   // queryCorrection that fetches corrections from the correction_log table based on filters and sorting
 
   describe("queryCorrection", () => {
+    // Note: numeric fields (visitors, extractions, etc.) are currently sort-only
+    // update these tests once dev team implements numeric filtering
+    
     it("returns corrections on success with filters", async () => {
       setupSelectChain([fakeCorrection]);
       const filters: ViewCorrectionFilters = { name: "Blood Drive Fix" };
@@ -220,6 +345,136 @@ describe("ImpEventModel", () => {
       expect(result.success).toBe(false);
       expect(result.message).toBe("Correction query failed");
       expect(result.data).toBeUndefined();
+    });
+
+    // single filter (name)
+    it("returns corrections filtered by name only", async () => {
+      setupSelectChain([fakeCorrection]);
+      const filters: ViewCorrectionFilters = { name: "Blood Drive Fix" };
+
+      const result = await model.queryCorrection(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeCorrection]);
+    });
+
+    // single filter (street)
+    it("returns corrections filtered by street only", async () => {
+      setupSelectChain([fakeCorrection]);
+      const filters: ViewCorrectionFilters = { street: "456 Elm St" };
+
+      const result = await model.queryCorrection(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeCorrection]);
+    });
+
+    // single filter (zip_code)
+    it("returns corrections filtered by zip code only", async () => {
+      setupSelectChain([fakeCorrection]);
+      const filters: ViewCorrectionFilters = { zip_code: "1001" };
+
+      const result = await model.queryCorrection(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeCorrection]);
+    });
+
+    // multiple filters (name and street)
+    it("returns corrections filtered by name and street", async () => {
+      setupSelectChain([fakeCorrection]);
+      const filters: ViewCorrectionFilters = { name: "Blood Drive Fix", street: "456 Elm St" };
+
+      const result = await model.queryCorrection(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeCorrection]);
+    });
+
+    // multiple filters (name and zip_code)
+    it("returns corrections filtered by name and zip code", async () => {
+      setupSelectChain([fakeCorrection]);
+      const filters: ViewCorrectionFilters = { name: "Blood Drive Fix", zip_code: "1001" };
+
+      const result = await model.queryCorrection(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeCorrection]);
+    });
+
+    // multiple filters (street and zip_code)
+    it("returns corrections filtered by street and zip code", async () => {
+      setupSelectChain([fakeCorrection]);
+      const filters: ViewCorrectionFilters = { street: "456 Elm St", zip_code: "1001" };
+
+      const result = await model.queryCorrection(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeCorrection]);
+    });
+
+    // multiple filters (name, street, and zip_code)
+    it("returns corrections filtered by name, street, and zip code", async () => {
+      setupSelectChain([fakeCorrection]);
+      const filters: ViewCorrectionFilters = { name: "Blood Drive Fix", street: "456 Elm St", zip_code: "1001" };
+
+      const result = await model.queryCorrection(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeCorrection]);
+    });
+
+    // TEST FOR SORTING WITH MULTIPLE COLUMNS
+
+    // sort by id ascending
+    it("sorts events by id ascending", async () => {
+      setupSelectChain([fakeCorrection]);
+      const sort: Sorter<ViewCorrections> = [{ col: "id", direction: "up" }];
+
+      const results = await model.queryCorrection({}, sort);
+
+      expect(results.success).toBe(true);
+    });
+
+    // sort by id descending
+    it("sorts events by id descending", async () => {
+      setupSelectChain([fakeCorrection]);
+      const sort: Sorter<ViewCorrections> = [{ col: "id", direction: "down" }];
+
+      const results = await model.queryCorrection({}, sort);
+
+      expect(results.success).toBe(true);
+    });
+
+    // sort by visitors ascending
+    it("sorts events by visitors ascending", async () => {
+      setupSelectChain([fakeCorrection]);
+      const sort: Sorter<ViewCorrections> = [{ col: "visitors", direction: "up" }];
+
+      const results = await model.queryCorrection({}, sort);
+
+      expect(results.success).toBe(true);
+    });
+
+    // sort by visitors descending
+    it("sorts events by visitors descending", async () => {
+      setupSelectChain([fakeCorrection]);
+      const sort: Sorter<ViewCorrections> = [{ col: "visitors", direction: "down" }];
+
+      const results = await model.queryCorrection({}, sort);
+
+      expect(results.success).toBe(true);
+    });
+ 
+    // invalid filter
+    it("returns empty array when no corrections match filters", async () => {
+      setupSelectChain([]);
+      const filters: ViewCorrectionFilters = { name: "Non-existent Correction" };
+
+      const result = await model.queryCorrection(filters, noSort);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([]);
     });
   });
 
