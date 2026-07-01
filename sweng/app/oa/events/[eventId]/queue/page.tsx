@@ -29,7 +29,7 @@ type LatestAddition = {
 const medicalProfessionals: MedicalProfessional[] = [
     {
         id: "MP-001",
-        name: "Dr. Janet Doe",
+        name: "Janet Doe",
         currentDonor: {
             queueNumber: "001",
             donorId: "D-001",
@@ -38,11 +38,11 @@ const medicalProfessionals: MedicalProfessional[] = [
     },
     {
         id: "MP-002",
-        name: "Dr. Jason Doe",
+        name: "Jason Doe",
     },
     {
         id: "MP-003",
-        name: "Dr. Jean Doe",
+        name: "Jean Doe",
         currentDonor: {
             queueNumber: "003",
             donorId: "D-003",
@@ -51,7 +51,7 @@ const medicalProfessionals: MedicalProfessional[] = [
     },
     {
         id: "MP-004",
-        name: "Dr. Jack Doe",
+        name: "Jack Doe",
     },
 ];
 
