@@ -212,7 +212,7 @@ export default function Home() {
 
                         {/* Copyright Placeholder */}
                         <p className="absolute bottom-[0.25in] left-1/2 z-30 -translate-x-1/2 text-white text-[12px]">
-                            Copyright
+                            {currentEvent.copyright}
                         </p>
                     </div>
                 </div>
