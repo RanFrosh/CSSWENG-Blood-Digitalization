@@ -1,25 +1,11 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation";    
-import Link from "next/link";            
-
+import { registerDonorAction } from "@/app/actions/donor-actions";
+import Link from "next/link";
 import Header from "@/components/Header";
 
 export default function RegisterPage() {
-  
-    const router = useRouter();
-
-    const goHome = () => {
-        router.push('/'); 
-    };
-
-    const registerDonor = () => {
-        alert("Donor registered!");
-        router.push('/scanner'); 
-    };
-
     return (
-
         <main className = "flex flex-col min-h-screen bg-[#f9fdff] text-black">
 
             {/* Header */}
@@ -79,24 +65,35 @@ export default function RegisterPage() {
                     <h1 className = "inline bg-[#c15555] text-[#f9fdff] text-[56px] p-[0.25in] font-['Montserrat'] font-semibold">Donor Registration</h1>
 
                     {/* Registration Field */}
-                    <div className = "flex flex-col gap-[0.25in]">
+                    <form action={registerDonorAction} className="flex flex-col gap-[0.25in]">
 
                         {/* Name Fields */}
                         <div className = "flex flex-row justify-between text-[28px]">
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "fname">First Name:</label>
-                                <input type = "text" className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
+                                <input id="fname"
+                                    name="firstName"
+                                    type="text"
+                                    required
+                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]" />
                             </div>  
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "mname">Middle Name:</label>
-                                <input type = "text" className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
+                                <input id = "mname"
+                                    name="middleName"
+                                    type="text"
+                                    className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "lname">Last Name:</label>
-                                <input type = "text" className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
+                                <input id = "lname"
+                                    name="lastName"
+                                    type="text"
+                                    required
+                                    className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                                 
                             </div>
 
@@ -107,13 +104,19 @@ export default function RegisterPage() {
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "al1">Address Line 1:</label>
-                                <input type = "text" className = "w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                <input id = "al1"
+                                    name="addressLine1"
+                                    type = "text"
+                                    className = "w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
                                     placeholder = "House no., Building, Street no., Street name"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "al2">Address Line 2:</label>
-                                <input type = "text" className = "w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                <input id = "al2"
+                                    name="addressLine2"
+                                    type = "text"
+                                    className = "w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
                                     placeholder = "Subdivision/Village, Barangay"/>
                             </div>
 
@@ -124,17 +127,26 @@ export default function RegisterPage() {
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "city">City:</label>
-                                <input type = "text" className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
+                                <input id = "city"
+                                    name="city"
+                                    type = "text"
+                                    className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "prov">Province:</label>
-                                <input type = "text" className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
+                                <input id = "prov"
+                                    name="province"
+                                    type = "text"
+                                    className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "zip">Zip Code:</label>
-                                <input type="text" className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
+                                <input id = "zip"
+                                    name="zipCode"
+                                    type="text"
+                                    className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                         </div>
@@ -144,26 +156,39 @@ export default function RegisterPage() {
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "email">Email Address:</label>
-                                <input type="email" className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
+                                <input id = "email"
+                                    name="email"
+                                    type="email"
+                                    className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "num">Mobile Number:</label>
-                                <input type="tel" className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
+                                <input id = "num"
+                                    name="mobileNumber"
+                                    type="tel"
+                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
-                                <label>Sex:</label>
+                                <label htmlFor = "sex">Sex:</label>
 
                                 <div className="flex flex-row gap-[0.25in]">
 
                                     <div className="flex flex-row gap-[0.125in]">
-                                        <input type="radio" name="sex" id="male" value="male" className="req-sex"/>
+                                        <input id="male"
+                                            name="sex"
+                                            type="radio"
+                                            value="male" required className="req-sex" />
                                         <label htmlFor = "male">male</label>
                                     </div>
 
                                     <div className="flex flex-row gap-[0.125in]">
-                                        <input type="radio" name="sex" id="female" value="female" className="req-sex"/>
+                                        <input id = "female"
+                                            name="sex"
+                                            type="radio"
+                                            value="female"
+                                            className="req-sex"/>
                                         <label htmlFor = "female">female</label>
                                     </div>
 
@@ -175,62 +200,64 @@ export default function RegisterPage() {
                         <div className = "flex flex-row justify-between gap-[0.5in] text-[28px]">
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
-                                <label>Blood Type:</label>
+                                <label htmlFor = "bld">Blood Type:</label>
 
                                 <div className="bld-opt">
                                     <div className="flex flex-row gap-[0.25in]">
                                         <div className="flex flex-row gap-[0.125in]">
-                                            <input type="radio" name="blood" id="O+" value="O+" className="req-bld"/>
+                                            <input id = "O+" type="radio" name="bloodType" value="O+" className="req-bld"/>
                                             <label htmlFor = "O+">O+</label>
                                         </div>
 
                                         <div className="flex flex-row gap-[0.125in]">
-                                            <input type="radio" name="blood" id="A+" value="A+" className="req-bld"/>
-                                            <label htmlFor="A+">A+</label>
+                                            <input id = "A+" type="radio" name="bloodType" value="A+" className="req-bld"/>
+                                            <label htmlFor = "A+">A+</label>
                                         </div>
 
                                         <div className="flex flex-row gap-[0.125in]">
-                                            <input type="radio" name="blood" id="B+" value="B+" className="req-bld"/>
-                                            <label htmlFor="B+">B+</label>
+                                            <input id = "B+" type="radio" name="bloodType" value="B+" className="req-bld"/>
+                                            <label htmlFor = "B+">B+</label>
                                         </div>
 
                                         <div className="flex flex-row gap-[0.125in]">
-                                            <input type="radio" name="blood" id="AB+" value="AB+" className="req-bld"/>
-                                            <label htmlFor="AB+">AB+</label>
+                                            <input id = "AB+" type="radio" name="bloodType" value="AB+" className="req-bld"/>
+                                            <label htmlFor = "AB+">AB+</label>
                                         </div>
                                     </div>
 
                                     <div className="flex flex-row gap-[0.25in]">
                                         <div className="flex flex-row gap-[0.125in]">
-                                            <input type="radio" name="blood" id="O-" value="O-" className="req-bld"/>
-                                            <label htmlFor="O-">O-</label>
+                                            <input id = "O-" type="radio" name="bloodType" value="O-" className="req-bld"/>
+                                            <label htmlFor = "O-">O-</label>
                                         </div>
 
                                         <div className="flex flex-row gap-[0.125in]">
-                                            <input type="radio" name="blood" id="A-" value="A-" className="req-bld"/>
-                                            <label htmlFor="A-">A-</label>
+                                            <input id = "A-" type="radio" name="bloodType" value="A-" className="req-bld"/>
+                                            <label htmlFor = "A-">A-</label>
                                         </div>
 
                                         <div className="flex flex-row gap-[0.125in]">
-                                            <input type="radio" name="blood" id="B-" value="B-" className="req-bld"/>
-                                            <label htmlFor="B-">B-</label>
+                                            <input id = "B-" type="radio" name="bloodType" value="B-" className="req-bld"/>
+                                            <label htmlFor = "B-">B-</label>
                                         </div>
 
                                         <div className="flex flex-row gap-[0.125in]">
-                                            <input type="radio" name="blood" id="AB-" value="AB-" className="req-bld"/>
-                                            <label htmlFor="AB-">AB-</label>
+                                            <input id = "AB-" type="radio" name="bloodType" value="AB-" className="req-bld"/>
+                                            <label htmlFor = "AB-">AB-</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        
+                        <div className="flex flex-end -mt-[0.6in]">
+                            <button className = "w-[2in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline ml-auto text-[21px]" type="submit">
+                                Register Donor
+                            </button>
+                        </div>
+                    </form>
 
-                    <div className = "flex flex-end -mt-[0.6in]">
-                        <button className = "w-[2in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline ml-auto text-[21px]" onClick={registerDonor}>
-                            Register Donor
-                        </button>
-                    </div>
+                    
                 </div>
 
                 <div className = "flex-1 bg-[#c15555]"></div>
