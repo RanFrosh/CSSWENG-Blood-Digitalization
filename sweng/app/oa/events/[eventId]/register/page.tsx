@@ -100,111 +100,38 @@ export default function RegisterPage() {
                             </div>
                         </div>
 
-                        {/* Address Fields */}
+                        {/* Basic Information Fields */}
                         <div>
                             <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
-                                Address
-                            </h3>
-
-                            <div className="grid grid-cols-1 gap-[0.25in]">
-                                <div className="flex flex-col gap-[5px]">
-                                    <label
-                                        htmlFor="address"
-                                        className="text-[18px] font-semibold text-[#002940]"
-                                    >
-                                        Address
-                                    </label>
-
-                                    <input
-                                        id="address"
-                                        type="text"
-                                        placeholder="House no., building, street no., street name, subdivision/village, barangay"
-                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-[0.25in]">
-                                    <div className="flex flex-col gap-[5px]">
-                                        <label
-                                            htmlFor="city"
-                                            className="text-[18px] font-semibold text-[#002940]"
-                                        >
-                                            City
-                                        </label>
-
-                                        <input
-                                            id="city"
-                                            type="text"
-                                            className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col gap-[5px]">
-                                        <label
-                                            htmlFor="province"
-                                            className="text-[18px] font-semibold text-[#002940]"
-                                        >
-                                            Province
-                                        </label>
-
-                                        <input
-                                            id="province"
-                                            type="text"
-                                            className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col gap-[5px]">
-                                        <label
-                                            htmlFor="zip"
-                                            className="text-[18px] font-semibold text-[#002940]"
-                                        >
-                                            Zip Code
-                                        </label>
-
-                                        <input
-                                            id="zip"
-                                            type="text"
-                                            className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Contact and Sex Fields */}
-                        <div>
-                            <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
-                                Contact and Basic Details
+                                Basic Information
                             </h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-[0.25in]">
                                 <div className="flex flex-col gap-[5px]">
                                     <label
-                                        htmlFor="email"
+                                        htmlFor="age"
                                         className="text-[18px] font-semibold text-[#002940]"
                                     >
-                                        Email Address
+                                        Age
                                     </label>
 
                                     <input
-                                        id="email"
-                                        type="email"
+                                        id="age"
+                                        type="number"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                     />
                                 </div>
 
                                 <div className="flex flex-col gap-[5px]">
                                     <label
-                                        htmlFor="mobile"
+                                        htmlFor="birthdate"
                                         className="text-[18px] font-semibold text-[#002940]"
                                     >
-                                        Mobile Number
+                                        Birth Date
                                     </label>
-
                                     <input
-                                        id="mobile"
-                                        type="tel"
+                                        id="birthdate"
+                                        type="date"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                     />
                                 </div>
@@ -335,6 +262,117 @@ export default function RegisterPage() {
                                         />
 
                                         <label htmlFor="AB-">AB-</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Contact Information Fields */}
+                        <div>
+                            <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
+                                Contact Information
+                            </h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.25in]">
+                                <div className="flex flex-col gap-[5px]">
+                                    <label
+                                        htmlFor="email"
+                                        className="text-[18px] font-semibold text-[#002940]"
+                                    >
+                                        Email Address
+                                    </label>
+
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                    />
+                                </div>
+
+                                <div className="flex flex-col gap-[5px]">
+                                    <label
+                                        htmlFor="mobile"
+                                        className="text-[18px] font-semibold text-[#002940]"
+                                    >
+                                        Mobile Number
+                                    </label>
+
+                                    <input
+                                        id="mobile"
+                                        type="tel"
+                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Address Fields */}
+                        <div>
+                            <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
+                                Address
+                            </h3>
+
+                            <div className="grid grid-cols-1 gap-[0.25in]">
+                                <div className="flex flex-col gap-[5px]">
+                                    <label
+                                        htmlFor="address"
+                                        className="text-[18px] font-semibold text-[#002940]"
+                                    >
+                                        Address
+                                    </label>
+
+                                    <input
+                                        id="address"
+                                        type="text"
+                                        placeholder="House no., building, street no., street name, subdivision/village, barangay"
+                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-[0.25in]">
+                                    <div className="flex flex-col gap-[5px]">
+                                        <label
+                                            htmlFor="city"
+                                            className="text-[18px] font-semibold text-[#002940]"
+                                        >
+                                            City
+                                        </label>
+
+                                        <input
+                                            id="city"
+                                            type="text"
+                                            className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-[5px]">
+                                        <label
+                                            htmlFor="province"
+                                            className="text-[18px] font-semibold text-[#002940]"
+                                        >
+                                            Province
+                                        </label>
+
+                                        <input
+                                            id="province"
+                                            type="text"
+                                            className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-[5px]">
+                                        <label
+                                            htmlFor="zip"
+                                            className="text-[18px] font-semibold text-[#002940]"
+                                        >
+                                            Zip Code
+                                        </label>
+
+                                        <input
+                                            id="zip"
+                                            type="text"
+                                            className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                        />
                                     </div>
                                 </div>
                             </div>

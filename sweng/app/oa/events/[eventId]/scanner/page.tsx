@@ -29,8 +29,8 @@ export default function ScannerPage() {
         );
 
         if (isConfirmed) {
-            alert("Donor checked in successfully!");
-            router.push(`/oa/events/${eventId}/queue`);
+            alert("Donor checked in successfully!\nPlease direct them to the waiting area.\n\nQueue Number: #001");
+            router.push(`/oa/events/${eventId}`);
         }
     };
 

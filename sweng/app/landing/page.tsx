@@ -47,15 +47,15 @@ export default function Home() {
     const currentEvent = events[currentIndex];
 
     const handleLogin = () => {
-        const view = prompt("Type 1 for admin, 2 for int. staff, 3 for RB director.");
+        const view = prompt("Type 1 for OA/Registration, 2 for MP/Nurse, 3 for Lab, 4 for Recovery, 5 for RBD, 6 for SA.");
 
         if (view === "1") {
             router.push("/oa/events");
         } else if (view === "2") {
-            router.push("/mp/search");
-        } else if (view === "3") {
+            router.push("/mp/events");
+        } else if (view === "5") {
             router.push("/rbd/analytics");
-        } else if (view === "4") {
+        } else if (view === "6") {
             router.push("/sa/list");
         }
     };
