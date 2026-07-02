@@ -237,7 +237,7 @@ export default function ScreeningPage() {
                                 onClick={screenDonor}
                                 className="min-w-[1.5in] bg-[#002940] text-white px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:underline"
                             >
-                                Submit Screening
+                                Submit
                             </button>
                         </div>
                     </section>
