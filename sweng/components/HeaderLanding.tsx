@@ -40,7 +40,7 @@ export default function HeaderLanding() {
                     onClick = {goHome}
                 />
 
-                <div className = "text-[0.155in] text-white flex flex-row items-center gap-[0.25in] font-[Montserrat]">
+                <div className = "text-[18px] text-white flex flex-row items-center gap-[0.25in] font-[Montserrat]">
                     {navLinks.map((link) => (
                         <p
                             key={link.path}

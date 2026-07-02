@@ -2,63 +2,63 @@
 
 import { useRouter, usePathname, useParams } from "next/navigation";
 
-export default function HeaderOA() {
+export default function HeaderMP() {
     const router = useRouter();
     const pathname = usePathname();
     const params = useParams();
 
     const eventId = params?.eventId as string | undefined;
+    const donorId = params?.donorId as string | undefined;
 
     const goMyEvents = () => {
-        router.push("/oa/events");
+        router.push("/mp/events");
     };
 
     const goEventHome = () => {
-        if (eventId) router.push(`/oa/events/${eventId}`);
+        if (eventId) router.push(`/mp/events/${eventId}`);
     };
 
-    const goRegisterDonor = () => {
-        if (eventId) router.push(`/oa/events/${eventId}/register`);
+    const goQueue = () => {
+        if (eventId) router.push(`/mp/events/${eventId}/queue`);
     };
 
-    const goScanner = () => {
-        if (eventId) router.push(`/oa/events/${eventId}/scanner`);
+    const goScreening = () => {
+        if (eventId && donorId) router.push(`/mp/events/${eventId}/screening/${donorId}`);
     };
 
     const goLogout = () => {
         router.push("/landing");
     };
 
-    const navLinks = eventId
-        ? [
-              {
-                  name: "My Events",
-                  path: "/oa/events",
-                  onClick: goMyEvents,
-              },
-              {
-                  name: "Event Home",
-                  path: `/oa/events/${eventId}`,
-                  onClick: goEventHome,
-              },
-              {
-                  name: "Register Donor",
-                  path: `/oa/events/${eventId}/register`,
-                  onClick: goRegisterDonor,
-              },
-              {
-                  name: "Scan QR",
-                  path: `/oa/events/${eventId}/scanner`,
-                  onClick: goScanner,
-              }
-          ]
-        : [
-              {
-                  name: "My Events",
-                  path: "/oa/events",
-                  onClick: goMyEvents,
-              },
-          ];
+    const navLinks = [];
+
+    navLinks.push({
+        name: "My Events",
+        path: "/mp/events",
+        onClick: goMyEvents,
+    });
+
+    if (eventId) {
+        navLinks.push({
+            name: "Event Home",
+            path: `/mp/events/${eventId}`,
+            onClick: goEventHome,
+        });
+
+        navLinks.push({
+            name: "Screening Queue",
+            path: `/mp/events/${eventId}/queue`,
+            onClick: goQueue,
+        });
+
+        if (donorId) {
+            navLinks.push({
+                name: "Donor Screening",
+                path: `/mp/events/${eventId}/screening/${donorId}`,
+                onClick: goScreening,
+            });
+        }
+    }
 
     const isActiveLink = (path: string) => {
         return pathname === path;
@@ -80,7 +80,9 @@ export default function HeaderOA() {
                             <p
                                 key={link.path}
                                 className={`cursor-pointer hover:scale-110 ${
-                                    isActiveLink(link.path) ? "font-bold" : "font-normal"
+                                    isActiveLink(link.path)
+                                        ? "font-bold"
+                                        : "font-normal"
                                 }`}
                                 onClick={link.onClick}
                             >
