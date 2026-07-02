@@ -178,7 +178,7 @@ export default function MPEventPage() {
                                 className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
                             >
                                 <h3 className="text-[24px] font-['Montserrat'] font-bold">
-                                    Donor Screening
+                                    Screen Donor
                                 </h3>
 
                                 <p className="mt-[8px] text-[18px]">
@@ -191,7 +191,7 @@ export default function MPEventPage() {
                                 className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
                             >
                                 <h3 className="text-[24px] font-['Montserrat'] font-bold">
-                                    Screening Queue
+                                    View Screening Queue
                                 </h3>
 
                                 <p className="mt-[8px] text-[18px]">
