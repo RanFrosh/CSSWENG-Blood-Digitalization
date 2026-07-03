@@ -41,7 +41,7 @@ export default function RecordPage() {
     };
 
     return (
-        <main className="flex flex-col min-h-screen bg-[#f9fdff]">
+        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
