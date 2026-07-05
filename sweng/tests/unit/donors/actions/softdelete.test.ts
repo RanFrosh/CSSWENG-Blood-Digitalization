@@ -68,4 +68,17 @@ describe("softDeleteDonorAction", () => {
       softDeleteDonorAction(formData)
     ).rejects.toThrow("Missing donor ID or reason");
   });
+
+  it("throws an error when donorId is not a valid bigint", async () => {
+    const formData = new FormData();
+
+    formData.append("donorId", "abc");
+    formData.append("reason", "Duplicate donor");
+
+    await expect(
+      softDeleteDonorAction(formData)
+    ).rejects.toThrow();
+
+});
+
 });
