@@ -7,7 +7,8 @@ const permissions = {
     'view_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'] as AccessType[],
     'create_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'] as AccessType[],
     'view_correct_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'] as AccessType[],
-    'create_correct_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'] as AccessType[]
+    'create_correct_event': ['onsite_admin', 'med_prof', 'director', 'staff_admin'] as AccessType[],
+    'view_analytics': ['director'] as AccessType[]
 } satisfies Record<string, AccessType[]>;
 
 export type Actions = keyof typeof permissions;
