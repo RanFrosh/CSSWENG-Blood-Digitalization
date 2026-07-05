@@ -1,21 +1,10 @@
-<<<<<<< Updated upstream
-"use client";
-=======
 "use client"
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";   
 import Link from "next/link";    
->>>>>>> Stashed changes
-
-import { registerDonorAction } from "@/app/actions/donor-actions";
-import Link from "next/link";
-import Header from "@/components/Header";
-
     
 export default function RegisterPage() {
-<<<<<<< Updated upstream
-=======
     const router = useRouter();
 
     const [submitted, setSubmitted] = useState(false);
@@ -67,12 +56,11 @@ export default function RegisterPage() {
         router.push("/scanner");
     };
 
->>>>>>> Stashed changes
     return (
         <main className = "flex flex-col min-h-screen bg-[#f9fdff] text-black">
 
             {/* Header */}
-            <Header/>
+            
 
             {/* Main Content */}
             <div className = "flex-1 bg-[#c15555] flex flex-row">
@@ -128,28 +116,14 @@ export default function RegisterPage() {
                     <h1 className = "inline bg-[#c15555] text-[#f9fdff] text-[56px] p-[0.25in] font-['Montserrat'] font-semibold">Donor Registration</h1>
 
                     {/* Registration Field */}
-                    <form action={registerDonorAction} className="flex flex-col gap-[0.25in]">
+                    <form action={registerDonor} className="flex flex-col gap-[0.25in]">
 
                         {/* Name Fields */}
                         <div className = "flex flex-row justify-between text-[28px]">
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "fname">First Name:</label>
-<<<<<<< Updated upstream
-                                <input id="fname"
-                                    name="firstName"
-                                    type="text"
-                                    required
-                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]" />
-                            </div>  
 
-                            <div className = "flex flex-row gap-[0.125in] text-[28px]">
-                                <label htmlFor = "mname">Middle Name:</label>
-                                <input id = "mname"
-                                    name="middleName"
-                                    type="text"
-                                    className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
-=======
                                 <input
                                     type="text"
                                     value={firstName}
@@ -171,19 +145,11 @@ export default function RegisterPage() {
                                     value={middleName}
                                     onChange={(e) => setMiddleName(e.target.value)}
                                     className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]" />
->>>>>>> Stashed changes
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "lname">Last Name:</label>
-<<<<<<< Updated upstream
-                                <input id = "lname"
-                                    name="lastName"
-                                    type="text"
-                                    required
-                                    className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
-                                
-=======
+
                                 <input
                                     type="text"
                                     value={lastName}
@@ -196,9 +162,7 @@ export default function RegisterPage() {
                                     }`}
                                     placeholder="Last Name"
                                 />
->>>>>>> Stashed changes
                             </div>
-
                         </div>
 
                         {/* Address Fields */}
@@ -206,12 +170,7 @@ export default function RegisterPage() {
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "al1">Address Line 1:</label>
-<<<<<<< Updated upstream
-                                <input id = "al1"
-                                    name="addressLine1"
-                                    type = "text"
-                                    className = "w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
-=======
+
                                 <input
                                     type="text"
                                     value={addressLine1}
@@ -222,27 +181,19 @@ export default function RegisterPage() {
                                             ? "border-2 border-red-500"
                                             : "border-2 border-gray-300"
                                     }`}
->>>>>>> Stashed changes
                                     placeholder = "House no., Building, Street no., Street name"/>
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "al2">Address Line 2:</label>
-<<<<<<< Updated upstream
-                                <input id = "al2"
-                                    name="addressLine2"
-                                    type = "text"
-                                    className = "w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
-=======
+
                                 <input
                                     type="text"
                                     value={addressLine2}
                                     onChange={(e) => setAddressLine2(e.target.value)}
                                     className="w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
->>>>>>> Stashed changes
                                     placeholder = "Subdivision/Village, Barangay"/>
                             </div>
-
                         </div>
                         
                         {/* City, Province, and Zip Code Fields */}
@@ -250,12 +201,7 @@ export default function RegisterPage() {
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "city">City:</label>
-<<<<<<< Updated upstream
-                                <input id = "city"
-                                    name="city"
-                                    type = "text"
-                                    className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
-=======
+
                                 <input
                                     type="text"
                                     value={city}
@@ -267,17 +213,11 @@ export default function RegisterPage() {
                                             : "border-2 border-gray-300"
                                     }`}
                                 />
->>>>>>> Stashed changes
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "prov">Province:</label>
-<<<<<<< Updated upstream
-                                <input id = "prov"
-                                    name="province"
-                                    type = "text"
-                                    className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
-=======
+
                                 <input
                                     type="text"
                                     value={province}
@@ -289,17 +229,11 @@ export default function RegisterPage() {
                                                 : "border-2 border-gray-300"
                                         }`}
                                 />
->>>>>>> Stashed changes
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "zip">Zip Code:</label>
-<<<<<<< Updated upstream
-                                <input id = "zip"
-                                    name="zipCode"
-                                    type="text"
-                                    className = "w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
-=======
+
                                 <input
                                     type="text"
                                     value={zipCode}
@@ -311,7 +245,6 @@ export default function RegisterPage() {
                                                 : "border-2 border-gray-300"
                                         }`}
                                 />
->>>>>>> Stashed changes
                             </div>
 
                         </div>
@@ -321,12 +254,7 @@ export default function RegisterPage() {
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "email">Email Address:</label>
-<<<<<<< Updated upstream
-                                <input id = "email"
-                                    name="email"
-                                    type="email"
-                                    className = "w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
-=======
+
                                 <input
                                     type="email"
                                     value={email}
@@ -338,21 +266,11 @@ export default function RegisterPage() {
                                                 : "border-2 border-gray-300"
                                         }`}
                                 />
->>>>>>> Stashed changes
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "num">Mobile Number:</label>
-<<<<<<< Updated upstream
-                                <input id = "num"
-                                    name="mobileNumber"
-                                    type="tel"
-                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"/>
-                            </div>
 
-                            <div className = "flex flex-row gap-[0.125in] text-[28px]">
-                                <label htmlFor = "sex">Sex:</label>
-=======
                                 <input
                                     type="tel"
                                     value={mobileNumber}
@@ -373,27 +291,11 @@ export default function RegisterPage() {
                                 }`}
                             >
                                 <label>Sex:</label>
->>>>>>> Stashed changes
 
                                 <div className="flex flex-row gap-[0.25in]">
 
                                     <div className="flex flex-row gap-[0.125in]">
-<<<<<<< Updated upstream
-                                        <input id="male"
-                                            name="sex"
-                                            type="radio"
-                                            value="male" required className="req-sex" />
-                                        <label htmlFor = "male">male</label>
-                                    </div>
 
-                                    <div className="flex flex-row gap-[0.125in]">
-                                        <input id = "female"
-                                            name="sex"
-                                            type="radio"
-                                            value="female"
-                                            className="req-sex"/>
-                                        <label htmlFor = "female">female</label>
-=======
                                         <input
                                             type="radio"
                                             name="sex"
@@ -416,7 +318,7 @@ export default function RegisterPage() {
                                             className="req-sex"
                                         />
                                         <label htmlFor = "female">Female</label>
->>>>>>> Stashed changes
+
                                     </div>
 
                                 </div>
@@ -436,9 +338,7 @@ export default function RegisterPage() {
                                 <div className="bld-opt">
                                     <div className="flex flex-row gap-[0.25in]">
                                         <div className="flex flex-row gap-[0.125in]">
-<<<<<<< Updated upstream
-                                            <input id = "O+" type="radio" name="bloodType" value="O+" className="req-bld"/>
-=======
+
                                             <input
                                                 type="radio"
                                                 name="blood"
@@ -448,25 +348,11 @@ export default function RegisterPage() {
                                                 onChange={(e) => setBloodType(e.target.value)}
                                                 className="req-bld"
                                             />
->>>>>>> Stashed changes
                                             <label htmlFor = "O+">O+</label>
                                         </div>
 
                                         <div className="flex flex-row gap-[0.125in]">
-<<<<<<< Updated upstream
-                                            <input id = "A+" type="radio" name="bloodType" value="A+" className="req-bld"/>
-                                            <label htmlFor = "A+">A+</label>
-                                        </div>
 
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input id = "B+" type="radio" name="bloodType" value="B+" className="req-bld"/>
-                                            <label htmlFor = "B+">B+</label>
-                                        </div>
-
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input id = "AB+" type="radio" name="bloodType" value="AB+" className="req-bld"/>
-                                            <label htmlFor = "AB+">AB+</label>
-=======
                                             <input
                                                 type="radio"
                                                 name="blood"
@@ -503,31 +389,12 @@ export default function RegisterPage() {
                                                 className="req-bld"
                                             />
                                             <label htmlFor="AB+">AB+</label>
->>>>>>> Stashed changes
                                         </div>
                                     </div>
 
                                     <div className="flex flex-row gap-[0.25in]">
                                         <div className="flex flex-row gap-[0.125in]">
-<<<<<<< Updated upstream
-                                            <input id = "O-" type="radio" name="bloodType" value="O-" className="req-bld"/>
-                                            <label htmlFor = "O-">O-</label>
-                                        </div>
 
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input id = "A-" type="radio" name="bloodType" value="A-" className="req-bld"/>
-                                            <label htmlFor = "A-">A-</label>
-                                        </div>
-
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input id = "B-" type="radio" name="bloodType" value="B-" className="req-bld"/>
-                                            <label htmlFor = "B-">B-</label>
-                                        </div>
-
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input id = "AB-" type="radio" name="bloodType" value="AB-" className="req-bld"/>
-                                            <label htmlFor = "AB-">AB-</label>
-=======
                                             <input
                                                 type="radio"
                                                 name="blood"
@@ -577,7 +444,6 @@ export default function RegisterPage() {
                                                 className="req-bld"
                                             />
                                             <label htmlFor="AB-">AB-</label>
->>>>>>> Stashed changes
                                         </div>
                                     </div>
                                 </div>
