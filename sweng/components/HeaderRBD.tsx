@@ -15,8 +15,9 @@ export default function HeaderRBD() {
         router.push("/rbd/analytics");
     };
 
+    // for some reason this specific folder keeps bugging so im using direct link lmao
     const goEventAnalytics = () => {
-        router.push("/rbd/analytics/events");
+        location.href = `/rbd/analytics/events/`;
     };
 
     const goDonorAnalytics = () => {
