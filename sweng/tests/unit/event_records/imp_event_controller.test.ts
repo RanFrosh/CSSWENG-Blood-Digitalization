@@ -61,6 +61,7 @@ const fakeCorrection = {
   zip_code: "1001",
   street: "456 Elm St",
   ref_event_id: BigInt(1),
+  ref_profile_id: "550e8400-e29b-41d4-a716-446655440000",  
 };
 
 const newEvent: CreateEvents = {
@@ -75,7 +76,8 @@ const newEvent: CreateEvents = {
   street: "789 Oak Ave",
 };
 
-const newCorrection: CreateCorrections = {
+// the controller fetches and appends ref_profile_id automatically
+const newCorrection: Omit<CreateCorrections, "ref_profile_id"> = {
   visitors: BigInt(110),
   extractions: BigInt(85),
   produced_bags: BigInt(80),
@@ -87,6 +89,8 @@ const newCorrection: CreateCorrections = {
   street: "321 Pine Rd",
   ref_event_id: BigInt(1),
 };
+
+const fakeProfileId = "550e8400-e29b-41d4-a716-446655440000";
 
 const noSort: Sorter<any> = [];
 
@@ -247,14 +251,15 @@ describe("ImpEventManager", () => {
   // invokeCreateCorrection (requires "create_correct_event" permission)
 
   describe("invokeCreateCorrection", () => {
-    it("creates correction when user has permission", async () => {
+    it("creates correction and appends ref_profile_id automatically", async () => {
       (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockProfileReader.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { id: fakeProfileId } as any });
       mockEventModel.createCorrection.mockResolvedValue({ success: true, message: "Correction created" });
 
       const result = await controller.invokeCreateCorrection(newCorrection);
 
       expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "create_correct_event");
-      expect(mockEventModel.createCorrection).toHaveBeenCalledWith(newCorrection);
+      expect(mockEventModel.createCorrection).toHaveBeenCalledWith({ ...newCorrection, ref_profile_id: fakeProfileId });
       expect(result.success).toBe(true);
       expect(result.message).toBe("Correction created");
     });
@@ -280,8 +285,20 @@ describe("ImpEventManager", () => {
       expect(result.message).toBe("Somehow there is no role");
     });
 
+    it("blocks when profile has no id", async () => {
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockProfileReader.getCurrentUser.mockResolvedValue({ success: false, message: "Profile not found" });
+
+      const result = await controller.invokeCreateCorrection(newCorrection);
+
+      expect(mockEventModel.createCorrection).not.toHaveBeenCalled();
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Profile not found");
+    });
+
     it("returns failure when model fails", async () => {
       (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      mockProfileReader.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { id: fakeProfileId } as any });
       mockEventModel.createCorrection.mockResolvedValue({ success: false, message: "Correction insert failed" });
 
       const result = await controller.invokeCreateCorrection(newCorrection);
