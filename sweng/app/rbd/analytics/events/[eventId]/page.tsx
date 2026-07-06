@@ -61,8 +61,9 @@ export default function EventAnalyticsDetailsPage() {
         return event.id === eventId;
     });
 
+    // for some reason this specific folder keeps bugging so im using direct link lmao
     const goBack = () => {
-        router.push("/rbd/analytics/events");
+        location.href = `/rbd/analytics/events/`;
     };
 
     if (selectedEvent === undefined) {

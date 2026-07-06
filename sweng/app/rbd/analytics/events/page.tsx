@@ -48,8 +48,9 @@ const events: EventAnalytics[] = [
 export default function EventAnalyticsPage() {
     const router = useRouter();
 
+    // for some reason this specific folder keeps bugging so im using direct link lmao
     const viewEventAnalytics = (eventId: string) => {
-        router.push(`/rbd/analytics/events/${eventId}`);
+        location.href = `/rbd/analytics/events/${eventId}`;
     };
 
     return (
