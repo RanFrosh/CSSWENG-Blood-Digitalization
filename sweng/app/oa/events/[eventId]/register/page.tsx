@@ -1,23 +1,9 @@
 "use client";
-import { useRouter, useParams } from "next/navigation";
 
 import Header from "@/components/HeaderOA";
+import { registerDonorAction } from "@/redux/features/donorSlice";
 
 export default function RegisterPage() {
-    const router = useRouter();
-    const params = useParams();
-
-    const eventId = params.eventId as string;
-
-    const registerDonor = () => {
-        alert("Donor registered!");
-
-        if (eventId) {
-            router.push(`/oa/events/${eventId}/scanner`);
-        } else {
-            router.push("/oa/events");
-        }
-    };
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -45,7 +31,10 @@ export default function RegisterPage() {
                         </div>
                     </div>
 
-                    <form className="mt-[0.35in] flex flex-col gap-[0.35in]">
+                    <form
+                        action={registerDonorAction}
+                        className="mt-[0.35in] flex flex-col gap-[0.35in]"
+                    >
                         {/* Name Fields */}
                         <div>
                             <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
@@ -63,8 +52,10 @@ export default function RegisterPage() {
 
                                     <input
                                         id="fname"
+                                        name="firstName"
                                         type="text"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                        required
                                     />
                                 </div>
 
@@ -93,8 +84,10 @@ export default function RegisterPage() {
 
                                     <input
                                         id="lname"
+                                        name="lastName"
                                         type="text"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                        required
                                     />
                                 </div>
                             </div>
@@ -117,8 +110,10 @@ export default function RegisterPage() {
 
                                     <input
                                         id="age"
+                                        name="age"
                                         type="number"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                        required
                                     />
                                 </div>
 
@@ -131,8 +126,10 @@ export default function RegisterPage() {
                                     </label>
                                     <input
                                         id="birthdate"
+                                        name="birthdate"
                                         type="date"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                        required
                                     />
                                 </div>
 
@@ -148,6 +145,7 @@ export default function RegisterPage() {
                                                 name="sex"
                                                 id="male"
                                                 value="male"
+                                                required
                                             />
 
                                             <label htmlFor="male">Male</label>
@@ -179,9 +177,10 @@ export default function RegisterPage() {
                                     <div className="flex flex-row items-center gap-[8px]">
                                         <input
                                             type="radio"
-                                            name="blood"
+                                            name="bloodType"
                                             id="O+"
                                             value="O+"
+                                            required
                                         />
 
                                         <label htmlFor="O+">O+</label>
@@ -190,7 +189,7 @@ export default function RegisterPage() {
                                     <div className="flex flex-row items-center gap-[8px]">
                                         <input
                                             type="radio"
-                                            name="blood"
+                                            name="bloodType"
                                             id="A+"
                                             value="A+"
                                         />
@@ -201,7 +200,7 @@ export default function RegisterPage() {
                                     <div className="flex flex-row items-center gap-[8px]">
                                         <input
                                             type="radio"
-                                            name="blood"
+                                            name="bloodType"
                                             id="B+"
                                             value="B+"
                                         />
@@ -212,7 +211,7 @@ export default function RegisterPage() {
                                     <div className="flex flex-row items-center gap-[8px]">
                                         <input
                                             type="radio"
-                                            name="blood"
+                                            name="bloodType"
                                             id="AB+"
                                             value="AB+"
                                         />
@@ -223,7 +222,7 @@ export default function RegisterPage() {
                                     <div className="flex flex-row items-center gap-[8px]">
                                         <input
                                             type="radio"
-                                            name="blood"
+                                            name="bloodType"
                                             id="O-"
                                             value="O-"
                                         />
@@ -234,7 +233,7 @@ export default function RegisterPage() {
                                     <div className="flex flex-row items-center gap-[8px]">
                                         <input
                                             type="radio"
-                                            name="blood"
+                                            name="bloodType"
                                             id="A-"
                                             value="A-"
                                         />
@@ -245,7 +244,7 @@ export default function RegisterPage() {
                                     <div className="flex flex-row items-center gap-[8px]">
                                         <input
                                             type="radio"
-                                            name="blood"
+                                            name="bloodType"
                                             id="B-"
                                             value="B-"
                                         />
@@ -256,7 +255,7 @@ export default function RegisterPage() {
                                     <div className="flex flex-row items-center gap-[8px]">
                                         <input
                                             type="radio"
-                                            name="blood"
+                                            name="bloodType"
                                             id="AB-"
                                             value="AB-"
                                         />
@@ -284,6 +283,7 @@ export default function RegisterPage() {
 
                                     <input
                                         id="email"
+                                        name="email"
                                         type="email"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                     />
@@ -299,6 +299,7 @@ export default function RegisterPage() {
 
                                     <input
                                         id="mobile"
+                                        name="mobileNumber"
                                         type="tel"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                     />
@@ -323,9 +324,11 @@ export default function RegisterPage() {
 
                                     <input
                                         id="address"
+                                        name="addressLine1"
                                         type="text"
                                         placeholder="House no., building, street no., street name, subdivision/village, barangay"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                        required
                                     />
                                 </div>
 
@@ -340,8 +343,10 @@ export default function RegisterPage() {
 
                                         <input
                                             id="city"
+                                            name="city"
                                             type="text"
                                             className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                            required
                                         />
                                     </div>
 
@@ -355,8 +360,10 @@ export default function RegisterPage() {
 
                                         <input
                                             id="province"
+                                            name="province"
                                             type="text"
                                             className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                            required
                                         />
                                     </div>
 
@@ -370,8 +377,10 @@ export default function RegisterPage() {
 
                                         <input
                                             id="zip"
+                                            name="zip"
                                             type="text"
                                             className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                            required
                                         />
                                     </div>
                                 </div>
@@ -381,8 +390,7 @@ export default function RegisterPage() {
                         {/* Submit Button */}
                         <div className="flex flex-row justify-end pt-[0.15in]">
                             <button
-                                type="button"
-                                onClick={registerDonor}
+                                type="submit"
                                 className="min-w-[1.5in] bg-[#002940] text-white px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:underline"
                             >
                                 Register Donor
