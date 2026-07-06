@@ -20,5 +20,5 @@ export interface EventController {
     invokeCreateEvent(data: CreateEvents): Promise<ApiResponse>
 
     invokeQueryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
-    invokeCreateCorrection(data: CreateCorrections): Promise<ApiResponse>
+    invokeCreateCorrection(data: Omit<CreateCorrections, 'ref_profile_id'>): Promise<ApiResponse>
 }

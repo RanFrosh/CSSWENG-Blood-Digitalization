@@ -1,6 +1,7 @@
-import { pgTable, text, timestamp, bigserial, bigint} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, bigserial, bigint, uuid} from "drizzle-orm/pg-core";
 import { city } from "./city";
 import { event_log } from "./event";
+import { profiles } from "./profiles";
 
 export const corrected_event = pgTable("corrected_event", {
   id: bigserial("id", { mode: "bigint" }).primaryKey(),
@@ -19,5 +20,6 @@ export const corrected_event = pgTable("corrected_event", {
   zip_code: text("zip_code"),
   street: text("street"),
 
-  ref_event_id: bigint("ref_event_id", { mode: "bigint" }).references(() => event_log.id, { onDelete: 'no action', onUpdate: 'no action'}).notNull()
+  ref_event_id: bigint("ref_event_id", { mode: "bigint" }).references(() => event_log.id, { onDelete: 'no action', onUpdate: 'no action'}).notNull(),
+  ref_profile_id: uuid("ref_profile_id").references(() => profiles.id, { onDelete: 'no action', onUpdate: 'no action'}).notNull()
 });
