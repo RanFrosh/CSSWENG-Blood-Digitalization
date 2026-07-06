@@ -64,6 +64,7 @@ const fakeCorrection = {
   zip_code: "1001",
   street: "456 Elm St",
   ref_event_id: BigInt(1), // references the original event that this correction is for
+  ref_profile_id: "550e8400-e29b-41d4-a716-446655440000", // references the profile that made the correction
 };
 
 // empty sorter for tests that don't require sorting
@@ -493,6 +494,7 @@ describe("ImpEventModel", () => {
       zip_code: "1003",
       street: "321 Pine Rd",
       ref_event_id: BigInt(1), // required foreign key that links to the event being corrected
+      ref_profile_id: "550e8400-e29b-41d4-a716-446655440000", // required foreign key that links to the profile making the correction
     };
 
     it("returns success when correction is created", async () => {
