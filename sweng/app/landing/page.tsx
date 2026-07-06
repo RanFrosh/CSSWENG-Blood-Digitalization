@@ -53,7 +53,11 @@ export default function Home() {
             router.push("/oa/events");
         } else if (view === "2") {
             router.push("/mp/events");
-        } else if (view === "5") {
+        } else if (view === "3") {
+            router.push("/ls/events");
+        } else if (view === "4") {
+            router.push("/rs/events")
+        }else if (view === "5") {
             router.push("/rbd/analytics");
         } else if (view === "6") {
             router.push("/sa/list");
@@ -104,7 +108,7 @@ export default function Home() {
     }, []);
 
     return (
-        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+        <main className="flex flex-col min-h-screen bg-[#f9fdff]">
             <Header />
 
             <div className="flex-1 flex flex-row">
@@ -144,13 +148,13 @@ export default function Home() {
 
                     <div className="flex flex-row gap-[0.25in] ml-auto">
                         <button
-                            className="w-[1in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline"
+                            className="w-[1in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:bg-[#fd5448] transition"
                             onClick={handleLogin}
                         >
                             Log in
                         </button>
 
-                        <button className="w-[1in] bg-[#f9fdff] text-[#1b4054] p-[5px] rounded-[10px] text-center border-2 border-[#1b4054] cursor-pointer hover:underline">
+                        <button className="w-[1in] bg-[#f9fdff] text-[#1b4054] p-[5px] rounded-[10px] text-center border-2 border-[#1b4054] cursor-pointer hover:bg-[#fd5448] hover:text-[#f9fdff] hover:border-[#fd5448] transition">
                             Sign up
                         </button>
                     </div>
