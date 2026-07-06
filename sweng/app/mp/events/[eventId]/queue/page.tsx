@@ -210,7 +210,7 @@ export default function QueuePage() {
     };
 
     return (
-        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+        <main className="flex flex-col min-h-screen bg-[#f9fdff]">
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
@@ -263,20 +263,32 @@ export default function QueuePage() {
                     </h2>
 
                     <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-5">
-                        {medicalProfessionals.map((medicalProfessional) => (
-                            <div
-                                key={medicalProfessional.id}
-                                className="bg-[#002940] rounded-[18px] p-5"
-                            >
-                                <div>
-                                    <h3 className="text-[24px] font-['Montserrat'] font-bold text-white">
-                                        {medicalProfessional.name}
-                                    </h3>
-                                </div>
+                        {medicalProfessionals.map((medicalProfessional) => {
+                            let cardColor = "bg-[#fd5448]";
 
-                                {getCurrentDonor(medicalProfessional)}
-                            </div>
-                        ))}
+                            if (medicalProfessional.currentDonor === undefined) {
+                                cardColor = "bg-[#002940]";
+                            }
+
+                            return (
+                                <div
+                                    key={medicalProfessional.id}
+                                    className={`${cardColor} rounded-[18px] p-5`}
+                                >
+                                    <div className="flex flex-row items-center justify-between gap-3 flex-wrap">
+                                        <h3 className="text-[24px] font-['Montserrat'] font-bold text-white">
+                                            {medicalProfessional.name}
+                                        </h3>
+
+                                        <span className="bg-white text-[#002940] px-4 py-2 rounded-full text-[18px] font-semibold">
+                                            {medicalProfessional.id}
+                                        </span>
+                                    </div>
+
+                                    {getCurrentDonor(medicalProfessional)}
+                                </div>
+                            );
+                        })}
                     </div>
                 </section>
 
