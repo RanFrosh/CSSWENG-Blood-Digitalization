@@ -44,7 +44,7 @@ export default function HeaderLanding() {
                     {navLinks.map((link) => (
                         <p
                             key={link.path}
-                            className={`cursor-pointer hover:scale-110 ${
+                            className={`cursor-pointer hover:text-[#1b4054] ${
                                 isActiveLink(link.path) ? "font-bold" : "font-normal"
                             }`}
                             onClick={() => {

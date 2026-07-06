@@ -79,7 +79,7 @@ export default function HeaderMP() {
                         {navLinks.map((link) => (
                             <p
                                 key={link.path}
-                                className={`cursor-pointer hover:scale-110 ${
+                                className={`cursor-pointer hover:text-[#1b4054] ${
                                     isActiveLink(link.path)
                                         ? "font-bold"
                                         : "font-normal"
@@ -93,7 +93,7 @@ export default function HeaderMP() {
                 </div>
 
                 <button
-                    className="mr-[0.25in] text-[18px] text-white font-[Montserrat] cursor-pointer hover:scale-110 hover:underline"
+                    className="mr-[0.25in] text-[18px] text-white font-[Montserrat] cursor-pointer hover:text-[#1b4054]"
                     onClick={goLogout}
                 >
                     Log Out
