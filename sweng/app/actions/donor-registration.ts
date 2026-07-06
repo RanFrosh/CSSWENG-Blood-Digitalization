@@ -4,6 +4,15 @@ import { redirect } from "next/navigation";
 import { orm } from "@/db/drizzle";
 import { donor } from "@/db/models/donor";
 
+/**
+ * Registers a new donor by extracting form data, validating
+ * required fields, inserting the donor into the database,
+ * and redirecting the user to the scanner page.
+ *
+ * @param formData - Form data submitted from the donor registration form.
+ * @throws {Error} If any required field is missing.
+ * @returns A Promise that resolves after the donor has been registered.
+ */
 export async function registerDonorAction(formData: FormData): Promise<void> {
   const firstName = formData.get("firstName") as string;
   const middleName = formData.get("middleName") as string | null;
@@ -18,6 +27,7 @@ export async function registerDonorAction(formData: FormData): Promise<void> {
   const sex = formData.get("sex") as string;
   const bloodType = formData.get("bloodType") as string;
 
+  // Validate that all required fields have been provided
   if (
     !firstName ||
     !lastName ||
@@ -33,6 +43,7 @@ export async function registerDonorAction(formData: FormData): Promise<void> {
     throw new Error("Missing required fields");
   }
 
+  // Insert the new donor record into the database
   await orm.insert(donor).values({
     first_name: firstName,
     middle_name: middleName || null,
@@ -47,5 +58,6 @@ export async function registerDonorAction(formData: FormData): Promise<void> {
     photo_path: "placeholder.jpg",
   });
 
+  // Redirect the user to the scanner page after successful registration
   redirect("/scanner");
 }

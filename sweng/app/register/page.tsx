@@ -1,13 +1,10 @@
 "use client"
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";   
-import Link from "next/link";    
+import Link from "next/link";  
+import { registerDonorAction } from "@/app/actions/donor-registration";  
     
 export default function RegisterPage() {
-    const router = useRouter();
-
-    const [submitted, setSubmitted] = useState(false);
 
     const [firstName, setFirstName] = useState("");
     const [middleName, setMiddleName] = useState("");
@@ -21,40 +18,6 @@ export default function RegisterPage() {
     const [mobileNumber, setMobileNumber] = useState("");
     const [sex, setSex] = useState("");
     const [bloodType, setBloodType] = useState("");
-
-    const registerDonor = async () => {
-        setSubmitted(true);
-
-        const response = await fetch("/api/donors", {
-            method: "POST",
-            headers: {
-            "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-            firstName,
-            middleName,
-            lastName,
-            addressLine1,
-            addressLine2,
-            city,
-            province,
-            zipCode,
-            email,
-            mobileNumber,
-            sex,
-            bloodType,
-            }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            alert(errorData.error ?? "Failed to register donor");
-            return;
-        }
-
-        alert("Donor registered!");
-        router.push("/scanner");
-    };
 
     return (
         <main className = "flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -116,7 +79,7 @@ export default function RegisterPage() {
                     <h1 className = "inline bg-[#c15555] text-[#f9fdff] text-[56px] p-[0.25in] font-['Montserrat'] font-semibold">Donor Registration</h1>
 
                     {/* Registration Field */}
-                    <form action={registerDonor} className="flex flex-col gap-[0.25in]">
+                    <form action={registerDonorAction} className="flex flex-col gap-[0.25in]">
 
                         {/* Name Fields */}
                         <div className = "flex flex-row justify-between text-[28px]">
@@ -125,42 +88,38 @@ export default function RegisterPage() {
                                 <label htmlFor = "fname">First Name:</label>
 
                                 <input
+                                    name="firstName"
                                     type="text"
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
-                                    className={`w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]
-                                    ${
-                                        submitted && firstName.trim() === ""
-                                            ? "border-2 border-red-500"
-                                            : "border-2 border-gray-300"
-                                    }`}
+                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
                                     placeholder="First Name" 
+                                    required
                                 />
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "mname">Middle Name:</label>
                                 <input
+                                    name="middleName"
                                     type="text"
                                     value={middleName}
                                     onChange={(e) => setMiddleName(e.target.value)}
-                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]" />
+                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                />
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "lname">Last Name:</label>
 
                                 <input
+                                    name="lastName"
                                     type="text"
                                     value={lastName}
                                     onChange={(e) => setLastName(e.target.value)}
-                                    className={`w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]
-                                    ${
-                                        submitted && lastName.trim() === ""
-                                            ? "border-2 border-red-500"
-                                            : "border-2 border-gray-300"
-                                    }`}
+                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
                                     placeholder="Last Name"
+                                    required
                                 />
                             </div>
                         </div>
@@ -172,27 +131,28 @@ export default function RegisterPage() {
                                 <label htmlFor = "al1">Address Line 1:</label>
 
                                 <input
+                                    name="addressLine1"
                                     type="text"
                                     value={addressLine1}
                                     onChange={(e) => setAddressLine1(e.target.value)}
-                                    className={`w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]
-                                    ${
-                                        submitted && addressLine1.trim() === ""
-                                            ? "border-2 border-red-500"
-                                            : "border-2 border-gray-300"
-                                    }`}
-                                    placeholder = "House no., Building, Street no., Street name"/>
+                                    className="w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                    placeholder="House no., Building, Street no., Street name"
+                                    required
+                                />
                             </div>
 
                             <div className = "flex flex-row gap-[0.125in] text-[28px]">
                                 <label htmlFor = "al2">Address Line 2:</label>
 
                                 <input
+                                    name="addressLine2"
                                     type="text"
                                     value={addressLine2}
                                     onChange={(e) => setAddressLine2(e.target.value)}
                                     className="w-[4.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
-                                    placeholder = "Subdivision/Village, Barangay"/>
+                                    placeholder="Subdivision/Village, Barangay"
+                                    required
+                                />
                             </div>
                         </div>
                         
@@ -203,15 +163,12 @@ export default function RegisterPage() {
                                 <label htmlFor = "city">City:</label>
 
                                 <input
+                                    name="city"
                                     type="text"
                                     value={city}
                                     onChange={(e) => setCity(e.target.value)}
-                                    className={`w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]
-                                    ${
-                                        submitted && city.trim() === ""
-                                            ? "border-2 border-red-500"
-                                            : "border-2 border-gray-300"
-                                    }`}
+                                    className="w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                    required
                                 />
                             </div>
 
@@ -219,15 +176,12 @@ export default function RegisterPage() {
                                 <label htmlFor = "prov">Province:</label>
 
                                 <input
+                                    name="province"
                                     type="text"
                                     value={province}
                                     onChange={(e) => setProvince(e.target.value)}
-                                    className={`w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]
-                                        ${
-                                            submitted && province.trim() === ""
-                                                ? "border-2 border-red-500"
-                                                : "border-2 border-gray-300"
-                                        }`}
+                                    className="w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                    required
                                 />
                             </div>
 
@@ -235,15 +189,12 @@ export default function RegisterPage() {
                                 <label htmlFor = "zip">Zip Code:</label>
 
                                 <input
+                                    name="zipCode"
                                     type="text"
                                     value={zipCode}
                                     onChange={(e) => setZipCode(e.target.value)}
-                                    className={`w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]
-                                        ${
-                                            submitted && zipCode.trim() === ""
-                                                ? "border-2 border-red-500"
-                                                : "border-2 border-gray-300"
-                                        }`}
+                                    className="w-[3in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                    required
                                 />
                             </div>
 
@@ -256,15 +207,12 @@ export default function RegisterPage() {
                                 <label htmlFor = "email">Email Address:</label>
 
                                 <input
+                                    name="email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className={`w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]
-                                        ${
-                                            submitted && email.trim() === ""
-                                                ? "border-2 border-red-500"
-                                                : "border-2 border-gray-300"
-                                        }`}
+                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                    required
                                 />
                             </div>
 
@@ -272,24 +220,16 @@ export default function RegisterPage() {
                                 <label htmlFor = "num">Mobile Number:</label>
 
                                 <input
+                                    name="mobileNumber"
                                     type="tel"
                                     value={mobileNumber}
                                     onChange={(e) => setMobileNumber(e.target.value)}
-                                    className={`w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]
-                                        ${
-                                            submitted && mobileNumber.trim() === ""
-                                                ? "border-2 border-red-500"
-                                                : "border-2 border-gray-300"
-                                        }`}
+                                    className="w-[2.5in] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] text-[21px]"
+                                    required
                                 />
                             </div>
 
-                            <div
-                                className={`flex flex-row gap-[0.125in] text-[28px]
-                                ${
-                                    submitted && !sex ? "border-2 border-red-500" : ""
-                                }`}
-                            >
+                            <div className="flex flex-row gap-[0.125in] text-[28px]">
                                 <label>Sex:</label>
 
                                 <div className="flex flex-row gap-[0.25in]">
@@ -303,7 +243,9 @@ export default function RegisterPage() {
                                             value="Male"
                                             checked={sex === "Male"}
                                             onChange={(e) => setSex(e.target.value)}
-                                            className="req-sex" />
+                                            className="req-sex"
+                                            required
+                                        />
                                         <label htmlFor = "male">Male</label>
                                     </div>
 
@@ -326,132 +268,130 @@ export default function RegisterPage() {
                         </div>
 
                         {/* Blood Type Field */}
-                        <div
-                            className={`flex flex-row justify-between gap-[0.5in] text-[28px]
-                                ${submitted && !bloodType ? "border-2 border-red-500" : ""
-                                }`}
-                        >
+                        <div className="flex flex-row items-start gap-[0.125in] text-[28px]">
+                            <label className="whitespace-nowrap">Blood Type:</label>
 
-                            <div className = "flex flex-row gap-[0.125in] text-[28px]">
-                                <label htmlFor = "bld">Blood Type:</label>
+                            <div className="bld-opt flex flex-col gap-2">
+                                <div className="flex flex-row gap-[0.25in]">
+                                    
+                                    <div className="flex flex-row gap-[0.125in]">
 
-                                <div className="bld-opt">
-                                    <div className="flex flex-row gap-[0.25in]">
-                                        <div className="flex flex-row gap-[0.125in]">
-
-                                            <input
-                                                type="radio"
-                                                name="blood"
-                                                id="O+"
-                                                value="O+"
-                                                checked={bloodType === "O+"}
-                                                onChange={(e) => setBloodType(e.target.value)}
-                                                className="req-bld"
-                                            />
-                                            <label htmlFor = "O+">O+</label>
-                                        </div>
-
-                                        <div className="flex flex-row gap-[0.125in]">
-
-                                            <input
-                                                type="radio"
-                                                name="blood"
-                                                id="A+"
-                                                value="A+"
-                                                checked={bloodType === "A+"}
-                                                onChange={(e) => setBloodType(e.target.value)}
-                                                className="req-bld"
-                                            />
-                                            <label htmlFor="A+">A+</label>
-                                        </div>
-
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input
-                                                type="radio"
-                                                name="blood"
-                                                id="B+"
-                                                value="B+"
-                                                checked={bloodType === "B+"}
-                                                onChange={(e) => setBloodType(e.target.value)}
-                                                className="req-bld"
-                                            />
-                                            <label htmlFor="B+">B+</label>
-                                        </div>
-
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input
-                                                type="radio"
-                                                name="blood"
-                                                id="AB+"
-                                                value="AB+"
-                                                checked={bloodType === "AB+"}
-                                                onChange={(e) => setBloodType(e.target.value)}
-                                                className="req-bld"
-                                            />
-                                            <label htmlFor="AB+">AB+</label>
-                                        </div>
+                                        <input
+                                            type="radio"
+                                            name="bloodType"
+                                            id="O+"
+                                            value="O+"
+                                            checked={bloodType === "O+"}
+                                            onChange={(e) => setBloodType(e.target.value)}
+                                            className="req-bld"
+                                            required
+                                        />
+                                        <label htmlFor = "O+">O+</label>
                                     </div>
 
-                                    <div className="flex flex-row gap-[0.25in]">
-                                        <div className="flex flex-row gap-[0.125in]">
+                                    <div className="flex flex-row gap-[0.125in]">
 
-                                            <input
-                                                type="radio"
-                                                name="blood"
-                                                id="O-"
-                                                value="O-"
-                                                checked={bloodType === "O-"}
-                                                onChange={(e) => setBloodType(e.target.value)}
-                                                className="req-bld"
-                                            />
-                                            <label htmlFor="O-">O-</label>
-                                        </div>
+                                        <input
+                                            type="radio"
+                                            name="bloodType"
+                                            id="A+"
+                                            value="A+"
+                                            checked={bloodType === "A+"}
+                                            onChange={(e) => setBloodType(e.target.value)}
+                                            className="req-bld"
+                                        />
+                                        <label htmlFor="A+">A+</label>
+                                    </div>
 
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input
-                                                type="radio"
-                                                name="blood"
-                                                id="A-"
-                                                value="A-"
-                                                checked={bloodType === "A-"}
-                                                onChange={(e) => setBloodType(e.target.value)}
-                                                className="req-bld"
-                                            />
-                                            <label htmlFor="A-">A-</label>
-                                        </div>
+                                    <div className="flex flex-row gap-[0.125in]">
+                                        <input
+                                            type="radio"
+                                            name="bloodType"
+                                            id="B+"
+                                            value="B+"
+                                            checked={bloodType === "B+"}
+                                            onChange={(e) => setBloodType(e.target.value)}
+                                            className="req-bld"
+                                        />
+                                        <label htmlFor="B+">B+</label>
+                                    </div>
 
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input
-                                                type="radio"
-                                                name="blood"
-                                                id="B-"
-                                                value="B-"
-                                                checked={bloodType === "B-"}
-                                                onChange={(e) => setBloodType(e.target.value)}
-                                                className="req-bld"
-                                            />
-                                            <label htmlFor="B-">B-</label>
-                                        </div>
+                                    <div className="flex flex-row gap-[0.125in]">
+                                        <input
+                                            type="radio"
+                                            name="bloodType"
+                                            id="AB+"
+                                            value="AB+"
+                                            checked={bloodType === "AB+"}
+                                            onChange={(e) => setBloodType(e.target.value)}
+                                            className="req-bld"
+                                        />
+                                        <label htmlFor="AB+">AB+</label>
+                                    </div>
+                                </div>
 
-                                        <div className="flex flex-row gap-[0.125in]">
-                                            <input
-                                                type="radio"
-                                                name="blood"
-                                                id="AB-"
-                                                value="AB-"
-                                                checked={bloodType === "AB-"}
-                                                onChange={(e) => setBloodType(e.target.value)}
-                                                className="req-bld"
-                                            />
-                                            <label htmlFor="AB-">AB-</label>
-                                        </div>
+                                <div className="flex flex-row gap-[0.25in]">
+                                    <div className="flex flex-row gap-[0.125in]">
+
+                                        <input
+                                            type="radio"
+                                            name="bloodType"
+                                            id="O-"
+                                            value="O-"
+                                            checked={bloodType === "O-"}
+                                            onChange={(e) => setBloodType(e.target.value)}
+                                            className="req-bld"
+                                        />
+                                        <label htmlFor="O-">O-</label>
+                                    </div>
+
+                                    <div className="flex flex-row gap-[0.125in]">
+                                        <input
+                                            type="radio"
+                                            name="bloodType"
+                                            id="A-"
+                                            value="A-"
+                                            checked={bloodType === "A-"}
+                                            onChange={(e) => setBloodType(e.target.value)}
+                                            className="req-bld"
+                                        />
+                                        <label htmlFor="A-">A-</label>
+                                    </div>
+
+                                    <div className="flex flex-row gap-[0.125in]">
+                                        <input
+                                            type="radio"
+                                            name="bloodType"
+                                            id="B-"
+                                            value="B-"
+                                            checked={bloodType === "B-"}
+                                            onChange={(e) => setBloodType(e.target.value)}
+                                            className="req-bld"
+                                        />
+                                        <label htmlFor="B-">B-</label>
+                                    </div>
+
+                                    <div className="flex flex-row gap-[0.125in]">
+                                        <input
+                                            type="radio"
+                                            name="bloodType"
+                                            id="AB-"
+                                            value="AB-"
+                                            checked={bloodType === "AB-"}
+                                            onChange={(e) => setBloodType(e.target.value)}
+                                            className="req-bld"
+                                        />
+                                        <label htmlFor="AB-">AB-</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <div className="flex flex-end -mt-[0.6in]">
-                            <button className = "w-[2in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline ml-auto text-[21px]" type="submit">
+                        <div className="flex justify-end mt-4">
+                            <button
+                                className="w-[2in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:underline ml-auto text-[21px]"
+                                type="submit"
+                            >
                                 Register Donor
                             </button>
                         </div>

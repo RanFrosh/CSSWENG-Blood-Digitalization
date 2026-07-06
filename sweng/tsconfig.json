@@ -13,10 +13,7 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "incremental": true,
-<<<<<<< Updated upstream
-=======
     "types": ["node"],
->>>>>>> Stashed changes
     "plugins": [
       {
         "name": "next"
@@ -35,8 +32,4 @@
     "**/*.mts"
   ],
   "exclude": ["node_modules"]
-<<<<<<< Updated upstream
 }
-=======
-}
->>>>>>> Stashed changes
