@@ -108,7 +108,7 @@ export default function Home() {
     }, []);
 
     return (
-        <main className="flex flex-col min-h-screen bg-[#f9fdff]">
+        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
 
             <div className="flex-1 flex flex-row">
