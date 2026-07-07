@@ -18,6 +18,7 @@ export class ImpProfileGetter implements ProfileSessionProvider {
         if (error || !data.user) {
             return { success: false, message: 'Not authenticated' }
         }
+        try {
         const [profile] = await orm
         .select()
         .from(profiles)
@@ -26,6 +27,9 @@ export class ImpProfileGetter implements ProfileSessionProvider {
         if (!profile) {
             return { success: false, message: 'Profile not found', data: undefined }
         }
-        return { success: true, message: 'Profile retrieved' };
+        return { success: true, message: 'Profile retrieved', data: profile };
+        } catch (err: any) {
+            return { success: false, message: err.message }
+        }
     }
 }
