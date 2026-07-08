@@ -32,8 +32,10 @@ export default function MPEventsPage() {
 
     useEffect(() => {
         const loadEvents = async () => {
-            setIsLoading(true);
-            const result = await executeEventQueryStaff({});
+            if (events.length === 0) setIsLoading(true);
+            const result = await executeEventQueryStaff(
+                activeTab !== "All" ? { status: activeTab } : {}
+            );
             if (result.success && result.data) {
                 setEvents(result.data);
             } else {
@@ -42,17 +44,7 @@ export default function MPEventsPage() {
             setIsLoading(false); 
         }
         loadEvents();
-    }, []);
-
-    // Initialize filtered events
-    let filteredEvents: ViewEvents[] = [];
-
-    // Filter events based on selected filter
-    if (activeTab === "All") {
-        filteredEvents = events;
-    } else {
-        filteredEvents = events.filter((event) => event.status === activeTab);
-    }
+    }, [activeTab]);
 
     // Can only open events that are ongoing
     const openEvent = (event: ViewEvents) => {
@@ -161,7 +153,7 @@ export default function MPEventsPage() {
 
                     {/* Event Cards */}
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {filteredEvents.map((event) => (
+                        {events.map((event) => (
                             <div
                                 key={event.id}
                                 className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
