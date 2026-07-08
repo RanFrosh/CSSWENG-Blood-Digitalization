@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { EventStatusType } from "@/db/enums/event_status";
-import { Sorter } from "@/types/sort_type";
 import { ViewEventFilters } from "@/types/event_type";
+import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 import Header from "@/components/HeaderMP";
 import StaffDetails from "@/components/StaffDetails";
 
