@@ -5,6 +5,7 @@
 import { ImpEventModel } from "@/app/event_records/imp_event_data";
 import { CreateEvents, CreateCorrections, ViewEventFilters, ViewCorrectionFilters, ViewEvents, ViewCorrections } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
+import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 
 // mock ORM 
 
@@ -31,6 +32,23 @@ function setupInsertChain() {
   mockOrm.insert.mockReturnValue({
     values: jest.fn().mockResolvedValue([]),
   });
+}
+
+// queryEventStaff makes two sequential select calls with no orderBy step
+// select from assigned_staff .where(profiles_id)
+// select from event_log .where(inArray(...))
+function setupStaffQueryChain(assignments: any[], events: any[]) {
+  mockOrm.select
+    .mockReturnValueOnce({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue(assignments),
+      }),
+    })
+    .mockReturnValueOnce({
+      from: jest.fn().mockReturnValue({
+        where: jest.fn().mockResolvedValue(events),
+      }),
+    });
 }
 
 // fake data
@@ -67,6 +85,17 @@ const fakeCorrection = {
   ref_profile_id: "550e8400-e29b-41d4-a716-446655440000", // references the profile that made the correction
 };
 
+// matches the assigned_staff table structure
+const fakeAssignment = {
+  id: BigInt(3),
+  profiles_id: "550e8400-e29b-41d4-a716-446655440000",
+  event_log_id: BigInt(1),
+};
+
+const fakeStaffFilter: ViewAssignedStaffFilter = {
+  profiles_id: "550e8400-e29b-41d4-a716-446655440000",
+};
+
 // empty sorter for tests that don't require sorting
 const noSort: Sorter<any> = [];
 
@@ -77,7 +106,7 @@ describe("ImpEventModel", () => {
 
   // reset mocks and create a new model instance before each test
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
     model = new ImpEventModel(mockOrm);
   });
 
@@ -513,6 +542,88 @@ describe("ImpEventModel", () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toBe("Correction insert failed");
+    });
+  });
+
+  // queryEventStaff fetches events assigned to a given staff profile,
+  // via a lookup in assigned_staff followed by a filtered event_log query
+
+  describe("queryEventStaff", () => {
+    it("returns failure when no profile id is provided", async () => {
+      const result = await model.queryEventStaff({}, {});
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("No profile ID");
+      expect(result.data).toBeUndefined();
+      expect(mockOrm.select).not.toHaveBeenCalled(); // should short-circuit before any db call
+    });
+
+    it("returns empty array when staff has no assignments", async () => {
+      setupStaffQueryChain([], []);
+
+      const result = await model.queryEventStaff({}, fakeStaffFilter);
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe("No events assigned");
+      expect(result.data).toEqual([]);
+      expect(mockOrm.select).toHaveBeenCalledTimes(1); // second query should be skipped entirely
+    });
+
+    it("returns events assigned to the staff member", async () => {
+      setupStaffQueryChain([fakeAssignment], [fakeEvent]);
+
+      const result = await model.queryEventStaff({}, fakeStaffFilter);
+
+      expect(result.success).toBe(true);
+      expect(result.message).toBe("Events retrieved");
+      expect(result.data).toEqual([fakeEvent]);
+      expect(mockOrm.select).toHaveBeenCalledTimes(2);
+    });
+
+    it("filters assigned events by status when provided", async () => {
+      setupStaffQueryChain([fakeAssignment], [fakeEvent]);
+      const filters: ViewEventFilters = { status: "active" } as ViewEventFilters;
+
+      const result = await model.queryEventStaff(filters, fakeStaffFilter);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeEvent]);
+    });
+
+    it("handles multiple assignments for the same staff member", async () => {
+      const secondAssignment = { ...fakeAssignment, id: BigInt(4), event_log_id: BigInt(2) };
+      setupStaffQueryChain([fakeAssignment, secondAssignment], [fakeEvent]);
+
+      const result = await model.queryEventStaff({}, fakeStaffFilter);
+
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual([fakeEvent]);
+    });
+
+    it("returns failure on db error during assignment lookup", async () => {
+      mockOrm.select.mockImplementationOnce(() => { throw new Error("Assignment lookup failed"); });
+
+      const result = await model.queryEventStaff({}, fakeStaffFilter);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Assignment lookup failed");
+      expect(result.data).toBeUndefined();
+    });
+
+    it("returns failure on db error during event lookup", async () => {
+      mockOrm.select
+        .mockReturnValueOnce({
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockResolvedValue([fakeAssignment]),
+          }),
+        })
+        .mockImplementationOnce(() => { throw new Error("Event lookup failed"); });
+
+      const result = await model.queryEventStaff({}, fakeStaffFilter);
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe("Event lookup failed");
+      expect(result.data).toBeUndefined();
     });
   });
 });

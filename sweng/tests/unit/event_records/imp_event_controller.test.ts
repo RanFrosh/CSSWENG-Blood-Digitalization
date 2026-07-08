@@ -7,6 +7,7 @@ import { EventData } from "@/abstract/events/event_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { CreateEvents, CreateCorrections, ViewEventFilters, ViewCorrectionFilters, ViewEvents, ViewCorrections } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
+import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 
 // mocks
 
@@ -23,6 +24,7 @@ const mockEventModel: jest.Mocked<EventData> = {
   createEvent: jest.fn(),
   queryCorrection: jest.fn(),
   createCorrection: jest.fn(),
+  queryEventStaff: jest.fn(),
 };
 
 // mock the profile reader to simulate getting the current user
@@ -62,6 +64,12 @@ const fakeCorrection = {
   street: "456 Elm St",
   ref_event_id: BigInt(1),
   ref_profile_id: "550e8400-e29b-41d4-a716-446655440000",  
+};
+
+// matches the assigned_staff table structure in the database
+const fakeStaffFilter: ViewAssignedStaffFilter = {
+  profiles_id: "550e8400-e29b-41d4-a716-446655440000",
+  event_log_id: BigInt(1),
 };
 
 const newEvent: CreateEvents = {
@@ -307,4 +315,51 @@ describe("ImpEventManager", () => {
       expect(result.message).toBe("Correction insert failed");
     });
   });
-});
+
+    // invokeQueryEventStaff (requires "view_event" permission)
+
+    describe("invokeQueryEventStaff", () => {
+      it("returns events when user has permission", async () => {
+        (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+        mockEventModel.queryEventStaff.mockResolvedValue({ success: true, message: "Events retrieved", data: [fakeEvent] });
+
+        const result = await controller.invokeQueryEventStaff({ name: "Blood Drive" }, fakeStaffFilter);
+
+        expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "view_event");
+        expect(mockEventModel.queryEventStaff).toHaveBeenCalledWith({ name: "Blood Drive" }, fakeStaffFilter);
+        expect(result.success).toBe(true);
+        expect(result.data).toEqual([fakeEvent]);
+      });
+
+      it("blocks and does not query when user lacks permission", async () => {
+        (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Not authorized" });
+
+        const result = await controller.invokeQueryEventStaff({}, fakeStaffFilter);
+
+        expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "view_event");
+        expect(mockEventModel.queryEventStaff).not.toHaveBeenCalled();
+        expect(result.success).toBe(false);
+        expect(result.message).toBe("Not authorized");
+      });
+
+      it("blocks when user has no role", async () => {
+        (helpGateKeep as jest.Mock).mockResolvedValue({ success: false, message: "Somehow there is no role" });
+
+        const result = await controller.invokeQueryEventStaff({}, fakeStaffFilter);
+
+        expect(mockEventModel.queryEventStaff).not.toHaveBeenCalled();
+        expect(result.success).toBe(false);
+        expect(result.message).toBe("Somehow there is no role");
+      });
+
+      it("returns failure when model fails", async () => {
+        (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+        mockEventModel.queryEventStaff.mockResolvedValue({ success: false, message: "DB error", data: undefined });
+
+        const result = await controller.invokeQueryEventStaff({}, fakeStaffFilter);
+
+        expect(result.success).toBe(false);
+        expect(result.message).toBe("DB error");
+      });
+    });
+  });
