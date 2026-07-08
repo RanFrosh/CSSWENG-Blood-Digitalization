@@ -83,7 +83,6 @@ export default function Home() {
             case "director":
                 router.push("/rbd/analytics");
                 break;
-            case "staff_admin":
             case "super_admin":
                 router.push("/sa/page");
                 break;

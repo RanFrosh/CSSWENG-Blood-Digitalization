@@ -9,7 +9,6 @@ const roleNames: Record<string, string> = {
     lab_staff: "Lab Staff",
     recov_staff: "Recovery Staff",
     director: "Red Bank Director",
-    staff_admin: "Staff Admin",
     super_admin: "Super Admin"
 };
 

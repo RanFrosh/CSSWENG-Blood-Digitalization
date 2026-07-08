@@ -3,7 +3,7 @@ import { serverSupa } from "@/db/supaserver";
 import { orm } from "@/db/drizzle";
 import { profiles } from "@/db/models/profiles";
 
-export type AppRole = 'onsite_admin' | 'med_prof' | 'director' | 'super_admin' | 'staff_admin';
+export type AppRole = 'onsite_admin' | 'med_prof' | 'director' | 'super_admin';
 
 export async function create_account(name: string, email: string, role: AppRole, password: string) {
     const supabase = await serverSupa();

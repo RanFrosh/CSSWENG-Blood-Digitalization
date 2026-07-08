@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { create_account, AppRole } from "../back/create_account/create_account";
-import Header from "@/components/HeaderLanding";
 
 export default function SignUpPage() {
     
@@ -106,11 +105,9 @@ export default function SignUpPage() {
                             value={formData.role}
                             onChange={(e) => setFormData({...formData, role: e.target.value as AppRole})}
                         >
-                            {/* NO DONOR OPTION HERE */}
                             <option value="onsite_admin">Onsite Admin (Can register donors)</option>
                             <option value="med_prof">Medical Professional (Blood tests)</option>
                             <option value="director">Director (Analytics access)</option>
-                            <option value="staff_admin">Staff Admin</option>
                             <option value="super_admin">Super Admin</option>
                         </select>
                     </div>
