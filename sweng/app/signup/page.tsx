@@ -126,7 +126,7 @@ export default function SignUpPage() {
 
                 <div className="mt-6 text-center">
                     <button 
-                        onClick={() => router.push("/login")}
+                        onClick={() => router.push("/landing")}
                         className="text-[16px] font-semibold text-[#002940] hover:underline"
                     >
                         Return to Login
