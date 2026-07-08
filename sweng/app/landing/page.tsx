@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderLanding";
 import { clientSupa } from "@/db/supaclient";
+import { executeLogin } from "../login/login_action";
 
 type LandingEvent = {
     id: string;
@@ -57,32 +58,15 @@ export default function Home() {
         setIsLoading(true)
         setErrorMessage("")
 
-        const supabase = await clientSupa();
+       const result = await executeLogin(email, password);
 
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password,
-        });
-
-        if (authError || !authData.user) {
-            setErrorMessage(authError?.message || "Invalid login credentials.");
+        if (!result.success || !result.data) {
+            setErrorMessage("Invalid Login Credentials.");
             setIsLoading(false);
             return;
         }
 
-        const { data: profileData, error: profileError } = await supabase
-            .from("profiles")
-            .select("role")
-            .eq("id", authData.user.id)
-            .single();
-
-        if (profileError || !profileData) {
-            setErrorMessage("Profile not found in database.");
-            setIsLoading(false);
-            return;
-        }
-
-        const role = profileData.role;
+        const role = result.data.role;
 
         switch (role) {
             case "onsite_admin":
@@ -91,17 +75,18 @@ export default function Home() {
             case "med_prof":
                 router.push("/mp/events");
                 break;
-            case "ls":
+            case "lab_staff":
                 router.push("/ls/events");
                 break;
-            case "rs":
+            case "recov_staff":
                 router.push("/rs/events");
                 break;
             case "director":
-            case "rbd":
+            case "director":
                 router.push("/rbd/analytics");
                 break;
-            case "sa":
+            case "staff_admin":
+            case "super_admin":
                 router.push("/sa/page");
                 break;
             default:
