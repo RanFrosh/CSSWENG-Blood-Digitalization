@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { EventStatusType } from "@/db/enums/event_status";
+import { Sorter } from "@/types/sort_type";
+import { ViewEventFilters } from "@/types/event_type";
 import Header from "@/components/HeaderMP";
 import StaffDetails from "@/components/StaffDetails";
 
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-type EventTab = EventStatus | "All";
+type EventTab = EventStatusType | "All";
 
 // Sample event structure
 type AssignedEvent = {
@@ -16,7 +17,7 @@ type AssignedEvent = {
     date: string;
     time: string;
     partner: string;
-    status: EventStatus;
+    status: EventStatusType;
 };
 
 // Sample events

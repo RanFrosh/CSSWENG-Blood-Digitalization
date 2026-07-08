@@ -2,10 +2,12 @@ import { EventData } from "@/abstract/events/event_abstract";
 import { ApiResponse } from "@/types/api_res_type";
 import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
-import { SQL, eq, asc, desc, and } from "drizzle-orm";
+import { SQL, eq, asc, desc, and, inArray } from "drizzle-orm";
 import { event_log } from "@/db/models/event";
 import { corrected_event } from "@/db/models/corrected_event";
 import { orm } from "@/db/drizzle";
+import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
+import { assigned_staff } from "@/db/models/assigned_staff";
 
 export class ImpEventModel implements EventData {
     private access: typeof orm;
@@ -90,6 +92,39 @@ export class ImpEventModel implements EventData {
             return { success: true, message: "Correction created" }
         } catch (err: any) {
             return { success: false, message: err.message }
+        }
+    }
+
+    async queryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>> {
+        try {
+
+            if (!staff.profiles_id) {
+                return { success: false, message: "No profile ID", data: undefined };
+            }
+
+            const assignments = await this.access
+            .select()
+            .from(assigned_staff)
+            .where(eq(assigned_staff.profiles_id, staff.profiles_id));
+
+            if (assignments.length === 0) {
+                return { success: true, message: "No events assigned", data: [] };
+            }
+
+            const eventIds = assignments.map(a => a.event_log_id);
+
+            const filters: SQL[] = [inArray(event_log.id, eventIds)];
+            if (data.status) filters.push(eq(event_log.status, data.status));
+
+            const events = await this.access
+            .select()
+            .from(event_log)
+            .where(and(...filters));
+
+            return { success: true, message: "Events retrieved", data: events };
+
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };
         }
     }
 }
