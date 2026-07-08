@@ -32,7 +32,7 @@ export default function MPEventsPage() {
 
     useEffect(() => {
         const loadEvents = async () => {
-            if (events.length === 0) setIsLoading(true);
+            setIsLoading(true);
             const result = await executeEventQueryStaff(
                 activeTab !== "All" ? { status: activeTab } : {}
             );
