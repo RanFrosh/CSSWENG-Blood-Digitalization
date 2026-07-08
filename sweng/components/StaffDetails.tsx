@@ -6,8 +6,8 @@ import { fetch_profile } from "@/app/global/access/fetch_profile";
 const roleNames: Record<string, string> = {
     onsite_admin: "Onsite Admin",
     med_prof: "Medical Professional",
-    ls: "Lab Staff",
-    rs: "Recovery Staff",
+    lab_staff: "Lab Staff",
+    recov_staff: "Recovery Staff",
     director: "Red Bank Director",
     staff_admin: "Staff Admin",
     super_admin: "Super Admin"

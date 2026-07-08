@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderLanding";
-import { clientSupa } from "@/db/supaclient";
 import { executeLogin } from "../login/login_action";
 
 type LandingEvent = {
@@ -202,7 +201,10 @@ export default function Home() {
                             {isLoading ? "..." : "Log in"}
                         </button>
 
-                        <button className="w-[1in] bg-[#f9fdff] text-[#1b4054] p-[5px] rounded-[10px] text-center border-2 border-[#1b4054] cursor-pointer hover:bg-[#fd5448] hover:text-[#f9fdff] hover:border-[#fd5448] transition">
+                        <button 
+                            className="w-[1in] bg-[#f9fdff] text-[#1b4054] p-[5px] rounded-[10px] text-center border-2 border-[#1b4054] cursor-pointer hover:bg-[#fd5448] hover:text-[#f9fdff] hover:border-[#fd5448] transition"
+                            onClick={() => router.push("/signup")}
+                        >
                             Sign up
                         </button>
                     </div>
