@@ -2,20 +2,25 @@ import { ImpAnalyticsData } from "@/app/analytics/analytics_queries";
 import { orm } from "@/db/drizzle";
 import { donor } from "@/db/models/donor";
 
+// Mock the ORM module so no real database connection is made
+// Only orm.select is stubbed
 jest.mock("@/db/drizzle", () => ({
     orm: {
         select: jest.fn(),
     },
 }));
 
+// Mock the donor schema object with plain string stand-ins
 jest.mock("@/db/models/donor", () => ({
-     donor: {
+    donor: {
         active: "donor.active",
         blood: "donor.blood",
     },
 }));
 
 describe("ImpAnalyticsData", () => {
+    // Instantiated once at the describe level rather than in beforeEach
+    // ImpAnalyticsData holds no state
     const analyticsData = new ImpAnalyticsData();
 
     beforeEach(() => {
@@ -23,6 +28,7 @@ describe("ImpAnalyticsData", () => {
     });
 
     describe("countActiveDonors", () => {
+        // Construct a mock Drizzle query chain for countActiveDonors
         function mockChain(resolvedValue: any) {
             const chain = {
             from: jest.fn().mockReturnThis(),
@@ -31,7 +37,10 @@ describe("ImpAnalyticsData", () => {
             (orm.select as jest.Mock).mockReturnValueOnce(chain);
             return chain;
           }
-
+        
+        // Supabase/Drizzle returns count as a string from the DB driver
+        // test if the implementation correctly converts the raw DB value
+        // to a number
         it("returns the count of active donors as a number", async () => {
             mockChain([{ count: "12" }]);
 
@@ -42,6 +51,7 @@ describe("ImpAnalyticsData", () => {
         });
 
         it("returns 0 when there are no active donors", async () => {
+            // Confirms Number("0") correctly resolves to 0 rather than NaN
             mockChain([{ count: "0" }]);
 
             const result = await analyticsData.countActiveDonors();
@@ -59,6 +69,9 @@ describe("ImpAnalyticsData", () => {
         });
 
         it("propagates errors from the underlying query", async () => {
+            // Manually construct the chain instead of using mockChain because
+            // the .where method needs to reject rather than resolve
+            // This test that ImpAnalyticsData has no try/catch for error handling
             const chain = {
                 from: jest.fn().mockReturnThis(),
                 where: jest.fn().mockRejectedValue(new Error("connection lost")),
@@ -91,10 +104,14 @@ describe("ImpAnalyticsData", () => {
 
             const result = await analyticsData.getDonorBloodTypeBreakdown();
 
+            // perform a deep equality check tot confirm if the method returns
+            // the query as-is
             expect(result).toEqual(breakdownRows);
         });
 
         it("returns an empty array when there are no active donors", async () => {
+            // Verifies the method handles an empty result gracefull rather than
+            // throwing
             mockChain([]);
 
             const result = await analyticsData.getDonorBloodTypeBreakdown();
