@@ -82,7 +82,6 @@ export default function Home() {
                 router.push("/rs/events");
                 break;
             case "director":
-            case "director":
                 router.push("/rbd/analytics");
                 break;
             case "staff_admin":

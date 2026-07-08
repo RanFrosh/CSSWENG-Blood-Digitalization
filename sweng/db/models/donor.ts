@@ -10,6 +10,7 @@ export const donor = pgTable("donor", {
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
   middle_name: text("middle_name"),
+  age: text("age").notNull(),
 
   email: text("email").notNull(),
   mobile_no: text("mobile_no").notNull(),
@@ -29,7 +30,7 @@ export const donor = pgTable("donor", {
 
   active: boolean("active").default(true).notNull(),
 
-  deleted_datetime: timestamp("deleted_datetime", { withTimezone: true }),
+  deleted_datetime: timestamp("delete_datetime", { withTimezone: true }),
   deleted_by: bigserial("deleted_by", { mode: "bigint" }),
   delete_reason: text("delete_reason"),
 

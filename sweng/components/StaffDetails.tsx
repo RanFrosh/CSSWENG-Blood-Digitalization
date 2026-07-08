@@ -4,12 +4,11 @@ import { useEffect, useState } from "react";
 import { fetch_profile } from "@/app/global/access/fetch_profile";
 
 const roleNames: Record<string, string> = {
-    onsite_admit: "Onsite Admin",
+    onsite_admin: "Onsite Admin",
     med_prof: "Medical Professional",
     ls: "Lab Staff",
     rs: "Recovery Staff",
-    director: "Director",
-    rbd: "Regional Blood Director", //WIP
+    director: "Red Bank Director",
     staff_admin: "Staff Admin",
     super_admin: "Super Admin"
 };
