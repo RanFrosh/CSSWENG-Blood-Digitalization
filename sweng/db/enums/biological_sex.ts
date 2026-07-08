@@ -1,6 +1,6 @@
 import { pgEnum } from "drizzle-orm/pg-core";
 
-export const biologicalBase = ['male', 'female'] as const;
+export const biologicalBase = ['Male', 'Female'] as const;
 
 export type BiologicalType = typeof biologicalBase[number];
 
