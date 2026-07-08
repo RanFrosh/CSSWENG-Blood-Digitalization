@@ -1,4 +1,3 @@
-// scripts/seed.ts
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -13,12 +12,13 @@ const supabase = createClient(
 );
 
 type AccessLevel =
-  | "donor"
   | "onsite_admin"
   | "med_prof"
   | "director"
   | "super_admin"
-  | "staff_admin";
+  | "staff_admin"
+  | "recov_staff"
+  | "lab_staff";
 
 interface SeedUser {
   email: string;
@@ -28,12 +28,6 @@ interface SeedUser {
 }
 
 const users: SeedUser[] = [
-  {
-    email: "donor@redbank.com",
-    password: "Donor123!",
-    name: "Angel Buenaventura",
-    role: "donor",
-  },
   {
     email: "onsite.admin@redbank.com",
     password: "Onsite123!",
@@ -64,13 +58,24 @@ const users: SeedUser[] = [
     name: "Sophia Sena",
     role: "staff_admin",
   },
+  {
+    email: "recov.staff@redbank.com",
+    password: "RecovStaff123!",
+    name: "Adrian Dee",
+    role: "recov_staff",
+  },
+  {
+    email: "lab.staff@redbank.com",
+    password: "LabStaff123!",
+    name: "Kylie Mariazeta",
+    role: "lab_staff",
+  },
 ];
 
-async function seed() {
+async function seedAccounts() {
   console.log("Seeding mock accounts...\n");
 
   for (const user of users) {
-    // 1. Create auth user
     const { data, error: authError } = await supabase.auth.admin.createUser({
       email: user.email,
       password: user.password,
@@ -78,7 +83,6 @@ async function seed() {
     });
 
     if (authError) {
-      // Skip if already exists
       if (authError.message.includes("already been registered")) {
         console.log(`Skipped (already exists): ${user.email}`);
         continue;
@@ -89,7 +93,6 @@ async function seed() {
 
     const userId = data.user.id;
 
-    // 2. Upsert profile
     const { error: profileError } = await supabase
       .from("profiles")
       .upsert({ id: userId, name: user.name, role: user.role });
@@ -105,4 +108,4 @@ async function seed() {
   console.log("\nSeeding complete.");
 }
 
-seed();
+seedAccounts();
