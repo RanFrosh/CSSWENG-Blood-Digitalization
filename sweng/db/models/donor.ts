@@ -21,9 +21,9 @@ export const donor = pgTable("donor", {
   sex: biological_sex("sex").notNull(),
   blood: blood_type("blood").notNull(),
 
-  city_id: bigint("city_id", { mode: "bigint" }).references(() => city.id, { onDelete: 'no action', onUpdate: 'no action'}).notNull(),
+  city_id: bigint("city_id", { mode: "bigint" }).references(() => city.id, { onDelete: 'no action', onUpdate: 'no action'}),
 
-  photo_path: text("photo_path").notNull(),
+  photo_path: text("photo_path"),
 
   height: doublePrecision("height"),
   weight: doublePrecision("weight"),
