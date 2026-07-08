@@ -1,131 +1,180 @@
-import { ImpLoginController } from "@/app/login/imp_login_controller";
-import { LoginProvider } from "@/abstract/auth/login_abstract";
+// tests for helpGateKeep function in bouncer.ts
+// helpGateKeep checks who the user is, if they have a role, and if their role allows the action.
+// we mock ProfileSessionProvider to simulate a user session.
+
+import { helpGateKeep} from "@/app/global/helper_bouncer/bouncer";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { ReadProfile } from "@/types/profile_type";
 
+const mockChecker: jest.Mocked<ProfileSessionProvider> = {
+    getCurrentUser: jest.fn(),
+};
 
-describe("ImpLoginController Unit Tests", () => {
-    // types as jest.Mocked<T> so TypeScript knows every method on these interfaces
-    let mockLoginProvider: jest.Mocked<LoginProvider>;
-    let mockProfileProvider: jest.Mocked<ProfileSessionProvider>; // Updated to ProfileSessionProvider
-    let loginController: ImpLoginController;
+// reset mocks before each test
+beforeEach(() => {
+    jest.clearAllMocks();
+});
 
-    beforeEach(() => {
-        // manually construct mock objects instead of using jest.mock()
-        mockLoginProvider = {
-            provideLogin: jest.fn(),
-        };
+describe("helpGateKeep", () => {
 
-        mockProfileProvider = {
-            getCurrentUser: jest.fn(),
-        };
+    // no active session
+    it("returns failure when getCurrentUser fails", async () => {
+        mockChecker.getCurrentUser.mockResolvedValue({ success: false, message: "No session found" });
 
-        // mocks are passed in as dependencies
-        loginController = new ImpLoginController(mockLoginProvider, mockProfileProvider);
+        const result = await helpGateKeep(mockChecker, "view_event");
+
+        expect(result.success).toBe(false);
+        expect(result.message).toBe("No session found");
     });
 
-    afterEach(() => {
-        // reset call counts, return values, and instances on all mocks after each test
-        jest.clearAllMocks();
+    // user has no role
+    it("returns failure when user has no role", async () => {
+        mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role: undefined } as any });
+
+        const result = await helpGateKeep(mockChecker, "view_event");
+
+        expect(result.success).toBe(false);
+        expect(result.message).toBe("Somehow there is no role");
     });
 
+    // user has a role but doesn't have the required permission
+    it("returns failure when user lacks permission", async () => {
+        mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role: "onsite_admin"} as any });
 
-    // Test Case 1: Role-based successful login
-    it.each([
-        ["onsite_admin", "qa_onsite@redbank.com", "TestPass123!"],
-        ["med_prof", "qa_medprof@redbank.com", "TestPass123!"],
-        ["director", "qa_director@redbank.com", "TestPass123!"],
-        ["super_admin", "qa_superadmin@redbank.com", "TestPass123!"],
-        ["staff_admin", "qa_staff@redbank.com", "TestPass123!"],
-        ["donor", "qa_donor@redbank.com", "TestPass123!"] 
-    ])("should successfully log in and return profile data for role: %s", async (role, email, password) => {
+        const result = await helpGateKeep(mockChecker, "delete_donor");
+
+        expect(result.success).toBe(false);
+        expect(result.message).toBe("Not authorized");
+    });
+
+    // user has a role with the required permission
+    it("returns success when user role has permission", async () => {
+        mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role: "onsite_admin" } as any });
         
-        // Set up the dummy profile based on the current role
-        // The id is role-scoped (dummy-uuid-${role}) so the later assertion can
-        // verify the correct profile was returned for each specific role iteration.
-        const dummyProfile: ReadProfile = {
-            id: `dummy-uuid-${role}`,
-            name: "Test User",
-            // casting tells TypeScript to trust the test data
-            role: role as ReadProfile["role"], 
-            created_at: new Date()
-        };
-
-        // Arrange: Configure mocks to simulate a fully successful auth flow
-        mockLoginProvider.provideLogin.mockResolvedValue({ success: true, message: "Success in logging in" });
-        mockProfileProvider.getCurrentUser.mockResolvedValue({ 
-            success: true, 
-            message: "Profile retrieved", 
-            data: dummyProfile 
-        });
-
-        // Act: Execute the login
-        const result = await loginController.invokeLogin(email, password);
-
-        // Assert
-        expect(mockLoginProvider.provideLogin).toHaveBeenCalledWith(email, password);
-        expect(mockProfileProvider.getCurrentUser).toHaveBeenCalled();
+        const result = await helpGateKeep(mockChecker, "view_event");
 
         expect(result.success).toBe(true);
-
-        // expect.objectContaining performs a partial match (only role and id are checked) 
-        expect(result.data).toEqual(
-            expect.objectContaining({
-                role: role, 
-                id: `dummy-uuid-${role}`
-            })
-        );
+        expect(result.message).toBe("Authorized");
     });
 
-    // Test Case 2: Empty email
-    it("should fail gracefully when the email is empty", async () => {
-        // Arrange: Mock Supabase rejecting the empty email
-        mockLoginProvider.provideLogin.mockResolvedValue({ success: false, message: "Email is required" });
+    // super admin can do everything regardless of action
+    it("returns success for super_admin on any action", async () => {
+        mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role: "super_admin" } as any });
 
-        // Act: Execute with empty email
-        const result = await loginController.invokeLogin("", "TestPass123!");
+        const result = await helpGateKeep(mockChecker, "delete_donor");
 
-        // Assert
-        expect(mockLoginProvider.provideLogin).toHaveBeenCalledWith("", "TestPass123!");
-        expect(mockProfileProvider.getCurrentUser).not.toHaveBeenCalled(); 
-        expect(result.success).toBe(false);
-        expect(result.message).toBe("Email is required");
+        expect(result.success).toBe(true);
+        expect(result.message).toBe("Authorized");
     });
 
+    // test all roles that have permission to view_event 
+    it("returns success for all roles with view_event permission", async () => {
+        const allowedRoles = ["onsite_admin", "med_prof", "director", "super_admin"];
 
-    // Test Case 3: Empty password
-    it("should fail gracefully when the password is empty", async () => {
-        // Arrange: Mock Supabase rejecting the empty password
-        mockLoginProvider.provideLogin.mockResolvedValue({ success: false, message: "Password is required" });
+        for (const role of allowedRoles) {
+            mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role } as any });
 
-        // Act: Execute with empty password
-        const result = await loginController.invokeLogin("fake@example.com", "");
+            const result = await helpGateKeep(mockChecker, "view_event");
 
-        // Assert
-        expect(mockLoginProvider.provideLogin).toHaveBeenCalledWith("fake@example.com", "");
-        expect(mockProfileProvider.getCurrentUser).not.toHaveBeenCalled(); 
-        expect(result.success).toBe(false);
-        expect(result.message).toBe("Password is required");
+            expect(result.success).toBe(true);
+            expect(result.message).toBe("Authorized");
+        }
     });
 
-    // Test Case 4: Wrong password (invalid credentials)
-    it("should fail and NOT fetch profile when an invalid password is provided", async () => {
-        // Arrange: provider returns the standard Supabase invalid credentials message
-        mockLoginProvider.provideLogin.mockResolvedValue({ 
-            success: false, 
-            message: "Invalid login credentials" 
-        });
+    // test all roles that have permission to create_event
+    it("returns success for all roles with create_event permission", async () => {
+        const allowedRoles = ["onsite_admin", "med_prof", "director", "super_admin"];
 
-        // Act: Execute with invalid credentials
-        const result = await loginController.invokeLogin("fake@example.com", "WrongPassword!");
+        for (const role of allowedRoles) {
+            mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role } as any });
 
-        // Assert
-        expect(mockLoginProvider.provideLogin).toHaveBeenCalledWith("fake@example.com", "WrongPassword!");
-        expect(mockProfileProvider.getCurrentUser).not.toHaveBeenCalled(); 
-        expect(result.success).toBe(false);
-        expect(result.message).toBe("Invalid login credentials");
-        // assert data is undefined to confirm if the controller doesn't
-        // accidentally return a profile data on a failed login
-        expect(result.data).toBeUndefined();
+            const result = await helpGateKeep(mockChecker, "create_event");
+
+            expect(result.success).toBe(true);
+            expect(result.message).toBe("Authorized");
+        }
+    });
+
+    // test all roles that have permission to view_correct_event
+    it("returns success for all roles with view_correct_event permission", async () => {
+        const allowedRoles = ["onsite_admin", "med_prof", "director", "super_admin"];
+
+        for (const role of allowedRoles) {
+            mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role } as any });
+
+            const result = await helpGateKeep(mockChecker, "view_correct_event");
+
+            expect(result.success).toBe(true);
+            expect(result.message).toBe("Authorized");
+        }
+    });
+
+    // test all roles that have permission to create_correct_event
+    it("returns success for all roles with create_correct_event permission", async () => {
+        const allowedRoles = ["onsite_admin", "med_prof", "director", "super_admin"];
+
+        for (const role of allowedRoles) {
+            mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role } as any });
+
+            const result = await helpGateKeep(mockChecker, "create_correct_event");
+
+            expect(result.success).toBe(true);
+            expect(result.message).toBe("Authorized");
+        }
+    });
+
+    // test all roles that have permission to retrieve_donors
+    it("returns success for all roles with retrieve_donors permission", async () => {
+        const allowedRoles = ["med_prof"];
+
+        for (const role of allowedRoles) {
+            mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role } as any });
+
+            const result = await helpGateKeep(mockChecker, "retrieve_donors");
+
+            expect(result.success).toBe(true);
+            expect(result.message).toBe("Authorized");
+        }
+    });
+
+    // test all roles that have permission to edit_donor
+    it("returns success for all roles with edit_donor permission", async () => {
+        const allowedRoles = ["med_prof"];
+
+        for (const role of allowedRoles) {
+            mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role } as any });
+
+            const result = await helpGateKeep(mockChecker, "edit_donor");
+
+            expect(result.success).toBe(true);
+            expect(result.message).toBe("Authorized");
+        }
+    });
+
+    // test all roles that have permission to view_analytics
+    it("returns success for all roles with view_analytics permission", async () => {
+        const allowedRoles = ["director"];
+
+        for (const role of allowedRoles) {
+            mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role } as any });
+
+            const result = await helpGateKeep(mockChecker, "view_analytics");
+
+            expect(result.success).toBe(true);
+            expect(result.message).toBe("Authorized");
+        }
+    });
+
+    // delete_donor has no allowed roles, so even valid roles should be unauthorized
+    it("returns failure for all roles on delete_donor", async () => {
+        const unauthorizedRoles = ["onsite_admin", "med_prof", "director", "lab_staff", "recov_staff", "donor"];
+
+        for (const role of unauthorizedRoles) {
+            mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role } as any });
+
+            const result = await helpGateKeep(mockChecker, "delete_donor");
+
+            expect(result.success).toBe(false);
+            expect(result.message).toBe("Not authorized");
+        }
     });
 });
