@@ -1,77 +1,61 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { EventStatusType } from "@/db/enums/event_status";
-import { ViewEventFilters } from "@/types/event_type";
-import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
+import { ViewEvents } from "@/types/event_type";
 import Header from "@/components/HeaderMP";
 import StaffDetails from "@/components/StaffDetails";
+import { executeEventQueryStaff } from "./event_action";
 
 type EventTab = EventStatusType | "All";
 
-// Sample event structure
-type AssignedEvent = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatusType;
-};
 
-// Sample events
-const assignedEvents: AssignedEvent[] = [
-    {
-        id: "1",
-        name: "Name 1",
-        location: "Location 1",
-        date: "Date 1",
-        time: "Time 1",
-        partner: "Partner 1",
-        status: "Ongoing",
-    },
-    {
-        id: "2",
-        name: "Name 2",
-        location: "Location 2",
-        date: "Date 2",
-        time: "Time 2",
-        partner: "Partner 2",
-        status: "Upcoming",
-    },
-    {
-        id: "3",
-        name: "Name 3",
-        location: "Location 3",
-        date: "Date 3",
-        time: "Time 3",
-        partner: "Partner 3",
-        status: "Completed",
-    },
-];
+
 
 export default function MPEventsPage() {
     const router = useRouter();
 
     // Set the initial active tab to "Ongoing"
     const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
+
+    // State for holding events from the backend
+    const [events, setEvents] = useState<ViewEvents[]>([]);
+
+    // Loading State
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Error display
+    const [errorMessage, setErrorMessage] = useState("");
     
     // Status filters
     const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
 
+    useEffect(() => {
+        const loadEvents = async () => {
+            setIsLoading(true);
+            const result = await executeEventQueryStaff({});
+            if (result.success && result.data) {
+                setEvents(result.data);
+            } else {
+                setErrorMessage(result.message);
+            }
+            setIsLoading(false); 
+        }
+        loadEvents();
+    }, []);
+
     // Initialize filtered events
-    let filteredEvents: AssignedEvent[] = [];
+    let filteredEvents: ViewEvents[] = [];
 
     // Filter events based on selected filter
     if (activeTab === "All") {
-        filteredEvents = assignedEvents;
+        filteredEvents = events;
     } else {
-        filteredEvents = assignedEvents.filter((event) => event.status === activeTab);
+        filteredEvents = events.filter((event) => event.status === activeTab);
     }
 
     // Can only open events that are ongoing
-    const openEvent = (event: AssignedEvent) => {
+    const openEvent = (event: ViewEvents) => {
         if (event.status === "Ongoing") {
             // Navigate to the event details page for the selected event
             router.push(`/mp/events/${event.id}`);
@@ -97,7 +81,7 @@ export default function MPEventsPage() {
     };
     
     // Create button to open event if it is ongoing
-    const createActionButton = (event: AssignedEvent) => {
+    const createActionButton = (event: ViewEvents) => {
         if (event.status === "Ongoing") {
             return (
                 <button
@@ -111,6 +95,29 @@ export default function MPEventsPage() {
             return null;
         }
     };
+
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading events...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
+    
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -186,23 +193,23 @@ export default function MPEventsPage() {
 
                                         <p>
                                             <span className="font-semibold text-[#002940]">
-                                                Location:
+                                                Street:
                                             </span>{" "}
-                                            {event.location}
+                                            {event.street}
                                         </p>
 
                                         <p>
                                             <span className="font-semibold text-[#002940]">
                                                 Date:
                                             </span>{" "}
-                                            {event.date}
+                                            {event.event_date}
                                         </p>
 
                                         <p>
                                             <span className="font-semibold text-[#002940]">
                                                 Time:
                                             </span>{" "}
-                                            {event.time}
+                                            {event.start_time && event.end_time ? `${event.start_time} - ${event.end_time}` : "—"}
                                         </p>
                                     </div>
                                 </div>
