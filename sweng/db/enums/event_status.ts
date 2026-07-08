@@ -6,6 +6,6 @@ export const eventStatusBase = [
     'Completed'
 ] as const;
 
-export type EvenStatusType = typeof eventStatusBase[number];
+export type EventStatusType = typeof eventStatusBase[number];
 
 export const event_status = pgEnum('event_status', eventStatusBase);

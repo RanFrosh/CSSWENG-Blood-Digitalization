@@ -19,7 +19,7 @@ export const event_log = pgTable("event_log", {
   zip_code: text("zip_code").notNull(),
   street: text("street").notNull(),
 
-  partner: text("name"),
+  partner: text("partner"),
   event_date: date("event_date"),
   start_time: time("start_time"),
   end_time: time("end_time"),
