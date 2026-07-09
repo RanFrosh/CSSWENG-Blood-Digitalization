@@ -138,10 +138,7 @@ export default function DonorAnalyticsDetailsPage() {
                                 <span className="font-semibold text-[#002940]">Age: </span> 
                                 {selectedDonor.age}
                             </p>
-                            <p>
-                                <span className="font-semibold text-[#002940]">Location: </span> 
-                                {`${selectedDonor.street}, ${selectedDonor.zip_code}`}
-                            </p>
+                            
                         </div>
                     </div>                        
                        
