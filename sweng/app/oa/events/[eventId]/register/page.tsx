@@ -1,6 +1,4 @@
 
-import { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
 import Header from "@/components/HeaderOA";
 import { orm } from "@/db/drizzle";
 import { city } from "@/db/models/city";
@@ -10,12 +8,12 @@ import RegistrationForm from "./registration-form";
 export default async function RegisterPage({
     params,
         }: {
-            params: { eventId: string };
+            params: Promise<{ eventId: string }>;
         }) {
             const provinces = await orm.select().from(province);
             const cities = await orm.select().from(city);
     
-            const eventId = params.eventId;
+            const { eventId } = await params;
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -36,11 +34,6 @@ export default async function RegisterPage({
                         <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                             Donor Information
                         </h2>
-                        {errorMsg && (
-                            <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-[10px] font-medium">
-                                {errorMsg}
-                            </div>
-                        )}
                     </div>
 
                 <RegistrationForm

@@ -8,12 +8,12 @@ type RegisterState = {
 } | null;
 
 type Province = {
-    id: number;
+    id: bigint;
     name: string | null;
 };
 
 type City = {
-    id: number;
+    id: bigint;
     name: string | null;
     province_id: bigint | null;
 };
