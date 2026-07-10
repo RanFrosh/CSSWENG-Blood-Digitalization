@@ -6,7 +6,8 @@ describe("ImpLoginProvider Unit Tests", () => {
     let loginProvider: ImpLoginProvider;
 
     beforeEach(() => {
-        // Create a deep mock for the Supabase Client
+        // Construct a plain object to mirror the shape of auth.signInWithPassword
+        // from the SupabaseClient
         mockSupabaseClient = {
             auth: {
                 signInWithPassword: jest.fn(),
@@ -21,8 +22,9 @@ describe("ImpLoginProvider Unit Tests", () => {
         jest.clearAllMocks();
     });
 
+    // Test Case 1: Successful sign-in
     it("should return success: true when Supabase sign-in is successful", async () => {
-        // Mock Supabase returning no error
+        // Arrange: Simulate SUpabase resolving with a valid user and session
         (mockSupabaseClient.auth.signInWithPassword as jest.Mock).mockResolvedValue({
             data: { user: { id: "123" }, session: {} },
             error: null,
@@ -30,7 +32,7 @@ describe("ImpLoginProvider Unit Tests", () => {
 
         const result = await loginProvider.provideLogin("qa_donor@redbank.com", "TestPass123!");
 
-        // Verify the exact payload sent to Supabase
+        // Assert
         expect(mockSupabaseClient.auth.signInWithPassword).toHaveBeenCalledWith({
             email: "qa_donor@redbank.com",
             password: "TestPass123!"
@@ -41,10 +43,11 @@ describe("ImpLoginProvider Unit Tests", () => {
         expect(result.message).toBe("Success in logging in");
     });
 
+    // Test Case 2: Failed sign-in
     it("should return success: false and gracefully catch the error when Supabase sign-in fails", async () => {
-        // Mock Supabase returning an authentication error
         const fakeErrorMessage = "Invalid login credentials";
         
+        // Arrange: simulate Supabase resolving with an error object (does not throw an exception)
         (mockSupabaseClient.auth.signInWithPassword as jest.Mock).mockResolvedValue({
             data: { user: null, session: null },
             error: { message: fakeErrorMessage },
@@ -52,6 +55,7 @@ describe("ImpLoginProvider Unit Tests", () => {
 
         const result = await loginProvider.provideLogin("fake@email.com", "WrongPassword!");
 
+        // Assert
         // Verify the exact payload sent to Supabase
         expect(mockSupabaseClient.auth.signInWithPassword).toHaveBeenCalledWith({
             email: "fake@email.com",

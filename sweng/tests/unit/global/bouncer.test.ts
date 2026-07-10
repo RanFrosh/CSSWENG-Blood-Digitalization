@@ -38,7 +38,7 @@ describe("helpGateKeep", () => {
 
     // user has a role but doesn't have the required permission
     it("returns failure when user lacks permission", async () => {
-        mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role: "onsite_admin"} as any });
+        mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role: "med_prof"} as any });
 
         const result = await helpGateKeep(mockChecker, "delete_donor");
 

@@ -9,7 +9,12 @@
     "lint": "eslint",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "seed:accounts": "tsx --env-file=.env scripts/seed-accounts.ts",
+    "clear:accounts": "tsx --env-file=.env scripts/clear-accounts.ts",
+    "seed:events": "tsx --env-file=.env scripts/seed-events.ts",
+    "clear:events": "tsx --env-file=.env scripts/clear-events.ts",
+    "seed:corrections": "tsx --env-file=.env scripts/seed-corrections.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

@@ -1,5 +1,6 @@
-import { pgTable, text, timestamp, bigserial, bigint} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, bigserial, bigint, date, time} from "drizzle-orm/pg-core";
 import { city } from "./city";
+import { event_status } from "../enums/event_status";
 
 export const event_log = pgTable("event_log", {
   id: bigserial("id", { mode: "bigint" }).primaryKey(),
@@ -16,5 +17,11 @@ export const event_log = pgTable("event_log", {
   city_id: bigint("city_id", { mode: "bigint" }).references(() => city.id, { onDelete: 'no action', onUpdate: 'no action'}).notNull(),
 
   zip_code: text("zip_code").notNull(),
-  street: text("street").notNull()
+  street: text("street").notNull(),
+
+  partner: text("partner"),
+  event_date: date("event_date"),
+  start_time: time("start_time"),
+  end_time: time("end_time"),
+  status: event_status("status")
 });

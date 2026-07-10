@@ -5,7 +5,7 @@ import { ImpAnalyticsData } from "./analytics_queries";
 import { ImpProfileGetter } from "../global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
 
-export async function fetchDirectorDashboardStats() {
+export async function fetchDirectorStats() {
 
     const dataLayer = new ImpAnalyticsData();
 

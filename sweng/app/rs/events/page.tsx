@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Header from "@/components/HeaderRS";
+import StaffDetails from "@/components/StaffDetails";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 type EventTab = EventStatus | "All";
@@ -123,36 +124,7 @@ export default function RSEventsPage() {
                 </section>
 
                 {/* Staff Details */}
-                <section className="mt-[0.15in]">
-                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                        <h2 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                            Staff Details
-                        </h2>
-
-                        <div className="mt-[0.15in] flex flex-col gap-[5px] text-[18px]">
-                            <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Name:
-                                </span>{" "}
-                                Jenny Doe
-                            </p>
-
-                            <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Role:
-                                </span>{" "}
-                                Recovery Staff
-                            </p>
-
-                            <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Staff ID:
-                                </span>{" "}
-                                RS-001
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                <StaffDetails />
 
                 {/* Assigned Events */}
                 <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">

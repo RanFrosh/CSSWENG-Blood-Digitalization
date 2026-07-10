@@ -4,6 +4,7 @@ import { Sorter } from "@/types/sort_type";
 import { EventController, EventData } from "@/abstract/events/event_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { helpGateKeep } from "../global/helper_bouncer/bouncer";
+import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 
 export class ImpEventManager implements EventController {
     private eventModel: EventData
@@ -35,10 +36,28 @@ export class ImpEventManager implements EventController {
         return corrections;
     }
 
-    async invokeCreateCorrection(data: CreateCorrections): Promise<ApiResponse> {
+    async invokeCreateCorrection(data: Omit<CreateCorrections, 'ref_profile_id'>): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'create_correct_event');
         if (!res.success) return { success: false, message: res.message, data: res.data }
-        const creation = await this.eventModel.createCorrection(data);
+
+        const profile = await this.profileReader.getCurrentUser();
+        if (!profile.success || !profile.data?.id) return { success: profile.success, message: profile.message};
+
+        const appendedData: CreateCorrections = {
+            ...data,
+            ref_profile_id: profile.data.id
+        }
+
+        const creation = await this.eventModel.createCorrection(appendedData);
         return creation;
+    }
+
+    async invokeQueryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>> {
+        const res = await helpGateKeep(this.profileReader, 'view_event');
+        if (!res.success) return { success: false, message: res.message, data: res.data }
+
+        const events = await this.eventModel.queryEventStaff(data, staff);
+        
+        return events;
     }
 }
