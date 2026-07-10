@@ -1,4 +1,6 @@
 
+import { useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 import Header from "@/components/HeaderOA";
 import { orm } from "@/db/drizzle";
 import { city } from "@/db/models/city";
@@ -20,25 +22,25 @@ export default async function RegisterPage({
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
-                {/* Page Title */}
                 <section className="bg-[#f9fdff] p-[0.25in]">
                     <p className="text-[16px] font-['Montserrat'] text-[#002940]">
                         Onsite Admin
                     </p>
-
                     <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
                         Donor Registration
                     </h1>
                 </section>
 
-                {/* Registration Form */}
                 <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
                     <div>
-                        <div>
-                            <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                Donor Information
-                            </h2>
-                        </div>
+                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
+                            Donor Information
+                        </h2>
+                        {errorMsg && (
+                            <div className="mt-4 p-4 bg-red-50 border border-red-200 text-red-600 rounded-[10px] font-medium">
+                                {errorMsg}
+                            </div>
+                        )}
                     </div>
 
                 <RegistrationForm
@@ -51,4 +53,5 @@ export default async function RegisterPage({
             </div>
         </main>
     );
+    
 }

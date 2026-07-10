@@ -1,0 +1,52 @@
+info:
+  name: Existing Onsite Director Login
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{SUPABASE_URL}}/auth/v1/token?grant_type=password"
+  headers:
+    - name: apikey
+      value: "{{SUPABASE_ANON_KEY}}"
+    - name: Content-Type
+      value: application/json
+  params:
+    - name: grant_type
+      value: password
+      type: query
+    - name: ""
+      value: ""
+      type: query
+  body:
+    type: json
+    data: |-
+      {
+        "email": {{onsite_director_email}},
+        "password": {{onsite_director_pw}}
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        test("Onsite Director successfully logs in and receives tokens", function() {
+          expect(res.getStatus()).to.equal(200);
+          
+          const body = res.getBody();
+
+          expect(body).to.have.property('access_token');
+          expect(body).to.have.property('refresh_token');
+          
+          expect(body).to.have.property('user');
+          
+          bru.setEnvVar("onsite_director_token", body.access_token);
+          bru.setEnvVar("onsite_director_id", body.user.id);
+        });
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

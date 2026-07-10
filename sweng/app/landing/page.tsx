@@ -1,8 +1,9 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import Header from "@/components/HeaderLanding";
+import { executeLogin } from "../login/login_action";
 
 type LandingEvent = {
     id: string;
@@ -40,27 +41,54 @@ const events: LandingEvent[] = [
 ];
 
 export default function Home() {
+
     const router = useRouter();
 
     const [currentIndex, setCurrentIndex] = useState(0);
-
     const currentEvent = events[currentIndex];
 
-    const handleLogin = () => {
-        const view = prompt("Type 1 for OA/Registration, 2 for MP/Nurse, 3 for Lab, 4 for Recovery, 5 for RBD, 6 for SA.");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
-        if (view === "1") {
-            router.push("/oa/events");
-        } else if (view === "2") {
-            router.push("/mp/events");
-        } else if (view === "3") {
-            router.push("/ls/events");
-        } else if (view === "4") {
-            router.push("/rs/events")
-        }else if (view === "5") {
-            router.push("/rbd/analytics");
-        } else if (view === "6") {
-            router.push("/sa/list");
+    const handleLogin = async () => {
+
+        setIsLoading(true)
+        setErrorMessage("")
+
+       const result = await executeLogin(email, password);
+
+        if (!result.success || !result.data) {
+            setErrorMessage("Invalid Login Credentials.");
+            setIsLoading(false);
+            return;
+        }
+
+        const role = result.data.role;
+
+        switch (role) {
+            case "onsite_admin":
+                router.push("/oa/events");
+                break;
+            case "med_prof":
+                router.push("/mp/events");
+                break;
+            case "lab_staff":
+                router.push("/ls/events");
+                break;
+            case "recov_staff":
+                router.push("/rs/events");
+                break;
+            case "director":
+                router.push("/rbd/analytics");
+                break;
+            case "super_admin":
+                router.push("/sa/page");
+                break;
+            default:
+                setErrorMessage("Unauthorized role detected.");
+                setIsLoading(false);
         }
     };
 
@@ -112,6 +140,7 @@ export default function Home() {
             <Header />
 
             <div className="flex-1 flex flex-row">
+
                 {/* Left Panel */}
                 <div className="w-[5in] shrink-0 bg-[#f9fdff] p-[0.5in] flex flex-col gap-[0.5in] justify-center">
                     <h1 className="text-[42px] font-['Montserrat'] font-semibold text-[#1b4054]">
@@ -119,13 +148,23 @@ export default function Home() {
                     </h1>
 
                     <div className="text-[21px] flex flex-col">
-                        <label className="mb-[5px]" htmlFor="uname">
-                            Username:
+                        {/* Error Message Display */}
+                        {errorMessage && (
+                            <div className="mb-4 p-2 text-sm text-white bg-red-500 rounded text-center">
+                                {errorMessage}
+                            </div>
+                        )}
+
+                        <label className="mb-[5px]" htmlFor="email">
+                            Email:
                         </label>
 
+                        {/* Email Input */}
                         <input
-                            id="uname"
-                            type="text"
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             className="w-full mb-[15px] border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] pr-[10px] outline-none"
                         />
 
@@ -133,9 +172,12 @@ export default function Home() {
                             Password:
                         </label>
 
+                        {/* Password Input */}
                         <input
                             id="pass"
                             type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             className="w-full border-2 border-gray-300 rounded-md focus:border-[#1b4054] pl-[10px] pr-[10px] outline-none"
                         />
 
@@ -144,17 +186,24 @@ export default function Home() {
                                 Forgot password?
                             </p>
                         </div>
+
                     </div>
+
+                    {/* Buttons */}
 
                     <div className="flex flex-row gap-[0.25in] ml-auto">
                         <button
                             className="w-[1in] bg-[#1b4054] text-[#f9fdff] p-[5px] rounded-[10px] text-center cursor-pointer hover:bg-[#fd5448] transition"
                             onClick={handleLogin}
+                            disabled={isLoading}
                         >
-                            Log in
+                            {isLoading ? "..." : "Log in"}
                         </button>
 
-                        <button className="w-[1in] bg-[#f9fdff] text-[#1b4054] p-[5px] rounded-[10px] text-center border-2 border-[#1b4054] cursor-pointer hover:bg-[#fd5448] hover:text-[#f9fdff] hover:border-[#fd5448] transition">
+                        <button 
+                            className="w-[1in] bg-[#f9fdff] text-[#1b4054] p-[5px] rounded-[10px] text-center border-2 border-[#1b4054] cursor-pointer hover:bg-[#fd5448] hover:text-[#f9fdff] hover:border-[#fd5448] transition"
+                            onClick={() => router.push("/signup")}
+                        >
                             Sign up
                         </button>
                     </div>

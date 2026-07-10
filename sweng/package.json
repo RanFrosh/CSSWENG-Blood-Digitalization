@@ -6,13 +6,20 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "seed:accounts": "tsx --env-file=.env scripts/seed-accounts.ts",
+    "clear:accounts": "tsx --env-file=.env scripts/clear-accounts.ts",
+    "seed:events": "tsx --env-file=.env scripts/seed-events.ts",
+    "clear:events": "tsx --env-file=.env scripts/clear-events.ts",
+    "seed:corrections": "tsx --env-file=.env scripts/seed-corrections.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
-    "@supabase/supabase-js": "^2.107.0",
+    "@supabase/supabase-js": "^2.108.0",
     "dotenv": "^17.4.2",
-    "drizzle-orm": "^0.45.2",
     "next": "16.2.7",
     "postgres": "^3.4.9",
     "react": "19.2.4",
@@ -20,13 +27,18 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.10",
+    "drizzle-orm": "^0.45.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.7",
+    "jest": "^30.4.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "ts-jest": "^29.4.11",
+    "tsx": "^4.22.4",
+    "typescript": "^5.9.3"
   }
 }
