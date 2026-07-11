@@ -25,6 +25,10 @@ export default function HeaderOA() {
         if (eventId) router.push(`/oa/events/${eventId}/scanner`);
     };
 
+    const goSearch = () => {
+        if (eventId) router.push(`/oa/events/${eventId}/search`)
+    }
+
     const goLogout = () => {
         router.push("/landing");
     };
@@ -32,7 +36,7 @@ export default function HeaderOA() {
     const navLinks = eventId
         ? [
               {
-                  name: "My Events",
+                  name: "Home",
                   path: "/oa/events",
                   onClick: goMyEvents,
               },
@@ -40,6 +44,11 @@ export default function HeaderOA() {
                   name: "Event Home",
                   path: `/oa/events/${eventId}`,
                   onClick: goEventHome,
+              },
+              {
+                  name: "Search Donor",
+                  path: `/oa/events/${eventId}/search`,
+                  onClick: goSearch,
               },
               {
                   name: "Register Donor",
@@ -54,7 +63,7 @@ export default function HeaderOA() {
           ]
         : [
               {
-                  name: "My Events",
+                  name: "Home",
                   path: "/oa/events",
                   onClick: goMyEvents,
               },
