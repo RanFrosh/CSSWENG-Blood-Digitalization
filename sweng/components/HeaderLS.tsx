@@ -33,7 +33,7 @@ export default function HeaderLS() {
     const navLinks = [];
 
     navLinks.push({
-        name: "My Events",
+        name: "Home",
         path: "/ls/events",
         onClick: goMyEvents,
     });
