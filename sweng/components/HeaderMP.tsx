@@ -33,7 +33,7 @@ export default function HeaderMP() {
     const navLinks = [];
 
     navLinks.push({
-        name: "My Events",
+        name: "Home",
         path: "/mp/events",
         onClick: goMyEvents,
     });
