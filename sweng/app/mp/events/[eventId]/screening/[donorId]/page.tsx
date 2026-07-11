@@ -1,5 +1,4 @@
 "use client";
-
 import { useRouter, useParams } from "next/navigation";
 
 import Header from "@/components/HeaderMP";
@@ -42,7 +41,7 @@ export default function ScreeningPage() {
     };
 
     return (
-        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+        <main className="flex flex-col min-h-screen bg-[#f9fdff]">
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
@@ -126,6 +125,7 @@ export default function ScreeningPage() {
 
                                 <input
                                     type="text"
+                                    placeholder="°C"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
@@ -137,6 +137,7 @@ export default function ScreeningPage() {
 
                                 <input
                                     type="text"
+                                    placeholder="mmHg"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
@@ -148,6 +149,7 @@ export default function ScreeningPage() {
 
                                 <input
                                     type="text"
+                                    placeholder="bpm"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
@@ -159,6 +161,7 @@ export default function ScreeningPage() {
 
                                 <input
                                     type="text"
+                                    placeholder="kg"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
