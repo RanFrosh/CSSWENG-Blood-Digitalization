@@ -49,6 +49,10 @@ export default function OAEventPage() {
         router.push(`/oa/events/${eventId}/scanner`);
     };
 
+    const goSearch = () => {
+        router.push(`/oa/events/${eventId}/search`);
+    };
+
     const goBack = () => {
         router.push("/oa/events");
     };
@@ -56,7 +60,7 @@ export default function OAEventPage() {
     // If the selected event is not found, display error message
     if (selectedEvent === undefined) {
         return (
-            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+            <main className="flex flex-col min-h-screen bg-[#f9fdff]">
                 <Header />
 
                 <div className="flex-1 p-[0.35in]">
@@ -83,7 +87,7 @@ export default function OAEventPage() {
     // If the selected event is found, display event details and actions
     } else {
         return (
-            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+            <main className="flex flex-col min-h-screen bg-[#f9fdff]">
                 <Header />
 
                 <div className="flex-1 p-[0.35in]">
@@ -141,7 +145,20 @@ export default function OAEventPage() {
                             Event Actions
                         </h2>
 
-                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-[0.25in]">
+                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[0.25in]">
+                            <button
+                                onClick={goSearch}
+                                className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
+                            >
+                                <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                                    Search Donor
+                                </h3>
+
+                                <p className="mt-[8px] text-[16px]">
+                                    Search for an existing donor account.
+                                </p>
+                            </button>
+                            
                             <button
                                 onClick={goRegister}
                                 className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"

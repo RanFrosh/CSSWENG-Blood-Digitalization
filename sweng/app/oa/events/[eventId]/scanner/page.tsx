@@ -15,7 +15,7 @@ const scannedDonor: DonorInfo = {
     name: "John Doe",
 };
 
-export default function ScannerPage() {
+export default function OAScannerPage() {
     const router = useRouter();
     const params = useParams();
 
@@ -35,7 +35,7 @@ export default function ScannerPage() {
     };
 
     return (
-        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+        <main className="flex flex-col min-h-screen bg-[#f9fdff]">
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
