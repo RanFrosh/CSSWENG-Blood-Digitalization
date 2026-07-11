@@ -28,7 +28,7 @@ export default function HeaderOA() {
     const navLinks = eventId
         ? [
               {
-                  name: "My Events",
+                  name: "Home",
                   path: "/rs/events",
                   onClick: goMyEvents,
               },
@@ -45,7 +45,7 @@ export default function HeaderOA() {
           ]
         : [
               {
-                  name: "My Events",
+                  name: "Home",
                   path: "/rs/events",
                   onClick: goMyEvents,
               },
