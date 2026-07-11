@@ -41,7 +41,7 @@ export default function RecordPage() {
     };
 
     return (
-        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+        <main className="flex flex-col min-h-screen bg-[#f9fdff]">
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
@@ -136,6 +136,7 @@ export default function RecordPage() {
 
                                 <input
                                     type="text"
+                                    placeholder="mL"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
@@ -158,7 +159,7 @@ export default function RecordPage() {
                             Collection Outcome
                         </h2>
 
-                        <div className="mt-[0.25in] grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="mt-[0.25in] grid grid-cols-1 lg:grid-cols-1 gap-4">
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                                 <p className="text-[18px] font-semibold text-[#002940]">
                                     Donation Outcome
@@ -181,32 +182,6 @@ export default function RecordPage() {
                                             className="mr-2"
                                         />
                                         Incomplete
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                                <p className="text-[18px] font-semibold text-[#002940]">
-                                    Blood Quality Assessment
-                                </p>
-
-                                <div className="mt-5 flex flex-row gap-5 flex-wrap text-[18px] text-[#002940]">
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="blood-quality"
-                                            className="mr-2"
-                                        />
-                                        Pass
-                                    </label>
-
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="blood-quality"
-                                            className="mr-2"
-                                        />
-                                        Fail
                                     </label>
                                 </div>
                             </div>
