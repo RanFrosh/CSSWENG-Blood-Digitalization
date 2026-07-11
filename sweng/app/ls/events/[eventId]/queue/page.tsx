@@ -223,7 +223,7 @@ export default function QueuePage() {
                             </p>
 
                             <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                                Screening Queue
+                                Blood Donation Queue
                             </h1>
                         </div>
                     </div>
