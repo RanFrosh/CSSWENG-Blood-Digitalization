@@ -7,6 +7,20 @@ import Header from "@/components/HeaderRS";
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 type EventTab = EventStatus | "All";
 
+// Sample user structure
+type User = {
+    id: string;
+    name: string;
+    role: string;
+}
+
+// Sample RS user
+const RSUser: User = {
+    id: "RS-001",
+    name: "Jenny Doe",
+    role: "Recovery Staff",
+}
+
 // Sample event structure
 type AssignedEvent = {
     id: string;
@@ -111,14 +125,14 @@ export default function RSEventsPage() {
     };
 
     return (
-        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+        <main className="flex flex-col min-h-screen bg-[#f9fdff]">
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
                 {/* Title */}
                 <section className="bg-[#f9fdff] p-[0.25in]">
                     <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">
-                        My Events
+                        Welcome, {RSUser.name}!
                     </h1>
                 </section>
 
@@ -134,21 +148,21 @@ export default function RSEventsPage() {
                                 <span className="font-semibold text-[#002940]">
                                     Name:
                                 </span>{" "}
-                                Jenny Doe
+                                {RSUser.name}
                             </p>
 
                             <p>
                                 <span className="font-semibold text-[#002940]">
                                     Role:
                                 </span>{" "}
-                                Recovery Staff
+                                {RSUser.role}
                             </p>
 
                             <p>
                                 <span className="font-semibold text-[#002940]">
                                     Staff ID:
                                 </span>{" "}
-                                RS-001
+                                {RSUser.id}
                             </p>
                         </div>
                     </div>
