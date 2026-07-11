@@ -7,7 +7,7 @@ import Header from "@/components/HeaderMP";
 type DonorInfo = {
     id: string;
     name: string;
-    age: number;
+    bday: string;
     sex: string;
     bloodType: string;
 };
@@ -16,7 +16,7 @@ type DonorInfo = {
 const donorInfo: DonorInfo = {
     id: "D-005",
     name: "June Doe",
-    age: 25,
+    bday: "XX/XX/XXXX",
     sex: "Female",
     bloodType: "O+",
 };
@@ -81,11 +81,11 @@ export default function ScreeningPage() {
 
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                             <p className="text-[18px] font-semibold text-[#002940]">
-                                Age
+                                Birth Date
                             </p>
 
                             <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.age}
+                                {donorInfo.bday}
                             </p>
                         </div>
 
