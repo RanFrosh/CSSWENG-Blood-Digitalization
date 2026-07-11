@@ -28,8 +28,8 @@ export const event_log = pgTable("event_log", {
   partner: text("partner").notNull(),
 
   // Location
-  street: text("street").notNull(),
-  zip_code: text("zip_code").notNull(),
+  street: text("street"),
+  zip_code: text("zip_code"),
   city_id: bigint("city_id", { mode: "bigint" })
     .references(() => city.id)
     .notNull(),

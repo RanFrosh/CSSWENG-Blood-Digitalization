@@ -37,8 +37,8 @@ export const donor = pgTable("donor", {
   mobile_no: text("mobile_no").notNull(),
 
   // Address
-  street: text("street").notNull(),
-  zip_code: text("zip_code").notNull(),
+  street: text("street"),
+  zip_code: text("zip_code"),
 
   // Personal attributes
   sex: biological_sex("sex").notNull(),
