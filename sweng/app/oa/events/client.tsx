@@ -51,29 +51,29 @@ export default function OAEventsClient({
     const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
 
     useEffect(() => {
-            const loadEvents = async () => {
-    
-                setIsLoading(true);
-                setErrorMessage("");
-    
-                try {
-                    const result = await checkAuthentication(
-                        activeTab !== "All" ? { status: activeTab } : {}
-                    );
+        const loadEvents = async () => {
 
-                    if (result.success && result.data) {
-                        setEvents(result.data);
-                    } else {
-                        setErrorMessage(result.message);
-                    }
-                } catch (error) {
-                    setErrorMessage("Failed to connect to the database");
-                } finally {
-                    setIsLoading(false); 
+            setIsLoading(true);
+            setErrorMessage("");
+
+            try {
+                const result = await checkAuthentication(
+                    activeTab !== "All" ? { status: activeTab } : {}
+                );
+
+                if (result.success && result.data) {
+                    setEvents(result.data);
+                } else {
+                    setErrorMessage(result.message);
                 }
+            } catch (error) {
+                setErrorMessage("Failed to connect to the database");
+            } finally {
+                setIsLoading(false); 
             }
-            loadEvents();
-        }, [activeTab]);
+        }
+        loadEvents();
+    }, [activeTab]);
 
     const filteredEvents =
         activeTab === "All"
