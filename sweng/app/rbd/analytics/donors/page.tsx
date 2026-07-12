@@ -35,6 +35,7 @@ export default function DonorAnalyticsPage() {
         };
         loadDonors();
     }, []);
+    
 
     const viewDonorAnalytics = (donorId: bigint) => {
         router.push(`/rbd/analytics/donors/${donorId.toString()}`);

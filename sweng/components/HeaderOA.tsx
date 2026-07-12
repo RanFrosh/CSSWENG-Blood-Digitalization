@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useParams } from "next/navigation";
+import LogoutButton from "./LogoutButton";
 
 export default function HeaderOA() {
     const router = useRouter();
@@ -90,12 +91,7 @@ export default function HeaderOA() {
                     </div>
                 </div>
 
-                <button
-                    className="mr-[0.25in] text-[18px] text-white font-[Montserrat] cursor-pointer hover:text-[#1b4054]"
-                    onClick={goLogout}
-                >
-                    Log Out
-                </button>
+                <LogoutButton/>
             </div>
         </div>
     );

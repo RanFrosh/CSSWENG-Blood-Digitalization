@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderLanding";
 import { executeLogin } from "../login/login_action";
+import { executeLogout } from "../logout/logout_action";
 
 type LandingEvent = {
     id: string;
@@ -52,6 +53,8 @@ export default function Home() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
     const handleLogin = async () => {
 
         setIsLoading(true)
@@ -89,6 +92,23 @@ export default function Home() {
             default:
                 setErrorMessage("Unauthorized role detected.");
                 setIsLoading(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        
+        const result = await executeLogout();
+        
+        if (result.success) {
+            // Instantly boot them back to the login page
+            router.push("/login");
+            // Optional: router.refresh() if Next.js caches the layout heavily
+            router.refresh(); 
+        } else {
+            console.error(result.message);
+            alert("Failed to log out safely.");
+            setIsLoggingOut(false);
         }
     };
 
