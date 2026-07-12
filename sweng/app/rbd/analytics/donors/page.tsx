@@ -1,60 +1,44 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import Header from "@/components/HeaderRBD";
+import { fetchAllDonors } from "@/app/analytics/donor_action";
 
-type DonorAnalytics = {
-    id: string;
-    name: string;
+type Donor = {
+    id: bigint; 
+    first_name: string;
+    last_name: string;
     sex: string;
-    bloodType: string;
-    location: string;
+    blood: string;
+    street: string;
+    zip_code: string;
+    active: boolean;
+    email: string;
+    age: string;
+    mobile_no: string
 };
 
-const donors: DonorAnalytics[] = [
-    {
-        id: "D-001",
-        name: "John Doe",
-        sex: "Male",
-        bloodType: "O+",
-        location: "Manila",
-    },
-    {
-        id: "D-002",
-        name: "Jason Doe",
-        sex: "Male",
-        bloodType: "A+",
-        location: "San Juan",
-    },
-    {
-        id: "D-003",
-        name: "Jean Doe",
-        sex: "Female",
-        bloodType: "B+",
-        location: "Makati",
-    },
-    {
-        id: "D-004",
-        name: "Jack Doe",
-        sex: "Male",
-        bloodType: "AB+",
-        location: "Taguig",
-    },
-    {
-        id: "D-005",
-        name: "June Doe",
-        sex: "Female",
-        bloodType: "O-",
-        location: "Pasay",
-    },
-];
-
 export default function DonorAnalyticsPage() {
+    
     const router = useRouter();
+    const [donors, setDonors] = useState<Donor[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
-    const viewDonorAnalytics = (donorId: string) => {
-        router.push(`/rbd/analytics/donors/${donorId}`);
+    useEffect(() => {
+        const loadDonors = async () => {
+            const result = await fetchAllDonors();
+            if (result.success && result.data) {
+                setDonors(result.data);
+            }
+            setIsLoading(false);
+        };
+        loadDonors();
+    }, []);
+    
+
+    const viewDonorAnalytics = (donorId: bigint) => {
+        router.push(`/rbd/analytics/donors/${donorId.toString()}`);
     };
 
     return (
@@ -112,62 +96,72 @@ export default function DonorAnalyticsPage() {
                         </h2>
 
                         <p className="text-[18px] text-[#002940]">
-                            Showing {donors.length} donor/s
+                            Showing {isLoading ? "..." : donors.length} donor/s
                         </p>
                     </div>
 
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {donors.slice(0, 5).map((donor) => (
-                            <div
-                                key={donor.id}
-                                className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
-                            >
-                                <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between gap-5 flex-wrap">
-                                    <div className="flex flex-row items-center gap-[0.15in] flex-wrap">
-                                        <h2 className="text-[24px] font-['Montserrat'] font-bold">
-                                            {donor.name}
-                                        </h2>
+                        {isLoading ? (
+                            <p className="text-[18px] text-[#002940] animate-pulse">Fetching database records...</p>
+                        ) : donors.length === 0 ? (
+                            <p className="text-[18px] text-gray-500 italic">No donors found in the system.</p>
+                        ) : (
+                            donors.slice(0, 5).map((donor) => (
+                                <div
+                                    key={donor.id.toString()}
+                                    className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
+                                >
+                                    <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between gap-5 flex-wrap">
+                                        <div className="flex flex-row items-center gap-[0.15in] flex-wrap">
+                                            <h2 className="text-[24px] font-['Montserrat'] font-bold">
+                                                {donor.first_name} {donor.last_name}
+                                            </h2>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => viewDonorAnalytics(donor.id)}
+                                            className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:underline hover:bg-gray-100 transition"
+                                        >
+                                            View Analytics
+                                        </button>
                                     </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            viewDonorAnalytics(donor.id);
-                                        }}
-                                        className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:underline"
-                                    >
-                                        View Analytics
-                                    </button>
-                                </div>
-
-                                <div className="p-[0.35in]">
-                                    <div className="grid grid-cols-2 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Sex:
-                                            </span>{" "}
-                                            {donor.sex}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Blood Type:
-                                            </span>{" "}
-                                            {donor.bloodType}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Location:
-                                            </span>{" "}
-                                            {donor.location}
-                                        </p>
+                                    <div className="p-[0.35in]">
+                                        <div className="grid grid-cols-2 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
+                                            
+                                            <p>
+                                                <span className="font-semibold text-[#002940]">Blood Type: </span> 
+                                                {donor.blood}
+                                            </p>
+                                            <p>
+                                                <span className="font-semibold text-[#002940]">Email: </span> 
+                                                {donor.email}
+                                            </p>
+                                            <p>
+                                                <span className="font-semibold text-[#002940]">Sex: </span> 
+                                                {donor.sex}
+                                            </p>
+                                            <p>
+                                                <span className="font-semibold text-[#002940]">Mobile Number: </span> 
+                                                {donor.mobile_no}
+                                            </p>
+                                            <p>
+                                                <span className="font-semibold text-[#002940]">Age: </span> 
+                                                {donor.age}
+                                            </p>
+                                            <p>
+                                                <span className="font-semibold text-[#002940]">Location: </span> 
+                                                {`${donor.street}, ${donor.zip_code}`}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
 
+                    {/* Pagination (View-Only for Demo) */}
                     <div className="mt-5 flex flex-row items-center justify-between gap-5">
                         <button
                             type="button"
@@ -175,11 +169,7 @@ export default function DonorAnalyticsPage() {
                         >
                             Previous
                         </button>
-
-                        <p className="text-[18px] text-[#002940]">
-                            Page 1
-                        </p>
-
+                        <p className="text-[18px] text-[#002940]">Page 1</p>
                         <button
                             type="button"
                             className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"

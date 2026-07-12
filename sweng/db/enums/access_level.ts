@@ -6,7 +6,6 @@ export const accessBase = [
     'med_prof',
     'director',
     'super_admin',
-    'staff_admin',
     'lab_staff',
     'recov_staff'
 ] as const;

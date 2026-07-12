@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderLanding";
-import { clientSupa } from "@/db/supaclient";
 import { executeLogin } from "../login/login_action";
+import { executeLogout } from "../logout/logout_action";
 
 type LandingEvent = {
     id: string;
@@ -53,6 +53,8 @@ export default function Home() {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
+
     const handleLogin = async () => {
 
         setIsLoading(true)
@@ -82,16 +84,31 @@ export default function Home() {
                 router.push("/rs/events");
                 break;
             case "director":
-            case "director":
                 router.push("/rbd/analytics");
                 break;
-            case "staff_admin":
             case "super_admin":
                 router.push("/sa/page");
                 break;
             default:
                 setErrorMessage("Unauthorized role detected.");
                 setIsLoading(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        
+        const result = await executeLogout();
+        
+        if (result.success) {
+            // Instantly boot them back to the login page
+            router.push("/login");
+            // Optional: router.refresh() if Next.js caches the layout heavily
+            router.refresh(); 
+        } else {
+            console.error(result.message);
+            alert("Failed to log out safely.");
+            setIsLoggingOut(false);
         }
     };
 
@@ -203,7 +220,10 @@ export default function Home() {
                             {isLoading ? "..." : "Log in"}
                         </button>
 
-                        <button className="w-[1in] bg-[#f9fdff] text-[#1b4054] p-[5px] rounded-[10px] text-center border-2 border-[#1b4054] cursor-pointer hover:bg-[#fd5448] hover:text-[#f9fdff] hover:border-[#fd5448] transition">
+                        <button 
+                            className="w-[1in] bg-[#f9fdff] text-[#1b4054] p-[5px] rounded-[10px] text-center border-2 border-[#1b4054] cursor-pointer hover:bg-[#fd5448] hover:text-[#f9fdff] hover:border-[#fd5448] transition"
+                            onClick={() => router.push("/signup")}
+                        >
                             Sign up
                         </button>
                     </div>

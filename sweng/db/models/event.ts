@@ -10,6 +10,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { city } from "./city";
+import { event_status } from "../enums/event_status";
 
 export const eventStatusEnum = pgEnum("event_status", [
   "Upcoming",

@@ -5,7 +5,6 @@ describe("hasPermission", () => {
     it("always allows super_admin, regardless of the action", () => {
         // Includes an action with an empty allow-list to prove the super_admin bypass runs before the list lookup
         expect(hasPermission("super_admin", "delete_donor")).toBe(true);
-
     });
 
     it("denies delete_donor to every non-super_admin role", () => {
@@ -14,7 +13,8 @@ describe("hasPermission", () => {
             "onsite_admin",
             "med_prof",
             "director",
-            "staff_admin",
+            "lab_staff",
+            "recov_staff",
         ];
 
         for (const role of roles) {
@@ -36,15 +36,15 @@ describe("hasPermission", () => {
     describe.each([
         ["retrieve_donors", ["med_prof"]],
         ["edit_donor", ["med_prof"]],
-        ["view_event", ["onsite_admin", "med_prof", "director", "staff_admin"]],
-        ["create_event", ["onsite_admin", "med_prof", "director", "staff_admin"]],
+        ["view_event", ["onsite_admin", "med_prof", "director", "super_admin"]],
+        ["create_event", ["onsite_admin", "med_prof", "director", "super_admin"]],
         [
             "view_correct_event",
-            ["onsite_admin", "med_prof", "director", "staff_admin"],
+            ["onsite_admin", "med_prof", "director", "super_admin"],
         ],
         [
             "create_correct_event",
-            ["onsite_admin", "med_prof", "director", "staff_admin"],
+            ["onsite_admin", "med_prof", "director", "super_admin"],
         ],
         ["view_analytics", ["director"]],
     ] as [Actions, AccessType[]][])("%s", (action, allowedRoles) => {
@@ -52,7 +52,9 @@ describe("hasPermission", () => {
             "onsite_admin",
             "med_prof",
             "director",
-            "staff_admin",
+            "lab_staff",
+            "recov_staff",
+            "donor",
         ];
 
         it(`allows: ${allowedRoles.join(", ")}`, () => {
