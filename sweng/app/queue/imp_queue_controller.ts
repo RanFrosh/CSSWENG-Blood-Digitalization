@@ -70,6 +70,15 @@ export class ImpQueueManager implements QueueController {
         const profile = await this.profileReader.getCurrentUser();
         if (!profile.success || !profile.data?.id) return { success: profile.success, message: profile.message};
 
+        const busyCheck = await this.queueModel.queryQueue({
+            event_log_id: event_guy,
+            profiles_id: profile.data.id,
+            station: null
+        });
+        if (busyCheck.data && busyCheck.data.length > 0) {
+            return { success: false, message: "You are already handling a donor" };
+        }
+
         const stationRes = getQueueStation(profile.data.role);
         if (!stationRes) return { success: false, message: "Invalid role for queue", data: undefined };
 
