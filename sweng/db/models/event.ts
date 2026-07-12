@@ -1,9 +1,28 @@
-import { pgTable, text, timestamp, bigserial, bigint} from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  bigserial,
+  bigint,
+  date,
+  time,
+  pgEnum,
+} from "drizzle-orm/pg-core";
+
 import { city } from "./city";
+
+export const eventStatusEnum = pgEnum("event_status", [
+  "Upcoming",
+  "Ongoing",
+  "Completed",
+]);
 
 export const event_log = pgTable("event_log", {
   id: bigserial("id", { mode: "bigint" }).primaryKey(),
-  created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+
+  created_at: timestamp("created_at", {
+    withTimezone: true,
+  }).defaultNow().notNull(),
 
   visitors: bigint("visitors", { mode: "bigint" }).notNull(),
   extractions: bigint("extractions", { mode: "bigint" }).notNull(),
@@ -13,8 +32,20 @@ export const event_log = pgTable("event_log", {
 
   name: text("name").notNull(),
 
-  city_id: bigint("city_id", { mode: "bigint" }).references(() => city.id, { onDelete: 'no action', onUpdate: 'no action'}).notNull(),
+  city_id: bigint("city_id", { mode: "bigint" })
+    .references(() => city.id)
+    .notNull(),
 
   zip_code: text("zip_code").notNull(),
-  street: text("street").notNull()
+  street: text("street").notNull(),
+
+  partner: text("partner"),
+
+  event_date: date("event_date"),
+
+  start_time: time("start_time"),
+
+  end_time: time("end_time"),
+
+  status: eventStatusEnum("status"),
 });
