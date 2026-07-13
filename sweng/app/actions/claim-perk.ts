@@ -1,19 +1,21 @@
-import { NextRequest, NextResponse } from "next/server";
+"use server";
+
 import { eq, sql } from "drizzle-orm";
 
 import { orm } from "@/db/drizzle";
 import { donor } from "@/db/models/donor";
 import { event_log } from "@/db/models/event-log";
 
-export async function POST(req: NextRequest) {
+export async function claimPerkAction(
+    eventId: string,
+    qrToken: string
+) {
     try {
-        const { eventId, qrToken } = await req.json();
-
         if (!eventId || !qrToken) {
-            return NextResponse.json(
-                { message: "Missing eventId or qrToken." },
-                { status: 400 }
-            );
+            return {
+                success: false,
+                message: "Missing eventId or qrToken.",
+            };
         }
 
         // Verify donor exists
@@ -28,10 +30,10 @@ export async function POST(req: NextRequest) {
             .limit(1);
 
         if (foundDonor.length === 0) {
-            return NextResponse.json(
-                { message: "Invalid QR code." },
-                { status: 404 }
-            );
+            return {
+                success: false,
+                message: "Invalid QR code.",
+            };
         }
 
         // Increment perk_claims
@@ -42,20 +44,16 @@ export async function POST(req: NextRequest) {
             })
             .where(eq(event_log.id, BigInt(eventId)));
 
-        return NextResponse.json({
+        return {
             success: true,
             donor: foundDonor[0],
-        });
+        };
     } catch (error) {
-        console.error(error);
+        console.error("CLAIM PERK ERROR:", error);
 
-        return NextResponse.json(
-            {
-                message: "Internal server error.",
-            },
-            {
-                status: 500,
-            }
-        );
+        return {
+            success: false,
+            message: "Internal server error.",
+        };
     }
 }

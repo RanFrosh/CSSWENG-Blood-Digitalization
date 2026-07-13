@@ -6,6 +6,9 @@ import { Html5Qrcode } from "html5-qrcode";
 
 import Header from "@/components/HeaderOA";
 
+import { verifyDonorAction } from "@/app/actions/donor-verification";
+import { checkInDonorAction } from "@/app/actions/oa-checkin";
+
 export default function ScannerPage() {
     const router = useRouter();
     const params = useParams();
@@ -13,7 +16,6 @@ export default function ScannerPage() {
     const eventId = params.eventId as string;
 
     const [isScanning, setIsScanning] = useState(false);
-    
     const [donor, setDonor] = useState<any>(null);
 
     const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -23,7 +25,7 @@ export default function ScannerPage() {
 
         setIsScanning(true);
 
-        // Wait for React to render the reader div
+        // Give React time to render the #reader div
         setTimeout(async () => {
             const scanner = new Html5Qrcode("reader");
             scannerRef.current = scanner;
@@ -39,29 +41,21 @@ export default function ScannerPage() {
                         },
                     },
                     async (decodedText) => {
-                        console.log("QR Code:", decodedText);
-
                         await scanner.stop();
-                        scanner.clear();
+                        await scanner.clear();
 
                         scannerRef.current = null;
                         setIsScanning(false);
 
                         try {
-                            const response = await fetch(
-                                `/api/donor/verify/${encodeURIComponent(decodedText)}`
-                            );
+                            const result = await verifyDonorAction(decodedText);
 
-                            const data = await response.json();
-
-                            if (!response.ok) {
-                                alert(data.message ?? "Invalid QR code.");
+                            if (!result.success) {
+                                alert(result.message);
                                 return;
                             }
 
-                            console.log(data.donor);
-
-                            setDonor(data.donor);
+                            setDonor(result.donor);
                         } catch (error) {
                             console.error(error);
                             alert("Failed to verify QR code.");
@@ -71,8 +65,6 @@ export default function ScannerPage() {
                         // Ignore scan errors
                     }
                 );
-
-                setIsScanning(true);
             } catch (err) {
                 console.error(err);
                 setIsScanning(false);
@@ -85,7 +77,7 @@ export default function ScannerPage() {
         if (!scannerRef.current) return;
 
         await scannerRef.current.stop();
-        scannerRef.current.clear();
+        await scannerRef.current.clear();
 
         scannerRef.current = null;
         setIsScanning(false);
@@ -95,7 +87,9 @@ export default function ScannerPage() {
         return () => {
             if (scannerRef.current) {
                 scannerRef.current.stop().catch(() => {});
-                scannerRef.current.clear();
+                try {
+                    scannerRef.current.clear();
+                } catch {}
             }
         };
     }, []);
@@ -104,21 +98,13 @@ export default function ScannerPage() {
         if (!donor) return;
 
         try {
-            const response = await fetch("/api/oa/check-in", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    eventId,
-                    qrToken: donor.qr_token,
-                }),
-            });
+            const result = await checkInDonorAction(
+                eventId,
+                donor.qr_token
+            );
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                alert(data.message ?? "Failed to check in donor.");
+            if (!result.success) {
+                alert(result.message);
                 return;
             }
 
@@ -141,15 +127,13 @@ export default function ScannerPage() {
                 {/* Page Title */}
                 <section className="bg-[#f9fdff] p-[0.25in]">
                     <div>
-                        <div>
-                            <p className="text-[18px] font-['Montserrat'] text-[#002940]">
-                                Onsite Admin
-                            </p>
+                        <p className="text-[18px] font-['Montserrat'] text-[#002940]">
+                            Onsite Admin
+                        </p>
 
-                            <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                                Scan Donor QR
-                            </h1>
-                        </div>
+                        <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
+                            Scan Donor QR
+                        </h1>
                     </div>
                 </section>
 
@@ -189,11 +173,9 @@ export default function ScannerPage() {
                 {/* Scanner */}
                 <section className="mt-8 bg-white border-2 border-[#c0cad0] rounded-[18px] p-5 shadow-sm">
                     <div className="flex flex-row items-center justify-between gap-5 flex-wrap">
-                        <div>
-                            <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                QR Scanner
-                            </h2>
-                        </div>
+                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
+                            QR Scanner
+                        </h2>
 
                         <span className="bg-[#002940] text-white px-5 py-3 rounded-full text-[18px] font-semibold">
                             Event ID: {eventId}
@@ -203,7 +185,7 @@ export default function ScannerPage() {
                     <button
                         type="button"
                         onClick={isScanning ? stopScanner : startScanner}
-                        className="mt-5 w-full min-h-[540px] bg-[#002940] rounded-[18px] border-2 border-[#002940] flex flex-col items-center justify-center cursor-pointer hover:opacity-95 transition"
+                        className="mt-5 w-full min-h-[540px] bg-[#002940] rounded-[18px] border-2 border-[#002940] flex flex-col items-center justify-center cursor-pointer hover:opacity-95 transition overflow-hidden"
                     >
                         {!isScanning ? (
                             <>
