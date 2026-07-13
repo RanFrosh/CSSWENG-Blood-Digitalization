@@ -2,6 +2,12 @@ import { AccessType } from "@/db/enums/access_level";
 import { QueueStationType } from "@/db/enums/queue_station";
 
 const permissions = {
+    'access_oa_page': ['onsite_admin'] as AccessType[],
+    'access_mp_page': ['med_prof'] as AccessType[],
+    'access_rbd_page': ['director'] as AccessType[],
+    'access_sa_page': ['super_admin'] as AccessType[],
+    'access_ls_page': ['lab_staff'] as AccessType[],
+    'access_rs_page': ['recov_staff'] as AccessType[],
     'retrieve_donors': ['med_prof'] as AccessType[],
     'edit_donor': ['med_prof'] as AccessType[],
     'delete_donor': [] as AccessType[],
