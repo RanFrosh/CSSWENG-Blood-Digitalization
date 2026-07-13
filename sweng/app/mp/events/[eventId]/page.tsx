@@ -18,6 +18,8 @@ export default function MPEventPage() {
 
     useEffect(() => {
     const load = async () => {
+        setIsLoading(true);
+        setErrorMessage("");
         const result = await verifyEventAccess(BigInt(eventId));
         if (result.success && result.data) {
             setEvent(result.data);

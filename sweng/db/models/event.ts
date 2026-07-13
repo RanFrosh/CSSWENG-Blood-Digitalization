@@ -16,8 +16,8 @@ export const event_log = pgTable("event_log", {
 
   city_id: bigint("city_id", { mode: "bigint" }).references(() => city.id, { onDelete: 'no action', onUpdate: 'no action'}).notNull(),
 
-  zip_code: text("zip_code").notNull(),
-  street: text("street").notNull(),
+  zip_code: text("zip_code"),
+  street: text("street"),
 
   partner: text("partner"),
   event_date: date("event_date"),

@@ -10,6 +10,7 @@ import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
+import { bigintToStr } from "../global/serializer/serial";
 
 export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<ViewDonor>> {
     try {
@@ -23,7 +24,7 @@ export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<Vie
 
         if (!result) return { success: false, message: "Donor not found" };
 
-        return { success: true, message: "Donor retrieved", data: result };
+        return bigintToStr({ success: true, message: "Donor retrieved", data: result });
 
     } catch (err: any) {
         return { success: false, message: err.message };
@@ -58,7 +59,7 @@ export async function viewQueueWithDonors(event_info: bigint): Promise<ApiRespon
             donor_profile: entry.donor_id ? donorMap.get(entry.donor_id) ?? null : null
         }));
 
-        return { success: true, message: "Queue retrieved", data: combined };
+        return bigintToStr({ success: true, message: "Queue retrieved", data: combined });
 
     } catch (err: any) {
         return { success: false, message: err.message }
@@ -71,5 +72,5 @@ export async function pickNextDonor(event_log_id: bigint): Promise<ApiResponse<V
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpQueueManager(model, profiler);
 
-    return controller.invokePickNextQueue(event_log_id);
+    return bigintToStr(controller.invokePickNextQueue(event_log_id));
 }
