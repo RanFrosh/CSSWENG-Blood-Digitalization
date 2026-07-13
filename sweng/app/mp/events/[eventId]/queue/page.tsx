@@ -66,9 +66,10 @@ export default function QueuePage() {
 
     useEffect(() => {
     const load = async () => {
+        console.log("1. CLIENT SENDING EVENT ID:", eventId);
         setIsLoading(true);
         setErrorMessage("");
-        const result = await viewQueueWithDonors(BigInt(eventId));
+        const result = await viewQueueWithDonors(eventId);
         if (result.success && result.data) {
             setWaitList(result.data);
             setCurrentPage(1);

@@ -9,6 +9,6 @@ export const event_queue = pgTable("event_queue", {
   event_log_id: bigint("event_log_id", { mode: "bigint" }).references(() => event_log.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   donor_id: bigint("donor_id", { mode: "bigint" }).references(() => donor.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   station: queue_station("station"),
-  profiles_id: uuid("profiles_id").references(() => profiles.id, { onDelete: 'cascade', onUpdate: 'cascade' })
+  profile_id: uuid("profiles_id").references(() => profiles.id, { onDelete: 'cascade', onUpdate: 'cascade' })
 });
 

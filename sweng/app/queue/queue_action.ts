@@ -11,10 +11,18 @@ import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
 import { bigintToStr } from "../global/serializer/serial";
+import { helpGateKeep } from "../global/helper_bouncer/bouncer";
+import { bigint } from "drizzle-orm/gel-core";
 
 export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<ViewDonor>> {
+    
     try {
         if (!donor_info) return { success: false, message: "Donor id is missing" };
+
+        const database = await serverSupa();
+        const profiler = new ImpProfileGetter(database);
+        const auth = await helpGateKeep(profiler, 'viewqueue');
+        if (!auth.success) return { success: false, message: auth.message };
 
         const [result] = await orm
         .select()
@@ -31,14 +39,17 @@ export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<Vie
     }
 }
 
-export async function viewQueueWithDonors(event_info: bigint): Promise<ApiResponse<QueueEntryWithDonor[]>> {
+export async function viewQueueWithDonors(event_info_str: string): Promise<ApiResponse<QueueEntryWithDonor[]>> {
+    
+    console.log("2. ACTION RECEIVED EVENT ID:", event_info_str);
     try {
         const database = await serverSupa();
         const model = new ImpQueueModel(orm);
         const profiler = new ImpProfileGetter(database);
         const controller = new ImpQueueManager(model, profiler);
+        const event_info_bigInt = BigInt(event_info_str)
 
-        const queueResult = await controller.invokeQueryQueue({ event_log_id: event_info });
+        const queueResult = await controller.invokeQueryQueue({ event_log_id: event_info_bigInt });
 
         if (!queueResult.success || !queueResult.data) return { success: queueResult.success, message: queueResult.message, data: undefined };
 
@@ -72,5 +83,5 @@ export async function pickNextDonor(event_log_id: bigint): Promise<ApiResponse<V
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpQueueManager(model, profiler);
 
-    return bigintToStr(controller.invokePickNextQueue(event_log_id));
+    return bigintToStr(await controller.invokePickNextQueue(event_log_id));
 }

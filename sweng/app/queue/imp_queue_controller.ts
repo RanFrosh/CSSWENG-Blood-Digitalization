@@ -15,48 +15,55 @@ export class ImpQueueManager implements QueueController {
     }
 
     async invokeQueryQueue(filterer: ViewQueueFilters): Promise<ApiResponse<ViewQueue[]>> {
-        const res = await helpGateKeep(this.profileReader, 'viewqueue');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
-
-        const profile = await this.profileReader.getCurrentUser();
-        if (!profile.success || !profile.data?.id) return { success: profile.success, message: profile.message};
+        
+        const res = await helpGateKeep(this.profileReader, 'dequeue');
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
 
         const appendedFilterer: ViewQueueFilters = {
             ...filterer,
-            profiles_id: profile.data.id,
-            station: getQueueStation(profile.data.role)
+            profile_id: res.data.id,
+            station: getQueueStation(res.data.role)
         }
+
+        console.log("3. CONTROLLER SENDING TO MODEL:", { 
+            event_id: appendedFilterer.event_log_id, 
+            profile_id: appendedFilterer.profile_id 
+        });
 
         const outcome = await this.queueModel.queryQueue(appendedFilterer);
         return outcome;
     }
 
     async invokeDeleteQueue(donorTarget: DeleteQueue): Promise<ApiResponse> {
+        
         const res = await helpGateKeep(this.profileReader, 'dequeue');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
 
         const outcome = await this.queueModel.deleteQueue(donorTarget);
         return outcome;
     }
 
     async invokeAddToQueue(queueTarget: CreateQueue): Promise<ApiResponse> {
-        const res = await helpGateKeep(this.profileReader, 'enqueue');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
+        
+        const res = await helpGateKeep(this.profileReader, 'dequeue');
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
 
         const outcome = await this.queueModel.addToQueue(queueTarget);
         return outcome;
     }
 
     async invokeUpdateQueueStation(queueTarget: UpdateQueue): Promise<ApiResponse> {
-        const res = await helpGateKeep(this.profileReader, 'updatequeue');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
-
-        const profile = await this.profileReader.getCurrentUser();
-        if (!profile.success || !profile.data?.id) return { success: profile.success, message: profile.message};
+        
+        const res = await helpGateKeep(this.profileReader, 'dequeue');
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
 
         const appendedQueueTarget: UpdateQueue = {
             ...queueTarget,
-            profiles_id: profile.data.id
+            profiles_id: res.data.id
         }
 
         const outcome = await this.queueModel.updateQueueStation(appendedQueueTarget);
@@ -64,25 +71,24 @@ export class ImpQueueManager implements QueueController {
     }
 
     async invokePickNextQueue(event_guy: bigint): Promise<ApiResponse<ViewQueue>> {
-        const res = await helpGateKeep(this.profileReader, 'updatequeue');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
         
-        const profile = await this.profileReader.getCurrentUser();
-        if (!profile.success || !profile.data?.id) return { success: profile.success, message: profile.message};
+        const res = await helpGateKeep(this.profileReader, 'dequeue');
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
 
         const busyCheck = await this.queueModel.queryQueue({
             event_log_id: event_guy,
-            profiles_id: profile.data.id,
+            profile_id: res.data.id,
             station: null
         });
         if (busyCheck.data && busyCheck.data.length > 0) {
             return { success: false, message: "You are already handling a donor" };
         }
 
-        const stationRes = getQueueStation(profile.data.role);
+        const stationRes = getQueueStation(res.data.role);
         if (!stationRes) return { success: false, message: "Invalid role for queue", data: undefined };
 
-        const queueResult = await this.queueModel.queryQueue({ event_log_id: event_guy, profiles_id: profile.data.id , station: stationRes });
+        const queueResult = await this.queueModel.queryQueue({ event_log_id: event_guy, profile_id: res.data.id, station: stationRes });
 
         if (!queueResult.success || !queueResult.data || queueResult.data.length === 0) {
             return { success: queueResult.success, message: queueResult.message, data: undefined };
@@ -93,7 +99,7 @@ export class ImpQueueManager implements QueueController {
         const updateResult = await this.queueModel.updateQueueStation({
         id: nextDonor.id,
         station: null,
-        profiles_id: profile.data.id
+        profiles_id: res.data.id
             });
 
         if (!updateResult.success) {
@@ -101,7 +107,7 @@ export class ImpQueueManager implements QueueController {
         }
 
         nextDonor.station = null;
-        nextDonor.profiles_id = profile.data.id
+        nextDonor.profile_id = res.data.id
 
         return { success: true, message: `Donor assigned and ${updateResult.message}`, data: nextDonor };
     }
