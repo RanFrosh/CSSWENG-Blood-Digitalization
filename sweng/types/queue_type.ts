@@ -1,6 +1,7 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import { event_queue } from "@/db/models/event_queue";
 import { QueueStationType } from "@/db/enums/queue_station";
+import { ViewDonor } from "./donor_type";
 
 export type ViewQueue = InferSelectModel<typeof event_queue>;
 export type ViewQueueFilters = Partial<ViewQueue>;
@@ -16,3 +17,5 @@ export type UpdateQueue = {
 export type DeleteQueue = {
     id: bigint;
 };
+
+export type QueueEntryWithDonor = ViewQueue & { donor_profile: ViewDonor | null };
