@@ -36,9 +36,13 @@ export default function RSScannerPage() {
                     { facingMode: "environment" },
                     {
                         fps: 10,
-                        qrbox: {
-                            width: 250,
-                            height: 250,
+                        qrbox: (viewfinderWidth, viewfinderHeight) => {
+                            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+
+                            return {
+                                width: minEdge * 0.8,
+                                height: minEdge * 0.8,
+                            };
                         },
                     },
                     async (decodedText) => {
