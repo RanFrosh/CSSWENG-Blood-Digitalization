@@ -15,6 +15,8 @@ export interface EventData {
 
     queryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
     createCorrection(data: CreateCorrections): Promise<ApiResponse>
+
+    queryEventById(id: bigint): Promise<ApiResponse<ViewEvents>>
 }
 
 export interface EventController {
@@ -24,4 +26,6 @@ export interface EventController {
 
     invokeQueryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
     invokeCreateCorrection(data: Omit<CreateCorrections, 'ref_profile_id'>): Promise<ApiResponse>
+
+    invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>>
 }

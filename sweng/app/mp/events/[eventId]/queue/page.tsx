@@ -1,7 +1,9 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
-
+import { useState, useEffect } from "react";
 import Header from "@/components/HeaderMP";
+import { QueueEntryWithDonor } from "@/types/queue_type";
+import { retrieveDonor, viewQueueWithDonors } from "@/app/queue/queue_action";
 
 // Sample queue donor structure
 type QueueDonor = {
@@ -80,7 +82,7 @@ const latestAddition: LatestAddition | null = {
 export default function QueuePage() {
     const router = useRouter();
     const params = useParams();
-
+    const [waitList, setWaitList]: QueueEntryWithDonor[] = useState([]);
     const eventId = params.eventId as string;
 
     // Get the current donor being handled by a medical professional

@@ -4,8 +4,8 @@ import { ApiResponse } from "@/types/api_res_type";
 import { orm } from "@/db/drizzle";
 import { donor } from "@/db/models/donor";
 import { eq, inArray } from "drizzle-orm";
-import { ViewDonor, ViewDonorPartial } from "@/types/donor_type";
-import { ViewQueueFilters, ViewQueue, QueueEntryWithDonor } from "@/types/queue_type";
+import { ViewDonor } from "@/types/donor_type";
+import { ViewQueue, QueueEntryWithDonor } from "@/types/queue_type";
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
@@ -63,4 +63,13 @@ export async function viewQueueWithDonors(event_info: bigint): Promise<ApiRespon
     } catch (err: any) {
         return { success: false, message: err.message }
     }
+}
+
+export async function pickNextDonor(event_log_id: bigint): Promise<ApiResponse<ViewQueue>> {
+    const database = await serverSupa();
+    const model = new ImpQueueModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpQueueManager(model, profiler);
+
+    return controller.invokePickNextQueue(event_log_id);
 }
