@@ -10,7 +10,6 @@ import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
-import { bigint } from "drizzle-orm/gel-core";
 
 export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<ViewDonor>> {
     try {
@@ -38,7 +37,7 @@ export async function viewQueueWithDonors(event_info: bigint): Promise<ApiRespon
         const profiler = new ImpProfileGetter(database);
         const controller = new ImpQueueManager(model, profiler);
 
-        const queueResult = await controller.invokeQueryQueue({ id: event_info });
+        const queueResult = await controller.invokeQueryQueue({ event_log_id: event_info });
 
         if (!queueResult.success || !queueResult.data) return { success: queueResult.success, message: queueResult.message, data: undefined };
 
@@ -62,6 +61,6 @@ export async function viewQueueWithDonors(event_info: bigint): Promise<ApiRespon
         return { success: true, message: "Queue retrieved", data: combined };
 
     } catch (err: any) {
-        return { success: false, message: err.med_queue }
+        return { success: false, message: err.message }
     }
 }
