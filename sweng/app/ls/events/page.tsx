@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderLS";
 import StaffDetails from "@/components/StaffDetails";
-import { checkAuthentication } from "./ls_action";
 import { ViewEvents } from "@/types/event_type";
+import { getLabStaffEvents } from "./ls_action";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 type EventTab = EventStatus | "All";
@@ -20,38 +20,9 @@ type AssignedEvent = {
     status: EventStatus;
 };
 
-// Sample events
-const assignedEvents: AssignedEvent[] = [
-    {
-        id: "1",
-        name: "Name 1",
-        location: "Location 1",
-        date: "Date 1",
-        time: "Time 1",
-        partner: "Partner 1",
-        status: "Ongoing",
-    },
-    {
-        id: "2",
-        name: "Name 2",
-        location: "Location 2",
-        date: "Date 2",
-        time: "Time 2",
-        partner: "Partner 2",
-        status: "Upcoming",
-    },
-    {
-        id: "3",
-        name: "Name 3",
-        location: "Location 3",
-        date: "Date 3",
-        time: "Time 3",
-        partner: "Partner 3",
-        status: "Completed",
-    },
-];
 
 export default function LSEventsPage() {
+
     const router = useRouter();
 
     // Set the initial active tab to "Ongoing"
@@ -76,9 +47,7 @@ export default function LSEventsPage() {
             setErrorMessage("");
 
             try {
-                const result = await checkAuthentication(
-                    activeTab !== "All" ? { status: activeTab } : {}
-                );
+                const result = await getLabStaffEvents(activeTab);
 
                 if (result.success && result.data) {
                     setEvents(result.data);
@@ -94,18 +63,12 @@ export default function LSEventsPage() {
         loadEvents();
     }, [activeTab]);
 
-    // Initialize filtered events
-    let filteredEvents: AssignedEvent[] = [];
-
-    // Filter events based on selected filter
-    if (activeTab === "All") {
-        filteredEvents = assignedEvents;
-    } else {
-        filteredEvents = assignedEvents.filter((event) => event.status === activeTab);
-    }
+    const filteredEvents = activeTab === "All" 
+        ? events 
+        : events.filter((event) => event.status === activeTab);
 
     // Can only open events that are ongoing
-    const openEvent = (event: AssignedEvent) => {
+    const openEvent = (event: ViewEvents) => {
         if (event.status === "Ongoing") {
             // Navigate to the event details page for the selected event
             router.push(`/ls/events/${event.id}`);
@@ -131,7 +94,7 @@ export default function LSEventsPage() {
     };
     
     // Create button to open event if it is ongoing
-    const createActionButton = (event: AssignedEvent) => {
+    const createActionButton = (event: ViewEvents) => {
         if (event.status === "Ongoing") {
             return (
                 <button

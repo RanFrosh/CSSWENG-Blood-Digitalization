@@ -11,7 +11,7 @@ const permissions = {
     'retrieve_donors': ['med_prof'] as AccessType[],
     'edit_donor': ['med_prof'] as AccessType[],
     'delete_donor': [] as AccessType[],
-    'view_event': ['onsite_admin', 'med_prof', 'director', 'super_admin'] as AccessType[],
+    'view_event': ['onsite_admin', 'med_prof', 'director', 'lab_staff', 'super_admin'] as AccessType[],
     'create_event': ['onsite_admin', 'med_prof', 'director', 'super_admin'] as AccessType[],
     'view_correct_event': ['onsite_admin', 'med_prof', 'director', 'super_admin'] as AccessType[],
     'create_correct_event': ['onsite_admin', 'med_prof', 'director', 'super_admin'] as AccessType[],

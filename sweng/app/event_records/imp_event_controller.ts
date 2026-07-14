@@ -16,36 +16,46 @@ export class ImpEventManager implements EventController {
     }
 
     async invokeQueryEvent(data: ViewEventFilters, sort: Sorter<ViewEvents>): Promise<ApiResponse<ViewEvents[]>> {
+
         const res = await helpGateKeep(this.profileReader, 'view_event');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
+
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
+
         const events = await this.eventModel.queryEvent(data, sort);
+
         return events;
     }
 
     async invokeCreateEvent(data: CreateEvents): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'create_event');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
+
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
+
         const creation = await this.eventModel.createEvent(data);
         return creation;
     }
 
     async invokeQueryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>> {
         const res = await helpGateKeep(this.profileReader, 'view_correct_event');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
+        
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
+
         const corrections = await this.eventModel.queryCorrection(data, sort);
         return corrections;
     }
 
     async invokeCreateCorrection(data: Omit<CreateCorrections, 'ref_profile_id'>): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'create_correct_event');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
-
-        const profile = await this.profileReader.getCurrentUser();
-        if (!profile.success || !profile.data?.id) return { success: profile.success, message: profile.message};
+        
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
 
         const appendedData: CreateCorrections = {
             ...data,
-            ref_profile_id: profile.data.id
+            ref_profile_id: res.data.id
         }
 
         const creation = await this.eventModel.createCorrection(appendedData);
@@ -53,20 +63,28 @@ export class ImpEventManager implements EventController {
     }
 
     async invokeQueryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>> {
+        
         const res = await helpGateKeep(this.profileReader, 'view_event');
-        if (!res.success) return { success: false, message: res.message, data: res.data }
+        
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
 
-        const events = await this.eventModel.queryEventStaff(data, staff);
+        const securedStaffFilter: ViewAssignedStaffFilter = {
+            ...staff,
+            profiles_id: res.data.id 
+        };
+
+        const events = await this.eventModel.queryEventStaff(data, securedStaffFilter);
         
         return events;
     }
 
     async invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>> {
+
         const res = await helpGateKeep(this.profileReader, 'view_event');
-        if (!res.success) return { success: false, message: res.message, data: res.data };
         
-        const profile = await this.profileReader.getCurrentUser();
-        if (!profile.success || !profile.data?.id) return { success: false, message: "Not authenticated", data: undefined };
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
 
         const eventResult = await this.eventModel.queryEventById(event_log_id);
         if (!eventResult.success) {
