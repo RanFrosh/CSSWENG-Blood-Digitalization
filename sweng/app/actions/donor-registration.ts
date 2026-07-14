@@ -132,8 +132,10 @@ export async function registerDonorAction(
   }
 
   // Insert the new donor record into the database
-  try {
-    await orm.insert(donor).values({
+try {
+  const [newDonor] = await orm
+    .insert(donor)
+    .values({
       first_name: firstName,
       middle_name: middleName || null,
       last_name: lastName,
@@ -147,11 +149,18 @@ export async function registerDonorAction(
       blood: bloodType,
       city_id: BigInt(city),
       photo_path: "placeholder.jpg",
+    } as any)
+    .returning({
+      id: donor.id,
+      qr_token: donor.qr_token,
     });
-  } catch (error) {
-    console.error("DONOR INSERT ERROR:", error);
-    throw error;
-  }
+
+  console.log("New donor:", newDonor);
+  console.log("QR Token:", newDonor.qr_token);
+} catch (error) {
+  console.error("DONOR INSERT ERROR:", error);
+  throw error;
+}
 
   // Redirect the user to the scanner page after successful registration
   redirect(`/oa/events/${eventId}/scanner`);

@@ -8,7 +8,7 @@ import {
   boolean,
   integer,
   date,
-  uuid
+  uuid,
 } from "drizzle-orm/pg-core";
 import { city } from "./city";
 import { biological_sex } from "../enums/biological_sex";
@@ -28,6 +28,9 @@ export const donor = pgTable("donor", {
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
   middle_name: text("middle_name"),
+
+  // QR Token
+  qr_token: uuid("qr_token").defaultRandom().unique().notNull(),
 
   // Age and birthdate
   birthdate: date("birthdate"),
