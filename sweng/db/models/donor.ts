@@ -8,11 +8,12 @@ import {
   boolean,
   integer,
   date,
+  uuid
 } from "drizzle-orm/pg-core";
-
 import { city } from "./city";
 import { biological_sex } from "../enums/biological_sex";
 import { blood_type } from "../enums/blood_type";
+import { assessment_status } from "../enums/assessment_status";
 
 export const donor = pgTable("donor", {
   // Primary key
@@ -29,9 +30,9 @@ export const donor = pgTable("donor", {
   middle_name: text("middle_name"),
 
   // Age and birthdate
-  age: integer("age"),
   birthdate: date("birthdate"),
-
+  age: integer("age"),
+  
   // Contact information
   email: text("email").notNull(),
   mobile_no: text("mobile_no").notNull(),
@@ -70,4 +71,6 @@ export const donor = pgTable("donor", {
   // Additional fields from dev
   verifiedBlood: boolean("verifiedBlood").default(false).notNull(),
   medicalNote: text("medicalNote"),
+  assessment_status: assessment_status("assessment_status"),
+  qr_token: uuid("qr_token").defaultRandom().notNull()
 });

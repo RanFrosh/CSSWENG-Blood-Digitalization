@@ -1,11 +1,19 @@
 "use client";
 import { useRouter } from "next/navigation";
-
+import { useState, useEffect } from "react";
 import Header from "@/components/HeaderRBD";
 import StaffDetails from "@/components/StaffDetails";
+import { checkAuthentication } from "./rbd_action";
 
 export default function AnalyticsPage() {
+    
     const router = useRouter();
+
+    // Loading State
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Error display
+    const [errorMessage, setErrorMessage] = useState("");
 
     const goEvents = () => {
         router.push(`/rbd/analytics/events`);
@@ -18,6 +26,50 @@ export default function AnalyticsPage() {
     const goOverall = () => {
         router.push(`/rbd/analytics/overall`);
     };
+    
+    useEffect(() => {
+        const verifyAccess = async () => {
+            setIsLoading(true);
+            setErrorMessage("");
+
+            try {
+                const result = await checkAuthentication();
+                
+                if (!result.success) {
+                    setErrorMessage(result.message);
+                }
+            } catch (error) {
+                console.error("Auth check failed:", error);
+                setErrorMessage("Failed to connect to the database.");
+            } finally {
+                setIsLoading(false); 
+            }
+        }
+        
+        verifyAccess();
+    }, []);
+
+    if (isLoading) {
+            return (
+                <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                    <Header />
+                    <div className="flex-1 flex items-center justify-center">
+                        <p className="text-[24px] text-[#002940]">Loading events...</p>
+                    </div>
+                </main>
+            );
+        }
+    
+        if (errorMessage) {
+            return (
+                <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                    
+                    <div className="flex-1 flex items-center justify-center">
+                        <p className="text-[24px] text-red-500">{errorMessage}</p>
+                    </div>
+                </main>
+            );
+        }
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">

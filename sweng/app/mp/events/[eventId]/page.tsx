@@ -1,76 +1,60 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
-
+import { useState, useEffect } from "react";
+import { ViewEvents } from "@/types/event_type";
+import { verifyEventAccess } from "../event_action";
 import Header from "@/components/HeaderMP";
-
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-
-// Sample event structure
-type AssignedEvent = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatus;
-};
-
-// Sample event
-const assignedEvents: AssignedEvent[] = [
-    {
-        id: "1",
-        name: "Blood Donation Drive",
-        location: "DLSU",
-        date: "XX/XX/XXXX",
-        time: "XX:XX AM - XX:XX PM",
-        partner: "Manila Doctors Hospital",
-        status: "Ongoing",
-    },
-];
-
-// Sample queue donor structure
-type QueueDonor = {
-    queueNumber: string;
-    id: string;
-    name: string;
-};
-
-// Sample next donor in queue
-const nextDonor: QueueDonor | null = {
-    queueNumber: "005",
-    id: "D-005",
-    name: "June Doe"
-};
+import { pickNextDonor, retrieveDonor } from "@/app/queue/queue_action";
 
 export default function MPEventPage() {
     const router = useRouter();
     const params = useParams();
+    const [event, setEvent] = useState<ViewEvents | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+    const [actionError, setActionError] = useState("");
 
     const eventId = params.eventId as string;
 
-    // Find the selected event based on the eventId
-    let selectedEvent: AssignedEvent | undefined = undefined;
-    selectedEvent = assignedEvents.find((event) => {
-        return event.id === eventId;
-    });
+    useEffect(() => {
+    const load = async () => {
+        setIsLoading(true);
+        setErrorMessage("");
+        const result = await verifyEventAccess(BigInt(eventId));
+        if (result.success && result.data) {
+            setEvent(result.data);
+        } else {
+            setErrorMessage(result.message);
+        }
+        setIsLoading(false);
+        };
+        load();
+    }, [eventId]);
 
     const goQueue = () => {
         router.push(`/mp/events/${eventId}/queue`);
     };
 
     // Accept donor from queue and proceed to screening
-    const acceptNewDonor = () => {
-        if (nextDonor === null) {
-            alert("There are no donors in the queue.");
+    const acceptNewDonor = async () => {
+        setActionError("");
+        const result = await pickNextDonor(BigInt(eventId));
+        if (result.success && result.data && result.data.donor_id) {
+            const donor = await retrieveDonor(result.data.donor_id)
+            if (donor.success && donor.data) {
+                const isConfirmed = confirm(
+                    `Queue Number: #${result.data.id}\nName: ${donor.data.first_name && donor.data.last_name
+                        ? `${donor.data.first_name} ${donor.data.last_name}`
+                        : "Missing name"}\n\nProceed to screening?`
+                );
+                if (isConfirmed) {
+                    router.push(`/mp/events/${eventId}/screening/${result.data.donor_id}`);
+                }
+            } else {
+                setActionError(donor.message);
+            }            
         } else {
-            const isConfirmed = confirm(
-                `Queue Number: #${nextDonor.queueNumber}\nName: ${nextDonor.name}\n\nProceed to screening?`
-            );
-
-            if (isConfirmed) {
-                router.push(`/mp/events/${eventId}/screening/${nextDonor.id}`);
-            }
+            setActionError(result.message);
         }
     };
 
@@ -78,20 +62,26 @@ export default function MPEventPage() {
         router.push("/mp/events");
     };
 
-    // If the selected event is not found, display error message
-    if (selectedEvent === undefined) {
+    if (isLoading) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
                 <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading event...</p>
+                </div>
+            </main>
+        );
+    }
 
+    // If the selected event is not found, display error message
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
                 <div className="flex-1 p-[0.35in]">
                     <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                        <h1 className="text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                            Event Not Found
-                        </h1>
-
                         <p className="mt-[10px] text-[18px]">
-                            The selected event does not exist or is not assigned to this account.
+                            {errorMessage}
                         </p>
 
                         <button
@@ -106,7 +96,7 @@ export default function MPEventPage() {
         );
 
     // If the selected event is found, display event details and actions
-    } else {
+    } else if (event) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
                 <Header />
@@ -119,7 +109,7 @@ export default function MPEventPage() {
                         </p>
 
                         <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                            {selectedEvent.name}
+                            {event.name}
                         </h1>
                     </section>
 
@@ -140,31 +130,37 @@ export default function MPEventPage() {
                                 <span className="font-semibold text-[#002940]">
                                     Partner:
                                 </span>{" "}
-                                {selectedEvent.partner}
+                                {event.partner}
                             </p>
 
                             <p>
                                 <span className="font-semibold text-[#002940]">
                                     Location:
                                 </span>{" "}
-                                {selectedEvent.location}
+                                {event.street}
                             </p>
 
                             <p>
                                 <span className="font-semibold text-[#002940]">
                                     Date:
                                 </span>{" "}
-                                {selectedEvent.date}
+                                {event.event_date}
                             </p>
 
                             <p>
                                 <span className="font-semibold text-[#002940]">
                                     Time:
                                 </span>{" "}
-                                {selectedEvent.time}
+                                {event?.start_time && event?.end_time ? `${event.start_time} - ${event.end_time}` : "—"}
                             </p>
                         </div>
                     </section>
+
+                    {actionError && (
+                        <div className="mt-[0.15in] p-2 text-sm text-white bg-red-500 rounded text-center">
+                            {actionError}
+                        </div>
+                    )}
 
                     {/* Action Cards */}
                     <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">

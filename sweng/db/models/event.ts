@@ -37,8 +37,8 @@ export const event_log = pgTable("event_log", {
     .references(() => city.id)
     .notNull(),
 
-  zip_code: text("zip_code").notNull(),
-  street: text("street").notNull(),
+  zip_code: text("zip_code"),
+  street: text("street"),
 
   partner: text("partner"),
 

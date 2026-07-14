@@ -60,4 +60,19 @@ export class ImpEventManager implements EventController {
         
         return events;
     }
+
+    async invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>> {
+        const res = await helpGateKeep(this.profileReader, 'view_event');
+        if (!res.success) return { success: false, message: res.message, data: res.data };
+        
+        const profile = await this.profileReader.getCurrentUser();
+        if (!profile.success || !profile.data?.id) return { success: false, message: "Not authenticated", data: undefined };
+
+        const eventResult = await this.eventModel.queryEventById(event_log_id);
+        if (!eventResult.success) {
+            return { success: eventResult.success, message: eventResult.message, data: undefined };
+        }
+
+        return { success: true, message: "Access verified", data: eventResult.data };
+    }
 }

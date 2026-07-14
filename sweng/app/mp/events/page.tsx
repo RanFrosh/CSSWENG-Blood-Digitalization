@@ -9,9 +9,6 @@ import { executeEventQueryStaff } from "./event_action";
 
 type EventTab = EventStatusType | "All";
 
-
-
-
 export default function MPEventsPage() {
     const router = useRouter();
 
@@ -32,16 +29,24 @@ export default function MPEventsPage() {
 
     useEffect(() => {
         const loadEvents = async () => {
+
             setIsLoading(true);
-            const result = await executeEventQueryStaff(
+            setErrorMessage("");
+
+            try {
+                const result = await executeEventQueryStaff(
                 activeTab !== "All" ? { status: activeTab } : {}
-            );
-            if (result.success && result.data) {
-                setEvents(result.data);
-            } else {
-                setErrorMessage(result.message);
+                );
+                if (result.success && result.data) {
+                    setEvents(result.data);
+                } else {
+                    setErrorMessage(result.message);
+                }
+            } catch (error) {
+                setErrorMessage("Failed to connect to the database");
+            } finally {
+                setIsLoading(false); 
             }
-            setIsLoading(false); 
         }
         loadEvents();
     }, [activeTab]);
@@ -102,7 +107,7 @@ export default function MPEventsPage() {
     if (errorMessage) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                <Header />
+                
                 <div className="flex-1 flex items-center justify-center">
                     <p className="text-[24px] text-red-500">{errorMessage}</p>
                 </div>
