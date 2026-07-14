@@ -127,16 +127,37 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
                 )
             );
 
-        const busyProfileIds = new Set(
-            busy.map(b => b.profile_id).filter((id): id is string => id !== null)
+        const busyByProfile = new Map(
+            busy.map(b => [b.profile_id, b])
         );
 
-        const result: StaffWithStatus[] = sameRoleStaff.map(p => ({
-            profiles_id: p.id,
-            name: p.name,
-            role: p.role,
-            isBusy: busyProfileIds.has(p.id)
-        }))
+        const busyDonorIds = busy
+            .map(b => b.donor_id)
+            .filter((id): id is bigint => id !== null
+        );
+
+        const busyDonors = busyDonorIds.length > 0
+            ? await orm.select().from(donor).where(inArray(donor.id, busyDonorIds))
+            : [];
+
+        const donorNameMap = new Map(
+            busyDonors.map(d => [d.id, `${d.first_name} ${d.last_name}`])
+        );
+
+        const result: StaffWithStatus[] = sameRoleStaff.map(p => {
+            const busyEntry = busyByProfile.get(p.id);
+            const isBusy = busyEntry !== undefined;
+            return {
+                profiles_id: p.id,
+                name: p.name,
+                role: p.role,
+                isBusy,
+                currentDonorId: isBusy ? busyEntry.donor_id ?? null : null,
+                currentDonorName: isBusy && busyEntry.donor_id
+                    ? donorNameMap.get(busyEntry.donor_id) ?? null
+                    : null,
+            };
+        });
 
         return bigintToStr({ success: true, message: "Staff status retrieved", data: result });
 

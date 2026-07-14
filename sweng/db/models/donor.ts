@@ -32,6 +32,7 @@ export const donor = pgTable("donor", {
   // Age and birthdate
   birthdate: date("birthdate"),
   age: integer("age"),
+  
   // Contact information
   email: text("email").notNull(),
   mobile_no: text("mobile_no").notNull(),

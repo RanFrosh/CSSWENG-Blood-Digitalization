@@ -2,52 +2,8 @@
 import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import Header from "@/components/HeaderMP";
-import { QueueEntryWithDonor } from "@/types/queue_type";
-import { retrieveDonor, viewQueueWithDonors } from "@/app/queue/queue_action";
-
-// Sample queue donor structure
-type QueueDonor = {
-    queueNumber: string;
-    donorId: string;
-    name: string;
-};
-
-// Sample queue MP structure
-type MedicalProfessional = {
-    id: string;
-    name: string;
-    currentDonor?: QueueDonor; // Optional since MP can be handling a donor or not
-};
-
-// Sample medical professionals
-const medicalProfessionals: MedicalProfessional[] = [
-    {
-        id: "MP-001",
-        name: "Jane Doe",
-        currentDonor: {
-            queueNumber: "001",
-            donorId: "D-001",
-            name: "John Doe",
-        },
-    },
-    {
-        id: "MP-002",
-        name: "Jason Doe",
-    },
-    {
-        id: "MP-003",
-        name: "Jean Doe",
-        currentDonor: {
-            queueNumber: "003",
-            donorId: "D-003",
-            name: "Joan Doe",
-        },
-    },
-    {
-        id: "MP-004",
-        name: "Jack Doe",
-    },
-];
+import { QueueEntryWithDonor, StaffWithStatus } from "@/types/queue_type";
+import { viewStaffStatus, viewQueueWithDonors } from "@/app/queue/queue_action";
 
 export default function QueuePage() {
     const router = useRouter();
@@ -63,19 +19,24 @@ export default function QueuePage() {
         (currentPage - 1) * pageSize,
         currentPage * pageSize
     );
+    const [staffList, setStaffList] = useState<StaffWithStatus[]>([]);
 
     useEffect(() => {
     const load = async () => {
         console.log("1. CLIENT SENDING EVENT ID:", eventId);
         setIsLoading(true);
         setErrorMessage("");
-        const result = await viewQueueWithDonors(eventId);
-        if (result.success && result.data) {
-            setWaitList(result.data);
+        const [queueResult, staffResult] = await Promise.all([
+            viewQueueWithDonors(eventId),
+            viewStaffStatus(BigInt(eventId)),
+        ]);
+        if (queueResult.success && queueResult.data && staffResult.success && staffResult.data) {
+            setWaitList(queueResult.data);
+            setStaffList(staffResult.data);
             setCurrentPage(1);
         } else {
-            setErrorMessage(result.message);
-            console.log(result);
+            setErrorMessage(`Queue: ${queueResult.message} and Staff: ${staffResult.message}`);
+            console.log(``);
         }
         setIsLoading(false);
         };
@@ -83,9 +44,9 @@ export default function QueuePage() {
     }, [eventId]);
 
     // Get the current donor being handled by a medical professional
-    const getCurrentDonor = (medicalProfessional: MedicalProfessional) => {
+    const getCurrentDonor = (medicalProfessional: StaffWithStatus) => {
         // MP is currently free
-        if (medicalProfessional.currentDonor === undefined) {
+        if (!medicalProfessional.isBusy) {
             return (
                 <div className="mt-5 bg-white rounded-[16px] p-5">
                     <p className="text-[18px] font-semibold text-[#002940]">
@@ -102,15 +63,15 @@ export default function QueuePage() {
                     </p>
 
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        #{medicalProfessional.currentDonor.queueNumber}
+                        #{medicalProfessional.currentDonorName}
                     </p>
 
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        {medicalProfessional.currentDonor.name}
+                        {medicalProfessional.name}
                     </p>
 
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        Donor ID: {medicalProfessional.currentDonor.donorId}
+                        Donor ID: {medicalProfessional.currentDonorId}
                     </p>
                 </div>
             );
@@ -311,16 +272,16 @@ export default function QueuePage() {
                     </h2>
 
                     <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-5">
-                        {medicalProfessionals.map((medicalProfessional) => {
+                        {staffList.map((medicalProfessional) => {
                             let cardColor = "bg-[#fd5448]";
 
-                            if (medicalProfessional.currentDonor === undefined) {
+                            if (!medicalProfessional.isBusy) {
                                 cardColor = "bg-[#002940]";
                             }
 
                             return (
                                 <div
-                                    key={medicalProfessional.id}
+                                    key={medicalProfessional.profiles_id}
                                     className={`${cardColor} rounded-[18px] p-5`}
                                 >
                                     <div className="flex flex-row items-center justify-between gap-3 flex-wrap">
@@ -329,7 +290,7 @@ export default function QueuePage() {
                                         </h3>
 
                                         <span className="bg-white text-[#002940] px-4 py-2 rounded-full text-[18px] font-semibold">
-                                            {medicalProfessional.id}
+                                            {medicalProfessional.profiles_id}
                                         </span>
                                     </div>
 
