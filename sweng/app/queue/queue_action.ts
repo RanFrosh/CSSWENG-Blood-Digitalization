@@ -3,7 +3,7 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { orm } from "@/db/drizzle";
 import { donor } from "@/db/models/donor";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { ViewDonor } from "@/types/donor_type";
 import { ViewQueue, QueueEntryWithDonor } from "@/types/queue_type";
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
@@ -12,7 +12,10 @@ import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
 import { bigintToStr } from "../global/serializer/serial";
 import { helpGateKeep } from "../global/helper_bouncer/bouncer";
-import { bigint } from "drizzle-orm/gel-core";
+import { StaffWithStatus } from "@/types/queue_type";
+import { profiles } from "@/db/models/profiles";
+import { assigned_staff } from "@/db/models/assigned_staff";
+import { event_queue } from "@/db/models/event_queue";
 
 export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<ViewDonor>> {
     
@@ -40,8 +43,6 @@ export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<Vie
 }
 
 export async function viewQueueWithDonors(event_info_str: string): Promise<ApiResponse<QueueEntryWithDonor[]>> {
-    
-    console.log("2. ACTION RECEIVED EVENT ID:", event_info_str);
     try {
         const database = await serverSupa();
         const model = new ImpQueueModel(orm);
@@ -84,4 +85,62 @@ export async function pickNextDonor(event_log_id: bigint): Promise<ApiResponse<V
     const controller = new ImpQueueManager(model, profiler);
 
     return bigintToStr(await controller.invokePickNextQueue(event_log_id));
+}
+
+export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<StaffWithStatus[]>> {
+    try {
+
+        const database = await serverSupa();
+        const profiler = new ImpProfileGetter(database);
+        const profile = await profiler.getCurrentUser();
+
+        if (!profile.success || !profile.data) return { success: false, message: profile.message };
+
+        const assigned = await orm
+        .select()
+        .from(assigned_staff)
+        .where(eq(assigned_staff.event_log_id, event_guy));
+
+        if (assigned.length === 0) return { success: true, message: "No staff assigned", data: [] };
+
+        const profileIds = assigned.map(a => a.profiles_id);
+        const profilesResult = await orm
+            .select()
+            .from(profiles)
+            .where(inArray(profiles.id, profileIds));
+
+        const profileMap = new Map(profilesResult.map(p => [p.id, p]));
+
+        const sameRoleStaff = assigned
+            .map(a => profileMap.get(a.profiles_id))
+            .filter((p): p is typeof profilesResult[number] => p?.role === profile.data!.role);
+
+        if (sameRoleStaff.length === 0) return { success: true, message: "No same-role staff assigned", data: [] };
+
+        const busy = await orm
+            .select()
+            .from(event_queue)
+            .where(
+                and(
+                    eq(event_queue.event_log_id, event_guy),
+                    isNull(event_queue.station)
+                )
+            );
+
+        const busyProfileIds = new Set(
+            busy.map(b => b.profile_id).filter((id): id is string => id !== null)
+        );
+
+        const result: StaffWithStatus[] = sameRoleStaff.map(p => ({
+            profiles_id: p.id,
+            name: p.name,
+            role: p.role,
+            isBusy: busyProfileIds.has(p.id)
+        }))
+
+        return bigintToStr({ success: true, message: "Staff status retrieved", data: result });
+
+    } catch (err: any) {
+        return { success: false, message: err.message }
+    }
 }

@@ -19,3 +19,10 @@ export type DeleteQueue = {
 };
 
 export type QueueEntryWithDonor = ViewQueue & { donor_profile: ViewDonor | null };
+
+export type StaffWithStatus = {
+    profiles_id: string
+    name: string
+    role: string
+    isBusy: boolean
+}
