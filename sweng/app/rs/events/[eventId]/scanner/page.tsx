@@ -6,6 +6,9 @@ import { Html5Qrcode } from "html5-qrcode";
 
 import Header from "@/components/HeaderRS";
 
+import { verifyDonorAction } from "@/app/actions/donor-verification";
+import { claimPerkAction } from "@/app/actions/claim-perk";
+
 export default function RSScannerPage() {
     const router = useRouter();
     const params = useParams();
@@ -33,9 +36,13 @@ export default function RSScannerPage() {
                     { facingMode: "environment" },
                     {
                         fps: 10,
-                        qrbox: {
-                            width: 250,
-                            height: 250,
+                        qrbox: (viewfinderWidth, viewfinderHeight) => {
+                            const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+
+                            return {
+                                width: minEdge * 0.8,
+                                height: minEdge * 0.8,
+                            };
                         },
                     },
                     async (decodedText) => {
@@ -48,20 +55,14 @@ export default function RSScannerPage() {
                         setIsScanning(false);
 
                         try {
-                            const response = await fetch(
-                                `/api/donor/verify/${encodeURIComponent(decodedText)}`
-                            );
+                            const result = await verifyDonorAction(decodedText);
 
-                            const data = await response.json();
-
-                            if (!response.ok) {
-                                alert(data.message ?? "Invalid QR code.");
+                            if (!result.success) {
+                                alert(result.message);
                                 return;
                             }
 
-                            console.log(data.donor);
-
-                            setDonor(data.donor);
+                            setDonor(result.donor);
                         } catch (error) {
                             console.error(error);
                             alert("Failed to verify QR code.");
@@ -104,21 +105,13 @@ export default function RSScannerPage() {
         if (!donor) return;
 
         try {
-            const response = await fetch("/api/rs/claim-perk", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    eventId,
-                    qrToken: donor.qr_token,
-                }),
-            });
+            const result = await claimPerkAction(
+                eventId,
+                donor.qr_token
+            );
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                alert(data.message ?? "Failed to claim perk.");
+            if (!result.success) {
+                alert(result.message);
                 return;
             }
 
