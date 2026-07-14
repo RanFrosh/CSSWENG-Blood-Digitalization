@@ -103,6 +103,9 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
 
         if (assigned.length === 0) return { success: true, message: "No staff assigned", data: [] };
 
+        const currentUserAssigned = assigned.some(a => a.profiles_id === profile.data!.id);
+        if (!currentUserAssigned) return { success: false, message: "Not assigned to this event", data: [] };
+
         const profileIds = assigned.map(a => a.profiles_id);
         const profilesResult = await orm
             .select()
