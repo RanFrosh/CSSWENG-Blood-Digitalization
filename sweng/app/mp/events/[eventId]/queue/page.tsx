@@ -30,14 +30,19 @@ export default function QueuePage() {
             viewQueueWithDonors(eventId),
             viewStaffStatus(BigInt(eventId)),
         ]);
-        if (queueResult.success && queueResult.data && staffResult.success && staffResult.data) {
+        if (queueResult.success && queueResult.data) {
             setWaitList(queueResult.data);
-            setStaffList(staffResult.data);
             setCurrentPage(1);
         } else {
-            setErrorMessage(`Queue: ${queueResult.message} and Staff: ${staffResult.message}`);
-            console.log(``);
+            setErrorMessage(queueResult.message);
         }
+
+        if (staffResult.success && staffResult.data) {
+            setStaffList(staffResult.data);
+        } else {
+            setErrorMessage(staffResult.message);
+        }
+
         setIsLoading(false);
         };
     load();
@@ -63,11 +68,11 @@ export default function QueuePage() {
                     </p>
 
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        #{medicalProfessional.currentDonorName}
+                        #{medicalProfessional.queueEntryId}
                     </p>
 
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        {medicalProfessional.name}
+                        {medicalProfessional.currentDonorName}
                     </p>
 
                     <p className="mt-1 text-[18px] text-[#002940]">

@@ -152,6 +152,7 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
                 name: p.name,
                 role: p.role,
                 isBusy,
+                queueEntryId: isBusy ? busyEntry.id : null,
                 currentDonorId: isBusy ? busyEntry.donor_id ?? null : null,
                 currentDonorName: isBusy && busyEntry.donor_id
                     ? donorNameMap.get(busyEntry.donor_id) ?? null
