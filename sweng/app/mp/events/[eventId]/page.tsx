@@ -41,15 +41,8 @@ export default function MPEventPage() {
         const result = await pickNextDonor(BigInt(eventId));
         if (result.success && result.data && result.data.donor_id) {
             const donor = await retrieveDonor(result.data.donor_id)
-            if (donor.success && donor.data) {
-                const isConfirmed = confirm(
-                    `Queue Number: #${result.data.id}\nName: ${donor.data.first_name && donor.data.last_name
-                        ? `${donor.data.first_name} ${donor.data.last_name}`
-                        : "Missing name"}\n\nProceed to screening?`
-                );
-                if (isConfirmed) {
+            if (donor.success && donor.data) {               
                     router.push(`/mp/events/${eventId}/screening/${result.data.donor_id}`);
-                }
             } else {
                 setActionError(donor.message);
             }            
