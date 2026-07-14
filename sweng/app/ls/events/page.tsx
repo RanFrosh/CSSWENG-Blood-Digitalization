@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
 import Header from "@/components/HeaderLS";
 import StaffDetails from "@/components/StaffDetails";
+import { checkAuthentication } from "./ls_action";
+import { ViewEvents } from "@/types/event_type";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 type EventTab = EventStatus | "All";
@@ -56,8 +57,42 @@ export default function LSEventsPage() {
     // Set the initial active tab to "Ongoing"
     const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
     
+    // State for holding events from the backend
+    const [events, setEvents] = useState<ViewEvents[]>([]);
+
+    // Loading State
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Error display
+    const [errorMessage, setErrorMessage] = useState("");
+
     // Status filters
     const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
+
+    useEffect(() => {
+        const loadEvents = async () => {
+
+            setIsLoading(true);
+            setErrorMessage("");
+
+            try {
+                const result = await checkAuthentication(
+                    activeTab !== "All" ? { status: activeTab } : {}
+                );
+
+                if (result.success && result.data) {
+                    setEvents(result.data);
+                } else {
+                    setErrorMessage(result.message);
+                }
+            } catch (error) {
+                setErrorMessage("Failed to connect to the database");
+            } finally {
+                setIsLoading(false); 
+            }
+        }
+        loadEvents();
+    }, [activeTab]);
 
     // Initialize filtered events
     let filteredEvents: AssignedEvent[] = [];
@@ -110,6 +145,28 @@ export default function LSEventsPage() {
             return null;
         }
     };
+
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading events...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">

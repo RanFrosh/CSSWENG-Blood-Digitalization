@@ -33,7 +33,7 @@ describe("helpGateKeep", () => {
         const result = await helpGateKeep(mockChecker, "view_event");
 
         expect(result.success).toBe(false);
-        expect(result.message).toBe("Somehow there is no role");
+        expect(result.message).toBe("Failed to identify role");
     });
 
     // user has a role but doesn't have the required permission
@@ -48,12 +48,14 @@ describe("helpGateKeep", () => {
 
     // user has a role with the required permission
     it("returns success when user role has permission", async () => {
-        mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { role: "onsite_admin" } as any });
-        
+        const profile = { role: "onsite_admin" } as any;
+        mockChecker.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: profile });
+
         const result = await helpGateKeep(mockChecker, "view_event");
 
         expect(result.success).toBe(true);
         expect(result.message).toBe("Authorized");
+        expect(result.data).toEqual(profile);
     });
 
     // super admin can do everything regardless of action

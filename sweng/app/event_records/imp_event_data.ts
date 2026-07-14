@@ -127,4 +127,19 @@ export class ImpEventModel implements EventData {
             return { success: false, message: err.message, data: undefined };
         }
     }
+
+    async queryEventById(id: bigint): Promise<ApiResponse<ViewEvents>> {
+        try {
+            const [event] = await this.access
+            .select()
+            .from(event_log)
+            .where(eq(event_log.id, id))
+            .limit(1);
+
+            if (!event) return { success: false, message: "Event not found", data: undefined }
+            return { success: true, message: "Event found", data: event }
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };        
+        }
+    }
 }
