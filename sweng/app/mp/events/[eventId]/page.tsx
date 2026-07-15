@@ -42,7 +42,7 @@ export default function MPEventPage() {
         if (result.success && result.data && result.data.donor_id) {
             const donor = await retrieveDonor(result.data.donor_id)
             if (donor.success && donor.data) {               
-                    router.push(`/mp/events/${eventId}/screening/${result.data.donor_id}`);
+                    router.push(`/mp/events/${eventId}/screening/${result.data.donor_id}?queueId=${result.data.id}`);
             } else {
                 setActionError(donor.message);
             }            

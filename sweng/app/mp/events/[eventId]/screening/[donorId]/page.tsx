@@ -1,45 +1,98 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { retrieveDonor } from "@/app/queue/queue_action";
+import { ViewDonor } from "@/types/donor_type";
 import Header from "@/components/HeaderMP";
-
-// Sample donor info structure
-type DonorInfo = {
-    id: string;
-    name: string;
-    age: number;
-    sex: string;
-    bloodType: string;
-};
-
-// Sample donor info
-const donorInfo: DonorInfo = {
-    id: "D-005",
-    name: "June Doe",
-    age: 25,
-    sex: "Female",
-    bloodType: "O+",
-};
+import { completeScreening, failScreening } from "../../../mp_action";
 
 export default function ScreeningPage() {
     const router = useRouter();
     const params = useParams();
-
+    const searchParams = useSearchParams();
+    const queueId = searchParams.get("queueId");
+    const donorId = params.donorId as string;
     const eventId = params.eventId as string;
+    const [eligibility, setEligibility] = useState<"fit" | "unfit" | null>(null);
 
-    const screenDonor = () => {
-        const donor = donorInfo;
+    const [donor, setDonor] = useState<ViewDonor | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
 
+    useEffect(() => {
+        setErrorMessage("");
+        const load = async () => {
+            if (!queueId) setErrorMessage("Missing queueId");
+            const result = await retrieveDonor(BigInt(donorId));
+            if (result.success && result.data) {
+                setDonor(result.data);
+            } else {
+                setErrorMessage(result.message);
+            }
+            setIsLoading(false);
+        };
+        load();
+    }, [donorId]);
+
+    const screenDonor = async () => {
+        if (!queueId) {
+            alert("Missing queue information or eligibility selection");
+            return;
+        }
+        
         const isConfirmed = confirm(
-            `Donor ID: ${donor.id}\nName: ${donor.name}\n\nConfirm fit for blood donation?`
+            `Donor ID: ${donor?.id}\nName: ${donor?.first_name} ${donor?.last_name}\n\nConfirm screening status ${eligibility}?`
         );
 
         if (isConfirmed) {
-            alert("Donor screened successfully!\nPlease direct them to the waiting area.\n\nQueue Number: #005");
-            router.push(`/mp/events/${eventId}`);
+            if (eligibility === "fit") {
+                const res = await completeScreening(BigInt(queueId!));
+                if (!res.success) {
+                    alert(res.message);
+                } else {
+                    alert(`Donor screened successfully!\nPlease direct them to the waiting area.\n\nQueue Number: #${queueId}`);
+                }
+                router.push(`/mp/events/${eventId}`);
+            } else if (eligibility === "unfit") {
+                const res = await failScreening(BigInt(queueId!));
+                alert(res.message);
+                router.push(`/mp/events/${eventId}`);
+            } else {
+                alert("Eligibility is null");
+            }           
+            
         }
     };
+
+    if (isLoading) {
+            return (
+                <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                    <Header />
+                    <div className="flex-1 flex items-center justify-center">
+                        <p className="text-[24px] text-[#002940]">Loading screening...</p>
+                    </div>
+                </main>
+            );
+        }
+    
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 p-[0.35in]">
+                    <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
+                        <p className="mt-[10px] text-[18px]">{errorMessage}</p>
+                        <button onClick={() => router.back()}
+                            className="mt-[0.25in] px-[18px] py-[10px] rounded-[10px] bg-[#002940] text-white text-[18px] font-semibold cursor-pointer hover:underline">
+                            Back
+                        </button>
+                    </section>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -64,7 +117,7 @@ export default function ScreeningPage() {
 
                         <div>
                             <span className="bg-[#002940] text-white border-2 border-[#002940] px-5 py-3 rounded-full text-[18px] font-semibold">
-                                Donor ID: {donorInfo.id}
+                                Donor ID: {donor?.id}
                             </span>
                         </div>
                     </div>
@@ -76,7 +129,7 @@ export default function ScreeningPage() {
                             </p>
 
                             <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.name}
+                                {donor?.first_name} {donor?.last_name}
                             </p>
                         </div>
 
@@ -86,7 +139,7 @@ export default function ScreeningPage() {
                             </p>
 
                             <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.age}
+                                {donor?.age}
                             </p>
                         </div>
 
@@ -96,7 +149,7 @@ export default function ScreeningPage() {
                             </p>
 
                             <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.sex}
+                                {donor?.sex}
                             </p>
                         </div>
 
@@ -106,7 +159,7 @@ export default function ScreeningPage() {
                             </p>
 
                             <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.bloodType}
+                                {donor?.blood}
                             </p>
                         </div>
                     </div>
@@ -225,8 +278,8 @@ export default function ScreeningPage() {
                         <div className="mt-[0.25in]">
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[10px] p-5 text-[18px] text-[#002940]">
                                 <div className="flex flex-row gap-6 flex-wrap">
-                                    <label><input type="radio" name="eligibility-result" /> FIT</label>
-                                    <label><input type="radio" name="eligibility-result" /> UNFIT</label>
+                                    <label><input type="radio" onChange={() => setEligibility("fit")} name="eligibility-result" /> FIT</label>
+                                    <label><input type="radio" onChange={() => setEligibility("unfit")} name="eligibility-result" /> UNFIT</label>
                                 </div>
                             </div>
                         </div>
