@@ -30,3 +30,20 @@ export async function getLabStaffEvents(statusTab?: string): Promise<ApiResponse
         return { success: false, message: "Internal server error", data: undefined };
     }
 }
+
+export async function verifyLabStaffEventAccess(eventIdStr: string): Promise<ApiResponse<ViewEvents>> {
+    
+    try {
+        const database = await serverSupa();
+        const model = new ImpEventModel(orm);
+        const profiler = new ImpProfileGetter(database);
+        const controller = new ImpEventManager(model, profiler);
+
+        const eventId = BigInt(eventIdStr);
+
+        return await controller.invokeVerifyEventAccess(eventId);
+    } catch (err: any) {
+        console.error("Server Action Error:", err);
+        return { success: false, message: "Invalid Event ID format", data: undefined };
+    }
+}

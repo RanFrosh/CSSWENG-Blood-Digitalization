@@ -3,23 +3,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderLS";
 import StaffDetails from "@/components/StaffDetails";
+import { EventCard } from "@/components/EventCard";
 import { ViewEvents } from "@/types/event_type";
 import { getLabStaffEvents } from "./ls_action";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 type EventTab = EventStatus | "All";
-
-// Sample event structure
-type AssignedEvent = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatus;
-};
-
 
 export default function LSEventsPage() {
 
@@ -174,58 +163,11 @@ export default function LSEventsPage() {
                     {/* Event Cards */}
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
                         {filteredEvents.map((event) => (
-                            <div
-                                key={event.id}
-                                className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
-                            >
-                                {/* Event Header */}
-                                <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between">
-                                    <div className="flex flex-row items-center gap-[0.15in]">
-                                        <h2 className="text-[24px] font-['Montserrat'] font-bold">
-                                            {event.name}
-                                        </h2>
-
-                                        <span className="px-[12px] py-[6px] rounded-full text-[16px] font-semibold bg-white text-[#002940]">
-                                            {event.status}
-                                        </span>
-                                    </div>
-
-                                    {createActionButton(event)}
-                                </div>
-
-                                {/* Event Details */}
-                                <div className="p-[0.35in]">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Partner:
-                                            </span>{" "}
-                                            {event.partner}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Location:
-                                            </span>{" "}
-                                            {event.location}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Date:
-                                            </span>{" "}
-                                            {event.date}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Time:
-                                            </span>{" "}
-                                            {event.time}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                            <EventCard 
+                                key={event.id} 
+                                event={event} 
+                                actionButton={createActionButton(event)} 
+                            />
                         ))}
                     </div>
                 </section>

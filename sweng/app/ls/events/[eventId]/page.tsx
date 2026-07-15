@@ -1,102 +1,95 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
-
+import { useState, useEffect } from "react";
 import Header from "@/components/HeaderLS";
-
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-
-// Sample event structure
-type AssignedEvent = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatus;
-};
-
-// Sample event
-const assignedEvents: AssignedEvent[] = [
-    {
-        id: "1",
-        name: "Blood Donation Drive",
-        location: "DLSU",
-        date: "XX/XX/XXXX",
-        time: "XX:XX AM - XX:XX PM",
-        partner: "Manila Doctors Hospital",
-        status: "Ongoing",
-    },
-];
-
-// Sample queue donor structure
-type QueueDonor = {
-    queueNumber: string;
-    id: string;
-    name: string;
-};
-
-// Sample next donor in queue
-const nextDonor: QueueDonor | null = {
-    queueNumber: "005",
-    id: "D-005",
-    name: "June Doe"
-};
+import { EventDetailsPanel } from "@/components/EventDetailsPanel";
+import { ViewEvents } from "@/types/event_type";
+import { verifyLabStaffEventAccess } from "../ls_action";
+import { viewQueueWithDonors } from "@/app/queue/queue_action";
+import { QueueEntryWithDonor } from "@/types/queue_type";
 
 export default function LSEventPage() {
+
     const router = useRouter();
     const params = useParams();
 
     const eventId = params.eventId as string;
 
-    // Find the selected event based on the eventId
-    let selectedEvent: AssignedEvent | undefined = undefined;
-    selectedEvent = assignedEvents.find((event) => {
-        return event.id === eventId;
-    });
+    const [nextDonor, setNextDonor] = useState<QueueEntryWithDonor | null>(null);
+    const [selectedEvent, setSelectedEvent] = useState<ViewEvents | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+
+
+    const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
+        const fetchPageData = async () => {
+            setIsLoading(true);
+            
+            const [eventRes, queueRes] = await Promise.all([
+                verifyLabStaffEventAccess(eventId),
+                viewQueueWithDonors(eventId)
+            ]);
+            
+            // Handle Event Data
+            if (eventRes.success && eventRes.data) {
+                setSelectedEvent(eventRes.data);
+            } else {
+                setErrorMessage(eventRes.message || "Event not found or not assigned to you.");
+            }
+
+            if (queueRes.success && queueRes.data && queueRes.data.length > 0) {
+                setNextDonor(queueRes.data[0]); 
+            } else {
+                setNextDonor(null); 
+            }
+
+            setIsLoading(false);
+        };
+
+        if (eventId) fetchPageData();
+    }, [eventId]);
 
     const goQueue = () => {
         router.push(`/ls/events/${eventId}/queue`);
-    };
-
-    // Accept donor from queue and proceed to blood donation record
-    const acceptNewDonor = () => {
-        if (nextDonor === null) {
-            alert("There are no donors in the queue.");
-        } else {
-            const isConfirmed = confirm(
-                `Queue Number: #${nextDonor.queueNumber}\nName: ${nextDonor.name}\n\nProceed to blood donation?`
-            );
-
-            if (isConfirmed) {
-                router.push(`/ls/events/${eventId}/record/${nextDonor.id}`);
-            }
-        }
     };
 
     const goBack = () => {
         router.push("/ls/events");
     };
 
-    // If the selected event is not found, display error message
-    if (selectedEvent === undefined) {
+    const confirmDonation = () => {
+        // We will eventually add the dequeue database call here
+        router.push(`/ls/events/${eventId}/record/${nextDonor?.donor_id}`);
+    };
+
+    if (isLoading) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
                 <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading event details...</p>
+                </div>
+            </main>
+        );
+    }
 
+    if (errorMessage || !selectedEvent) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
                 <div className="flex-1 p-[0.35in]">
-                    <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
+                    <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm flex flex-col items-start gap-[0.25in]">
                         <h1 className="text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                            Event Not Found
+                            Access Denied
                         </h1>
-
-                        <p className="mt-[10px] text-[18px]">
-                            The selected event does not exist or is not assigned to this account.
+                        <p className="text-[18px] text-red-500">
+                            {errorMessage}
                         </p>
-
                         <button
-                            onClick={goBack}
-                            className="mt-[0.25in] px-[18px] py-[10px] rounded-[10px] bg-[#002940] text-white text-[18px] font-semibold cursor-pointer hover:underline"
+                            onClick={() => router.push("/ls/events")}
+                            className="px-[18px] py-[10px] rounded-[10px] bg-[#002940] text-white text-[18px] font-semibold cursor-pointer hover:bg-blue-900 transition"
                         >
                             Back to My Events
                         </button>
@@ -104,104 +97,100 @@ export default function LSEventPage() {
                 </div>
             </main>
         );
-
-    // If the selected event is found, display event details and actions
-    } else {
-        return (
-            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                <Header />
-
-                <div className="flex-1 p-[0.35in]">
-                    {/* Page Title */}
-                    <section className="bg-[#f9fdff] p-[0.25in]">
-                        <p className="text-[18px] font-['Montserrat'] text-[#002940]">
-                            Lab Staff
-                        </p>
-
-                        <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                            {selectedEvent.name}
-                        </h1>
-                    </section>
-
-                    {/* Event Details */}
-                    <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                        <div className="flex flex-row items-center justify-between gap-[0.25in] flex-wrap">
-                            <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                Event Details
-                            </h2>
-
-                            <span className="bg-[#002940] text-white px-5 py-3 rounded-full text-[18px] font-semibold">
-                                Event ID: {eventId}
-                            </span>
-                        </div>
-
-                        <div className="mt-[0.15in] grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                            <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Partner:
-                                </span>{" "}
-                                {selectedEvent.partner}
-                            </p>
-
-                            <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Location:
-                                </span>{" "}
-                                {selectedEvent.location}
-                            </p>
-
-                            <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Date:
-                                </span>{" "}
-                                {selectedEvent.date}
-                            </p>
-
-                            <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Time:
-                                </span>{" "}
-                                {selectedEvent.time}
-                            </p>
-                        </div>
-                    </section>
-
-                    {/* Action Cards */}
-                    <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Event Actions
-                        </h2>
-
-                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 gap-[0.25in]">
-                            <button
-                                onClick={acceptNewDonor}
-                                className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
-                            >
-                                <h3 className="text-[24px] font-['Montserrat'] font-bold">
-                                    Record Donor Blood Donation
-                                </h3>
-
-                                <p className="mt-[8px] text-[18px]">
-                                    Accept the next donor from the blood donation queue.
-                                </p>
-                            </button>
-
-                            <button
-                                onClick={goQueue}
-                                className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
-                            >
-                                <h3 className="text-[24px] font-['Montserrat'] font-bold">
-                                    View Blood Donation Queue
-                                </h3>
-
-                                <p className="mt-[8px] text-[18px]">
-                                    View screened donors waiting for blood donation procedures.
-                                </p>
-                            </button>
-                        </div>
-                    </section>
-                </div>
-            </main>
-        );
     }
+
+    return (
+        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black relative">
+            
+            <Header />
+
+            <div className="flex-1 p-[0.35in]">
+                {/* Page Title */}
+                <section className="bg-[#f9fdff] p-[0.25in]">
+                    <p className="text-[18px] font-['Montserrat'] text-[#002940]">
+                        Lab Staff
+                    </p>
+                    <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
+                        {selectedEvent.name}
+                    </h1>
+                </section>
+
+                {/* Event Details Panel */}
+                <EventDetailsPanel event={selectedEvent} />
+
+                {/* Action Cards */}
+                <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
+                    <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
+                        Event Actions
+                    </h2>
+
+                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 gap-[0.25in]">
+                        <button
+                            onClick={() => setShowModal(true)}
+                            disabled={!nextDonor}
+                            className={`border-2 rounded-[16px] p-[0.25in] text-left transition ${
+                                !nextDonor 
+                                    ? "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed" 
+                                    : "bg-white border-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white"
+                            }`}
+                        >
+                            <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                                Record Donor Blood Donation
+                            </h3>
+                            <p className="mt-[8px] text-[18px]">
+                                Accept the next donor from the blood donation queue.
+                            </p>
+                        </button>
+
+                        <button
+                            onClick={goQueue}
+                            className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
+                        >
+                            <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                                View Blood Donation Queue
+                            </h3>
+                            <p className="mt-[8px] text-[18px]">
+                                View screened donors waiting for blood donation procedures.
+                            </p>
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            {/* The Modal Overlay */}
+            {showModal && nextDonor && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white p-8 rounded-[16px] shadow-2xl max-w-md w-full border-2 border-[#002940]">
+                        <h2 className="text-2xl font-['Montserrat'] font-bold text-[#002940] mb-4">
+                            Proceed to Donation?
+                        </h2>
+                        
+                        <div className="mb-6 text-lg bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p className="mb-2">
+                                <span className="font-bold text-[#002940]">Id: </span> {nextDonor.id}
+                            </p>
+                            <p>
+                                <span className="font-bold text-[#002940]">Name:</span> {nextDonor.donor_profile?.first_name} {nextDonor.donor_profile?.last_name}
+                            </p>
+                        </div>
+                        
+                        <div className="flex justify-end gap-3">
+                            <button 
+                                onClick={() => setShowModal(false)}
+                                className="px-5 py-2 font-semibold border-2 border-gray-400 rounded-lg text-gray-600 hover:bg-gray-100 transition"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={confirmDonation}
+                                className="px-5 py-2 font-semibold bg-[#002940] text-white rounded-lg hover:bg-blue-900 transition"
+                            >
+                                Confirm & Start
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </main>
+    );
 }

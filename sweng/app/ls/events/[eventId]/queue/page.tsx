@@ -1,92 +1,58 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-
 import Header from "@/components/HeaderLS";
-
-// Sample queue donor structure
-type QueueDonor = {
-    queueNumber: string;
-    donorId: string;
-    name: string;
-};
-
-// Sample queue LS structure
-type LabStaff = {
-    id: string;
-    name: string;
-    currentDonor?: QueueDonor; // Optional since LS can be handling a donor or not
-};
-
-// Sample last added donor structure
-type LatestAddition = {
-    queueNumber: string;
-    donorId: string;
-    name: string;
-    position: number;
-};
-
-// Sample medical professionals
-const labStaff: LabStaff[] = [
-    {
-        id: "LS-001",
-        name: "Jenna Doe",
-        currentDonor: {
-            queueNumber: "001",
-            donorId: "D-001",
-            name: "John Doe",
-        },
-    },
-    {
-        id: "LS-002",
-        name: "Joseph Doe",
-    },
-    {
-        id: "LS-003",
-        name: "Jin Doe",
-        currentDonor: {
-            queueNumber: "003",
-            donorId: "D-003",
-            name: "Joan Doe",
-        },
-    },
-    {
-        id: "LS-004",
-        name: "Jannah Doe",
-    },
-];
-
-// Sample waitlist
-const waitlist: QueueDonor[] = [
-    {
-        queueNumber: "005",
-        donorId: "D-005",
-        name: "June Doe",
-    },
-    {
-        queueNumber: "006",
-        donorId: "D-006",
-        name: "Janice Doe",
-    }
-];
-
-// Sample last added donor
-const latestAddition: LatestAddition | null = {
-    queueNumber: "006",
-    donorId: "D-006",
-    name: "Janice Doe",
-    position: 2,
-};
+import { viewQueueWithDonors, viewStaffStatus } from "@/app/queue/queue_action";
+import { QueueEntryWithDonor, StaffWithStatus } from "@/types/queue_type";
 
 export default function QueuePage() {
+    
     const router = useRouter();
     const params = useParams();
-
     const eventId = params.eventId as string;
 
-    // Get the current donor being handled by a lab staff
-    const getCurrentDonor = (labStaff: LabStaff) => {
-        // LS is currently free
-        if (labStaff.currentDonor === undefined) {
+    const [waitlist, setWaitlist] = useState<QueueEntryWithDonor[]>([]);
+    const [labStaff, setLabStaff] = useState<StaffWithStatus[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    useEffect(() => {
+        const fetchQueueData = async () => {
+            if (!eventId) return;
+            setIsLoading(true);
+            setErrorMessage("");
+
+            try {
+                const [queueRes, staffRes] = await Promise.all([
+                    viewQueueWithDonors(eventId),
+                    viewStaffStatus(BigInt(eventId)) 
+                ]);
+
+                if (queueRes.success && queueRes.data) {
+                    setWaitlist(queueRes.data);
+                } else {
+                    setErrorMessage(queueRes.message);
+                }
+
+                if (staffRes.success && staffRes.data) {
+                    setLabStaff(staffRes.data);
+                }
+                
+            } catch (error) {
+                setErrorMessage("Failed to load queue data");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchQueueData();
+    }, [eventId]);
+
+    const latestAddition = waitlist.length > 0 ? waitlist[waitlist.length - 1] : null;
+
+    // Component Renderers
+    const getCurrentDonor = (staff: StaffWithStatus) => {
+        if (!staff.isBusy) {
             return (
                 <div className="mt-5 bg-white rounded-[16px] p-5">
                     <p className="text-[18px] font-semibold text-[#002940]">
@@ -94,72 +60,53 @@ export default function QueuePage() {
                     </p>
                 </div>
             );
-        //LS is currently handling a donor
         } else {
             return (
                 <div className="mt-5 bg-white rounded-[16px] p-5">
                     <p className="text-[18px] font-semibold text-[#002940]">
                         Currently Handling
                     </p>
-
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        #{labStaff.currentDonor.queueNumber}
+                        #{staff.queueEntryId}
                     </p>
-
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        {labStaff.currentDonor.name}
+                        {staff.currentDonorName || "Unknown Donor"}
                     </p>
-
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        Donor ID: {labStaff.currentDonor.donorId}
+                        Donor ID: {staff.currentDonorId}
                     </p>
                 </div>
             );
         }
     };
 
-    // Get the last donor added to the queue
     const getLatestAddition = () => {
-        // No donor has been added to the queue yet
-        if (latestAddition === null) {
+        if (!latestAddition) {
             return (
                 <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-5">
-                    <p className="text-[18px] font-semibold text-[#002940]">
-                        Latest Addition
-                    </p>
-
-                    <p className="mt-2.5 text-[18px] text-[#002940]">
-                        No donors have checked in.
-                    </p>
+                    <p className="text-[18px] font-semibold text-[#002940]">Latest Addition</p>
+                    <p className="mt-2.5 text-[18px] text-[#002940]">No donors have checked in.</p>
                 </div>
             );
-        // At least one donor has been added to the queue
         } else {
             return (
                 <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-5">
-                    <p className="text-[18px] font-semibold text-[#002940]">
-                        Latest Addition
-                    </p>
-
+                    <p className="text-[18px] font-semibold text-[#002940]">Latest Addition</p>
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        #{latestAddition.queueNumber}
+                        #{latestAddition.id}
                     </p>
-
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        {latestAddition.name}
+                        {latestAddition.donor_profile?.first_name} {latestAddition.donor_profile?.last_name}
                     </p>
-
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        Donor ID: {latestAddition.donorId}
+                        Donor ID: {latestAddition.donor_id}
                     </p>
                 </div>
             );
         }
     };
 
-    // Get the donor waitlist
     const getWaitlist = () => {
-        // No donors in queue
         if (waitlist.length === 0) {
             return (
                 <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-5">
@@ -168,35 +115,28 @@ export default function QueuePage() {
                     </p>
                 </div>
             );
-        // At least one donor in queue
         } else {
             return (
                 <div className="flex flex-col gap-4">
-                    {waitlist.map((donor, index) => (
+                    {waitlist.map((entry, index) => (
                         <div
-                            key={donor.queueNumber}
+                            key={entry.id.toString()}
                             className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-5"
                         >
                             <div className="flex flex-row items-start justify-between gap-5 flex-wrap">
                                 <div>
                                     <p className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                        #{donor.queueNumber}
+                                        #{entry.id}
                                     </p>
-
                                     <p className="mt-2.5 text-[18px] font-semibold text-[#002940]">
-                                        {donor.name}
+                                        {entry.donor_profile?.first_name} {entry.donor_profile?.last_name}
                                     </p>
-
                                     <p className="mt-1 text-[18px] text-[#002940]">
-                                        Donor ID: {donor.donorId}
+                                        Donor ID: {entry.donor_id}
                                     </p>
                                 </div>
-
                                 <div className="text-right">
-                                    <p className="text-[18px] font-semibold text-[#002940]">
-                                        Position
-                                    </p>
-
+                                    <p className="text-[18px] font-semibold text-[#002940]">Position</p>
                                     <p className="mt-1 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                                         {index + 1}
                                     </p>
@@ -209,6 +149,28 @@ export default function QueuePage() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff]">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading queue...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff]">
+                <Header />
+                <div className="flex-1 p-[0.35in] text-red-500 font-bold">
+                    Error: {errorMessage}
+                </div>
+            </main>
+        );
+    }
+
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff]">
             <Header />
@@ -218,10 +180,7 @@ export default function QueuePage() {
                 <section className="bg-[#f9fdff] p-[0.25in]">
                     <div>
                         <div>
-                            <p className="text-[18px] font-['Montserrat'] text-[#002940]">
-                                Lab Staff
-                            </p>
-
+                            <p className="text-[18px] font-['Montserrat'] text-[#002940]">Lab Staff</p>
                             <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
                                 Screening Queue
                             </h1>
@@ -235,7 +194,6 @@ export default function QueuePage() {
                         <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                             Current Queue Status
                         </h2>
-
                         <span className="bg-[#002940] text-white px-5 py-3.5 rounded-full text-[18px] font-semibold">
                             Event ID: {eventId}
                         </span>
@@ -243,15 +201,11 @@ export default function QueuePage() {
 
                     <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Donors Waiting
-                            </p>
-
+                            <p className="text-[18px] font-semibold text-[#002940]">Donors Waiting</p>
                             <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                                 {waitlist.length}
                             </p>
                         </div>
-
                         {getLatestAddition()}
                     </div>
                 </section>
@@ -261,31 +215,21 @@ export default function QueuePage() {
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                         Lab Staff Status
                     </h2>
-
                     <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-4 gap-5">
-                        {labStaff.map((labStaff) => {
-                            let cardColor = "bg-[#fd5448]";
-
-                            if (labStaff.currentDonor === undefined) {
-                                cardColor = "bg-[#002940]";
-                            }
-
+                        {labStaff.map((staff) => {
+                            const cardColor = staff.isBusy ? "bg-[#fd5448]" : "bg-[#002940]";
+                            
                             return (
-                                <div
-                                    key={labStaff.id}
-                                    className={`${cardColor} rounded-[18px] p-5`}
-                                >
+                                <div key={staff.profiles_id.toString()} className={`${cardColor} rounded-[18px] p-5`}>
                                     <div className="flex flex-row items-center justify-between gap-3 flex-wrap">
                                         <h3 className="text-[24px] font-['Montserrat'] font-bold text-white">
-                                            {labStaff.name}
+                                            {staff.name || "Unknown Staff"}
                                         </h3>
-
-                                        <span className="bg-white text-[#002940] px-4 py-2 rounded-full text-[18px] font-semibold">
-                                            {labStaff.id}
+                                        <span className="bg-white text-[#002940] px-4 py-2 rounded-full text-[16px] font-semibold truncate max-w-[120px]">
+                                            {staff.profiles_id.toString().substring(0, 8)}...
                                         </span>
                                     </div>
-
-                                    {getCurrentDonor(labStaff)}
+                                    {getCurrentDonor(staff)}
                                 </div>
                             );
                         })}
@@ -297,7 +241,6 @@ export default function QueuePage() {
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                         Waitlist
                     </h2>
-
                     <div className="mt-5">
                         {getWaitlist()}
                     </div>
