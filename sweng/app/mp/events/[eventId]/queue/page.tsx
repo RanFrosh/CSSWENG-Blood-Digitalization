@@ -202,7 +202,7 @@ export default function QueuePage() {
                 <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
                     <Header />
                     <div className="flex-1 flex items-center justify-center">
-                        <p className="text-[24px] text-[#002940]">Loading events...</p>
+                        <p className="text-[24px] text-[#002940]">Loading queue...</p>
                     </div>
                 </main>
             );
@@ -214,9 +214,11 @@ export default function QueuePage() {
                     <Header />
                     <div className="flex-1 p-[0.35in]">
                         <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                            <p className="mt-[10px] text-[18px]">
-                                {errorMessage}
-                            </p>
+                            <p className="mt-[10px] text-[18px]">{errorMessage}</p>
+                            <button onClick={() => router.back()}
+                                className="mt-[0.25in] px-[18px] py-[10px] rounded-[10px] bg-[#002940] text-white text-[18px] font-semibold cursor-pointer hover:underline">
+                                Back
+                            </button>
                         </section>
                     </div>
                 </main>
