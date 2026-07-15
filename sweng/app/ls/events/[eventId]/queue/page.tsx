@@ -182,7 +182,7 @@ export default function QueuePage() {
                         <div>
                             <p className="text-[18px] font-['Montserrat'] text-[#002940]">Lab Staff</p>
                             <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                                Screening Queue
+                                Donor Queue
                             </h1>
                         </div>
                     </div>
