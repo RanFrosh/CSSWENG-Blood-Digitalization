@@ -57,7 +57,7 @@ export class ImpQueueManager implements QueueController {
 
     async invokeUpdateQueueStation(queueTarget: UpdateQueue): Promise<ApiResponse> {
         
-        const res = await helpGateKeep(this.profileReader, 'dequeue');
+        const res = await helpGateKeep(this.profileReader, 'updatequeue');
         if (!res.success || !res.data) 
             return { success: false, message: res.message }
 
@@ -72,7 +72,7 @@ export class ImpQueueManager implements QueueController {
 
     async invokePickNextQueue(event_guy: bigint): Promise<ApiResponse<ViewQueue>> {
         
-        const res = await helpGateKeep(this.profileReader, 'dequeue');
+        const res = await helpGateKeep(this.profileReader, 'updatequeue');
         if (!res.success || !res.data) 
             return { success: false, message: res.message }
 
