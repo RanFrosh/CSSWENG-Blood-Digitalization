@@ -6,6 +6,11 @@ import { orm } from "@/db/drizzle";
 import { donor } from "@/db/models/donor";
 import { event_log } from "@/db/models/event-log";
 
+import { serverSupa } from "@/db/supaserver";
+import { ImpQueueModel } from "@/app/queue/imp_queue_data";
+import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
+import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
+
 export async function checkInDonorAction(
     eventId: string,
     qrToken: string
@@ -43,6 +48,26 @@ export async function checkInDonorAction(
                 visitors: sql`${event_log.visitors} + 1`,
             })
             .where(eq(event_log.id, BigInt(eventId)));
+
+        // Add donor to queue
+        const database = await serverSupa();
+
+        const model = new ImpQueueModel(orm);
+        const profiler = new ImpProfileGetter(database);
+        const controller = new ImpQueueManager(model, profiler);
+
+        const queueResult = await controller.invokeAddToQueue({
+            donor_id: foundDonor[0].id,
+            event_log_id: BigInt(eventId),
+            profile_id: null,
+        });
+
+        if (!queueResult.success) {
+            return {
+                success: false,
+                message: queueResult.message,
+            };
+        }
 
         return {
             success: true,
