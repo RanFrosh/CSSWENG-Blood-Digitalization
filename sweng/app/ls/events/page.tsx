@@ -3,55 +3,15 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderLS";
 import StaffDetails from "@/components/StaffDetails";
-import { checkAuthentication } from "./ls_action";
+import { EventCard } from "@/components/EventCard";
 import { ViewEvents } from "@/types/event_type";
+import { getLabStaffEvents } from "./ls_action";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 type EventTab = EventStatus | "All";
 
-// Sample event structure
-type AssignedEvent = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatus;
-};
-
-// Sample events
-const assignedEvents: AssignedEvent[] = [
-    {
-        id: "1",
-        name: "Name 1",
-        location: "Location 1",
-        date: "Date 1",
-        time: "Time 1",
-        partner: "Partner 1",
-        status: "Ongoing",
-    },
-    {
-        id: "2",
-        name: "Name 2",
-        location: "Location 2",
-        date: "Date 2",
-        time: "Time 2",
-        partner: "Partner 2",
-        status: "Upcoming",
-    },
-    {
-        id: "3",
-        name: "Name 3",
-        location: "Location 3",
-        date: "Date 3",
-        time: "Time 3",
-        partner: "Partner 3",
-        status: "Completed",
-    },
-];
-
 export default function LSEventsPage() {
+
     const router = useRouter();
 
     // Set the initial active tab to "Ongoing"
@@ -76,9 +36,7 @@ export default function LSEventsPage() {
             setErrorMessage("");
 
             try {
-                const result = await checkAuthentication(
-                    activeTab !== "All" ? { status: activeTab } : {}
-                );
+                const result = await getLabStaffEvents(activeTab);
 
                 if (result.success && result.data) {
                     setEvents(result.data);
@@ -94,18 +52,12 @@ export default function LSEventsPage() {
         loadEvents();
     }, [activeTab]);
 
-    // Initialize filtered events
-    let filteredEvents: AssignedEvent[] = [];
-
-    // Filter events based on selected filter
-    if (activeTab === "All") {
-        filteredEvents = assignedEvents;
-    } else {
-        filteredEvents = assignedEvents.filter((event) => event.status === activeTab);
-    }
+    const filteredEvents = activeTab === "All" 
+        ? events 
+        : events.filter((event) => event.status === activeTab);
 
     // Can only open events that are ongoing
-    const openEvent = (event: AssignedEvent) => {
+    const openEvent = (event: ViewEvents) => {
         if (event.status === "Ongoing") {
             // Navigate to the event details page for the selected event
             router.push(`/ls/events/${event.id}`);
@@ -131,7 +83,7 @@ export default function LSEventsPage() {
     };
     
     // Create button to open event if it is ongoing
-    const createActionButton = (event: AssignedEvent) => {
+    const createActionButton = (event: ViewEvents) => {
         if (event.status === "Ongoing") {
             return (
                 <button
@@ -211,58 +163,11 @@ export default function LSEventsPage() {
                     {/* Event Cards */}
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
                         {filteredEvents.map((event) => (
-                            <div
-                                key={event.id}
-                                className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
-                            >
-                                {/* Event Header */}
-                                <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between">
-                                    <div className="flex flex-row items-center gap-[0.15in]">
-                                        <h2 className="text-[24px] font-['Montserrat'] font-bold">
-                                            {event.name}
-                                        </h2>
-
-                                        <span className="px-[12px] py-[6px] rounded-full text-[16px] font-semibold bg-white text-[#002940]">
-                                            {event.status}
-                                        </span>
-                                    </div>
-
-                                    {createActionButton(event)}
-                                </div>
-
-                                {/* Event Details */}
-                                <div className="p-[0.35in]">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Partner:
-                                            </span>{" "}
-                                            {event.partner}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Location:
-                                            </span>{" "}
-                                            {event.location}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Date:
-                                            </span>{" "}
-                                            {event.date}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Time:
-                                            </span>{" "}
-                                            {event.time}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                            <EventCard 
+                                key={event.id} 
+                                event={event} 
+                                actionButton={createActionButton(event)} 
+                            />
                         ))}
                     </div>
                 </section>

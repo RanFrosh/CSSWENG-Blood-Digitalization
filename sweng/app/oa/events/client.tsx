@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ViewEvents } from "@/types/event_type";
 import Header from "@/components/HeaderOA";
 import { checkAuthentication } from "./oa_action";
+import StaffDetails from "@/components/StaffDetails";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 type EventTab = EventStatus | "All";
@@ -146,30 +147,7 @@ export default function OAEventsClient({
                     </h1>
                 </section>
 
-                <section className="mt-[0.15in]">
-                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                        <h2 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                        Staff Details
-                        </h2>
-
-                        <div className="mt-[0.15in] flex flex-col gap-[5px] text-[18px]">
-                            <p>
-                                <span className="font-semibold text-[#002940]">Name:</span>{" "}
-                                {staff?.name ?? "No staff found."}
-                            </p>
-
-                            <p>
-                                <span className="font-semibold text-[#002940]">Role:</span>{" "}
-                                Onsite Admin
-                            </p>
-
-                            <p>
-                                <span className="font-semibold text-[#002940]">Staff ID:</span>{" "}
-                                {staff?.id ?? "No staff ID found."}
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                <StaffDetails />
 
                 <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
                     <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
