@@ -3,61 +3,34 @@ import { orm } from "@/db/drizzle";
 import { city } from "@/db/models/city";
 import { province } from "@/db/models/province";
 import RegistrationForm from "./registration-form";
-import { useState, useEffect } from "react";
 import { checkAuthentication } from "../../oa_action";
 
 export default async function RegisterPage({
     params,
-        }: {
-            params: Promise<{ eventId: string }>;
-        }) {
-            const provinces = await orm.select().from(province);
-            const cities = await orm.select().from(city);
-    
-            const { eventId } = await params;
+}: {
+    params: Promise<{ eventId: string }>;
+}) {
 
-    // Loading State
-    const [isLoading, setIsLoading] = useState(true);
+    const auth = await checkAuthentication();
 
-    // Error display
-    const [errorMessage, setErrorMessage] = useState("");
-
-    useEffect(() => {
-        const verifyAccess = async () => {
-            
-            const result = await checkAuthentication(); 
-            
-            if (!result.success) {
-                setErrorMessage(result.message);
-            }
-            setIsLoading(false);
-        };
-        
-        verifyAccess();
-    }, []);
-
-    if (isLoading) {
+    if (!auth.success) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
                 <Header />
                 <div className="flex-1 flex items-center justify-center">
-                    <p className="text-[24px] text-[#002940]">Loading events...</p>
+                    <p className="text-[24px] text-red-500">
+                        {auth.message}
+                    </p>
                 </div>
             </main>
         );
     }
 
-    if (errorMessage) {
-        return (
-            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                
-                <div className="flex-1 flex items-center justify-center">
-                    <p className="text-[24px] text-red-500">{errorMessage}</p>
-                </div>
-            </main>
-        );
-    }
+    const provinces = await orm.select().from(province);
+    const cities = await orm.select().from(city);
 
+    const { eventId } = await params;
+    
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />

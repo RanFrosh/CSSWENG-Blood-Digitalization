@@ -14,7 +14,7 @@ export async function checkAuthentication(data?: ViewEventFilters) {
         const controller = new ImpLabController(model);
         return controller.getQueue(userId); */
 
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise(resolve => setTimeout(resolve, 500));
 
         // Hardcoded
         return {
