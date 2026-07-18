@@ -3,7 +3,7 @@ import { orm } from "@/db/drizzle";
 import { city } from "@/db/models/city";
 import { province } from "@/db/models/province";
 import RegistrationForm from "./registration-form";
-import { checkAuthentication } from "../../oa_action";
+import { checkAuthentication } from "../../action";
 
 export default async function RegisterPage({
     params,

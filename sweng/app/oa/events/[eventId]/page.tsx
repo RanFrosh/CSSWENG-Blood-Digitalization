@@ -1,5 +1,5 @@
 import { getAssignedEvent } from "@/app/actions/event";
-import OAEventClient from "./event-client";
+import OAEventClient from "./client";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 

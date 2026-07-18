@@ -1,4 +1,4 @@
-import { registerDonorAction } from "@/app/actions/donor-registration";
+import { registerDonorAction } from "@/app/oa/events/[eventId]/register/action";
 
 const mockRedirect = jest.fn((url: string) => {
     throw new Error(`NEXT_REDIRECT:${url}`);

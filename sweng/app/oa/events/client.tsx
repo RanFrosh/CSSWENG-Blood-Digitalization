@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ViewEvents } from "@/types/event_type";
 import Header from "@/components/HeaderOA";
-import { checkAuthentication } from "./oa_action";
+import { checkAuthentication } from "./action";
 import StaffDetails from "@/components/StaffDetails";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";

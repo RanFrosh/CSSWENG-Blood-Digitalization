@@ -6,8 +6,8 @@ import { Html5Qrcode } from "html5-qrcode";
 
 import Header from "@/components/HeaderRS";
 
-import { verifyDonorAction } from "@/app/actions/donor-verification";
-import { claimPerkAction } from "@/app/actions/claim-perk";
+import { verifyDonorAction } from "@/app/actions/donor_verification";
+import { claimPerkAction } from "@/app/rs/events/[eventId]/scanner/action";
 
 export default function RSScannerPage() {
     const router = useRouter();
@@ -19,11 +19,14 @@ export default function RSScannerPage() {
 
     const [donor, setDonor] = useState<any>(null);
 
+    const [error, setError] = useState("");
+
     const scannerRef = useRef<Html5Qrcode | null>(null);
 
     const startScanner = async () => {
         if (scannerRef.current) return;
 
+        setError("");
         setIsScanning(true);
 
         // Wait for React to render the reader div
@@ -58,14 +61,14 @@ export default function RSScannerPage() {
                             const result = await verifyDonorAction(decodedText);
 
                             if (!result.success) {
-                                alert(result.message);
+                                setError(result.message ?? "Failed to verify donor.");
                                 return;
                             }
 
                             setDonor(result.donor);
                         } catch (error) {
                             console.error(error);
-                            alert("Failed to verify QR code.");
+                            setError("Failed to verify QR code.");
                         }
                     },
                     () => {
@@ -77,7 +80,7 @@ export default function RSScannerPage() {
             } catch (err) {
                 console.error(err);
                 setIsScanning(false);
-                alert("Unable to access the camera.");
+                setError("Unable to access the camera.");
             }
         }, 100);
     };
@@ -104,6 +107,8 @@ export default function RSScannerPage() {
     const claimPerk = async () => {
         if (!donor) return;
 
+        setError("");
+
         try {
             const result = await claimPerkAction(
                 eventId,
@@ -111,18 +116,19 @@ export default function RSScannerPage() {
             );
 
             if (!result.success) {
-                alert(result.message);
+                setError(result.message ?? "Failed to claim perk.");
                 return;
             }
 
             alert("Perk successfully claimed!");
 
+            setError("");
             setDonor(null);
 
             router.push(`/rs/events/${eventId}`);
         } catch (error) {
             console.error(error);
-            alert("Failed to claim perk.");
+            setError("Failed to claim perk.");
         }
     };
 
@@ -198,6 +204,12 @@ export default function RSScannerPage() {
                             Event ID: {eventId}
                         </span>
                     </div>
+
+                    {error && (
+                        <div className="mt-5 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 font-medium">
+                            {error}
+                        </div>
+                    )}
 
                     <button
                         type="button"

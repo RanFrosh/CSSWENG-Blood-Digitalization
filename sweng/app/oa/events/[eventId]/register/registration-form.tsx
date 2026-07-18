@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { registerDonorAction } from "@/app/actions/donor-registration";
+import { registerDonorAction } from "@/app/oa/events/[eventId]/register/action";
 
 type RegisterState = {
     error?: string;

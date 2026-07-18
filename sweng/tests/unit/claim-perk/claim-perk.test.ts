@@ -1,4 +1,4 @@
-import { claimPerkAction } from "@/app/actions/claim-perk";
+import { claimPerkAction } from "@/app/rs/events/[eventId]/scanner/action";
 
 const mockLimit = jest.fn();
 const mockWhereSelect = jest.fn(() => ({ limit: mockLimit }));

@@ -6,8 +6,8 @@ import { Html5Qrcode } from "html5-qrcode";
 
 import Header from "@/components/HeaderOA";
 
-import { verifyDonorAction } from "@/app/actions/donor-verification";
-import { checkInDonorAction } from "@/app/actions/oa-checkin";
+import { verifyDonorAction } from "@/app/actions/donor_verification";
+import { checkInDonorAction } from "@/app/oa/events/[eventId]/scanner/action";
 
 export default function ScannerPage() {
     const router = useRouter();
@@ -18,11 +18,15 @@ export default function ScannerPage() {
     const [isScanning, setIsScanning] = useState(false);
     const [donor, setDonor] = useState<any>(null);
 
+    const [error, setError] = useState("");
+
     const scannerRef = useRef<Html5Qrcode | null>(null);
 
     const startScanner = async () => {
         if (scannerRef.current) return;
 
+        setError("");
+        setDonor(null);
         setIsScanning(true);
 
         // Give React time to render the #reader div
@@ -55,14 +59,15 @@ export default function ScannerPage() {
                             const result = await verifyDonorAction(decodedText);
 
                             if (!result.success) {
-                                alert(result.message);
+                                setError(result.message ?? "Invalid QR code.");
                                 return;
                             }
 
+                            setError("");
                             setDonor(result.donor);
                         } catch (error) {
                             console.error(error);
-                            alert("Failed to verify QR code.");
+                            setError("Failed to verify QR code.");
                         }
                     },
                     () => {
@@ -72,7 +77,7 @@ export default function ScannerPage() {
             } catch (err) {
                 console.error(err);
                 setIsScanning(false);
-                alert("Unable to access the camera.");
+                setError("Unable to access the camera.");
             }
         }, 100);
     };
@@ -101,6 +106,8 @@ export default function ScannerPage() {
     const checkin = async () => {
         if (!donor) return;
 
+        setError("");
+
         try {
             const result = await checkInDonorAction(
                 eventId,
@@ -108,10 +115,14 @@ export default function ScannerPage() {
             );
 
             if (!result.success) {
-                alert(result.message);
+                setError(
+                    result.message ??
+                    "This donor cannot be checked in."
+                );
                 return;
             }
 
+            setError("");
             alert("Donor successfully checked in!");
 
             setDonor(null);
@@ -119,7 +130,7 @@ export default function ScannerPage() {
             router.push(`/oa/events/${eventId}`);
         } catch (error) {
             console.error(error);
-            alert("Failed to check in donor.");
+            setError("Failed to check in donor.");
         }
     };
 
@@ -185,6 +196,12 @@ export default function ScannerPage() {
                             Event ID: {eventId}
                         </span>
                     </div>
+
+                    {error && (
+                        <div className="mt-5 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-red-700 font-medium">
+                            {error}
+                        </div>
+                    )}
 
                     <button
                         type="button"
@@ -255,7 +272,10 @@ export default function ScannerPage() {
                             </button>
 
                             <button
-                                onClick={() => setDonor(null)}
+                                onClick={() => {
+                                    setDonor(null);
+                                    setError("");
+                                }}
                                 className="bg-gray-300 px-8 py-3 rounded-lg hover:bg-gray-400 transition"
                             >
                                 Cancel
