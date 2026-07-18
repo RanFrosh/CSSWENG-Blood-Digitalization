@@ -3,7 +3,7 @@ import { ApiResponse } from "@/types/api_res_type";
 import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 import { SQL, eq, asc, desc, and, inArray } from "drizzle-orm";
-import { event_log } from "@/db/models/event";
+import { event_log } from "@/db/models/event_log";
 import { corrected_event } from "@/db/models/corrected_event";
 import { orm } from "@/db/drizzle";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";

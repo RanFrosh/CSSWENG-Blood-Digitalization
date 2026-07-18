@@ -1,7 +1,7 @@
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { orm } from "@/db/drizzle";
 import { event_queue } from "@/db/models/event_queue";
-import { event_log } from "@/db/models/event";
+import { event_log } from "@/db/models/event_log";
 import { assigned_staff } from "@/db/models/assigned_staff";
 import { ViewQueueFilters, DeleteQueue, CreateQueue, UpdateQueue } from "@/types/queue_type";
 
@@ -28,7 +28,7 @@ jest.mock("@/db/models/event_queue", () => ({
     },
 }));
 
-jest.mock("@/db/models/event", () => ({
+jest.mock("@/db/models/event_log", () => ({
     event_log: {
         id: "event_log.id",
         status: "event_log.status",

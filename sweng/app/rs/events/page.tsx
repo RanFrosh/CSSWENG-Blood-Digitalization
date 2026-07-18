@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { orm } from "@/db/drizzle";
 import { serverSupa } from "@/db/supaserver";
 
-import { event_log } from "@/db/models/event-log";
-import { assigned_staff } from "@/db/models/assigned-staff";
+import { event_log } from "@/db/models/event_log";
+import { assigned_staff } from "@/db/models/assigned_staff";
 
 import RSClient, { AssignedEvent } from "./client";
 

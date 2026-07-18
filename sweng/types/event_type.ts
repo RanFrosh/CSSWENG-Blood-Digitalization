@@ -1,6 +1,6 @@
 import { corrected_event } from "@/db/models/corrected_event";
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { event_log } from "@/db/models/event";
+import { event_log } from "@/db/models/event_log";
 
 export type ViewCorrections = InferSelectModel<typeof corrected_event>;
 export type ViewCorrectionFilters = Partial<ViewCorrections>;

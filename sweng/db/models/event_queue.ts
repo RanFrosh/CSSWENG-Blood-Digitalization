@@ -1,5 +1,5 @@
 import { pgTable, bigserial, bigint, uuid} from "drizzle-orm/pg-core";
-import { event_log } from "./event";
+import { event_log } from "./event_log";
 import { donor } from "./donor";
 import { queue_station } from "../enums/queue_station";
 import { profiles } from "./profiles";

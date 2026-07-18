@@ -74,6 +74,5 @@ export const donor = pgTable("donor", {
   // Additional fields from dev
   verifiedBlood: boolean("verifiedBlood").default(false).notNull(),
   medicalNote: text("medicalNote"),
-  assessment_status: assessment_status("assessment_status"),
-  qr_token: uuid("qr_token").defaultRandom().notNull()
+  assessment_status: assessment_status("assessment_status")
 });

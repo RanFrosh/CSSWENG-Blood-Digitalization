@@ -1,11 +1,14 @@
 // scripts/seed-events-drizzle.ts
 import { orm } from "@/db/drizzle";
-import { event_log } from "@/db/models/event";
+import { event_log } from "@/db/models/event_log";
 import { eq } from "drizzle-orm";
 
 const events = [
   {
     name: "Lingkod Dugo sa Maynila",
+    partner: "Red Cross",
+    event_date: "2024-01-15",
+    start_time: "08:00",
     city_id: BigInt(6),
     zip_code: "1000",
     street: "Padre Faura St.",
@@ -17,6 +20,9 @@ const events = [
   },
   {
     name: "RedBank Cebu Blood Drive",
+    partner: "RedBank",
+    event_date: "2024-02-10",
+    start_time: "09:00",
     city_id: BigInt(107),
     zip_code: "6000",
     street: "Osmeña Blvd.",
@@ -28,6 +34,9 @@ const events = [
   },
   {
     name: "Davao Gives Life",
+    partner: "City Health",
+    event_date: "2024-03-05",
+    start_time: "07:30",
     city_id: BigInt(136),
     zip_code: "8000",
     street: "JP Laurel Ave.",
@@ -39,6 +48,9 @@ const events = [
   },
   {
     name: "QC Community Blood Drive",
+    partner: "Community Partners",
+    event_date: "2024-04-20",
+    start_time: "10:00",
     city_id: BigInt(13),
     zip_code: "1100",
     street: "Elliptical Rd.",

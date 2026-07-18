@@ -4,7 +4,7 @@ import { eq, sql } from "drizzle-orm";
 
 import { orm } from "@/db/drizzle";
 import { donor } from "@/db/models/donor";
-import { event_log } from "@/db/models/event-log";
+import { event_log } from "@/db/models/event_log";
 
 import { serverSupa } from "@/db/supaserver";
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";

@@ -25,7 +25,7 @@ jest.mock("@/db/models/donor", () => ({
     },
 }));
 
-jest.mock("@/db/models/event-log", () => ({
+jest.mock("@/db/models/event_log", () => ({
     event_log: {
         id: "id",
         perk_claims: "perk_claims",

@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, bigserial, bigint, uuid} from "drizzle-orm/pg-core";
 import { city } from "./city";
-import { event_log } from "./event";
+import { event_log } from "./event_log";
 import { profiles } from "./profiles";
 
 export const corrected_event = pgTable("corrected_event", {

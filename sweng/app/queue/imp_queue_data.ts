@@ -4,7 +4,7 @@ import { orm } from "@/db/drizzle";
 import { QueueData } from "@/abstract/queue/queue_abstract";
 import { ViewQueueFilters, ViewQueue, DeleteQueue, CreateQueue, UpdateQueue } from "@/types/queue_type";
 import { event_queue } from "@/db/models/event_queue";
-import { event_log } from "@/db/models/event";
+import { event_log } from "@/db/models/event_log";
 import { assigned_staff } from "@/db/models/assigned_staff";
 
 export class ImpQueueModel implements QueueData {

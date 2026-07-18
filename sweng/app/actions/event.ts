@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 
 import { orm } from "@/db/drizzle";
-import { event_log } from "@/db/models/event";
+import { event_log } from "@/db/models/event_log";
 import { city } from "@/db/models/city";
 import { province } from "@/db/models/province";
 

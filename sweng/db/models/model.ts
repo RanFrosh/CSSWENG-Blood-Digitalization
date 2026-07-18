@@ -1,4 +1,4 @@
-export { event_log } from "./event";
+export { event_log } from "./event_log";
 export { donor } from "./donor";
 export { profiles } from "./profiles";
 export { assigned_staff } from "./assigned_staff";
