@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { ViewEvents } from "@/types/event_type";
 import { verifyEventAccess } from "../event_action";
 import Header from "@/components/HeaderMP";
-import { pickNextDonor, retrieveDonor } from "@/app/queue/queue_action";
+import { pickNextDonor, retrieveDonor, peekNextDonor } from "@/app/queue/queue_action";
 
 export default function MPEventPage() {
     const router = useRouter();
@@ -38,17 +38,31 @@ export default function MPEventPage() {
     // Accept donor from queue and proceed to screening
     const acceptNewDonor = async () => {
         setActionError("");
-        const result = await pickNextDonor(BigInt(eventId));
-        if (result.success && result.data && result.data.donor_id) {
-            const donor = await retrieveDonor(result.data.donor_id)
-            if (donor.success && donor.data) {               
-                    router.push(`/mp/events/${eventId}/screening/${result.data.donor_id}?queueId=${result.data.id}`);
-            } else {
-                setActionError(donor.message);
-            }            
-        } else {
-            setActionError(result.message);
+
+        const peek = await peekNextDonor(BigInt(eventId));
+        if (!peek.success || !peek.data || !peek.data.donor_id) {
+            setActionError(peek.message);
+            return;
         }
+
+        const donorInfo = await retrieveDonor(peek.data.donor_id);
+        if (!donorInfo.success || !donorInfo.data) {
+            setActionError(donorInfo.message);
+            return;
+        }
+
+        const isConfirmed = confirm(
+            `Queue #${peek.data.id}\nName: ${donorInfo.data.first_name} ${donorInfo.data.last_name}\n\nAccept this donor for screening?`
+        );
+        if (!isConfirmed) return;
+
+        const pick = await pickNextDonor(BigInt(eventId));
+        if (!pick.success || !pick.data) {
+            setActionError(pick.message);
+            return;
+        }
+        
+        router.push(`/mp/events/${eventId}/screening/${pick.data.donor_id}?queueId=${pick.data.id}`);
     };
 
     const goBack = () => {

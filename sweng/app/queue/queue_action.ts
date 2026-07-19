@@ -87,6 +87,15 @@ export async function pickNextDonor(event_log_id: bigint): Promise<ApiResponse<V
     return bigintToStr(await controller.invokePickNextQueue(event_log_id));
 }
 
+export async function peekNextDonor(event_log_id: bigint): Promise<ApiResponse<ViewQueue>> {
+    const database = await serverSupa();
+    const model = new ImpQueueModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpQueueManager(model, profiler);
+
+    return bigintToStr(await controller.invokePeekNextQueue(event_log_id));
+}
+
 export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<StaffWithStatus[]>> {
     try {
 

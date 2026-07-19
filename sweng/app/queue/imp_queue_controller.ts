@@ -82,7 +82,7 @@ export class ImpQueueManager implements QueueController {
             station: null
         });
         if (busyCheck.data && busyCheck.data.length > 0) {
-            return { success: false, message: "You are already handling a donor" };
+            return { success: false, message: "You are already handling a donor, cannot handle for now" };
         }
 
         const stationRes = getQueueStation(res.data.role);
@@ -110,5 +110,31 @@ export class ImpQueueManager implements QueueController {
         nextDonor.profile_id = res.data.id
 
         return { success: true, message: `Donor assigned and ${updateResult.message}`, data: nextDonor };
+    }
+
+    async invokePeekNextQueue(event_guy: bigint): Promise<ApiResponse<ViewQueue>> {
+        const res = await helpGateKeep(this.profileReader, 'viewqueue');
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
+
+        const busyCheck = await this.queueModel.queryQueue({
+            event_log_id: event_guy,
+            profile_id: res.data.id,
+            station: null
+        });
+        if (busyCheck.data && busyCheck.data.length > 0) {
+            return { success: false, message: "You are already handling a donor, cannot peek" };
+        }
+
+        const stationRes = getQueueStation(res.data.role);
+        if (!stationRes) return { success: false, message: "Invalid role for queue", data: undefined };
+
+        const queueResult = await this.queueModel.queryQueue({ event_log_id: event_guy, profile_id: res.data.id, station: stationRes });
+
+        if (!queueResult.success || !queueResult.data || queueResult.data.length === 0) {
+            return { success: queueResult.success, message: queueResult.message, data: undefined };
+        }
+        
+        return { success: true, message: `Donor peeked and ${queueResult.message}`, data: queueResult.data[0] };
     }
 }

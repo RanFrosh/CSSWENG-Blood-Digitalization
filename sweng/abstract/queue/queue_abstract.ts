@@ -19,5 +19,6 @@ export interface QueueController {
     invokeDeleteQueue(donorTarget: DeleteQueue): Promise<ApiResponse>
     invokeAddToQueue(queueTarget: CreateQueue): Promise<ApiResponse>
     invokeUpdateQueueStation(queueTarget: UpdateQueue): Promise<ApiResponse>
-    invokePickNextQueue(event_log_id: bigint): Promise<ApiResponse<ViewQueue>>
+    invokePickNextQueue(event_guy: bigint): Promise<ApiResponse<ViewQueue>>
+    invokePeekNextQueue(event_guy: bigint): Promise<ApiResponse<ViewQueue>>
 }

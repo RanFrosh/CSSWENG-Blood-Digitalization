@@ -7,4 +7,4 @@
 
 Project is attempting to be SOLID compliant but willing to diverge on some cases if it makes implementation faster and easier.
 
-viewStaffStatus function in **@/app/queue/queue_action.ts** breaks the design pattern but should be treated as an outlier.
+viewStaffStatus and retrieveDonor functions in **@/app/queue/queue_action.ts** breaks the design pattern but should be treated as outliers, currently being refactored.
