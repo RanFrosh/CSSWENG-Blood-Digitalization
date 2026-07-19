@@ -1,6 +1,29 @@
 "use client";
-
 import { useRouter, usePathname, useParams } from "next/navigation";
+
+type NavLink = {
+    name: string;
+    path: string;
+    onClick: () => void;
+};
+
+type EventStatus = "Ongoing" | "Completed" | "Upcoming";
+
+type LabEvent = {
+    id: string;
+    status: EventStatus;
+};
+
+const labEvents: LabEvent[] = [
+    {
+        id: "1",
+        status: "Ongoing",
+    },
+    {
+        id: "3",
+        status: "Completed",
+    },
+];
 
 export default function HeaderLS() {
     const router = useRouter();
@@ -10,27 +33,49 @@ export default function HeaderLS() {
     const eventId = params?.eventId as string | undefined;
     const donorId = params?.donorId as string | undefined;
 
+    const selectedEvent = labEvents.find((event) => event.id === eventId);
+    const isOngoingEvent = selectedEvent?.status === "Ongoing";
+    const isCompletedEvent = selectedEvent?.status === "Completed";
+
     const goMyEvents = () => {
         router.push("/ls/events");
     };
 
     const goEventHome = () => {
-        if (eventId) router.push(`/ls/events/${eventId}`);
+        if (eventId) {
+            router.push(`/ls/events/${eventId}`);
+        }
     };
 
     const goQueue = () => {
-        if (eventId) router.push(`/ls/events/${eventId}/queue`);
+        if (eventId) {
+            router.push(`/ls/events/${eventId}/queue`);
+        }
     };
 
     const goRecord = () => {
-        if (eventId && donorId) router.push(`/ls/events/${eventId}/record/${donorId}`);
+        if (eventId && donorId) {
+            router.push(`/ls/events/${eventId}/record/${donorId}`);
+        }
+    };
+
+    const goSearch = () => {
+        if (eventId) {
+            router.push(`/ls/events/${eventId}/search`);
+        }
+    };
+
+    const goEdit = () => {
+        if (eventId && donorId) {
+            router.push(`/ls/events/${eventId}/search/${donorId}`);
+        }
     };
 
     const goLogout = () => {
         router.push("/landing");
     };
 
-    const navLinks = [];
+    const navLinks: NavLink[] = [];
 
     navLinks.push({
         name: "Home",
@@ -45,18 +90,36 @@ export default function HeaderLS() {
             onClick: goEventHome,
         });
 
-        navLinks.push({
-            name: "Donation Queue",
-            path: `/ls/events/${eventId}/queue`,
-            onClick: goQueue,
-        });
-
-        if (donorId) {
+        if (isOngoingEvent) {
             navLinks.push({
-                name: "Donor Record",
-                path: `/ls/events/${eventId}/record/${donorId}`,
-                onClick: goRecord,
+                name: "Donation Queue",
+                path: `/ls/events/${eventId}/queue`,
+                onClick: goQueue,
             });
+
+            if (donorId && pathname === `/ls/events/${eventId}/record/${donorId}`) {
+                navLinks.push({
+                    name: "Donor Record",
+                    path: `/ls/events/${eventId}/record/${donorId}`,
+                    onClick: goRecord,
+                });
+            }
+        }
+
+        if (isCompletedEvent) {
+            navLinks.push({
+                name: "Record Search",
+                path: `/ls/events/${eventId}/search`,
+                onClick: goSearch,
+            });
+
+            if (donorId && pathname === `/ls/events/${eventId}/search/${donorId}`) {
+                navLinks.push({
+                    name: "Edit Record",
+                    path: `/ls/events/${eventId}/search/${donorId}`,
+                    onClick: goEdit,
+                });
+            }
         }
     }
 
