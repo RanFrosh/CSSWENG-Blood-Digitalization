@@ -11,35 +11,20 @@ import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
 import { bigintToStr } from "../global/serializer/serial";
-import { helpGateKeep } from "../global/helper_bouncer/bouncer";
 import { StaffWithStatus } from "@/types/queue_type";
 import { profiles } from "@/db/models/profiles";
 import { assigned_staff } from "@/db/models/assigned_staff";
 import { event_queue } from "@/db/models/event_queue";
+import { ImpDonorModel } from "../donoring/imp_donor_data";
+import { ImpDonorManager } from "../donoring/imp_donor_controller";
 
 export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<ViewDonor>> {
-    
-    try {
-        if (!donor_info) return { success: false, message: "Donor id is missing" };
+    const database = await serverSupa();
+    const model = new ImpDonorModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpDonorManager(model, profiler);
 
-        const database = await serverSupa();
-        const profiler = new ImpProfileGetter(database);
-        const auth = await helpGateKeep(profiler, 'viewqueue');
-        if (!auth.success) return { success: false, message: auth.message };
-
-        const [result] = await orm
-        .select()
-        .from(donor)
-        .where(eq(donor.id, donor_info))
-        .limit(1);
-
-        if (!result) return { success: false, message: "Donor not found" };
-
-        return bigintToStr({ success: true, message: "Donor retrieved", data: result });
-
-    } catch (err: any) {
-        return { success: false, message: err.message };
-    }
+    return bigintToStr(await controller.invokeGetSingleDonor({ id: donor_info }));
 }
 
 export async function viewQueueWithDonors(event_info_str: string): Promise<ApiResponse<QueueEntryWithDonor[]>> {

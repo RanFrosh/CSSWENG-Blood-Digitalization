@@ -19,7 +19,8 @@ const permissions = {
     'enqueue': ['onsite_admin'] as AccessType[],
     'dequeue': ['onsite_admin', 'med_prof', 'recov_staff', 'lab_staff'] as AccessType[],
     'updatequeue': ['med_prof', 'lab_staff'] as AccessType[],
-    'viewqueue': ['med_prof', 'lab_staff'] as AccessType[]
+    'viewqueue': ['med_prof', 'lab_staff'] as AccessType[],
+    'viewdonor': ['med_prof', 'lab_staff'] as AccessType[]
 } satisfies Record<string, AccessType[]>;
 
 const queueMapping = {
