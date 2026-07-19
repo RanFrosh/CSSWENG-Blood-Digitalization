@@ -27,6 +27,15 @@ const assignedEvents: AssignedEvent[] = [
         partner: "Manila Doctors Hospital",
         status: "Ongoing",
     },
+    {
+        id: "3",
+        name: "Every Drop Counts",
+        location: "De La Salle University",
+        date: "XX/XX/XXXX",
+        time: "XX:XX AM - XX:XX PM",
+        partner: "Healthway QualiMed Manila",
+        status: "Completed",
+    },
 ];
 
 // Sample queue donor structure
@@ -57,6 +66,10 @@ export default function LSEventPage() {
 
     const goQueue = () => {
         router.push(`/ls/events/${eventId}/queue`);
+    };
+
+    const goSearch = () => {
+        router.push(`/ls/events/${eventId}/search`);
     };
 
     // Accept donor from queue and proceed to blood donation record
@@ -172,33 +185,53 @@ export default function LSEventPage() {
                             Event Actions
                         </h2>
 
-                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 gap-[0.25in]">
-                            <button
-                                onClick={acceptNewDonor}
-                                className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
-                            >
-                                <h3 className="text-[24px] font-['Montserrat'] font-bold">
-                                    Record Donor Blood Donation
-                                </h3>
+                        {selectedEvent.status === "Ongoing" && (
+                            <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 gap-[0.25in]">
+                                <button
+                                    onClick={acceptNewDonor}
+                                    className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
+                                >
+                                    <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                                        Record Donor Blood Donation
+                                    </h3>
 
-                                <p className="mt-[8px] text-[18px]">
-                                    Accept the next donor from the blood donation queue.
-                                </p>
-                            </button>
+                                    <p className="mt-[8px] text-[18px]">
+                                        Accept the next donor from the blood donation queue.
+                                    </p>
+                                </button>
 
-                            <button
-                                onClick={goQueue}
-                                className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
-                            >
-                                <h3 className="text-[24px] font-['Montserrat'] font-bold">
-                                    View Blood Donation Queue
-                                </h3>
+                                <button
+                                    onClick={goQueue}
+                                    className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
+                                >
+                                    <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                                        View Blood Donation Queue
+                                    </h3>
 
-                                <p className="mt-[8px] text-[18px]">
-                                    View screened donors waiting for blood donation procedures.
-                                </p>
-                            </button>
-                        </div>
+                                    <p className="mt-[8px] text-[18px]">
+                                        View screened donors waiting for blood donation procedures.
+                                    </p>
+                                </button>
+                            </div>
+                        )}
+
+                        {selectedEvent.status === "Completed" && (
+                            <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-1 gap-[0.25in]">
+                                <button
+                                    type="button"
+                                    onClick={goSearch}
+                                    className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
+                                >
+                                    <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                                        Search Donation Records
+                                    </h3>
+
+                                    <p className="mt-[8px] text-[18px]">
+                                        Search donors who successfully donated during this event and access their donation records.
+                                    </p>
+                                </button>
+                            </div>
+                        )}
                     </section>
                 </div>
             </main>

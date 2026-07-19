@@ -82,9 +82,9 @@ export default function LSEventsPage() {
         filteredEvents = assignedEvents.filter((event) => event.status === activeTab);
     }
 
-    // Can only open events that are ongoing
+    // Can only open events that are ongoing or completed
     const openEvent = (event: AssignedEvent) => {
-        if (event.status === "Ongoing") {
+        if (event.status !== "Upcoming") {
             // Navigate to the event details page for the selected event
             router.push(`/ls/events/${event.id}`);
         } else {
@@ -108,9 +108,9 @@ export default function LSEventsPage() {
         return className;
     };
     
-    // Create button to open event if it is ongoing
+    // Create button to open event if it is ongoing or completed
     const createActionButton = (event: AssignedEvent) => {
-        if (event.status === "Ongoing") {
+        if (event.status !== "Upcoming") {
             return (
                 <button
                     onClick={() => openEvent(event)}
