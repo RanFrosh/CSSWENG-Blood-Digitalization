@@ -41,7 +41,7 @@ export default function EditPage() {
         const donor = donorInfo;
 
         const isConfirmed = confirm(
-            `Donor ID: ${donor.id}\nName: ${donor.name}\n\nSubmit edit request?`
+            `Donor ID: ${donor.id}\nName: ${donor.name}\n\nBlood Bag ID: ${donor.bloodBagId}\n\nSubmit edit request?`
         );
 
         if (isConfirmed) {
