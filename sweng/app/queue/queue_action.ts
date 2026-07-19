@@ -17,6 +17,8 @@ import { assigned_staff } from "@/db/models/assigned_staff";
 import { event_queue } from "@/db/models/event_queue";
 import { ImpDonorModel } from "../donoring/imp_donor_data";
 import { ImpDonorManager } from "../donoring/imp_donor_controller";
+import { ImpProfilesManager } from "../profiles/imp_profiles_controller";
+import { ImpProfilesModel } from "../profiles/imp_profiles_data";
 
 export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<ViewDonor>> {
     const database = await serverSupa();
@@ -87,6 +89,8 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
         const database = await serverSupa();
         const profiler = new ImpProfileGetter(database);
         const profile = await profiler.getCurrentUser();
+        const profilesModel = new ImpProfilesModel(orm);
+        const profilesController = new ImpProfilesManager(profilesModel, profiler);
 
         if (!profile.success || !profile.data) return { success: false, message: profile.message };
 
@@ -101,16 +105,14 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
         if (!currentUserAssigned) return { success: false, message: "Not assigned to this event", data: [] };
 
         const profileIds = assigned.map(a => a.profiles_id);
-        const profilesResult = await orm
-            .select()
-            .from(profiles)
-            .where(inArray(profiles.id, profileIds));
-
-        const profileMap = new Map(profilesResult.map(p => [p.id, p]));
-
+        const profilesResult = await profilesController.invokeGetProfiles(profileIds);
+        if (!profilesResult.success || !profilesResult.data) return { success: profilesResult.success, message: profilesResult.message }
+        
+        const profileMap = new Map(profilesResult.data.map(p => [p.id, p]));
+        
         const sameRoleStaff = assigned
             .map(a => profileMap.get(a.profiles_id))
-            .filter((p): p is typeof profilesResult[number] => p?.role === profile.data!.role);
+            .filter((p): p is typeof profilesResult.data[number] => p?.role === profile.data!.role);
 
         if (sameRoleStaff.length === 0) return { success: true, message: "No same-role staff assigned", data: [] };
 

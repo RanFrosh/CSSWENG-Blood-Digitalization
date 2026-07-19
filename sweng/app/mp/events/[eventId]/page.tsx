@@ -38,7 +38,6 @@ export default function MPEventPage() {
     // Accept donor from queue and proceed to screening
     const acceptNewDonor = async () => {
         setActionError("");
-
         const peek = await peekNextDonor(BigInt(eventId));
         if (!peek.success || !peek.data || !peek.data.donor_id) {
             setActionError(peek.message);
