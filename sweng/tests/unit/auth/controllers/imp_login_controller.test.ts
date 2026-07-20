@@ -33,7 +33,7 @@ describe("helpGateKeep", () => {
         const result = await helpGateKeep(mockChecker, "view_event");
 
         expect(result.success).toBe(false);
-        expect(result.message).toBe("Somehow there is no role");
+        expect(result.message).toBe("Failed to identify role");
     });
 
     // user has a role but doesn't have the required permission
