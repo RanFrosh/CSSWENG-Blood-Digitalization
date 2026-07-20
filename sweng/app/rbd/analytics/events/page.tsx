@@ -1,6 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
 
+import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderRBD";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
@@ -13,6 +13,8 @@ type EventAnalytics = {
     time: string;
     partner: string;
     status: EventStatus;
+    extractionGoal: number;
+    totalBagsProduced: number;
 };
 
 const events: EventAnalytics[] = [
@@ -24,6 +26,8 @@ const events: EventAnalytics[] = [
         time: "9:00 AM - 4:00 PM",
         partner: "Manila Doctors Hospital",
         status: "Ongoing",
+        extractionGoal: 100,
+        totalBagsProduced: 72,
     },
     {
         id: "2",
@@ -33,6 +37,8 @@ const events: EventAnalytics[] = [
         time: "Time 2",
         partner: "Partner 2",
         status: "Upcoming",
+        extractionGoal: 100,
+        totalBagsProduced: 67,
     },
     {
         id: "3",
@@ -42,13 +48,14 @@ const events: EventAnalytics[] = [
         time: "Time 3",
         partner: "Partner 3",
         status: "Completed",
+        extractionGoal: 100,
+        totalBagsProduced: 89,
     },
 ];
 
-export default function EventAnalyticsPage() {
+export default function SearchEventsPage() {
     const router = useRouter();
 
-    // for some reason this specific folder keeps bugging so im using direct link lmao
     const viewEventAnalytics = (eventId: string) => {
         location.href = `/rbd/analytics/events/${eventId}`;
     };
@@ -57,20 +64,22 @@ export default function EventAnalyticsPage() {
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
 
-            <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
+            <div className="flex-1 bg-[#f9fdff] p-[0.35in] flex flex-col gap-[0.35in]">
+                {/* Header Section */}
                 <section className="bg-[#f9fdff] p-[0.25in]">
                     <p className="text-[18px] font-['Montserrat'] text-[#002940]">
                         Red Bank Director
                     </p>
 
                     <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                        Event Analytics
+                        Event Search
                     </h1>
                 </section>
 
-                <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
+                {/* Filter and Search Bar */}
+                <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        Search Events
+                        Filters
                     </h2>
 
                     <div className="mt-5 flex flex-row items-end gap-5">
@@ -101,7 +110,8 @@ export default function EventAnalyticsPage() {
                     </div>
                 </section>
 
-                <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
+                {/* Event Results Section */}
+                <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
                     <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
                         <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
                             Events

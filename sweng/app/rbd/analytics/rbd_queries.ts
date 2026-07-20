@@ -1,5 +1,5 @@
-import { orm } from "../../db/drizzle";
-import { donor } from "../../db/models/donor";
+import { orm } from "../../../db/drizzle";
+import { donor } from "../../../db/models/donor";
 import { eq, sql } from "drizzle-orm";
 import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 

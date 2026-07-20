@@ -1,6 +1,6 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { helpGateKeep } from "../global/helper_bouncer/bouncer";
+import { helpGateKeep } from "../../global/helper_bouncer/bouncer";
 import { AnalyticsController, AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 
 export class ImpAnalyticsManager implements AnalyticsController {

@@ -1,4 +1,4 @@
-import { ImpAnalyticsData } from "@/app/analytics/analytics_queries";
+import { ImpAnalyticsData } from "@/app/rbd/analytics/rbd_queries";
 import { orm } from "@/db/drizzle";
 import { donor } from "@/db/models/donor";
 

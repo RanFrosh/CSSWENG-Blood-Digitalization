@@ -1,19 +1,12 @@
 "use client";
+
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+
 import Header from "@/components/HeaderRBD";
-import StaffDetails from "@/components/StaffDetails";
-import { checkAuthentication } from "./rbd_action";
 
 export default function AnalyticsPage() {
     
     const router = useRouter();
-
-    // Loading State
-    const [isLoading, setIsLoading] = useState(true);
-
-    // Error display
-    const [errorMessage, setErrorMessage] = useState("");
 
     const goEvents = () => {
         router.push(`/rbd/analytics/events`);
@@ -26,50 +19,6 @@ export default function AnalyticsPage() {
     const goOverall = () => {
         router.push(`/rbd/analytics/overall`);
     };
-    
-    useEffect(() => {
-        const verifyAccess = async () => {
-            setIsLoading(true);
-            setErrorMessage("");
-
-            try {
-                const result = await checkAuthentication();
-                
-                if (!result.success) {
-                    setErrorMessage(result.message);
-                }
-            } catch (error) {
-                console.error("Auth check failed:", error);
-                setErrorMessage("Failed to connect to the database.");
-            } finally {
-                setIsLoading(false); 
-            }
-        }
-        
-        verifyAccess();
-    }, []);
-
-    if (isLoading) {
-            return (
-                <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                    <Header />
-                    <div className="flex-1 flex items-center justify-center">
-                        <p className="text-[24px] text-[#002940]">Loading events...</p>
-                    </div>
-                </main>
-            );
-        }
-    
-        if (errorMessage) {
-            return (
-                <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                    
-                    <div className="flex-1 flex items-center justify-center">
-                        <p className="text-[24px] text-red-500">{errorMessage}</p>
-                    </div>
-                </main>
-            );
-        }
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -84,7 +33,36 @@ export default function AnalyticsPage() {
                 </section>
 
                 {/* Staff Details */}
-                <StaffDetails />
+                <section className="mt-[0.15in]">
+                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
+                        <h2 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                            Staff Details
+                        </h2>
+
+                        <div className="mt-[0.15in] flex flex-col gap-[5px] text-[18px]">
+                            <p>
+                                <span className="font-semibold text-[#002940]">
+                                    Name:
+                                </span>{" "}
+                                Jillian Doe
+                            </p>
+
+                            <p>
+                                <span className="font-semibold text-[#002940]">
+                                    Role:
+                                </span>{" "}
+                                Red Bank Director
+                            </p>
+
+                            <p>
+                                <span className="font-semibold text-[#002940]">
+                                    Staff ID:
+                                </span>{" "}
+                                RBD-001
+                            </p>
+                        </div>
+                    </div>
+                </section>
 
                 {/* Action Cards */}
                 <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
