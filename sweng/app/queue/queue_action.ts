@@ -95,6 +95,8 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
         const staffController = new ImpAssignedStaffManager(staffModel, profiler);
         const donorModel = new ImpDonorModel(orm);
         const donorController = new ImpDonorManager(donorModel, profiler);
+        const queueModel = new ImpQueueModel(orm);
+        const queueController = new ImpQueueManager(queueModel, profiler);
 
         if (!profile.success || !profile.data) return { success: false, message: profile.message };
 
@@ -118,22 +120,16 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
 
         if (sameRoleStaff.length === 0) return { success: true, message: "No same-role staff assigned", data: [] };
 
-        const busy = await orm
-            .select()
-            .from(event_queue)
-            .where(
-                and(
-                    eq(event_queue.event_log_id, event_guy),
-                    isNull(event_queue.station)
-                )
-            );
+        const busy = await queueController.invokeGetNullStations(event_guy);
+
+        if (!busy.success || !busy.data) return { success: busy.success, message: busy.message };
 
         const busyByProfile = new Map(
-            busy.map(b => [b.profile_id, b])
+            busy.data.map(b => [b.profile_id, b])
         );
 
         const busyDonorIds = busy
-            .map(b => b.donor_id)
+            .data.map(b => b.donor_id)
             .filter((id): id is bigint => id !== null
         );
 

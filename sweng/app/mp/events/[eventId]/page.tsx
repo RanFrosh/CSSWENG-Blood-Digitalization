@@ -2,7 +2,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { ViewEvents } from "@/types/event_type";
-import { verifyEventAccess } from "../event_action";
+import { verifyEventAccess } from "../../../event_records/event_action";
 import Header from "@/components/HeaderMP";
 import { pickNextDonor, retrieveDonor, peekNextDonor } from "@/app/queue/queue_action";
 

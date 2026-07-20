@@ -112,4 +112,24 @@ export class ImpQueueModel implements QueueData {
             return { success: false, message: err.message };
         }    
     }
+
+    async getNullStations(event_guy: bigint): Promise<ApiResponse<ViewQueue[]>> {
+        try {
+            const busy = await this.access
+            .select()
+            .from(event_queue)
+            .where(
+                and(
+                    eq(event_queue.event_log_id, event_guy),
+                    isNull(event_queue.station)
+                )
+            );
+
+            if (busy.length === 0) return { success: true, message: "No donors with null stations", data: [] };
+
+            return { success: true, message: "Returning list of donors being handled by a staff", data: busy };
+        } catch (err: any) {
+            return { success: false, message: err.message }
+        }
+    }
 }

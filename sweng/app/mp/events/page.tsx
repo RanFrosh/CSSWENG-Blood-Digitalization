@@ -5,7 +5,7 @@ import { EventStatusType } from "@/db/enums/event_status";
 import { ViewEvents } from "@/types/event_type";
 import Header from "@/components/HeaderMP";
 import StaffDetails from "@/components/StaffDetails";
-import { executeEventQueryStaff } from "./event_action";
+import { executeEventQueryStaff } from "../../event_records/event_action";
 
 type EventTab = EventStatusType | "All";
 

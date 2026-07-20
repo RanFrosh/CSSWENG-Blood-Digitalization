@@ -137,4 +137,12 @@ export class ImpQueueManager implements QueueController {
         
         return { success: true, message: `Donor peeked and ${queueResult.message}`, data: queueResult.data[0] };
     }
+
+    async invokeGetNullStations(event_guy: bigint): Promise<ApiResponse<ViewQueue[]>> {
+        const res = await helpGateKeep(this.profileReader, 'viewqueue');
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }    
+        
+        return await this.queueModel.getNullStations(event_guy);
+    }
 }
