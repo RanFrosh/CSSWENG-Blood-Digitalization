@@ -18,4 +18,11 @@ export class ImpDonorManager implements DonorController {
         if (!res.success || !res.data) return { success: false, message: res.message };
         return await this.donorModel.getSingleDonor(filterer);        
     }
+
+    async invokeGetDonorsByIds(ids: bigint[]): Promise<ApiResponse<ViewDonor[]>> {       
+        const res = await helpGateKeep(this.profileReader, 'viewdonor');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        if (ids.length === 0) return { success: true, message: "No IDs provided", data: [] };
+        return await this.donorModel.getDonorsByIds(ids);       
+    }
 }

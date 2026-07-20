@@ -93,6 +93,8 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
         const profilesController = new ImpProfilesManager(profilesModel, profiler);
         const staffModel = new ImpAssignedStaffModel(orm);
         const staffController = new ImpAssignedStaffManager(staffModel, profiler);
+        const donorModel = new ImpDonorModel(orm);
+        const donorController = new ImpDonorManager(donorModel, profiler);
 
         if (!profile.success || !profile.data) return { success: false, message: profile.message };
 
@@ -135,12 +137,11 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
             .filter((id): id is bigint => id !== null
         );
 
-        const busyDonors = busyDonorIds.length > 0
-            ? await orm.select().from(donor).where(inArray(donor.id, busyDonorIds))
-            : [];
+        const busyDonors = await donorController.invokeGetDonorsByIds(busyDonorIds);
+        if (!busyDonors.success || !busyDonors.data) return { success: busyDonors.success, message: busyDonors.message };
 
         const donorNameMap = new Map(
-            busyDonors.map(d => [d.id, `${d.first_name} ${d.last_name}`])
+            busyDonors.data.map(d => [d.id, `${d.first_name} ${d.last_name}`])
         );
 
         const result: StaffWithStatus[] = sameRoleStaff.map(p => {

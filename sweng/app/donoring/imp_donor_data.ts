@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/types/api_res_type";
-import { SQL, eq, and } from "drizzle-orm";
+import { SQL, eq, and, inArray } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
 import { DonorData } from "@/abstract/donor/donor_abstract";
 import { ViewDonorPartial, ViewDonor } from "@/types/donor_type";
@@ -37,4 +37,19 @@ export class ImpDonorModel implements DonorData {
             return { success: false, message: err.message }
         }  
     }
+
+    async getDonorsByIds(ids: bigint[]): Promise<ApiResponse<ViewDonor[]>> {
+    try {
+        const donors = await this.access
+            .select()
+            .from(donor)
+            .where(inArray(donor.id, ids));
+
+        if (donors.length === 0) return { success: true, message: "Donors not found", data: [] };
+        return { success: true, message: "Donors retrieved", data: donors };
+    } catch (err: any) {
+        return { success: false, message: err.message };
+    }
+    }
+
 }
