@@ -1,5 +1,8 @@
 "use client";
+
+import { useEffect, useState } from "react";
 import Header from "@/components/HeaderRBD";
+import { fetchDirectorStats } from "@/app/analytics/analytics_action";
 
 type BloodTypeData = {
     bloodType: string;
@@ -30,9 +33,6 @@ type EventCampaign = {
     totalBagsProduced: number;
 };
 
-<<<<<<< Updated upstream
-export default function OverallAnalyticsPage() {
-=======
 const campaignEvents: EventCampaign[] = [
     {
         id: "1",
@@ -128,7 +128,6 @@ export default function OverallAnalyticsPage() {
         loadDashboard();
     }, []);
 
->>>>>>> Stashed changes
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
@@ -143,10 +142,7 @@ export default function OverallAnalyticsPage() {
                     </h1>
                 </section>
 
-<<<<<<< Updated upstream
-=======
                 {/* Filters Section */}
->>>>>>> Stashed changes
                 <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                         Filters
@@ -187,94 +183,6 @@ export default function OverallAnalyticsPage() {
                     </div>
                 </section>
 
-<<<<<<< Updated upstream
-                <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                    <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        Analytics Summary
-                    </h2>
-
-                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Total Donors
-                            </p>
-
-                            <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {overallAnalytics.totalDonors}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Blood Donated
-                            </p>
-
-                            <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {overallAnalytics.bloodDonated}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Total Bags Produced
-                            </p>
-
-                            <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {overallAnalytics.totalBagsProduced}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Show-up Rate
-                            </p>
-
-                            <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {overallAnalytics.showUpRate}
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="mt-[0.35in] grid grid-cols-1 xl:grid-cols-2 gap-[0.35in]">
-                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Blood Type Distribution
-                        </h2>
-
-                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {overallAnalytics.bloodTypes.map((bloodType) => (
-                                <div
-                                    key={bloodType.bloodType}
-                                    className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-center justify-between"
-                                >
-                                    <p className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                        {bloodType.bloodType}
-                                    </p>
-
-                                    <p className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                        {bloodType.count}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Extraction Goal Progress
-                        </h2>
-
-                        <div className="mt-[0.25in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <div className="flex flex-row items-center justify-between gap-5 flex-wrap">
-                                <p className="text-[18px] font-semibold text-[#002940]">
-                                    Target Bags
-                                </p>
-
-                                <p className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                    {overallAnalytics.totalBagsProduced} / {overallAnalytics.extractionGoal}
-                                </p>
-=======
                 {isLoading ? (
                      <div className="mt-[0.35in] h-[400px] flex items-center justify-center text-[#002940] text-xl font-semibold animate-pulse">
                             Fetching analytics...
@@ -497,19 +405,9 @@ export default function OverallAnalyticsPage() {
                                         </div>
                                     );
                                 })}
->>>>>>> Stashed changes
                             </div>
                         </section>
 
-<<<<<<< Updated upstream
-                            <div className="mt-5 w-full h-[24px] bg-white border-2 border-[#c0cad0] rounded-full overflow-hidden">
-                                <div
-                                    className="h-full bg-[#002940]"
-                                    style={{
-                                        width: `${overallAnalytics.extractionProgress}%`,
-                                    }}
-                                ></div>
-=======
                         {/* Extraction Objective Framework Component View */}
                         <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
                             <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
@@ -534,15 +432,10 @@ export default function OverallAnalyticsPage() {
                                 <p className="mt-4 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
                                     {analytics.extractionProgress}%
                                 </p>
->>>>>>> Stashed changes
                             </div>
-
-                            <p className="mt-4 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {overallAnalytics.extractionProgress}%
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                        </section>
+                    </>
+                )}
             </div>
         </main>
     );
