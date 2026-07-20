@@ -2,8 +2,6 @@
 
 import { ApiResponse } from "@/types/api_res_type";
 import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
-import { and, eq, inArray, isNull } from "drizzle-orm";
 import { ViewDonor } from "@/types/donor_type";
 import { ViewQueue, QueueEntryWithDonor } from "@/types/queue_type";
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
@@ -12,7 +10,6 @@ import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
 import { bigintToStr } from "../global/serializer/serial";
 import { StaffWithStatus } from "@/types/queue_type";
-import { event_queue } from "@/db/models/event_queue";
 import { ImpDonorModel } from "../donoring/imp_donor_data";
 import { ImpDonorManager } from "../donoring/imp_donor_controller";
 import { ImpProfilesManager } from "../profiles/imp_profiles_controller";
@@ -36,6 +33,8 @@ export async function viewQueueWithDonors(event_info_str: string): Promise<ApiRe
         const profiler = new ImpProfileGetter(database);
         const controller = new ImpQueueManager(model, profiler);
         const event_info_bigInt = BigInt(event_info_str)
+        const donorModel = new ImpDonorModel(orm);
+        const donorController = new ImpDonorManager(donorModel, profiler);
 
         const queueResult = await controller.invokeQueryQueue({ event_log_id: event_info_bigInt });
 
@@ -47,11 +46,10 @@ export async function viewQueueWithDonors(event_info_str: string): Promise<ApiRe
         .map(entry => entry.donor_id)
         .filter((id): id is bigint => id !== null);
 
-        const donors = donor_ids.length > 0
-            ? await orm.select().from(donor).where(inArray(donor.id, donor_ids))
-            : [];
+        const donors = await donorController.invokeGetDonorsByIds(donor_ids)
+        if (!donors.success || !donors.data) return { success: false, message: donors.message };
 
-        const donorMap = new Map(donors.map(d => [d.id, d]));
+        const donorMap = new Map(donors.data.map(d => [d.id, d]));
 
         const combined: QueueEntryWithDonor[] = queueResult.data.map(entry => ({
             ...entry,
