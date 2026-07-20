@@ -15,11 +15,32 @@ const scannedDonor: DonorInfo = {
     name: "John Doe",
 };
 
+type EventInfo = {
+    id: string;
+    name: string;
+};
+
+const events: EventInfo[] = [
+    {
+        id: "1",
+        name: "Blood Donation Drive",
+    },
+    {
+        id: "2",
+        name: "Name 2",
+    },
+    {
+        id: "3",
+        name: "Name 3",
+    },
+];
+
 export default function OAScannerPage() {
     const router = useRouter();
     const params = useParams();
 
     const eventId = params.eventId as string;
+    const selectedEvent = events.find((event) => event.id === eventId);
 
     const scanDonor = () => {
         const donor = scannedDonor;
@@ -97,7 +118,7 @@ export default function OAScannerPage() {
                         </div>
 
                         <span className="bg-[#002940] text-white px-5 py-3 rounded-full text-[18px] font-semibold">
-                            Event ID: {eventId}
+                            {selectedEvent?.name}
                         </span>
                     </div>
 
