@@ -12,13 +12,13 @@ import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
 import { bigintToStr } from "../global/serializer/serial";
 import { StaffWithStatus } from "@/types/queue_type";
-import { profiles } from "@/db/models/profiles";
-import { assigned_staff } from "@/db/models/assigned_staff";
 import { event_queue } from "@/db/models/event_queue";
 import { ImpDonorModel } from "../donoring/imp_donor_data";
 import { ImpDonorManager } from "../donoring/imp_donor_controller";
 import { ImpProfilesManager } from "../profiles/imp_profiles_controller";
 import { ImpProfilesModel } from "../profiles/imp_profiles_data";
+import { ImpAssignedStaffManager } from "../assigned_staff/imp_assigned_staff_controller";
+import { ImpAssignedStaffModel } from "../assigned_staff/imp_assigned_staff_data";
 
 export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<ViewDonor>> {
     const database = await serverSupa();
@@ -91,27 +91,27 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
         const profile = await profiler.getCurrentUser();
         const profilesModel = new ImpProfilesModel(orm);
         const profilesController = new ImpProfilesManager(profilesModel, profiler);
+        const staffModel = new ImpAssignedStaffModel(orm);
+        const staffController = new ImpAssignedStaffManager(staffModel, profiler);
 
         if (!profile.success || !profile.data) return { success: false, message: profile.message };
 
-        const assigned = await orm
-        .select()
-        .from(assigned_staff)
-        .where(eq(assigned_staff.event_log_id, event_guy));
+        const assigned = await staffController.invokeGetStaff(event_guy);
+        if (!assigned.success || !assigned.data) return { success: assigned.success, message: assigned.message };
 
-        if (assigned.length === 0) return { success: true, message: "No staff assigned", data: [] };
+        if (assigned.data.length === 0) return { success: assigned.success, message: assigned.message, data: [] };
 
-        const currentUserAssigned = assigned.some(a => a.profiles_id === profile.data!.id);
+        const currentUserAssigned = assigned.data.some(a => a.profiles_id === profile.data!.id);
         if (!currentUserAssigned) return { success: false, message: "Not assigned to this event", data: [] };
 
-        const profileIds = assigned.map(a => a.profiles_id);
+        const profileIds = assigned.data.map(a => a.profiles_id);
         const profilesResult = await profilesController.invokeGetProfiles(profileIds);
         if (!profilesResult.success || !profilesResult.data) return { success: profilesResult.success, message: profilesResult.message }
         
         const profileMap = new Map(profilesResult.data.map(p => [p.id, p]));
         
         const sameRoleStaff = assigned
-            .map(a => profileMap.get(a.profiles_id))
+            .data.map(a => profileMap.get(a.profiles_id))
             .filter((p): p is typeof profilesResult.data[number] => p?.role === profile.data!.role);
 
         if (sameRoleStaff.length === 0) return { success: true, message: "No same-role staff assigned", data: [] };

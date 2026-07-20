@@ -21,7 +21,8 @@ const permissions = {
     'updatequeue': ['med_prof', 'lab_staff'] as AccessType[],
     'viewqueue': ['med_prof', 'lab_staff'] as AccessType[],
     'viewdonor': ['med_prof', 'lab_staff'] as AccessType[],
-    'viewprofiles': ['med_prof', 'lab_staff'] as AccessType[]
+    'viewprofiles': ['med_prof', 'lab_staff'] as AccessType[],
+    'view_assigned_staff': ['med_prof', 'lab_staff'] as AccessType[]
 } satisfies Record<string, AccessType[]>;
 
 const queueMapping = {

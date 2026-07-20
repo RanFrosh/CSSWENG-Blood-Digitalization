@@ -31,7 +31,7 @@ export class ImpDonorModel implements DonorData {
             .where(and(...filtersDonor))
             .limit(1);
 
-            if (!result) return { success: false, message: "Donor not found" };
+            if (!result) return { success: true, message: "Donor not found" };
             return { success: true, message: "Donor retrieved", data: result }    
         } catch (err: any) {
             return { success: false, message: err.message }
