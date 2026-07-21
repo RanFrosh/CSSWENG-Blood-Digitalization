@@ -135,21 +135,33 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
     }
 
-    async invokeGetDirectorEvents(status: string): Promise<ApiResponse<any>> {
-
+    async invokeGetFilteredEvents(status: string, search: string, sortBy: string): Promise<ApiResponse<any>> {
+        
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
 
         if (!authRes.success) 
             return { success: false, message: authRes.message };
 
         try {
+            const rawEvents = await this.analyticsModel.getEvents(status, search, sortBy);
 
-            const dbEvents = await this.analyticsModel.getEventsByStatus(status);
-                        
-            return { success: true, message: "Director events retrieved", data: dbEvents };
+            const formattedEvents = rawEvents.map((e: any) => ({
+                id: e.id,
+                name: e.name,
+                partner: e.partner,
+                date: e.event_date,
+                status: e.status
+                // map any other fields you need for the EventCard
+            }));
+
+            return {
+                success: true,
+                message: "Events retrieved",
+                data: formattedEvents
+            };
+
         } catch (error: any) {
-            console.error("Event Manager Error:", error);
-            return { success: false, message: "Failed to load events from the database." };
+            return { success: false, message: "Failed to fetch events: " + error.message };
         }
     }
 

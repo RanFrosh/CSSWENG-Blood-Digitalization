@@ -1,6 +1,6 @@
 import { orm } from "../../../db/drizzle";
 import { donor } from "../../../db/models/donor";
-import { eq, sql, and, sum, count, desc } from "drizzle-orm";
+import { eq, sql, or, and, ilike, ne, sum, count, asc, desc } from "drizzle-orm";
 import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { event_log } from "@/db/models/event_log";
 import { donor_to_event } from "@/db/models/donor_to_event";
@@ -108,20 +108,6 @@ export class ImpAnalyticsData implements AnalyticsData {
         };
     }
 
-    async getEventsByStatus(status: string) {
-        
-        if (status === "All") {
-            return await orm
-                .select()
-                .from(event_log);
-        }
-
-        return await orm
-            .select()
-            .from(event_log)
-            .where(eq(event_log.status, status as "Ongoing" | "Upcoming" | "Completed"));
-    }
-
     async getEventById(numericId: bigint) {
 
         const [dbEvent] = await orm
@@ -131,5 +117,46 @@ export class ImpAnalyticsData implements AnalyticsData {
             .limit(1);
         
         return dbEvent;
+    }
+
+    async getEvents(status: string, search: string, sortBy: string) {
+        
+        const conditions = [];
+
+        // Status Filter
+        if (status !== "All") {
+            conditions.push(eq(event_log.status, status as "Ongoing" | "Completed"));
+        } else {
+            conditions.push(ne(event_log.status, "Upcoming"));
+        }
+
+        // Search Filter
+        if (search && search.trim() !== "") {
+            conditions.push(
+                or(
+                    ilike(event_log.name, `%${search}%`),
+                    ilike(event_log.partner, `%${search}%`)
+                )
+            );
+        }
+
+        // Sort Logic
+        let orderLogic: any = desc(event_log.event_date);
+
+        if (sortBy === "Date") 
+            orderLogic = desc(event_log.event_date);
+
+        if (sortBy === "Partner") 
+            orderLogic = asc(event_log.partner);
+
+        if (sortBy === "Status") 
+            orderLogic = asc(event_log.status);
+
+        const events = await orm.select()
+            .from(event_log)
+            .where(conditions.length > 0 ? and(...conditions) : undefined)
+            .orderBy(orderLogic);
+
+        return events;
     }
 }

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { fetchDirectorEvents } from "../rbd_action";
+import { fetchFilteredEvents } from "../rbd_action";
 import { ViewEvents } from "@/types/event_type";
 import Header from "@/components/HeaderRBD";
 import { EventCard } from "@/components/EventCard";
@@ -15,7 +15,10 @@ export default function SearchEventsPage() {
     const router = useRouter();
     
     // Set the initial active tab to "Ongoing"
-    const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
+    const [activeTab, setActiveTab] = useState<EventTab>("All");
+
+    const [searchTerm, setSearchTerm] = useState("");
+    const [sortBy, setSortBy] = useState("Default");
     
     // State for holding events from the backend
     const [events, setEvents] = useState<ViewEvents[]>([]);
@@ -32,7 +35,7 @@ export default function SearchEventsPage() {
             setErrorMessage("");
 
             try {
-                const result = await fetchDirectorEvents(activeTab);
+                const result = await fetchFilteredEvents(activeTab, searchTerm, sortBy);
 
                 if (result.success && result.data) {
                     setEvents(result.data);
@@ -45,9 +48,14 @@ export default function SearchEventsPage() {
                 setIsLoading(false); 
             }
         }
+
+        const delayDebounceFn = setTimeout(() => {
+            loadEvents();
+        }, 300);
         
-        loadEvents();
-    }, [activeTab]);
+        return () => clearTimeout(delayDebounceFn);
+
+    }, [activeTab, searchTerm, sortBy]);
 
     const viewEventAnalytics = (eventId: BigInt) => {
         router.push(`/rbd/analytics/events/${eventId}`);
@@ -97,64 +105,80 @@ export default function SearchEventsPage() {
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in] flex flex-col gap-[0.35in]">
-                {/* Header Section */}
-                <section className="bg-[#f9fdff] p-[0.25in]">
-                    <p className="text-[18px] font-['Montserrat'] text-[#002940]">
-                        Red Bank Director
-                    </p>
 
-                    <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                        Event Search
-                    </h1>
-                </section>
+                <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
 
-                {/* Filter and Search Bar */}
-                <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
-                    <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        Filters
-                    </h2>
+                    {/* Header & Status Tabs */}
+                    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
+                        <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
+                            Event Directory
+                        </h2>
 
-                    <div className="mt-5 flex flex-row items-end gap-5">
-                        <div className="flex-1 flex flex-col gap-2">
+                        <div className="flex flex-row flex-wrap gap-2">
+                            {["All", "Ongoing", "Completed"].map((tab) => (
+                                <button
+                                    key={tab}
+                                    type="button"
+                                    onClick={() => setActiveTab(tab as EventTab)}
+                                    className={`px-6 py-2 rounded-full font-semibold border-2 transition-colors cursor-pointer ${
+                                        activeTab === tab
+                                            ? "bg-[#002940] text-white border-[#002940]"
+                                            : "bg-[#f9fdff] text-[#002940] border-[#c0cad0] hover:bg-gray-200"
+                                    }`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Search and Sort */}
+                    <div className="mt-6 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-end gap-5 flex-wrap">
+                        <div className="flex-1 flex flex-col gap-2 min-w-[250px]">
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Search by
                             </label>
-
+                            
                             <input
                                 type="text"
-                                placeholder="Input event name or partner"
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Input event name or partner..."
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] transition-colors bg-white"
                             />
                         </div>
 
-                        <div className="w-[2in] flex flex-col gap-2">
+                        <div className="w-full md:w-[2in] flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Sort By
                             </label>
-
-                            <select className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white">
-                                <option>Default</option>
-                                <option>Date</option>
-                                <option>Partner</option>
-                                <option>Status</option>
+                            
+                            <select 
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="Default">Default</option>
+                                <option value="Date">Date</option>
+                                <option value="Partner">Partner</option>
+                                <option value="Status">Status</option>
                             </select>
                         </div>
                     </div>
-                </section>
 
-                {/* Event Results Section */}
-                <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                    <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
-                        <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
-                            Events
-                        </h2>
-
-                        <p className="text-[18px] text-[#002940]">
-                            Showing {events.length} event/s
-                        </p>
+                    {/* Divider & Result Count */}
+                    <div className="mt-8 flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
+                        <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                            Results
+                        </h3>
+                        
+                        <span className="bg-[#e2e8ec] text-[#002940] px-4 py-1 rounded-full text-[16px] font-semibold">
+                            Showing {events.length} {events.length === 1 ? 'event' : 'events'}
+                        </span>
                     </div>
 
-                    <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
+                    {/* Events List */}
+                    <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
                         {events.map((event) => (
                             <EventCard 
                                 key={event.id} 
@@ -164,8 +188,9 @@ export default function SearchEventsPage() {
                         ))}
 
                         {events.length === 0 && !isLoading && (
-                            <div className="p-8 text-center text-gray-500 italic border-2 border-dashed border-gray-300 rounded-[16px]">
-                                No events found.
+                            <div className="p-10 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#c0cad0] rounded-[16px] bg-[#f9fdff]">
+                                <p className="text-[20px] font-semibold text-[#002940] mb-2">No events found</p>
+                                <p className="text-[16px] text-gray-500">Try adjusting your filters or search term.</p>
                             </div>
                         )}
                     </div>

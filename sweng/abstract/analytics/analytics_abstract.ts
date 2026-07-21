@@ -8,14 +8,14 @@ export interface AnalyticsData {
     getAllDonors(): Promise<any[]>;
     getLatestVisit(numericId: bigint): Promise<any>;
     getDonorMetrics(numericId: bigint): Promise<any>;
-    getEventsByStatus(status: string): Promise<any[]>;
     getEventById(numericId: bigint): Promise<any | undefined>;
+    getEvents(status: string, search: string, sortBy: string): Promise<any>;
 }
 
 export interface AnalyticsController {
     invokeGetDirectorStats(): Promise<ApiResponse<ViewDirectorStats>>
     invokeGetAllDonors(): Promise<ApiResponse<any>>; 
     invokeGetDonorAnalytics(donorIdStr: string): Promise<ApiResponse<any>>;
-    invokeGetDirectorEvents(status: string): Promise<ApiResponse<any>>;
+    invokeGetFilteredEvents(status: string, search: string, sortBy: string): Promise<ApiResponse<any>>;
     invokeGetEventAnalytics(eventIdStr: string): Promise<ApiResponse<any>>;
 }

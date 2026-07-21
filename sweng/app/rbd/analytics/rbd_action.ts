@@ -76,7 +76,7 @@ export async function fetchAllDonors() {
     return await analyticsController.invokeGetAllDonors();
 }
 
-export async function fetchDirectorEvents(activeTab: string) {
+export async function fetchFilteredEvents(status: string, search: string, sortBy: string) {
 
     const dataLayer = new ImpAnalyticsData();
     const supabaseClient = await serverSupa();
@@ -84,7 +84,7 @@ export async function fetchDirectorEvents(activeTab: string) {
     
     const eventController = new ImpAnalyticsManager(dataLayer, authProvider);
 
-    return await eventController.invokeGetDirectorEvents(activeTab);
+    return await eventController.invokeGetFilteredEvents(status, search, sortBy);
 }
 
 export async function fetchEventAnalytics(activeTab: string) {
