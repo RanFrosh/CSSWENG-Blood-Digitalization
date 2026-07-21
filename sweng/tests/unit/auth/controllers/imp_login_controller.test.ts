@@ -33,7 +33,6 @@ describe("ImpLoginController", () => {
     it("returns failure and skips profile fetch when login fails", async () => {
         mockProvider.provideLogin.mockResolvedValue({ success: false, message: "Invalid credentials" });
 
-        // execute the login
         const result = await loginController.invokeLogin("user@example.com", "wrongPassword");
 
         expect(mockProfileReader.getCurrentUser).not.toHaveBeenCalled();
@@ -41,10 +40,11 @@ describe("ImpLoginController", () => {
     });
 
     it("returns failure when login succeeds but profile fetch fails", async () => {
+        // invokeLogin returns getCurrentUser's result when login succeeds
+        // so a successful login can still end in an overall failure if fetching the profile fails
         mockProvider.provideLogin.mockResolvedValue({ success: true, message: "OK" });
         mockProfileReader.getCurrentUser.mockResolvedValue({ success: false, message: "Session expired" } as any);
 
-        // execute the login
         const result = await loginController.invokeLogin("user@example.com", "correctPassword");
 
         expect(result.success).toBe(false);
@@ -54,7 +54,6 @@ describe("ImpLoginController", () => {
     it("passes the exact email and password through to the provider", async () => {
         mockProvider.provideLogin.mockResolvedValue({ success: false, message: "Invalid credentials" });
 
-        // execute the login
         await loginController.invokeLogin("test@domain.com", "hunter2");
 
         expect(mockProvider.provideLogin).toHaveBeenCalledWith("test@domain.com", "hunter2");
