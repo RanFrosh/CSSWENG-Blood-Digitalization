@@ -16,11 +16,29 @@ export interface DonorDetails {
     assessment_status: string;
 }
 
-const statusStyles: Record<string, { label: string; color: string }> = {
-    "Passed": { label: "Passed", color: "text-green-700" },
-    "For Review": { label: "For Review", color: "text-orange-600" },
-    "Failed": { label: "Failed", color: "text-red-800" },
-    "default": { label: "Pending", color: "text-gray-600" }
+const getEligibility = (donor: any) => {
+
+    if (donor.permanentlyDeferred) 
+        return { label: "Permanently Ineligible", color: "text-red-800" };
+
+    if (donor.active === false) 
+        return { label: "Inactive", color: "text-gray-600" };
+    
+    // First-time donors (no date set yet)
+    if (!donor.nextEligibleDate) 
+        return { label: "Eligible to Donate", color: "text-green-700" };
+
+    const today = new Date();
+    const eligibleDate = new Date(donor.nextEligibleDate);
+
+    today.setHours(0, 0, 0, 0);
+    eligibleDate.setHours(0, 0, 0, 0);
+
+    if (eligibleDate > today) {
+        return { label: "In Recovery Window", color: "text-yellow-800" };
+    } else {
+        return { label: "Eligible to Donate", color: "text-green-700" };
+    }
 };
 
 export default function DonorDetails({ donor }: { donor: DonorDetails }) {
@@ -29,7 +47,7 @@ export default function DonorDetails({ donor }: { donor: DonorDetails }) {
         return null;
 
     const rawStatus = donor.assessment_status || "default";
-    const currentStatus = statusStyles[rawStatus] || statusStyles["default"];
+    const eligibility = getEligibility(donor)
 
     return (
         <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
@@ -77,9 +95,10 @@ export default function DonorDetails({ donor }: { donor: DonorDetails }) {
                 </p>
 
                 <p>
-                    <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Assessment Status:</span> 
-                    <span className={`font-semibold ${currentStatus.color}`}>
-                        {currentStatus.label}
+                    <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Eligibility:</span> 
+                    
+                    <span className={`font-semibold ${eligibility.color}`}>
+                        {eligibility.label}
                     </span>
                 </p>
 

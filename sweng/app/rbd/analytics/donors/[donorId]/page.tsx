@@ -128,7 +128,7 @@ export default function DonorAnalyticsDetailsPage() {
                     <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                             <p className="text-[18px] font-semibold text-[#002940]">
-                                Total Visits
+                                Total Visits:
                             </p>
 
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
@@ -138,7 +138,7 @@ export default function DonorAnalyticsDetailsPage() {
 
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                             <p className="text-[18px] font-semibold text-[#002940]">
-                                Blood Donated
+                                Blood Donated:
                             </p>
 
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
@@ -148,7 +148,7 @@ export default function DonorAnalyticsDetailsPage() {
 
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                             <p className="text-[18px] font-semibold text-[#002940]">
-                                Blood Bags Filled
+                                Blood Bags Filled:
                             </p>
 
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
@@ -158,7 +158,7 @@ export default function DonorAnalyticsDetailsPage() {
 
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                             <p className="text-[18px] font-semibold text-[#002940]">
-                                Successful Donations
+                                Successful Donations:
                             </p>
 
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
@@ -175,20 +175,20 @@ export default function DonorAnalyticsDetailsPage() {
                         </h2>
 
                         <div className="mt-[0.25in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Date
-                            </p>
-
-                            <p className="mt-2 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor?.mostRecentVisitDate}
-                            </p>
-
                             <p className="mt-5 text-[18px] font-semibold text-[#002940]">
-                                Event
+                                Event:
                             </p>
 
                             <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor?.mostRecentVisitEvent}
+                                {selectedDonor?.recentVisitEvent}
+                            </p>
+                            
+                            <p className="text-[18px] font-semibold text-[#002940]">
+                                Date:
+                            </p>
+
+                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                                {selectedDonor?.recentVisitDate}
                             </p>
                         </div>
                     </div>
@@ -201,7 +201,7 @@ export default function DonorAnalyticsDetailsPage() {
                         <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                                 <p className="text-[18px] font-semibold text-[#002940]">
-                                    Deferred Visits
+                                    Deferred Visits: 
                                 </p>
 
                                 <p className="mt-2 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
@@ -211,11 +211,14 @@ export default function DonorAnalyticsDetailsPage() {
 
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                                 <p className="text-[18px] font-semibold text-[#002940]">
-                                    Next Eligible Donation Date
+                                    Next Eligible Donation Date:
                                 </p>
 
                                 <p className="mt-2 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                    {selectedDonor?.nextEligibleDate}
+                                    {(!selectedDonor?.nextEligibleDate || new Date(selectedDonor.nextEligibleDate) <= new Date()) 
+                                        ? "Eligible Now" 
+                                        : selectedDonor.nextEligibleDate
+                                    }
                                 </p>
                             </div>
                         </div>

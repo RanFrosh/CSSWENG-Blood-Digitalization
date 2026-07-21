@@ -6,6 +6,8 @@ export interface AnalyticsData {
     getDonorBloodTypeBreakdown(): Promise<any[]>;
     getDonorById(numericId: bigint): Promise<any | undefined>;
     getAllDonors(): Promise<any[]>;
+    getLatestVisit(numericId: bigint): Promise<any>;
+    getDonorMetrics(numericId: bigint): Promise<any>;
     getEventsByStatus(status: string): Promise<any[]>;
     getEventById(numericId: bigint): Promise<any | undefined>;
 }

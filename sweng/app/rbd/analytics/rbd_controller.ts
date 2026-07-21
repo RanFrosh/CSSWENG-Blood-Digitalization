@@ -39,10 +39,33 @@ export class ImpAnalyticsManager implements AnalyticsController {
             const idString = donorIdStr.replace(/\D/g, ''); 
             const numericId = BigInt(idString); 
 
-            const dbDonor = await this.analyticsModel.getDonorById(numericId);
+            const [dbDonor, metrics, latestVisit] = await Promise.all([
+                this.analyticsModel.getDonorById(numericId),
+                this.analyticsModel.getDonorMetrics(numericId),
+                this.analyticsModel.getLatestVisit(numericId)
+            ]);
 
             if (!dbDonor) {
                 return { success: false, message: "Donor not found in database" };
+            }
+
+            // Derive Blood Bags (Total mL / 450mL)
+            const derivedBags = Math.floor(metrics.bloodDonatedML / 500);
+
+            // 3-Month Eligibility
+            let nextEligibleDate = undefined;
+            let recentVisitEvent = "No previous visits";
+            let recentVisitDate = "N/A";
+
+            if (latestVisit) {
+                recentVisitEvent = latestVisit.eventName;
+                recentVisitDate = latestVisit.date;
+                
+                if (latestVisit.isSuccess && latestVisit.date) {
+                    const lastDateObj = new Date(latestVisit.date);
+                    lastDateObj.setMonth(lastDateObj.getMonth() + 3);
+                    nextEligibleDate = lastDateObj.toISOString().split('T')[0];
+                }
             }
 
             return {
@@ -62,16 +85,17 @@ export class ImpAnalyticsManager implements AnalyticsController {
                     height: dbDonor.height,
                     weight: dbDonor.weight,
                     assessment_status: dbDonor.assessment_status,
+
+                    totalVisits: metrics.totalVisits,
+                    successfulDonations: metrics.successfulDonations,
+                    deferredVisits: metrics.totalVisits - metrics.successfulDonations,
+     
+                    bloodDonated: `${(metrics.bloodDonatedML || 0).toLocaleString()} mL`,
+                    bloodBagsFilled: derivedBags,
                     
-                    // PLACEHOLDERS
-                    totalVisits: 4,
-                    mostRecentVisitDate: "2026-07-15",
-                    mostRecentVisitEvent: "Blood Donation Drive",
-                    bloodDonated: "1,350 mL",
-                    bloodBagsFilled: 3,
-                    successfulDonations: 3,
-                    deferredVisits: 1,
-                    nextEligibleDate: "2026-10-13"
+                    recentVisitEvent: recentVisitEvent,          
+                    recentVisitDate: recentVisitDate,      
+                    nextEligibleDate: nextEligibleDate
                 }
             };
         } catch (error: any) {
