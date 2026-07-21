@@ -61,7 +61,7 @@ const fakeCorrection = {
   zip_code: "1001",
   street: "456 Elm St",
   ref_event_id: BigInt(1),
-  ref_profile_id: "550e8400-e29b-41d4-a716-446655440000",  
+  ref_profile_id: "550e8400-e29b-41d4-a716-446655440000",
 };
 
 const newEvent: CreateEvents = {
@@ -92,9 +92,14 @@ const newCorrection: Omit<CreateCorrections, "ref_profile_id"> = {
 
 const fakeProfileId = "550e8400-e29b-41d4-a716-446655440000";
 
+// helpGateKeep returns data on success (the authenticated user's profile),
+// and the controller checks !res.data as part of its guard clause —
+// so every "authorized" mock needs this, not just success: true
+const fakeAuthorizedProfile = { id: fakeProfileId, role: "director" };
+
 const noSort: Sorter<any> = [];
 
-// tests 
+// tests
 
 describe("ImpEventManager", () => {
   let controller: ImpEventManager;
@@ -109,12 +114,12 @@ describe("ImpEventManager", () => {
 
   describe("invokeQueryEvent", () => {
     it("returns events when user has permission", async () => {
-      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized", data: fakeAuthorizedProfile });
       mockEventModel.queryEvent.mockResolvedValue({ success: true, message: "Events retrieved", data: [fakeEvent] });
 
       const result = await controller.invokeQueryEvent({ name: "Blood Drive" }, noSort);
 
-      // verify the correct persmission was checked  
+      // verify the correct permission was checked
       expect(helpGateKeep).toHaveBeenCalledWith(mockProfileReader, "view_event");
       expect(mockEventModel.queryEvent).toHaveBeenCalled();
       expect(result.success).toBe(true);
@@ -144,7 +149,8 @@ describe("ImpEventManager", () => {
     });
 
     it("returns failure when model fails", async () => {
-      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      // needs data here too, since the guard clause must be passed before the model is even reached
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized", data: fakeAuthorizedProfile });
       mockEventModel.queryEvent.mockResolvedValue({ success: false, message: "DB error", data: undefined });
 
       const result = await controller.invokeQueryEvent({}, noSort);
@@ -158,7 +164,7 @@ describe("ImpEventManager", () => {
 
   describe("invokeCreateEvent", () => {
     it("creates event when user has permission", async () => {
-      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized", data: fakeAuthorizedProfile });
       mockEventModel.createEvent.mockResolvedValue({ success: true, message: "Event created" });
 
       const result = await controller.invokeCreateEvent(newEvent);
@@ -191,7 +197,7 @@ describe("ImpEventManager", () => {
     });
 
     it("returns failure when model fails", async () => {
-      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized", data: fakeAuthorizedProfile });
       mockEventModel.createEvent.mockResolvedValue({ success: false, message: "Insert failed" });
 
       const result = await controller.invokeCreateEvent(newEvent);
@@ -205,7 +211,7 @@ describe("ImpEventManager", () => {
 
   describe("invokeQueryCorrection", () => {
     it("returns corrections when user has permission", async () => {
-      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized", data: fakeAuthorizedProfile });
       mockEventModel.queryCorrection.mockResolvedValue({ success: true, message: "Corrections retrieved", data: [fakeCorrection] });
 
       const result = await controller.invokeQueryCorrection({ name: "Blood Drive Fix" }, noSort);
@@ -238,7 +244,7 @@ describe("ImpEventManager", () => {
     });
 
     it("returns failure when model fails", async () => {
-      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized", data: fakeAuthorizedProfile });
       mockEventModel.queryCorrection.mockResolvedValue({ success: false, message: "Query failed", data: undefined });
 
       const result = await controller.invokeQueryCorrection({}, noSort);
@@ -252,8 +258,9 @@ describe("ImpEventManager", () => {
 
   describe("invokeCreateCorrection", () => {
     it("creates correction and appends ref_profile_id automatically", async () => {
-      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
-      mockProfileReader.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { id: fakeProfileId } as any });
+      // ref_profile_id comes from helpGateKeep's res.data.id — the controller
+      // does NOT call mockProfileReader.getCurrentUser directly for this
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized", data: fakeAuthorizedProfile });
       mockEventModel.createCorrection.mockResolvedValue({ success: true, message: "Correction created" });
 
       const result = await controller.invokeCreateCorrection(newCorrection);
@@ -285,9 +292,10 @@ describe("ImpEventManager", () => {
       expect(result.message).toBe("Somehow there is no role");
     });
 
-    it("blocks when profile has no id", async () => {
-      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
-      mockProfileReader.getCurrentUser.mockResolvedValue({ success: false, message: "Profile not found" });
+    it("blocks when profile is missing (no data returned)", async () => {
+      // success: true but data is missing, the controller's guard clause
+      // (!res.success || !res.data) should still block this
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Profile not found", data: undefined });
 
       const result = await controller.invokeCreateCorrection(newCorrection);
 
@@ -297,8 +305,7 @@ describe("ImpEventManager", () => {
     });
 
     it("returns failure when model fails", async () => {
-      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized" });
-      mockProfileReader.getCurrentUser.mockResolvedValue({ success: true, message: "OK", data: { id: fakeProfileId } as any });
+      (helpGateKeep as jest.Mock).mockResolvedValue({ success: true, message: "Authorized", data: fakeAuthorizedProfile });
       mockEventModel.createCorrection.mockResolvedValue({ success: false, message: "Correction insert failed" });
 
       const result = await controller.invokeCreateCorrection(newCorrection);
