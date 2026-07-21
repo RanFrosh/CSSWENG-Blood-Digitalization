@@ -5,16 +5,16 @@
 import { helpGateKeep} from "@/app/global/helper_bouncer/bouncer";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 
-const mockChecker: jest.Mocked<ProfileSessionProvider> = {
-    getCurrentUser: jest.fn(),
-};
-
-// reset mocks before each test
-beforeEach(() => {
-    jest.clearAllMocks();
-});
 
 describe("helpGateKeep", () => {
+    const mockChecker: jest.Mocked<ProfileSessionProvider> = {
+        getCurrentUser: jest.fn(),
+    };
+
+    // reset mocks before each test
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
 
     // no active session
     it("returns failure when getCurrentUser fails", async () => {
