@@ -1,19 +1,51 @@
 "use client";
 
 import { useRouter, useParams } from "next/navigation";
-
+import { useState, useEffect } from "react";
+import { fetchDonorAnalytics } from "../../rbd_action";
+import DonorDetails from "@/components/DonorDetails";
 import Header from "@/components/HeaderRBD";
 
 export default function DonorAnalyticsDetailsPage() {
     
     const router = useRouter();
     const params = useParams();
-
     const donorId = params.donorId as string;
+    const [selectedDonor, setSelectedDonor] = useState<any>(null);
 
-    const selectedDonor = donors.find((donor) => {
-        return donor.id === donorId;
-    });
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    useEffect(() => {
+
+        const loadDonor = async () => {
+
+            if (!donorId) 
+                return;
+
+            setIsLoading(true);
+            setErrorMessage("");
+
+            try {
+
+                const result = await fetchDonorAnalytics(donorId);
+
+                if (result.success && result.data) {
+                    setSelectedDonor(result.data);
+                } else {
+                    setErrorMessage(result.message || "Failed to load donor data.");
+                    setSelectedDonor(undefined);
+                }
+            } catch (error) {
+                setErrorMessage("Failed to connect to the database.");
+                setSelectedDonor(undefined);
+            } finally {
+                setIsLoading(false); 
+            }
+        }
+
+        loadDonor();
+    }, [donorId]);
 
     const goBack = () => {
         router.push("/rbd/analytics/donors");
@@ -47,6 +79,28 @@ export default function DonorAnalyticsDetailsPage() {
         );
     }
 
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading Donor Details...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
+
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
@@ -63,40 +117,7 @@ export default function DonorAnalyticsDetailsPage() {
                 </section>
 
                 <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                    <div className="flex flex-row items-center justify-between gap-5 flex-wrap">
-                        <div>
-                            <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor.name}
-                            </h2>
-                        </div>
-
-                        <span className="bg-[#002940] text-white px-5 py-3 rounded-full text-[18px] font-semibold">
-                            Donor ID: {selectedDonor.id}
-                        </span>
-                    </div>
-
-                    <div className="mt-[0.25in] grid grid-cols-2 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                        <p>
-                            <span className="font-semibold text-[#002940]">
-                                Sex:
-                            </span>{" "}
-                            {selectedDonor.sex}
-                        </p>
-
-                        <p>
-                            <span className="font-semibold text-[#002940]">
-                                Blood Type:
-                            </span>{" "}
-                            {selectedDonor.bloodType}
-                        </p>
-
-                        <p>
-                            <span className="font-semibold text-[#002940]">
-                                Location:
-                            </span>{" "}
-                            {selectedDonor.location}
-                        </p>
-                    </div>
+                    <DonorDetails donor={selectedDonor}/>
                 </section>
 
                 <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
@@ -111,7 +132,7 @@ export default function DonorAnalyticsDetailsPage() {
                             </p>
 
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor.totalVisits}
+                                {selectedDonor?.totalVisits}
                             </p>
                         </div>
 
@@ -121,7 +142,7 @@ export default function DonorAnalyticsDetailsPage() {
                             </p>
 
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor.bloodDonated}
+                                {selectedDonor?.bloodDonated}
                             </p>
                         </div>
 
@@ -131,7 +152,7 @@ export default function DonorAnalyticsDetailsPage() {
                             </p>
 
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor.bloodBagsFilled}
+                                {selectedDonor?.bloodBagsFilled}
                             </p>
                         </div>
 
@@ -141,7 +162,7 @@ export default function DonorAnalyticsDetailsPage() {
                             </p>
 
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor.successfulDonations}
+                                {selectedDonor?.successfulDonations}
                             </p>
                         </div>
                     </div>
@@ -159,7 +180,7 @@ export default function DonorAnalyticsDetailsPage() {
                             </p>
 
                             <p className="mt-2 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor.mostRecentVisitDate}
+                                {selectedDonor?.mostRecentVisitDate}
                             </p>
 
                             <p className="mt-5 text-[18px] font-semibold text-[#002940]">
@@ -167,7 +188,7 @@ export default function DonorAnalyticsDetailsPage() {
                             </p>
 
                             <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor.mostRecentVisitEvent}
+                                {selectedDonor?.mostRecentVisitEvent}
                             </p>
                         </div>
                     </div>
@@ -184,7 +205,7 @@ export default function DonorAnalyticsDetailsPage() {
                                 </p>
 
                                 <p className="mt-2 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                    {selectedDonor.deferredVisits}
+                                    {selectedDonor?.deferredVisits}
                                 </p>
                             </div>
 
@@ -194,7 +215,7 @@ export default function DonorAnalyticsDetailsPage() {
                                 </p>
 
                                 <p className="mt-2 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                    {selectedDonor.nextEligibleDate}
+                                    {selectedDonor?.nextEligibleDate}
                                 </p>
                             </div>
                         </div>

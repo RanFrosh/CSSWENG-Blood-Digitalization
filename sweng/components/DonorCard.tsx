@@ -27,7 +27,7 @@ export default function DonorCard({ donor, onViewAnalytics }: DonorCardProps) {
                 <button
                     type="button"
                     onClick={() => onViewAnalytics(safeId)}
-                    className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] transition hover:bg-gray-200"
+                    className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] transition hover:bg-gray-200 cursor-pointer"
                 >
                     View Analytics
                 </button>
