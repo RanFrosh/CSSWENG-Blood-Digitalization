@@ -1,7 +1,7 @@
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { helpGateKeep } from "../../global/helper_bouncer/bouncer";
 import { AnalyticsController, AnalyticsData } from "@/abstract/analytics/analytics_abstract";
-import { assessment_status } from "@/db/enums/assessment_status";
+import { ApiResponse } from "@/types/api_res_type";
 
 export class ImpAnalyticsManager implements AnalyticsController {
     
@@ -13,7 +13,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
         this.profileReader = injectProfileReader;
     }
 
-    async invokeGetAllDonors() {
+    async invokeGetAllDonors(): Promise<ApiResponse<any>> {
 
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
 
@@ -22,13 +22,13 @@ export class ImpAnalyticsManager implements AnalyticsController {
 
         try {
             const dbDonors = await this.analyticsModel.getAllDonors();
-            return { success: true, data: dbDonors };
+            return { success: true, message: "Donor retrived", data: dbDonors };
         } catch (error: any) {
             return { success: false, message: error.message };
         }
     }
 
-    async invokeGetDonorAnalytics(donorIdStr: string) {
+    async invokeGetDonorAnalytics(donorIdStr: string): Promise<ApiResponse<any>> {
 
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
 
@@ -47,6 +47,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
 
             return {
                 success: true,
+                message: "Donor data retrieved",
                 data: {
                     id: `D-${String(dbDonor.id).padStart(3, '0')}`,
                     name: `${dbDonor.first_name} ${dbDonor.last_name}`,
@@ -107,6 +108,75 @@ export class ImpAnalyticsManager implements AnalyticsController {
         } catch (error: any) {
             console.error("Analytics Manager Error:", error);
             return { success: false, message: "Failed to fetch analytics data" };
+        }
+    }
+
+    async invokeGetDirectorEvents(status: string): Promise<ApiResponse<any>> {
+
+        const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
+
+        if (!authRes.success) 
+            return { success: false, message: authRes.message };
+
+        try {
+
+            const dbEvents = await this.analyticsModel.getEventsByStatus(status);
+                        
+            return { success: true, message: "Director events retrieved", data: dbEvents };
+        } catch (error: any) {
+            console.error("Event Manager Error:", error);
+            return { success: false, message: "Failed to load events from the database." };
+        }
+    }
+
+    async invokeGetEventAnalytics(eventIdStr: string): Promise<ApiResponse<any>> {
+
+        const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
+        
+        if (!authRes.success) 
+            return { success: false, message: authRes.message };
+
+        try {
+            const numericId = BigInt(eventIdStr.replace(/\D/g, '')); 
+            const dbEvent = await this.analyticsModel.getEventById(numericId);
+
+            if (!dbEvent) {
+                return { success: false, message: "Event not found" };
+            }
+
+            return {
+                success: true,
+                message: "Event analytics retrieved",
+                data: {
+
+                    id: `EVT-${String(dbEvent.id).padStart(3, '0')}`,
+                    name: dbEvent.name,
+                    partner: dbEvent.partner,
+                    street: dbEvent.street,
+                    event_date: dbEvent.event_date,
+                    start_time: dbEvent.start_time,
+                    end_time: dbEvent.end_time,
+                    
+                    // PLACEHOLDER
+                    totalDonors: 145,
+                    bloodDonated: "62,500 mL",
+                    totalBagsProduced: 125,
+                    showUpRate: "82%",
+                    extractionGoal: 150,
+                    bloodTypes: [
+                        { bloodType: 'O+', count: 45 },
+                        { bloodType: 'O-', count: 12 },
+                        { bloodType: 'A+', count: 35 },
+                        { bloodType: 'A-', count: 8 },
+                        { bloodType: 'B+', count: 15 },
+                        { bloodType: 'B-', count: 4 },
+                        { bloodType: 'AB+', count: 5 },
+                        { bloodType: 'AB-', count: 1 }
+                    ]
+                }
+            };
+        } catch (error: any) {
+            return { success: false, message: "Failed to load event data" };
         }
     }
 }

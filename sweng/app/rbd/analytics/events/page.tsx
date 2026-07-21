@@ -1,64 +1,96 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { fetchDirectorEvents } from "../rbd_action";
+import { ViewEvents } from "@/types/event_type";
 import Header from "@/components/HeaderRBD";
+import { EventCard } from "@/components/EventCard";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-
-type EventAnalytics = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatus;
-    extractionGoal: number;
-    totalBagsProduced: number;
-};
-
-const events: EventAnalytics[] = [
-    {
-        id: "1",
-        name: "Blood Donation Drive",
-        location: "DLSU",
-        date: "2026-07-15",
-        time: "9:00 AM - 4:00 PM",
-        partner: "Manila Doctors Hospital",
-        status: "Ongoing",
-        extractionGoal: 100,
-        totalBagsProduced: 72,
-    },
-    {
-        id: "2",
-        name: "Name 2",
-        location: "Location 2",
-        date: "Date 2",
-        time: "Time 2",
-        partner: "Partner 2",
-        status: "Upcoming",
-        extractionGoal: 100,
-        totalBagsProduced: 67,
-    },
-    {
-        id: "3",
-        name: "Name 3",
-        location: "Location 3",
-        date: "Date 3",
-        time: "Time 3",
-        partner: "Partner 3",
-        status: "Completed",
-        extractionGoal: 100,
-        totalBagsProduced: 89,
-    },
-];
+type EventTab = EventStatus | "All";
 
 export default function SearchEventsPage() {
-    const router = useRouter();
 
-    const viewEventAnalytics = (eventId: string) => {
-        location.href = `/rbd/analytics/events/${eventId}`;
+    const router = useRouter();
+    
+    // Set the initial active tab to "Ongoing"
+    const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
+    
+    // State for holding events from the backend
+    const [events, setEvents] = useState<ViewEvents[]>([]);
+
+    // Loading State
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Error display
+    const [errorMessage, setErrorMessage] = useState("");
+
+    useEffect(() => {
+        const loadEvents = async () => {
+            setIsLoading(true);
+            setErrorMessage("");
+
+            try {
+                const result = await fetchDirectorEvents(activeTab);
+
+                if (result.success && result.data) {
+                    setEvents(result.data);
+                } else {
+                    setErrorMessage(result.message || "Failed to load events.");
+                }
+            } catch (error) {
+                setErrorMessage("Failed to connect to the database");
+            } finally {
+                setIsLoading(false); 
+            }
+        }
+        
+        loadEvents();
+    }, [activeTab]);
+
+    const viewEventAnalytics = (eventId: BigInt) => {
+        router.push(`/rbd/analytics/events/${eventId}`);
     };
+
+    // Create button to open event if it is ongoing
+    const createActionButton = (event: ViewEvents) => {
+
+        if (event.status === "Ongoing" || event.status === "Completed") {
+            return (
+                <button
+                    onClick={() => viewEventAnalytics(event.id)}
+                    className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] transition hover:bg-gray-200 cursor-pointer"
+                >
+                    View Event
+                </button>
+            );
+        } 
+        
+        return null;
+    };
+
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading Events...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -123,66 +155,19 @@ export default function SearchEventsPage() {
                     </div>
 
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {events.slice(0, 5).map((event) => (
-                            <div
-                                key={event.id}
-                                className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
-                            >
-                                <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between gap-5 flex-wrap">
-                                    <div className="flex flex-row items-center gap-[0.15in] flex-wrap">
-                                        <h2 className="text-[24px] font-['Montserrat'] font-bold">
-                                            {event.name}
-                                        </h2>
-
-                                        <span className="px-[12px] py-[6px] rounded-full text-[16px] font-semibold bg-white text-[#002940]">
-                                            {event.status}
-                                        </span>
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            viewEventAnalytics(event.id);
-                                        }}
-                                        className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:underline"
-                                    >
-                                        View Analytics
-                                    </button>
-                                </div>
-
-                                <div className="p-[0.35in]">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Partner:
-                                            </span>{" "}
-                                            {event.partner}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Location:
-                                            </span>{" "}
-                                            {event.location}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Date:
-                                            </span>{" "}
-                                            {event.date}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Time:
-                                            </span>{" "}
-                                            {event.time}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+                        {events.map((event) => (
+                            <EventCard 
+                                key={event.id} 
+                                event={event} 
+                                actionButton={createActionButton(event)} 
+                            />
                         ))}
+
+                        {events.length === 0 && !isLoading && (
+                            <div className="p-8 text-center text-gray-500 italic border-2 border-dashed border-gray-300 rounded-[16px]">
+                                No events found.
+                            </div>
+                        )}
                     </div>
 
                     <div className="mt-5 flex flex-row items-center justify-between gap-5">

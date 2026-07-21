@@ -75,3 +75,25 @@ export async function fetchAllDonors() {
 
     return await analyticsController.invokeGetAllDonors();
 }
+
+export async function fetchDirectorEvents(activeTab: string) {
+
+    const dataLayer = new ImpAnalyticsData();
+    const supabaseClient = await serverSupa();
+    const authProvider = new ImpProfileGetter(supabaseClient);
+    
+    const eventController = new ImpAnalyticsManager(dataLayer, authProvider);
+
+    return await eventController.invokeGetDirectorEvents(activeTab);
+}
+
+export async function fetchEventAnalytics(activeTab: string) {
+
+    const dataLayer = new ImpAnalyticsData();
+    const supabaseClient = await serverSupa();
+    const authProvider = new ImpProfileGetter(supabaseClient);
+    
+    const eventController = new ImpAnalyticsManager(dataLayer, authProvider);
+
+    return await eventController.invokeGetEventAnalytics(activeTab);
+}

@@ -1,69 +1,46 @@
 "use client";
+
 import { useRouter, useParams } from "next/navigation";
-
+import { useState, useEffect } from "react";
 import Header from "@/components/HeaderRBD";
-
-type BloodTypeData = {
-    bloodType: string;
-    count: number;
-};
-
-type EventAnalyticsDetails = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    totalDonors: number;
-    bloodDonated: string;
-    totalBagsProduced: number;
-    showUpRate: string;
-    extractionGoal: number;
-    extractionProgress: number;
-    bloodTypes: BloodTypeData[];
-};
-
-const events: EventAnalyticsDetails[] = [
-    {
-        id: "1",
-        name: "Blood Donation Drive",
-        location: "DLSU",
-        date: "2026-07-15",
-        time: "9:00 AM - 4:00 PM",
-        partner: "Manila Doctors Hospital",
-        totalDonors: 120,
-        bloodDonated: "25200 mL",
-        totalBagsProduced: 72,
-        showUpRate: "85%",
-        extractionGoal: 100,
-        extractionProgress: 72,
-        bloodTypes: [
-            { bloodType: "O+", count: 24 },
-            { bloodType: "A+", count: 16 },
-            { bloodType: "B+", count: 14 },
-            { bloodType: "AB+", count: 8 },
-            { bloodType: "O-", count: 5 },
-            { bloodType: "A-", count: 3 },
-            { bloodType: "B-", count: 1 },
-            { bloodType: "AB-", count: 1 },
-            { bloodType: 'Rh-null', count: 0 },
-        ],
-    }
-];
+import { fetchEventAnalytics } from "../../rbd_action";
+import { EventDetailsPanel } from "@/components/EventDetailsPanel";
 
 export default function EventAnalyticsDetailsPage() {
+
     const router = useRouter();
     const params = useParams();
 
     const eventId = params.eventId as string;
 
-    const selectedEvent = events.find((event) => {
-        return event.id === eventId;
-    });
+    const [selectedEvent, setSelectedEvent] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    useEffect(() => {
+        const loadEvent = async () => {
+            if (!eventId) return;
+            setIsLoading(true);
+
+            try {
+                const result = await fetchEventAnalytics(eventId);
+                if (result.success && result.data) {
+                    setSelectedEvent(result.data);
+                } else {
+                    setSelectedEvent(undefined);
+                }
+            } catch (error) {
+                setSelectedEvent(undefined);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadEvent();
+    }, [eventId]);
 
     const goBack = () => {
-        location.href = `/rbd/analytics/events/`;
+        router.push(`/rbd/analytics/events/`);
     };
 
     if (selectedEvent === undefined) {
@@ -94,6 +71,28 @@ export default function EventAnalyticsDetailsPage() {
         );
     }
 
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading Event Analytics...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
+
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
@@ -109,49 +108,8 @@ export default function EventAnalyticsDetailsPage() {
                     </h1>
                 </section>
 
-                <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                    <div className="flex flex-row items-center justify-between gap-5 flex-wrap">
-                        <div>
-                            <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedEvent.name}
-                            </h2>
-                        </div>
-
-                        <span className="bg-[#002940] text-white px-5 py-3 rounded-full text-[18px] font-semibold">
-                            Event ID: {selectedEvent.id}
-                        </span>
-                    </div>
-
-                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                        <p>
-                            <span className="font-semibold text-[#002940]">
-                                Partner:
-                            </span>{" "}
-                            {selectedEvent.partner}
-                        </p>
-
-                        <p>
-                            <span className="font-semibold text-[#002940]">
-                                Location:
-                            </span>{" "}
-                            {selectedEvent.location}
-                        </p>
-
-                        <p>
-                            <span className="font-semibold text-[#002940]">
-                                Date:
-                            </span>{" "}
-                            {selectedEvent.date}
-                        </p>
-
-                        <p>
-                            <span className="font-semibold text-[#002940]">
-                                Time:
-                            </span>{" "}
-                            {selectedEvent.time}
-                        </p>
-                    </div>
-                </section>
+                {/* Event Details Panel */}
+                <EventDetailsPanel event={selectedEvent} />
 
                 <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">

@@ -2,7 +2,7 @@ import { orm } from "../../../db/drizzle";
 import { donor } from "../../../db/models/donor";
 import { eq, sql } from "drizzle-orm";
 import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
-import { assessment_status } from "@/db/enums/assessment_status";
+import { event_log } from "@/db/models/event_log";
 
 export class ImpAnalyticsData implements AnalyticsData {
 
@@ -58,5 +58,30 @@ export class ImpAnalyticsData implements AnalyticsData {
             })
             .from(donor)
             .limit(limit);
+    }
+
+    async getEventsByStatus(status: string) {
+        
+        if (status === "All") {
+            return await orm
+                .select()
+                .from(event_log);
+        }
+
+        return await orm
+            .select()
+            .from(event_log)
+            .where(eq(event_log.status, status as "Ongoing" | "Upcoming" | "Completed"));
+    }
+
+    async getEventById(numericId: bigint) {
+
+        const [dbEvent] = await orm
+            .select()
+            .from(event_log)
+            .where(eq(event_log.id, numericId))
+            .limit(1);
+        
+        return dbEvent;
     }
 }
