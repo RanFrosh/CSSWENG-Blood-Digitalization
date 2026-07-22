@@ -13,18 +13,41 @@ export class ImpAnalyticsManager implements AnalyticsController {
         this.profileReader = injectProfileReader;
     }
 
-    async invokeGetAllDonors(): Promise<ApiResponse<any>> {
-
+    async invokeGetFilteredDonors(status: string, search: string, sortBy: string) {
+        
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
-
-        if (!authRes.success) 
+        
+        if (!authRes.success) {
             return { success: false, message: authRes.message };
+        }
 
         try {
-            const dbDonors = await this.analyticsModel.getAllDonors();
-            return { success: true, message: "Donor retrived", data: dbDonors };
+            const rawDonors = await this.analyticsModel.getFilteredDonors(status, search, sortBy);
+
+            const formattedDonors = rawDonors.map((d: any) => ({
+
+                displayId: `DNR-${String(d.id).padStart(4, '0')}`,
+                rawId: d.id, 
+                fullName: `${d.first_name} ${d.last_name}`,
+                email: d.email,
+                mobile: d.mobile_no,
+                age: d.age,
+                sex: d.sex,
+                bloodType: d.blood || 'Unknown',
+                isVerified: d.verifiedBlood,
+                status: d.active ? 'Active' : 'Inactive',
+                assessmentStatus: d.assessment_status
+            }));
+
+            return {
+                success: true,
+                message: "Donors successfully retrieved",
+                data: formattedDonors
+            };
+
         } catch (error: any) {
-            return { success: false, message: error.message };
+            console.error("Donor Manager Error:", error);
+            return { success: false, message: "Failed to load donors: " + error.message };
         }
     }
 

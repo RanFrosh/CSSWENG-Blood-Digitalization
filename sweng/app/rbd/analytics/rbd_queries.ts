@@ -38,7 +38,35 @@ export class ImpAnalyticsData implements AnalyticsData {
         return dbDonor;
     }
 
-    async getAllDonors(limit: number = 50) {
+    async getFilteredDonors(search: string, status: string, sortBy: string, limit: number = 50) {
+
+        const conditions = [];
+
+        // Search
+        if (search && search.trim() !== "") {
+            conditions.push(
+                or(
+                    ilike(donor.first_name, `%${search}%`),
+                    ilike(donor.last_name, `%${search}%`),
+                    ilike(donor.email, `%${search}%`)
+                )
+            );
+        }
+
+        // Blood Type Filter
+        if (bloodFilter && bloodFilter.trim() !== "" && bloodFilter !== "All") {
+            conditions.push(eq(donor.blood, bloodFilter as "O+" | "O-" | "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-"));
+        }
+
+        // Sort Logic
+        let orderLogic: any = desc(donor.id); // Default to newest donors
+
+        if (sortBy === "Name (A-Z)") orderLogic = asc(donor.last_name);
+        if (sortBy === "Name (Z-A)") orderLogic = desc(donor.last_name);
+        if (sortBy === "Age (Youngest)") orderLogic = asc(donor.age);
+        if (sortBy === "Age (Oldest)") orderLogic = desc(donor.age);
+
+        // Execute Query
         return await orm
             .select({
                 id: donor.id,
@@ -58,6 +86,8 @@ export class ImpAnalyticsData implements AnalyticsData {
                 assessment_status: donor.assessment_status
             })
             .from(donor)
+            .where(conditions.length > 0 ? and(...conditions) : undefined)
+            .orderBy(orderLogic)
             .limit(limit);
     }
 

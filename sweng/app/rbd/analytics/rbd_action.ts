@@ -64,7 +64,7 @@ export async function fetchDonorAnalytics(donorIdStr: string) {
     return await analyticsController.invokeGetDonorAnalytics(donorIdStr);
 }
 
-export async function fetchAllDonors() {
+export async function fetchFilteredDonors(status: string, search: string, sortBy: string) {
 
     const dataLayer = new ImpAnalyticsData();
 
@@ -73,7 +73,7 @@ export async function fetchAllDonors() {
 
     const analyticsController = new ImpAnalyticsManager(dataLayer, authProvider);
 
-    return await analyticsController.invokeGetAllDonors();
+    return await analyticsController.invokeGetFilteredDonors(status, search, sortBy);
 }
 
 export async function fetchFilteredEvents(status: string, search: string, sortBy: string) {

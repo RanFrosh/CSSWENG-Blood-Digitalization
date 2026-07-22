@@ -5,7 +5,7 @@ export interface AnalyticsData {
     countActiveDonors(): Promise<number>;
     getDonorBloodTypeBreakdown(): Promise<any[]>;
     getDonorById(numericId: bigint): Promise<any | undefined>;
-    getAllDonors(): Promise<any[]>;
+    getFilteredDonors(search: string, bloodFilter: string, sortBy: string): Promise<any>;
     getLatestVisit(numericId: bigint): Promise<any>;
     getDonorMetrics(numericId: bigint): Promise<any>;
     getEventById(numericId: bigint): Promise<any | undefined>;
@@ -15,7 +15,7 @@ export interface AnalyticsData {
 
 export interface AnalyticsController {
     invokeGetDirectorStats(): Promise<ApiResponse<ViewDirectorStats>>
-    invokeGetAllDonors(): Promise<ApiResponse<any>>; 
+    invokeGetFilteredDonors(search: string, stats: string, sortBy: string): Promise<ApiResponse<any>>; 
     invokeGetDonorAnalytics(donorIdStr: string): Promise<ApiResponse<any>>;
     invokeGetFilteredEvents(status: string, search: string, sortBy: string): Promise<ApiResponse<any>>;
     invokeGetEventAnalytics(eventIdStr: string): Promise<ApiResponse<any>>;

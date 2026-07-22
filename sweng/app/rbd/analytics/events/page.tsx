@@ -16,9 +16,11 @@ export default function SearchEventsPage() {
     
     // Set the initial active tab to "Ongoing"
     const [activeTab, setActiveTab] = useState<EventTab>("All");
-
-    const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("Default");
+
+    const [searchInput, setSearchInput] = useState("");
+    const [activeSearch, setActiveSearch] = useState("");
+    
     
     // State for holding events from the backend
     const [events, setEvents] = useState<ViewEvents[]>([]);
@@ -35,7 +37,7 @@ export default function SearchEventsPage() {
             setErrorMessage("");
 
             try {
-                const result = await fetchFilteredEvents(activeTab, searchTerm, sortBy);
+                const result = await fetchFilteredEvents(activeTab, activeSearch, sortBy);
 
                 if (result.success && result.data) {
                     setEvents(result.data);
@@ -49,13 +51,9 @@ export default function SearchEventsPage() {
             }
         }
 
-        const delayDebounceFn = setTimeout(() => {
-            loadEvents();
-        }, 300);
-        
-        return () => clearTimeout(delayDebounceFn);
+        loadEvents();
 
-    }, [activeTab, searchTerm, sortBy]);
+    }, [activeTab, activeSearch, sortBy]);
 
     const viewEventAnalytics = (eventId: BigInt) => {
         router.push(`/rbd/analytics/events/${eventId}`);
@@ -134,18 +132,48 @@ export default function SearchEventsPage() {
 
                     {/* Search and Sort */}
                     <div className="mt-6 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-end gap-5 flex-wrap">
+                        
                         <div className="flex-1 flex flex-col gap-2 min-w-[250px]">
+                            
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Search by
                             </label>
-                            
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Input event name or partner..."
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] transition-colors bg-white"
-                            />
+
+                            {/* Wrapper */}
+                            <div className="flex flex-row items-center w-full h-[54px] bg-white border-2 border-[#c0cad0] rounded-[10px] focus-within:border-[#002940] transition-colors overflow-hidden">
+                                
+                                {/* The Search Button */}
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveSearch(searchInput)}
+                                    className="pl-4 pr-2 h-full flex items-center justify-center text-gray-400 hover:text-[#002940] transition-colors cursor-pointer"
+                                    title="Search"
+                                >
+                                    <svg 
+                                        xmlns="http://www.w3.org/2000/svg" 
+                                        fill="none" 
+                                        viewBox="0 0 24 24" 
+                                        strokeWidth={2.5} 
+                                        stroke="currentColor" 
+                                        className="w-6 h-6"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                    </svg>
+                                </button>
+
+                                {/* The Borderless Input */}
+                                <input
+                                    type="text"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') setActiveSearch(searchInput);
+                                    }}
+                                    placeholder="Input event name or partner..."
+                                    className="flex-1 h-full pr-4 text-[18px] outline-none bg-transparent text-[#002940] placeholder-gray-400"
+                                />
+                            </div>
+
                         </div>
 
                         <div className="w-full md:w-[2in] flex flex-col gap-2">

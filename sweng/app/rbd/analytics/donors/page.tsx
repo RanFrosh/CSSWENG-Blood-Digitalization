@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { fetchAllDonors } from "../rbd_action";
-import { donor } from "@/db/models/donor";
+import { fetchFilteredDonors } from "../rbd_action";
 import DonorCard from "@/components/DonorCard";
 import Header from "@/components/HeaderRBD";
 
@@ -11,9 +10,11 @@ export default function DonorAnalyticsPage() {
 
     const router = useRouter();
 
-    const [searchQuery, setSearchQuery] = useState("");
-    const [sortBy, setSortBy] = useState("Default");
     const [activeTab, setActiveTab] = useState("All");
+    const [sortBy, setSortBy] = useState("Default");
+
+    const [searchInput, setSearchInput] = useState("");
+    const [activeSearch, setActiveSearch] = useState("");
 
     const [donors, setDonors] = useState<any[]>([]);
 
@@ -21,18 +22,17 @@ export default function DonorAnalyticsPage() {
     const [errorMessage, setErrorMessage] = useState("");
 
     useEffect(() => {
-        const loadEvents = async () => {
-
+        const loadDonors = async () => {
             setIsLoading(true);
             setErrorMessage("");
 
             try {
-                const result = await fetchAllDonors();
+                const result = await fetchFilteredDonors(activeSearch, activeTab, sortBy);
 
                 if (result.success && result.data) {
                     setDonors(result.data);
                 } else {
-                    setErrorMessage(result.message);
+                    setErrorMessage(result.message || "Failed to load donors.");
                 }
             } catch (error) {
                 setErrorMessage("Failed to connect to the database");
@@ -40,8 +40,10 @@ export default function DonorAnalyticsPage() {
                 setIsLoading(false); 
             }
         }
-        loadEvents();
-    }, [activeTab]);
+
+        loadDonors();
+
+    }, [activeTab, activeSearch, sortBy]);
 
     const viewDonorAnalytics = (donorId: string) => {
         router.push(`/rbd/analytics/donors/${donorId}`);
@@ -76,44 +78,66 @@ export default function DonorAnalyticsPage() {
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
 
-                {/* Main Title Section */}
-                <section className="bg-[#f9fdff] p-[0.25in]">
-                    <p className="text-[18px] font-['Montserrat'] text-[#002940]">
-                        Red Bank Director
-                    </p>
-                    <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                        Donor Search
-                    </h1>
-                </section>
-
                 {/* Filters Section */}
                 <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        Filters
+                        Donor Directory
                     </h2>
 
-                    <div className="mt-5 flex flex-row items-end gap-5 flex-wrap md:flex-nowrap">
-                        <div className="flex-1 w-full flex flex-col gap-2">
+                    {/* Search and Sort */}
+                    <div className="mt-6 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-end gap-5 flex-wrap">
+                        
+                        <div className="flex-1 flex flex-col gap-2 min-w-[250px]">
+                            
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Search by
                             </label>
-                            <input
-                                type="text"
-                                placeholder="Input donor name"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
-                            />
+                            
+                            {/* Wrapper */}
+                            <div className="flex flex-row items-center w-full h-[54px] bg-white border-2 border-[#c0cad0] rounded-[10px] focus-within:border-[#002940] transition-colors overflow-hidden">
+                                
+                                {/* The Search Button */}
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveSearch(searchInput)}
+                                    className="pl-4 pr-2 h-full flex items-center justify-center text-gray-400 hover:text-[#002940] transition-colors cursor-pointer"
+                                    title="Search"
+                                >
+                                    <svg 
+                                        xmlns="http://www.w3.org/2000/svg" 
+                                        fill="none" 
+                                        viewBox="0 0 24 24" 
+                                        strokeWidth={2.5} 
+                                        stroke="currentColor" 
+                                        className="w-6 h-6"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                    </svg>
+                                </button>
+
+                                {/* Search Input */}
+                                <input
+                                    type="text"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') setActiveSearch(searchInput);
+                                    }}
+                                    placeholder="Input event name or partner..."
+                                    className="flex-1 h-full pr-4 text-[18px] outline-none bg-transparent text-[#002940] placeholder-gray-400"
+                                />
+                            </div>
                         </div>
 
                         <div className="w-full md:w-[2in] flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Sort By
                             </label>
-                            <select
+                            
+                            <select 
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
                             >
                                 <option value="Default">Default</option>
                                 <option value="Sex">Sex</option>
@@ -124,19 +148,17 @@ export default function DonorAnalyticsPage() {
                     </div>
                 </section>
 
-                {/* Registered Base Directory Records */}
                 <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
 
-                    <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
+                    {/* Divider & Result Count */}
+                    <div className="mt-8 flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
+                        <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                            Results
+                        </h3>
                         
-                        <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
-                            Donors
-                        </h2>
-
-                        <p className="text-[18px] text-[#002940]">
-                            Showing {donors.length} donor/s
-                        </p>
-
+                        <span className="bg-[#e2e8ec] text-[#002940] px-4 py-1 rounded-full text-[16px] font-semibold">
+                            Showing {donors.length} {donors.length === 1 ? 'event' : 'events'}
+                        </span>
                     </div>
 
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
