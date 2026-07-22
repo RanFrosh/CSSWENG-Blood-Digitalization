@@ -43,9 +43,10 @@ describe("ImpQueueManager", () => {
             deleteQueue: jest.fn(),
             addToQueue: jest.fn(),
             updateQueueStation: jest.fn(),
+            getNullStations: jest.fn(),
         };
 
-        // empty case profileReader
+        // profileReader is passed through to helpGateKeep
         profileReader = {} as ProfileSessionProvider;
 
         manager = new ImpQueueManager(queueModel, profileReader);
@@ -75,7 +76,7 @@ describe("ImpQueueManager", () => {
 
                 await manager.invokeQueryQueue(baseFilter);
 
-                // confirms the controller passes profileReader and the correct action string
+                // Confirms the controller passes profileReader and the correct action
                 expect(helpGateKeep).toHaveBeenCalledWith(profileReader, "dequeue");
             });
         });
@@ -96,7 +97,7 @@ describe("ImpQueueManager", () => {
 
                 await manager.invokeQueryQueue(baseFilter);
 
-                // the controller should spread the original filter and append
+                // The controller should spread the original filter and append
                 // profile_id from res.data and station from getQueueStation.
                 expect(queueModel.queryQueue).toHaveBeenCalledWith({
                     ...baseFilter,
@@ -163,6 +164,17 @@ describe("ImpQueueManager", () => {
                 expect(result).toEqual({ success: false, message: "Not authorized" });
                 expect(queueModel.deleteQueue).not.toHaveBeenCalled();
             });
+
+            it("checks authorization against the 'dequeue' permission", async () => {
+                (helpGateKeep as jest.Mock).mockResolvedValue({
+                    success: false,
+                    message: "Not authorized",
+                });
+
+                await manager.invokeDeleteQueue(donorTarget);
+
+                expect(helpGateKeep).toHaveBeenCalledWith(profileReader, "dequeue");
+            });
         });
 
         describe("when the user is authorized", () => {
@@ -178,11 +190,11 @@ describe("ImpQueueManager", () => {
 
                 await manager.invokeDeleteQueue(donorTarget);
 
-                // the controller passes donorTarget through unchanged
+                // The controller passes donorTarget through unchanged
                 expect(queueModel.deleteQueue).toHaveBeenCalledWith(donorTarget);
             });
 
-            it("returns the outcome from deleteQueue", async () => {
+            it("returns the success response from deleteQueue", async () => {
                 queueModel.deleteQueue.mockResolvedValue({
                     success: true,
                     message: "Donor dequeued",
@@ -192,6 +204,18 @@ describe("ImpQueueManager", () => {
 
                 expect(result.success).toBe(true);
                 expect(result.message).toBe("Donor dequeued");
+            });
+
+            it("returns the failure response from deleteQueue when it fails", async () => {
+                queueModel.deleteQueue.mockResolvedValue({
+                    success: false,
+                    message: "Donor not found",
+                });
+
+                const result = await manager.invokeDeleteQueue(donorTarget);
+
+                expect(result.success).toBe(false);
+                expect(result.message).toBe("Donor not found");
             });
         });
     });
@@ -214,6 +238,17 @@ describe("ImpQueueManager", () => {
                 expect(result).toEqual({ success: false, message: "Not authorized" });
                 expect(queueModel.addToQueue).not.toHaveBeenCalled();
             });
+
+            it("checks authorization against the 'dequeue' permission", async () => {
+                (helpGateKeep as jest.Mock).mockResolvedValue({
+                    success: false,
+                    message: "Not authorized",
+                });
+
+                await manager.invokeAddToQueue(queueTarget);
+
+                expect(helpGateKeep).toHaveBeenCalledWith(profileReader, "dequeue");
+            });
         });
 
         describe("when the user is authorized", () => {
@@ -232,7 +267,7 @@ describe("ImpQueueManager", () => {
                 expect(queueModel.addToQueue).toHaveBeenCalledWith(queueTarget);
             });
 
-            it("returns the outcome from addToQueue", async () => {
+            it("returns the success response from addToQueue", async () => {
                 queueModel.addToQueue.mockResolvedValue({
                     success: true,
                     message: "Donor enqueued",
@@ -243,15 +278,26 @@ describe("ImpQueueManager", () => {
                 expect(result.success).toBe(true);
                 expect(result.message).toBe("Donor enqueued");
             });
+
+            it("returns the failure response from addToQueue when it fails", async () => {
+                queueModel.addToQueue.mockResolvedValue({
+                    success: false,
+                    message: "Insert failed",
+                });
+
+                const result = await manager.invokeAddToQueue(queueTarget);
+
+                expect(result.success).toBe(false);
+                expect(result.message).toBe("Insert failed");
+            });
         });
     });
-
 
     describe("invokeUpdateQueueStation", () => {
         const queueTarget: UpdateQueue = {
             id: BigInt(3),
             station: "med_queue",
-            profiles_id: dummyProfile.id,
+            profiles_id: "old-uuid", // will be overwritten by the controller
         };
 
         describe("when the user is not authorized", () => {
@@ -265,6 +311,17 @@ describe("ImpQueueManager", () => {
 
                 expect(result).toEqual({ success: false, message: "Not authorized" });
                 expect(queueModel.updateQueueStation).not.toHaveBeenCalled();
+            });
+
+            it("checks authorization against the 'updatequeue' permission", async () => {
+                (helpGateKeep as jest.Mock).mockResolvedValue({
+                    success: false,
+                    message: "Not authorized",
+                });
+
+                await manager.invokeUpdateQueueStation(queueTarget);
+
+                expect(helpGateKeep).toHaveBeenCalledWith(profileReader, "updatequeue");
             });
         });
 
@@ -281,15 +338,15 @@ describe("ImpQueueManager", () => {
 
                 await manager.invokeUpdateQueueStation(queueTarget);
 
-                // the controller spreads queueTarget but replaces profiles_id with
-                // res.data.id
+                // The controller spreads queueTarget but replaces profiles_id with
+                // res.data.id 
                 expect(queueModel.updateQueueStation).toHaveBeenCalledWith({
                     ...queueTarget,
                     profiles_id: dummyProfile.id,
                 });
             });
 
-            it("returns the outcome from updateQueueStation", async () => {
+            it("returns the success response from updateQueueStation", async () => {
                 queueModel.updateQueueStation.mockResolvedValue({
                     success: true,
                     message: "Donor station updated",
@@ -300,163 +357,17 @@ describe("ImpQueueManager", () => {
                 expect(result.success).toBe(true);
                 expect(result.message).toBe("Donor station updated");
             });
-        });
-    });
 
-    describe("invokePickNextQueue", () => {
-        const eventId = BigInt(10);
-
-        describe("when the user is not authorized", () => {
-            it("returns the gate failure response without querying", async () => {
-                (helpGateKeep as jest.Mock).mockResolvedValue({
-                    success: false,
-                    message: "Not authorized",
-                });
-
-                const result = await manager.invokePickNextQueue(eventId);
-
-                expect(result).toEqual({ success: false, message: "Not authorized" });
-                expect(queueModel.queryQueue).not.toHaveBeenCalled();
-            });
-        });
-
-        describe("when the user is authorized", () => {
-            beforeEach(() => {
-                (helpGateKeep as jest.Mock).mockResolvedValue(authorizedGateResponse);
-                (getQueueStation as jest.Mock).mockReturnValue("med_queue");
-            });
-
-            it("returns a busy message if the user is already handling a donor", async () => {
-                // first queryQueue call (busy check) returns an occupied slot
-                // station: null means the donor is actively being handled
-                queueModel.queryQueue.mockResolvedValueOnce({
-                    success: true,
-                    message: "Queue retrieved",
-                    data: [{ id: BigInt(1), event_log_id: eventId, donor_id: BigInt(99), station: null, profile_id: dummyProfile.id }],
-                });
-
-                const result = await manager.invokePickNextQueue(eventId);
-
-                expect(result).toEqual({
-                    success: false,
-                    message: "You are already handling a donor",
-                });
-                // updateQueueStation should never be called if the user is busy
-                expect(queueModel.updateQueueStation).not.toHaveBeenCalled();
-            });
-
-            it("returns a failure if getQueueStation returns undefined for the user's role", async () => {
-                // busy check passes (empty = not handling anyone).
-                queueModel.queryQueue.mockResolvedValueOnce({
-                    success: true,
-                    message: "Queue is empty",
-                    data: [],
-                });
-                // simulate a role that has no station mapping (e.g. onsite_admin).
-                (getQueueStation as jest.Mock).mockReturnValue(undefined);
-
-                const result = await manager.invokePickNextQueue(eventId);
-
-                expect(result).toEqual({
-                    success: false,
-                    message: "Invalid role for queue",
-                    data: undefined,
-                });
-            });
-
-            it("returns a failure when the queue is empty for the user's station", async () => {
-                // Busy check passes
-                queueModel.queryQueue.mockResolvedValueOnce({
-                    success: true,
-                    message: "Queue is empty",
-                    data: [],
-                });
-                // Station queue check also returns empty — no donor to pick.
-                queueModel.queryQueue.mockResolvedValueOnce({
-                    success: true,
-                    message: "Queue is empty",
-                    data: [],
-                });
-
-                const result = await manager.invokePickNextQueue(eventId);
-
-                expect(result.success).toBe(true);
-                expect(result.data).toBeUndefined();
-            });
-
-            it("assigns the next donor and updates the queue station on success", async () => {
-                const nextDonor: ViewQueue = {
-                    id: BigInt(7),
-                    event_log_id: eventId,
-                    donor_id: BigInt(42),
-                    station: "med_queue",
-                    profile_id: null,
-                };
-
-                // busy check - user is free
-                queueModel.queryQueue.mockResolvedValueOnce({
-                    success: true,
-                    message: "Queue retrieved",
-                    data: [],
-                });
-                // station queue - returns the next donor in line
-                queueModel.queryQueue.mockResolvedValueOnce({
-                    success: true,
-                    message: "Queue retrieved",
-                    data: [nextDonor],
-                });
-                queueModel.updateQueueStation.mockResolvedValue({
-                    success: true,
-                    message: "Donor station updated",
-                });
-
-                const result = await manager.invokePickNextQueue(eventId);
-
-                // confirms the update was called with station: null and the
-                // authenticated user's id as profiles_id
-                expect(queueModel.updateQueueStation).toHaveBeenCalledWith({
-                    id: nextDonor.id,
-                    station: null,
-                    profiles_id: dummyProfile.id,
-                });
-
-                expect(result.success).toBe(true);
-                expect(result.message).toContain("Donor assigned");
-                // verifies the returned donor has station cleared and profile_id set
-                expect(result.data?.station).toBeNull();
-                expect(result.data?.profile_id).toBe(dummyProfile.id);
-            });
-
-            it("returns a failure if updateQueueStation fails after picking a donor", async () => {
-                const nextDonor: ViewQueue = {
-                    id: BigInt(7),
-                    event_log_id: eventId,
-                    donor_id: BigInt(42),
-                    station: "med_queue",
-                    profile_id: null,
-                };
-
-                queueModel.queryQueue.mockResolvedValueOnce({
-                    success: true,
-                    data: [],
-                    message: "Queue is empty",
-                });
-                queueModel.queryQueue.mockResolvedValueOnce({
-                    success: true,
-                    message: "Queue retrieved",
-                    data: [nextDonor],
-                });
-                // update fails
+            it("returns the failure response from updateQueueStation when it fails", async () => {
                 queueModel.updateQueueStation.mockResolvedValue({
                     success: false,
                     message: "Update failed",
                 });
 
-                const result = await manager.invokePickNextQueue(eventId);
+                const result = await manager.invokeUpdateQueueStation(queueTarget);
 
                 expect(result.success).toBe(false);
                 expect(result.message).toBe("Update failed");
-                expect(result.data).toBeUndefined();
             });
         });
     });

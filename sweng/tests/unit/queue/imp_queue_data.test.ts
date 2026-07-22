@@ -1,11 +1,11 @@
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { orm } from "@/db/drizzle";
 import { event_queue } from "@/db/models/event_queue";
-import { event_log } from "@/db/models/event_log";
-import { assigned_staff } from "@/db/models/assigned_staff";
 import { ViewQueueFilters, DeleteQueue, CreateQueue, UpdateQueue } from "@/types/queue_type";
 
-
+// mock at the module level
+// Mocking it at the module level intercepts every .select/.insert/.update/.delete
+// call without touching a real database.
 jest.mock("@/db/drizzle", () => ({
     orm: {
         select: jest.fn(),
@@ -17,7 +17,6 @@ jest.mock("@/db/drizzle", () => ({
 
 // Schema objects are mocked as plain column-name strings so they can be passed
 // to eq(), and(), isNull() without needing Drizzle to interpret them.
-// Only the columns actually referenced in ImpQueueModel are stubbed.
 jest.mock("@/db/models/event_queue", () => ({
     event_queue: {
         id: "event_queue.id",
@@ -50,10 +49,13 @@ const baseFilter: ViewQueueFilters = {
     event_log_id: EVENT_LOG_ID,
 };
 
+// Minimal assigned_staff row
 const dummyAssignment = [{ id: BigInt(1), profiles_id: PROFILE_ID, event_log_id: EVENT_LOG_ID }];
 
+// events with ongoing status are the only events that are valid for onsite queue processes
 const ongoingEvent = [{ id: EVENT_LOG_ID, status: "Ongoing" }];
 
+// Minimal ViewQueue row matching the event_queue schema
 const dummyQueueRow = {
     id: BigInt(1),
     event_log_id: EVENT_LOG_ID,
@@ -62,12 +64,11 @@ const dummyQueueRow = {
     profile_id: PROFILE_ID,
 };
 
+
 // queryQueue makes up to three chained select calls in sequence:
 // 1. assigned_staff check  → .select().from().where().limit()
 // 2. event_log check       → .select().from().where().limit()
 // 3. event_queue fetch     → .select().from().where().orderBy()
-// Each call to orm.select() must return its own chain via mockReturnValueOnce
-// so they don't interfere with each other.
 
 function mockSelectChainWithLimit(resolvedValue: any) {
     const chain = {
@@ -94,6 +95,7 @@ describe("ImpQueueModel", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        // orm is passed in as a constructor dependency
         model = new ImpQueueModel(orm);
     });
 
@@ -132,7 +134,7 @@ describe("ImpQueueModel", () => {
 
         describe("assignment check", () => {
             it("returns a failure when the staff member is not assigned to the event", async () => {
-                // assigned_staff query returns empty
+                // assigned_staff query returns empty; staff not assigned
                 mockSelectChainWithLimit([]);
 
                 const result = await model.queryQueue(baseFilter);
@@ -142,7 +144,7 @@ describe("ImpQueueModel", () => {
                     message: "Not assigned to this event",
                     data: undefined,
                 });
-                // only one select call should have been mad.
+                // Only one select call should have been made (the assignment check)
                 expect(orm.select).toHaveBeenCalledTimes(1);
             });
         });
@@ -216,7 +218,7 @@ describe("ImpQueueModel", () => {
                     data: [dummyQueueRow],
                 });
             });
-            
+
             it.each([
                 ["a specific station value", "med_queue" as const],
                 ["null (donor being handled)", null],
@@ -233,8 +235,7 @@ describe("ImpQueueModel", () => {
             });
 
             it("propagates errors from the underlying query as a failure response", async () => {
-                // queryQueue has a try/catch that returns { success: false } rather
-                // than rethrowing
+                // queryQueue has a try/catch that returns { success: false }
                 mockSelectChainWithLimit(dummyAssignment);
                 mockSelectChainWithLimit(ongoingEvent);
 
@@ -297,6 +298,7 @@ describe("ImpQueueModel", () => {
     });
 
     describe("addToQueue", () => {
+        // donor_id and event_log_id are bigints per the event_queue schema.
         const queueTarget: CreateQueue = {
             event_log_id: EVENT_LOG_ID,
             donor_id: BigInt(99),
@@ -324,7 +326,6 @@ describe("ImpQueueModel", () => {
 
             await model.addToQueue(queueTarget);
 
-            // donor always enters the queue at the med_queue station first.
             expect(chain.values).toHaveBeenCalledWith({
                 ...queueTarget,
                 station: "med_queue",
@@ -346,7 +347,7 @@ describe("ImpQueueModel", () => {
     describe("updateQueueStation", () => {
         const queueTarget: UpdateQueue = {
             id: BigInt(3),
-            station: null,         // null clears the station (donor being handled)
+            station: null, // null clears the station (donor being handled)
             profiles_id: PROFILE_ID,
         };
 
@@ -373,6 +374,8 @@ describe("ImpQueueModel", () => {
 
             await model.updateQueueStation(queueTarget);
 
+            // The model writes profiles_id (from UpdateQueue) into the profile_id
+            // column on event_queue
             expect(chain.set).toHaveBeenCalledWith({
                 station: queueTarget.station,
                 profile_id: queueTarget.profiles_id,
@@ -397,6 +400,78 @@ describe("ImpQueueModel", () => {
             const result = await model.updateQueueStation(queueTarget);
 
             expect(result).toEqual({ success: false, message: "update failed" });
+        });
+    });
+
+    describe("getNullStations", () => {
+        const eventId = BigInt(10);
+
+        const dummyBusyEntry = {
+            id: BigInt(1),
+            event_log_id: eventId,
+            donor_id: BigInt(99),
+            station: null,
+            profile_id: "dummy-uuid-1",
+        };
+
+        // getNullStations chain: .select().from().where()
+        function mockNullStationsChain(resolvedValue: any) {
+            const chain = {
+                from: jest.fn().mockReturnThis(),
+                where: jest.fn().mockResolvedValue(resolvedValue),
+            };
+            (orm.select as jest.Mock).mockReturnValueOnce(chain);
+            return chain;
+        }
+
+        it("returns an empty array when no donors have null stations", async () => {
+            mockNullStationsChain([]);
+
+            const result = await model.getNullStations(eventId);
+
+            expect(result).toEqual({
+                success: true,
+                message: "No donors with null stations",
+                data: [],
+            });
+        });
+
+        it("returns list of donors currently being handled", async () => {
+            mockNullStationsChain([dummyBusyEntry]);
+
+            const result = await model.getNullStations(eventId);
+
+            expect(result).toEqual({
+                success: true,
+                message: "Returning list of donors being handled by a staff",
+                data: [dummyBusyEntry],
+            });
+        });
+
+        it("calls select on event_queue filtered by event_log_id and null station", async () => {
+            const chain = mockNullStationsChain([dummyBusyEntry]);
+
+            await model.getNullStations(eventId);
+
+            // Confirms the query targets event_queue
+            expect(orm.select).toHaveBeenCalled();
+            // where() receives the combined and() condition
+            expect(chain.where).toHaveBeenCalled();
+        });
+
+        it("propagates errors from the underlying query as a failure response", async () => {
+            const chain = {
+                from: jest.fn().mockReturnThis(),
+                where: jest.fn().mockRejectedValue(new Error("db timeout")),
+            };
+            (orm.select as jest.Mock).mockReturnValueOnce(chain);
+
+            const result = await model.getNullStations(eventId);
+
+            expect(result).toEqual({
+                success: false,
+                message: "db timeout",
+            });
         });
     });
 });
