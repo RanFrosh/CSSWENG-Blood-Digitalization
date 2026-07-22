@@ -14,8 +14,8 @@ export default function SearchEventsPage() {
 
     const router = useRouter();
     
-    // Set the initial active tab to "Ongoing"
-    const [activeTab, setActiveTab] = useState<EventTab>("All");
+    // Filters
+    const [statusFilter, setStatusFilter] = useState("All");
     const [sortBy, setSortBy] = useState("Default");
 
     const [searchInput, setSearchInput] = useState("");
@@ -37,7 +37,7 @@ export default function SearchEventsPage() {
             setErrorMessage("");
 
             try {
-                const result = await fetchFilteredEvents(activeTab, activeSearch, sortBy);
+                const result = await fetchFilteredEvents(activeSearch, statusFilter, sortBy);
 
                 if (result.success && result.data) {
                     setEvents(result.data);
@@ -53,7 +53,7 @@ export default function SearchEventsPage() {
 
         loadEvents();
 
-    }, [activeTab, activeSearch, sortBy]);
+    }, [activeSearch, statusFilter, sortBy]);
 
     const viewEventAnalytics = (eventId: BigInt) => {
         router.push(`/rbd/analytics/events/${eventId}`);
@@ -106,29 +106,9 @@ export default function SearchEventsPage() {
 
                 <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
 
-                    {/* Header & Status Tabs */}
-                    <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-5">
-                        <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
-                            Event Directory
-                        </h2>
-
-                        <div className="flex flex-row flex-wrap gap-2">
-                            {["All", "Ongoing", "Completed"].map((tab) => (
-                                <button
-                                    key={tab}
-                                    type="button"
-                                    onClick={() => setActiveTab(tab as EventTab)}
-                                    className={`px-6 py-2 rounded-full font-semibold border-2 transition-colors cursor-pointer ${
-                                        activeTab === tab
-                                            ? "bg-[#002940] text-white border-[#002940]"
-                                            : "bg-[#f9fdff] text-[#002940] border-[#c0cad0] hover:bg-gray-200"
-                                    }`}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                    <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
+                        Event Directory
+                    </h2>
 
                     {/* Search and Sort */}
                     <div className="mt-6 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-end gap-5 flex-wrap">
@@ -176,6 +156,23 @@ export default function SearchEventsPage() {
 
                         </div>
 
+                        {/* Status Filter */}
+                        <div className="w-full md:w-[1.5in] flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Satus
+                            </label>
+                            
+                            <select 
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="All">All</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Ongoing">Ongoing</option>
+                            </select>
+                        </div>
+
                         <div className="w-full md:w-[2in] flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Sort By
@@ -186,10 +183,13 @@ export default function SearchEventsPage() {
                                 onChange={(e) => setSortBy(e.target.value)}
                                 className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
                             >
-                                <option value="Default">Default</option>
-                                <option value="Date">Date</option>
-                                <option value="Partner">Partner</option>
-                                <option value="Status">Status</option>
+                                {/* Date Options */}
+                                <option value ="Date">Date (earliest)</option>
+                                <option value ="Date (Oldest)">Date (oldest)</option>
+                                
+                                {/* Partner Options */}
+                                <option value = "Partner (A-Z)">Partner (A-Z)</option>
+                                <option value = "Partner (Z-A)">Partner (Z-A)</option>
                             </select>
                         </div>
                     </div>

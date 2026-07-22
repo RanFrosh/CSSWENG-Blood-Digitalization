@@ -76,7 +76,7 @@ export async function fetchFilteredDonors(search: string, bloodFilter: string, s
     return await analyticsController.invokeGetFilteredDonors(search, bloodFilter, sexFilter, sortBy);
 }
 
-export async function fetchFilteredEvents(status: string, search: string, sortBy: string) {
+export async function fetchFilteredEvents(search: string, status: string, sortBy: string) {
 
     const dataLayer = new ImpAnalyticsData();
     const supabaseClient = await serverSupa();
@@ -84,7 +84,7 @@ export async function fetchFilteredEvents(status: string, search: string, sortBy
     
     const eventController = new ImpAnalyticsManager(dataLayer, authProvider);
 
-    return await eventController.invokeGetFilteredEvents(status, search, sortBy);
+    return await eventController.invokeGetFilteredEvents(search, status, sortBy);
 }
 
 export async function fetchEventAnalytics(eventIdStr: string) {

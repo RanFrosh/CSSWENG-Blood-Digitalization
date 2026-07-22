@@ -64,12 +64,23 @@ export class ImpAnalyticsData implements AnalyticsData {
         }
 
         // Sort Logic
-        let orderLogic: any = desc(donor.id); // Default to newest donors
+        let orderLogic: any = desc(donor.last_name);
 
-        if (sortBy === "Name (A-Z)") orderLogic = asc(donor.last_name);
-        if (sortBy === "Name (Z-A)") orderLogic = desc(donor.last_name);
-        if (sortBy === "Age (Youngest)") orderLogic = asc(donor.age);
-        if (sortBy === "Age (Oldest)") orderLogic = desc(donor.age);
+        switch (sortBy) {
+            case "Age (Youngest)":
+                orderLogic = asc(donor.age);
+                break;
+            case "Age (Oldest)":
+                orderLogic = desc(donor.age);
+                break;
+            case "Name (Z-A)":
+                orderLogic = desc(donor.last_name);
+                break;
+            case "Name (A-Z)":
+            default:
+                orderLogic = asc(donor.last_name);
+                break;
+        }
 
         // Execute Query
         return await orm
@@ -154,7 +165,7 @@ export class ImpAnalyticsData implements AnalyticsData {
         return dbEvent;
     }
 
-    async getEvents(status: string, search: string, sortBy: string) {
+    async getFilteredEvents(search: string, status: string, sortBy: string) {
         
         const conditions = [];
 
@@ -178,14 +189,21 @@ export class ImpAnalyticsData implements AnalyticsData {
         // Sort Logic
         let orderLogic: any = desc(event_log.event_date);
 
-        if (sortBy === "Date") 
-            orderLogic = desc(event_log.event_date);
-
-        if (sortBy === "Partner") 
-            orderLogic = asc(event_log.partner);
-
-        if (sortBy === "Status") 
-            orderLogic = asc(event_log.status);
+        switch (sortBy) {
+            case "Date (Oldest)":
+                orderLogic = asc(event_log.event_date);
+                break;
+            case "Partner (A-Z)":
+                orderLogic = asc(event_log.partner);
+                break;
+            case "Partner (Z-A)":
+                orderLogic = desc(event_log.partner);
+                break;
+            case "Date":
+            default:
+                orderLogic = desc(event_log.event_date);
+                break;
+        }
 
         const events = await orm.select()
             .from(event_log)

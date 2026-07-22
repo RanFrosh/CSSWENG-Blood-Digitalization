@@ -160,7 +160,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
     }
 
-    async invokeGetFilteredEvents(status: string, search: string, sortBy: string): Promise<ApiResponse<any>> {
+    async invokeGetFilteredEvents(search: string, status: string, sortBy: string): Promise<ApiResponse<any>> {
         
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
 
@@ -168,14 +168,17 @@ export class ImpAnalyticsManager implements AnalyticsController {
             return { success: false, message: authRes.message };
 
         try {
-            const rawEvents = await this.analyticsModel.getEvents(status, search, sortBy);
+            const rawEvents = await this.analyticsModel.getFilteredEvents(search, status, sortBy);
 
             const formattedEvents = rawEvents.map((e: any) => ({
                 id: e.id,
                 name: e.name,
                 partner: e.partner,
-                date: e.event_date,
-                status: e.status
+                event_date: e.event_date,
+                street: e.street,
+                status: e.status,
+                start_time: e.start_time,
+                end_time: e.end_time
             }));
 
             return {
