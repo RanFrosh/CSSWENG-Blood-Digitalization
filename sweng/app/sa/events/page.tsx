@@ -90,7 +90,6 @@ export function SAEventsPage() {
         "Name: A-Z",
     ];
 
-    // Filtering logic
     let filteredEvents = [...events];
     if (activeTab !== "All") {
         filteredEvents = filteredEvents.filter((evt) => evt.status === activeTab);
@@ -228,7 +227,7 @@ export function SAEventsPage() {
                         Super Admin
                     </p>
                     <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">
-                        Manage Events
+                        Event Management
                     </h1>
                 </section>
 
