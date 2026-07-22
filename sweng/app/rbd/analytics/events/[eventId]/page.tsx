@@ -149,11 +149,11 @@ export default function EventAnalyticsDetailsPage() {
 
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                             <p className="text-[18px] font-semibold text-[#002940]">
-                                Show-up Rate
+                                Extraction Success Rate
                             </p>
 
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedEvent.showUpRate}
+                                {selectedEvent.successRate}
                             </p>
                         </div>
                     </div>

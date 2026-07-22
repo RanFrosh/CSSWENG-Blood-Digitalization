@@ -196,7 +196,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                     totalDonors: visitors,
                     bloodDonated: `${Number(totalML).toLocaleString()} mL`,
                     totalBagsProduced: Number(eventRow.produced_bags) || 0,
-                    showUpRate: `${successRate}%`,
+                    successRate: `${successRate}%`,
                     extractionGoal: Number(eventRow.target_blood) || 0,
                     
                     bloodTypes: bloodTypeDist.map((bt: any) => ({
