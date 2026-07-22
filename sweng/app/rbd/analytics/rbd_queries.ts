@@ -248,4 +248,45 @@ export class ImpAnalyticsData implements AnalyticsData {
             bloodTypeDist: bloodTypeResult
         };
     }
+
+    async getOverallAnalytics() {
+
+        const [
+            totalDonors,
+            bloodTypesRes,
+            genderRes,
+            eventMetricsRes,
+            recentCampaignsRes
+        ] = await Promise.all([
+
+            this.countActiveDonors(), // Total Active Donors
+            this.getDonorBloodTypeBreakdown(), // Blood Type Distribution
+        
+            // Gender Distribution
+            orm.select({ sex: donor.sex, count: sql<number>`count(*)` })
+               .from(donor)
+               .groupBy(donor.sex),
+            
+            // Global Event Metrics (Bags and Targets)
+            orm.select({
+                totalBags: sql<number>`sum(${event_log.produced_bags})`,
+                totalTarget: sql<number>`sum(${event_log.target_blood})`,
+                totalExtractions: sql<number>`sum(${event_log.extractions})`, 
+            }).from(event_log),
+
+            // Recent Campaign Performance
+            orm.select()
+               .from(event_log)
+               .orderBy(desc(event_log.event_date))
+               .limit(5)
+        ]);
+
+        return {
+            totalDonors: totalDonors,
+            bloodTypes: bloodTypesRes,
+            genders: genderRes,
+            metrics: eventMetricsRes[0],
+            campaigns: recentCampaignsRes
+        };
+    }
 }

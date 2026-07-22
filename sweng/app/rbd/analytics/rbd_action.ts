@@ -40,18 +40,6 @@ export async function checkAuthentication(data?: ViewEventFilters) {
     })
 }
 
-export async function fetchDirectorStats() {
-
-    const dataLayer = new ImpAnalyticsData();
-
-    const supabaseClient = await serverSupa();
-    const authProvider = new ImpProfileGetter(supabaseClient)
-
-    const analyticsController = new ImpAnalyticsManager(dataLayer, authProvider);
-
-    return await analyticsController.invokeGetDirectorStats();
-}
-
 export async function fetchDonorAnalytics(donorIdStr: string) {
     
     const dataLayer = new ImpAnalyticsData();
@@ -96,4 +84,16 @@ export async function fetchEventAnalytics(eventIdStr: string) {
     const eventController = new ImpAnalyticsManager(dataLayer, authProvider);
 
     return await eventController.invokeGetEventAnalytics(eventIdStr);
+}
+
+export async function fetchOverallAnalytics() {
+
+    const dataLayer = new ImpAnalyticsData();
+
+    const supabaseClient = await serverSupa();
+    const authProvider = new ImpProfileGetter(supabaseClient)
+
+    const analyticsController = new ImpAnalyticsManager(dataLayer, authProvider);
+
+    return await analyticsController.invokeGetOverallAnalytics();
 }

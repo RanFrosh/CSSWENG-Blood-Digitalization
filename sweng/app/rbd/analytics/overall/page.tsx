@@ -2,26 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Header from "@/components/HeaderRBD";
-import { fetchDirectorStats } from "../rbd_action";
+import { fetchOverallAnalytics } from "../rbd_action";
 
 type BloodTypeData = {
     bloodType: string;
     count: number;
     pct: number;
     color: string;
-};
-
-type OverallAnalytics = {
-    totalDonors: number;
-    bloodDonated: string;
-    totalBagsProduced: number;
-    extractionSuccessRate: string; // Replaced showUpRate / eligibilityRate
-    extractionGoal: number;
-    extractionProgress: number;
-    malePct: number;
-    femalePct: number;
-    activeEngagementRate: number;
-    bloodTypes: BloodTypeData[];
 };
 
 type EventCampaign = {
@@ -33,34 +20,22 @@ type EventCampaign = {
     totalBagsProduced: number;
 };
 
-const campaignEvents: EventCampaign[] = [
-    {
-        id: "1",
-        name: "Blood Donation Drive",
-        partner: "Manila Doctors Hospital",
-        date: "2026-07-15",
-        extractionGoal: 100,
-        totalBagsProduced: 72,
-    },
-    {
-        id: "2",
-        name: "Name 2",
-        partner: "Partner 2",
-        date: "Date 2",
-        extractionGoal: 100,
-        totalBagsProduced: 67,
-    },
-    {
-        id: "3",
-        name: "Name 3",
-        partner: "Partner 3",
-        date: "Date 3",
-        extractionGoal: 100,
-        totalBagsProduced: 89,
-    },
-];
+type OverallAnalytics = {
+    totalDonors: number;
+    bloodDonated: string;
+    totalBagsProduced: number;
+    extractionSuccessRate: string;
+    extractionGoal: number;
+    extractionProgress: number;
+    malePct: number;
+    femalePct: number;
+    activeEngagementRate: number;
+    bloodTypes: BloodTypeData[];
+    campaignEvents: EventCampaign[];
+};
 
 export default function OverallAnalyticsPage() {
+    
     const [analytics, setAnalytics] = useState<OverallAnalytics | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -78,15 +53,17 @@ export default function OverallAnalyticsPage() {
     };
 
     const maxVal = Math.max(
-        ...campaignEvents.map(e => Math.max(e.extractionGoal, e.totalBagsProduced)),
+        ...(analytics?.campaignEvents || []).map(e => Math.max(e.extractionGoal, e.totalBagsProduced)),
         1
     );
 
     useEffect(() => {
         const loadDashboard = async () => {
-            const result = await fetchDirectorStats();
+            const result = await fetchOverallAnalytics();
             
             if (result.success && result.data) {
+
+                
                 const db = result.data;
                 
                 const baseTotalBags = db.extractionGoals?.currentCollected || 0;
@@ -119,7 +96,8 @@ export default function OverallAnalyticsPage() {
                     malePct: fetchedMalePct,
                     femalePct: fetchedFemalePct,
                     activeEngagementRate: dynamicEngagement,
-                    bloodTypes: parsedBloodTypes
+                    bloodTypes: parsedBloodTypes,
+                    campaignEvents: db.campaignEvents || []
                 });
             }
             setIsLoading(false);
@@ -299,7 +277,7 @@ export default function OverallAnalyticsPage() {
                                         {analytics.bloodTypes.map((item) => {
                                             const circleRadius = 34;
                                             const circumference = 2 * Math.PI * circleRadius; 
-                                            const strokeDashoffset = circumference - (item.pct / 100) * circumference;
+                                            const strokeDashoffset = `${(item.pct / 100) * circumference + 1.5} ${circumference}`;
 
                                             return (
                                                 <div 
@@ -355,14 +333,14 @@ export default function OverallAnalyticsPage() {
                         {/* Campaign Performance Analytics Section */}
                         <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
                             <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                Campaign Performance (Goal vs. Actual)
+                                Event Performance (Goal vs. Actual)
                             </h2>
                             <p className="text-[16px] text-gray-500 mt-1">
                                 Comparative review of targeted blood bag extractions against actual performance.
                             </p>
 
                             <div className="mt-8 flex flex-col gap-6">
-                                {campaignEvents.map((event) => {
+                                {analytics.campaignEvents.map((event) => {
                                     const actualWidth = (event.totalBagsProduced / maxVal) * 100;
                                     const goalWidth = (event.extractionGoal / maxVal) * 100;
 
@@ -430,7 +408,7 @@ export default function OverallAnalyticsPage() {
                                 </div>
 
                                 <p className="mt-4 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                    {analytics.extractionProgress}%
+                                    {analytics.extractionProgress.toFixed(2)}%
                                 </p>
                             </div>
                         </section>

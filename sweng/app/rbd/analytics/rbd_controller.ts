@@ -128,38 +128,6 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
     }
 
-    async invokeGetDirectorStats() {
-    
-        const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
-
-        if (!authRes.success) 
-            return { success: false, message: authRes.message };
-
-        try {
-            const totalActiveDonors = await this.analyticsModel.countActiveDonors();
-            const donorDemographics = await this.analyticsModel.getDonorBloodTypeBreakdown();
-
-            // Hardcoded data
-            const showUpRates = { registered: 150, attended: 112, ratePercent: 74.6 };
-            const extractionGoals = { targetGoal: 500, currentCollected: 312, progressPercent: 62.4 };
-
-        
-            return {
-                success: true,
-                message: "Analytics retrieved successfully",
-                data: {
-                    totalActiveDonors,
-                    donorDemographics,
-                    showUpRates,
-                    extractionGoals
-                }
-            };
-        } catch (error: any) {
-            console.error("Analytics Manager Error:", error);
-            return { success: false, message: "Failed to fetch analytics data" };
-        }
-    }
-
     async invokeGetFilteredEvents(search: string, status: string, sortBy: string): Promise<ApiResponse<any>> {
         
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
@@ -239,6 +207,71 @@ export class ImpAnalyticsManager implements AnalyticsController {
             };
         } catch (error: any) {
             return { success: false, message: "Failed to load event data" };
+        }
+    }
+
+    async invokeGetOverallAnalytics() {
+    
+        const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
+
+        if (!authRes.success) 
+            return { success: false, message: authRes.message };
+
+        try {
+            const raw = await this.analyticsModel.getOverallAnalytics();
+
+            // Gender Demographics
+            let mCount = 0;
+            let fCount = 0;
+
+            (raw.genders || []).forEach((g: any) => {
+                const sexLabel = String(g.sex || "").trim().toLowerCase();
+                const countVal = Number(g.count || 0);
+
+                if (sexLabel === 'male' || sexLabel === 'm') {
+                    mCount += countVal;
+                } else if (sexLabel === 'female' || sexLabel === 'f') {
+                    fCount += countVal;
+                }
+            });
+
+            const totalGenders = mCount + fCount;
+            const malePercent = totalGenders > 0 ? (mCount / totalGenders) * 100 : 0;
+            const femalePercent = totalGenders > 0 ? (fCount / totalGenders) * 100 : 0;
+
+            // Event Metrics
+            const bags = Number(raw.metrics?.totalBags || 0);
+            const target = Number(raw.metrics?.totalTarget || 1); // fallback to 1 to prevent division by zero
+            const extractions = Number(raw.metrics?.totalExtractions || 0);
+            
+            const progressPercent = target > 0 ? (bags / target) * 100 : 0;
+            const successRatePercent = extractions > 0 ? (bags / extractions) * 100 : 0;
+
+            // Format Campaigns
+            const formattedCampaigns = raw.campaigns.map((c: any) => ({
+                id: String(c.id),
+                name: c.name,
+                partner: c.partner,
+                date: c.event_date,
+                extractionGoal: Number(c.target_blood || 0),
+                totalBagsProduced: Number(c.produced_bags || 0)
+            }));
+
+            const payload = {
+                totalActiveDonors: Number(raw.totalDonors),
+                genderDemographics: { malePercent, femalePercent },
+                engagementMetrics: { activeRate: 85 }, // Can be dynamically calculated later based on activity thresholds
+                donorDemographics: raw.bloodTypes,
+                extractionGoals: { currentCollected: bags, targetGoal: target, progressPercent },
+                extractionMetrics: { successRatePercent: successRatePercent.toFixed(1) },
+                campaignEvents: formattedCampaigns
+            };
+
+            return { success: true, data: payload };
+
+        } catch (error: any) {
+            console.error("Analytics Error:", error);
+            return { success: false, message: "Failed to load dashboard statistics" };
         }
     }
 }
