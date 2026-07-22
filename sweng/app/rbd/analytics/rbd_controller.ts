@@ -151,7 +151,6 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 partner: e.partner,
                 date: e.event_date,
                 status: e.status
-                // map any other fields you need for the EventCard
             }));
 
             return {
@@ -173,42 +172,41 @@ export class ImpAnalyticsManager implements AnalyticsController {
             return { success: false, message: authRes.message };
 
         try {
-            const numericId = BigInt(eventIdStr.replace(/\D/g, '')); 
-            const dbEvent = await this.analyticsModel.getEventById(numericId);
+            const rawData = await this.analyticsModel.getEventAnalyticsData(eventIdStr);
 
-            if (!dbEvent) {
+            if (!rawData || !rawData.eventRow) {
                 return { success: false, message: "Event not found" };
             }
+
+            const { eventRow, totalML, bloodTypeDist } = rawData;
+
+            const visitors = Number(eventRow.visitors) || 0;
+            const extractions = Number(eventRow.extractions) || 0;
+            const successRate = visitors > 0 ? Math.round((extractions / visitors) * 100) : 0;
 
             return {
                 success: true,
                 message: "Event analytics retrieved",
                 data: {
 
-                    id: `EVT-${String(dbEvent.id).padStart(3, '0')}`,
-                    name: dbEvent.name,
-                    partner: dbEvent.partner,
-                    street: dbEvent.street,
-                    event_date: dbEvent.event_date,
-                    start_time: dbEvent.start_time,
-                    end_time: dbEvent.end_time,
+                    id: `EVT-${String(eventRow.id).padStart(3, '0')}`,
+                    name: eventRow.name,
+                    partner: eventRow.partner,
+                    street: eventRow.street,
+                    event_date: eventRow.event_date,
+                    start_time: eventRow.start_time,
+                    end_time: eventRow.end_time,
                     
-                    // PLACEHOLDER
-                    totalDonors: 145,
-                    bloodDonated: "62,500 mL",
-                    totalBagsProduced: 125,
-                    showUpRate: "82%",
-                    extractionGoal: 150,
-                    bloodTypes: [
-                        { bloodType: 'O+', count: 45 },
-                        { bloodType: 'O-', count: 12 },
-                        { bloodType: 'A+', count: 35 },
-                        { bloodType: 'A-', count: 8 },
-                        { bloodType: 'B+', count: 15 },
-                        { bloodType: 'B-', count: 4 },
-                        { bloodType: 'AB+', count: 5 },
-                        { bloodType: 'AB-', count: 1 }
-                    ]
+                    totalDonors: visitors,
+                    bloodDonated: `${Number(totalML).toLocaleString()} mL`,
+                    totalBagsProduced: Number(eventRow.produced_bags) || 0,
+                    showUpRate: `${successRate}%`,
+                    extractionGoal: Number(eventRow.target_blood) || 0,
+                    
+                    bloodTypes: bloodTypeDist.map((bt: any) => ({
+                        bloodType: bt.bloodType || 'Unknown',
+                        count: Number(bt.count) || 0
+                    }))
                 }
             };
         } catch (error: any) {

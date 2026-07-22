@@ -10,6 +10,7 @@ export interface AnalyticsData {
     getDonorMetrics(numericId: bigint): Promise<any>;
     getEventById(numericId: bigint): Promise<any | undefined>;
     getEvents(status: string, search: string, sortBy: string): Promise<any>;
+    getEventAnalyticsData(eventIdStr: string): Promise<any>;
 }
 
 export interface AnalyticsController {

@@ -87,7 +87,7 @@ export async function fetchFilteredEvents(status: string, search: string, sortBy
     return await eventController.invokeGetFilteredEvents(status, search, sortBy);
 }
 
-export async function fetchEventAnalytics(activeTab: string) {
+export async function fetchEventAnalytics(eventIdStr: string) {
 
     const dataLayer = new ImpAnalyticsData();
     const supabaseClient = await serverSupa();
@@ -95,5 +95,5 @@ export async function fetchEventAnalytics(activeTab: string) {
     
     const eventController = new ImpAnalyticsManager(dataLayer, authProvider);
 
-    return await eventController.invokeGetEventAnalytics(activeTab);
+    return await eventController.invokeGetEventAnalytics(eventIdStr);
 }

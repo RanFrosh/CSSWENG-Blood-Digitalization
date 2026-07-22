@@ -195,7 +195,10 @@ export default function EventAnalyticsDetailsPage() {
 
                                                 const percentage = totalUnits > 0 ? (bloodType.count / totalUnits) * 100 : 0;
                                                 const strokeLength = (percentage / 100) * mainCircumference;
-                                                const strokeOffset = mainCircumference - ((accumulatedPercentage / 100) * mainCircumference);
+                                                
+                                                // BUG FIX: Calculate exact gap and use a negative offset to push the slice forward
+                                                const strokeGap = mainCircumference - strokeLength;
+                                                const strokeOffset = -((accumulatedPercentage / 100) * mainCircumference);
                                                 
                                                 accumulatedPercentage += percentage;
 
@@ -206,7 +209,7 @@ export default function EventAnalyticsDetailsPage() {
                                                         fill="transparent"
                                                         stroke={fillColor}
                                                         strokeWidth="14"
-                                                        strokeDasharray={`${strokeLength} ${mainCircumference}`}
+                                                        strokeDasharray={`${strokeLength} ${strokeGap}`}
                                                         strokeDashoffset={strokeOffset}
                                                         className="transition-all duration-500 ease-out"
                                                     />
@@ -216,7 +219,7 @@ export default function EventAnalyticsDetailsPage() {
                                         
                                         <div className="absolute inset-0 flex flex-col items-center justify-center font-['Montserrat']">
                                             <span className="text-[32px] font-bold text-[#002940]">{totalUnits}</span>
-                                            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Units</span>
+                                            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Total Donors</span>
                                         </div>
                                     </div>
 
@@ -230,7 +233,7 @@ export default function EventAnalyticsDetailsPage() {
                                             const count = bloodType.count || 0;
                                             const percentage = totalUnits > 0 ? (count / totalUnits) * 100 : 0;
 
-                                            // Independent Ring Setup (Radius matching donor analytics style configuration)
+                                            // Independent Ring Setup
                                             const miniRadius = 34;
                                             const miniCircumference = 2 * Math.PI * miniRadius;
                                             const miniStrokeOffset = miniCircumference - (percentage / 100) * miniCircumference;
@@ -240,7 +243,6 @@ export default function EventAnalyticsDetailsPage() {
                                                     key={typeStr}
                                                     className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-4 flex flex-row items-center justify-between gap-3 min-w-0 shadow-sm"
                                                 >
-                                                    {/* Modular Mini Donut Ring Layout Component */}
                                                     <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
                                                         <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
                                                             <circle
@@ -261,7 +263,6 @@ export default function EventAnalyticsDetailsPage() {
                                                             />
                                                         </svg>
                                                         
-                                                        {/* Center Text Container with safety sizing hooks for Rh-null text scaling */}
                                                         <div className="absolute inset-0 flex items-center justify-center text-center px-1.5">
                                                             <span className={`${typeStr.includes('Golden') ? 'text-[9px] leading-tight px-0.5' : 'text-[18px]'} font-['Montserrat'] font-bold text-[#002940] break-words line-clamp-3`}>
                                                                 {typeStr}
@@ -269,7 +270,6 @@ export default function EventAnalyticsDetailsPage() {
                                                         </div>
                                                     </div>
 
-                                                    {/* Metric Readings Output block */}
                                                     <div className="text-right shrink-0">
                                                         <p className="text-[26px] font-['Montserrat'] font-bold text-[#002940] leading-none">
                                                             {count}
@@ -313,6 +313,15 @@ export default function EventAnalyticsDetailsPage() {
                             </div>
                         </div>
                     </div>
+
+                    <button
+                        type="button"
+                        onClick={goBack}
+                        className="mt-[0.35in] bg-white text-[#002940] border-2 border-[#002940] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:bg-[#fd5448] hover:border-[#fd5448] hover:text-white transition"
+                    >
+                        Back to Event List
+                    </button>
+                    
                 </section>
             </div>
         </main>

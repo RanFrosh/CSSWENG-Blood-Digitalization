@@ -159,4 +159,40 @@ export class ImpAnalyticsData implements AnalyticsData {
 
         return events;
     }
+
+    async getEventAnalyticsData(eventIdStr: string) {
+        const eventId = BigInt(eventIdStr);
+
+        const [eventResult, exactBloodResult, bloodTypeResult] = await Promise.all([
+
+            // Get the pre-calculated stats from event_log
+            orm.select()
+                .from(event_log)
+                .where(eq(event_log.id, eventId))
+                .limit(1),
+
+            // Sum up the exact mL of blood donated
+            orm.select({
+                totalML: sum(donor_to_event.blood_amount)
+            })
+            .from(donor_to_event)
+            .where(and(eq(donor_to_event.event_id, eventId), eq(donor_to_event.is_success, true))),
+
+            // Group and count by Blood Type
+            orm.select({
+                bloodType: donor.blood,
+                count: count()
+            })
+            .from(donor_to_event)
+            .innerJoin(donor, eq(donor_to_event.donor_id, donor.id))
+            .where(eq(donor_to_event.event_id, eventId))
+            .groupBy(donor.blood)
+        ]);
+
+        return {
+            eventRow: eventResult[0],
+            totalML: exactBloodResult[0]?.totalML || 0,
+            bloodTypeDist: bloodTypeResult
+        };
+    }
 }
