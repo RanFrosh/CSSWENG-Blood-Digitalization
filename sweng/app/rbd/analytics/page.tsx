@@ -79,7 +79,7 @@ export default function AnalyticsPage() {
                 {/* Title */}
                 <section className="bg-[#f9fdff] p-[0.25in]">
                     <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">
-                        My Events
+                        Welcome, Director.
                     </h1>
                 </section>
 

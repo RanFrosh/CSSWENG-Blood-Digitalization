@@ -28,7 +28,7 @@ export default function HeaderSA() {
     const navLinks = eventId
         ? [
               {
-                  name: "Manage Events",
+                  name: "Event Management",
                   path: "/sa/events",
                   onClick: goMyEvents,
               },
@@ -38,19 +38,19 @@ export default function HeaderSA() {
                   onClick: goEventHome,
               },
               {
-                  name: "Manage Users",
+                  name: "User Management",
                   path: "/sa/users",
                   onClick: goManageUsers,
               },
           ]
         : [
               {
-                  name: "Manage Events",
+                  name: "Event Management",
                   path: "/sa/events",
                   onClick: goMyEvents,
               },
               {
-                  name: "Manage Users",
+                  name: "User Management",
                   path: "/sa/users",
                   onClick: goManageUsers,
               },

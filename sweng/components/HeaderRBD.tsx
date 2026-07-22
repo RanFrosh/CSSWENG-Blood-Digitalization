@@ -40,12 +40,12 @@ export default function HeaderRBD() {
             onClick: goAnalyticsHome,
         },
         {
-            name: "Event Analytics",
+            name: "Event Search",
             path: "/rbd/analytics/events",
             onClick: goEventAnalytics,
         },
         {
-            name: "Donor Analytics",
+            name: "Donor Search",
             path: "/rbd/analytics/donors",
             onClick: goDonorAnalytics,
         },
