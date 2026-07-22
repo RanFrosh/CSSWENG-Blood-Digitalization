@@ -11,9 +11,14 @@ export default function DonorAnalyticsPage() {
     const router = useRouter();
 
     const [activeTab, setActiveTab] = useState("All");
+
+    // Filters
+    const [sexFilter, setSexFilter] = useState("All");
+    const [bloodFilter, setBloodFilter] = useState("All");
     const [sortBy, setSortBy] = useState("Default");
 
-    const [searchInput, setSearchInput] = useState("");
+    // Search
+    const [searchInput, setSearchInput] = useState(""); 
     const [activeSearch, setActiveSearch] = useState("");
 
     const [donors, setDonors] = useState<any[]>([]);
@@ -27,7 +32,7 @@ export default function DonorAnalyticsPage() {
             setErrorMessage("");
 
             try {
-                const result = await fetchFilteredDonors(activeSearch, activeTab, sortBy);
+                const result = await fetchFilteredDonors(activeSearch, bloodFilter, sexFilter, sortBy);
 
                 if (result.success && result.data) {
                     setDonors(result.data);
@@ -43,7 +48,7 @@ export default function DonorAnalyticsPage() {
 
         loadDonors();
 
-    }, [activeTab, activeSearch, sortBy]);
+    }, [activeSearch, bloodFilter, sexFilter, sortBy]);
 
     const viewDonorAnalytics = (donorId: string) => {
         router.push(`/rbd/analytics/donors/${donorId}`);
@@ -80,42 +85,32 @@ export default function DonorAnalyticsPage() {
 
                 {/* Filters Section */}
                 <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
+                    
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                         Donor Directory
                     </h2>
-
-                    {/* Search and Sort */}
+                    
+                    {/* 2. Search, Blood Filter, and Sort (Tinted Container) */}
                     <div className="mt-6 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-end gap-5 flex-wrap">
                         
+                        {/* Search Input with embedded button */}
                         <div className="flex-1 flex flex-col gap-2 min-w-[250px]">
-                            
                             <label className="text-[18px] font-semibold text-[#002940]">
-                                Search by
+                                Search Name or Email
                             </label>
                             
-                            {/* Wrapper */}
                             <div className="flex flex-row items-center w-full h-[54px] bg-white border-2 border-[#c0cad0] rounded-[10px] focus-within:border-[#002940] transition-colors overflow-hidden">
-                                
-                                {/* The Search Button */}
                                 <button
                                     type="button"
                                     onClick={() => setActiveSearch(searchInput)}
                                     className="pl-4 pr-2 h-full flex items-center justify-center text-gray-400 hover:text-[#002940] transition-colors cursor-pointer"
                                     title="Search"
                                 >
-                                    <svg 
-                                        xmlns="http://www.w3.org/2000/svg" 
-                                        fill="none" 
-                                        viewBox="0 0 24 24" 
-                                        strokeWidth={2.5} 
-                                        stroke="currentColor" 
-                                        className="w-6 h-6"
-                                    >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                                     </svg>
                                 </button>
 
-                                {/* Search Input */}
                                 <input
                                     type="text"
                                     value={searchInput}
@@ -123,12 +118,53 @@ export default function DonorAnalyticsPage() {
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') setActiveSearch(searchInput);
                                     }}
-                                    placeholder="Input event name or partner..."
+                                    placeholder="Input donor details..."
                                     className="flex-1 h-full pr-4 text-[18px] outline-none bg-transparent text-[#002940] placeholder-gray-400"
                                 />
                             </div>
                         </div>
 
+                        {/* Blood Type Filter */}
+                        <div className="w-full md:w-[1.5in] flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Blood Type
+                            </label>
+                            
+                            <select 
+                                value={bloodFilter}
+                                onChange={(e) => setBloodFilter(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="All">All Types</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+
+                        {/* Sex Filter */}
+                        <div className="w-full md:w-[1.5in] flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Sex
+                            </label>
+                            
+                            <select 
+                                value={sexFilter}
+                                onChange={(e) => setSexFilter(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="All">All</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+
+                        {/* Sorting */}
                         <div className="w-full md:w-[2in] flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Sort By
@@ -139,10 +175,9 @@ export default function DonorAnalyticsPage() {
                                 onChange={(e) => setSortBy(e.target.value)}
                                 className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
                             >
-                                <option value="Default">Default</option>
-                                <option value="Sex">Sex</option>
-                                <option value="Blood Type">Blood Type</option>
-                                <option value="Location">Location</option>
+                                <option value="Default">Newest First</option>
+                                <option value="Name (A-Z)">Name (A-Z)</option>
+                                <option value="Name (Z-A)">Name (Z-A)</option>
                             </select>
                         </div>
                     </div>

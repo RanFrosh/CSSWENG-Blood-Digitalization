@@ -38,7 +38,7 @@ export class ImpAnalyticsData implements AnalyticsData {
         return dbDonor;
     }
 
-    async getFilteredDonors(search: string, status: string, sortBy: string, limit: number = 50) {
+    async getFilteredDonors(search: string, bloodFilter: string, sexFilter: string, sortBy: string, limit: number = 50) {
 
         const conditions = [];
 
@@ -56,6 +56,11 @@ export class ImpAnalyticsData implements AnalyticsData {
         // Blood Type Filter
         if (bloodFilter && bloodFilter.trim() !== "" && bloodFilter !== "All") {
             conditions.push(eq(donor.blood, bloodFilter as "O+" | "O-" | "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-"));
+        }
+
+        // Sex Filter
+        if (sexFilter && sexFilter.trim() !== "" && sexFilter !== "All") {
+            conditions.push(eq(donor.sex, sexFilter as "Male" | "Female"));
         }
 
         // Sort Logic

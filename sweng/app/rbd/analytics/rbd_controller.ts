@@ -2,6 +2,7 @@ import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { helpGateKeep } from "../../global/helper_bouncer/bouncer";
 import { AnalyticsController, AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { ApiResponse } from "@/types/api_res_type";
+import { blood_type } from "@/db/enums/blood_type";
 
 export class ImpAnalyticsManager implements AnalyticsController {
     
@@ -13,7 +14,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
         this.profileReader = injectProfileReader;
     }
 
-    async invokeGetFilteredDonors(status: string, search: string, sortBy: string) {
+    async invokeGetFilteredDonors(search: string, bloodFilter: string, sexFilter: string, sortBy: string) {
         
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
         
@@ -22,18 +23,19 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
 
         try {
-            const rawDonors = await this.analyticsModel.getFilteredDonors(status, search, sortBy);
+            const rawDonors = await this.analyticsModel.getFilteredDonors(search, bloodFilter, sexFilter, sortBy);
 
             const formattedDonors = rawDonors.map((d: any) => ({
 
                 displayId: `DNR-${String(d.id).padStart(4, '0')}`,
-                rawId: d.id, 
-                fullName: `${d.first_name} ${d.last_name}`,
+                id: d.id, 
+                first_name: d.first_name,
+                last_name: d.last_name,
                 email: d.email,
                 mobile: d.mobile_no,
                 age: d.age,
                 sex: d.sex,
-                bloodType: d.blood || 'Unknown',
+                blood: d.blood || 'Unknown',
                 isVerified: d.verifiedBlood,
                 status: d.active ? 'Active' : 'Inactive',
                 assessmentStatus: d.assessment_status
