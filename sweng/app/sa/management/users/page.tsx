@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import Header from "@/components/HeaderSA";
 
-type UserRole = "Super Admin" | "Medical Professional" | "Onsite Admin" | "Donor";
+type UserRole = "SA" | "RBD" | "RS" | "LS" | "MP" | "OA" | "D";
 type UserStatus = "Active" | "Inactive";
 
 type SystemUser = {
@@ -20,7 +20,7 @@ const initialUsers: SystemUser[] = [
         id: "SA-001",
         name: "Alex Cruz",
         email: "alex.cruz@example.com",
-        role: "Super Admin",
+        role: "SA",
         status: "Active",
         dateJoined: "2026-01-04",
     },
@@ -28,7 +28,7 @@ const initialUsers: SystemUser[] = [
         id: "MP-001",
         name: "Jane Doe",
         email: "jane.doe@example.com",
-        role: "Medical Professional",
+        role: "MP",
         status: "Active",
         dateJoined: "2026-02-12",
     },
@@ -36,7 +36,7 @@ const initialUsers: SystemUser[] = [
         id: "MP-002",
         name: "Jason Doe",
         email: "jason.doe@example.com",
-        role: "Medical Professional",
+        role: "MP",
         status: "Inactive",
         dateJoined: "2026-03-02",
     },
@@ -44,7 +44,7 @@ const initialUsers: SystemUser[] = [
         id: "OA-001",
         name: "Red Cross Chapter",
         email: "redcross.chapter@example.com",
-        role: "Onsite Admin",
+        role: "OA",
         status: "Active",
         dateJoined: "2026-04-18",
     },
@@ -52,14 +52,13 @@ const initialUsers: SystemUser[] = [
         id: "D-005",
         name: "June Doe",
         email: "june.doe@example.com",
-        role: "Donor",
+        role: "D",
         status: "Active",
         dateJoined: "2026-05-30",
     },
 ];
 
-type TabFilter = "All" | UserRole;
-
+type TabFilter = "All" | UserRole
 type SortOption =
     | "Default"
     | "Name: A-Z"
@@ -78,15 +77,18 @@ export default function SAUsersPage() {
     const [userToDelete, setUserToDelete] = useState<SystemUser | null>(null);
 
     const [formEmail, setFormEmail] = useState("");
-    const [formRole, setFormRole] = useState<UserRole>("Donor");
+    const [formRole, setFormRole] = useState<UserRole>("SA");
     const [inviteError, setInviteError] = useState("");
 
     const tabs: TabFilter[] = [
         "All",
-        "Super Admin",
-        "Medical Professional",
-        "Onsite Admin",
-        "Donor",
+        "SA",
+        "RBD",
+        "RS",
+        "LS",
+        "MP",
+        "OA",
+        "D",
     ];
 
     const sortOptions: SortOption[] = [
@@ -132,21 +134,9 @@ export default function SAUsersPage() {
         return 0;
     });
 
-    const getUserPrefix = (role: UserRole) => {
-        if (role === "Super Admin") {
-            return "SA";
-        } else if (role === "Medical Professional") {
-            return "MP";
-        } else if (role === "Onsite Admin") {
-            return "OA";
-        } else {
-            return "D";
-        }
-    };
-
     const openCreateModal = () => {
         setFormEmail("");
-        setFormRole("Medical Professional");
+        setFormRole("SA");
         setInviteError("");
         setIsUserModalOpen(true);
     };
@@ -387,9 +377,12 @@ export default function SAUsersPage() {
                                     onChange={(event) => setFormRole(event.target.value as UserRole)}
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none bg-white cursor-pointer focus:border-[#002940]"
                                 >
-                                    <option value="Super Admin">Super Admin</option>
-                                    <option value="Medical Professional">Medical Professional</option>
-                                    <option value="Onsite Admin">Onsite Admin</option>
+                                    <option value="SA">Super Admin</option>
+                                    <option value="RBD">Red Bank Director</option>
+                                    <option value="RS">Recovery Staff</option>
+                                    <option value="LS">Lab Staff</option>
+                                    <option value="MP">Medical Professional</option>
+                                    <option value="OA">Onsite Admin</option>
                                 </select>
                             </div>
 
