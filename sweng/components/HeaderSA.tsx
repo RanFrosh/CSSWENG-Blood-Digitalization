@@ -1,63 +1,75 @@
 "use client";
 
-import { useRouter, usePathname, useParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+
+type NavLink = {
+    name: string;
+    path: string;
+    onClick: () => void;
+};
 
 export default function HeaderSA() {
     const router = useRouter();
     const pathname = usePathname();
-    const params = useParams();
 
-    const eventId = params?.eventId as string | undefined;
-
-    const goMyEvents = () => {
-        router.push("/sa/events");
+    const goHome = () => {
+        router.push("/sa/management");
     };
 
-    const goEventHome = () => {
-        if (eventId) router.push(`/sa/events/${eventId}`);
+    const goEventMng = () => {
+        router.push(`/sa/management/events`);
     };
 
-    const goManageUsers = () => {
-        router.push("/sa/users");
+    const goUserMng = () => {
+        router.push("/sa/management/users");
+    };
+
+    const goEventLog = () => {
+        router.push(`/sa/management/logs/events`);
+    };
+
+    const goDataLog = () => {
+        router.push(`/sa/management/logs/data`);
     };
 
     const goLogout = () => {
         router.push("/landing");
     };
 
-    const navLinks = eventId
-        ? [
-              {
-                  name: "Event Management",
-                  path: "/sa/events",
-                  onClick: goMyEvents,
-              },
-              {
-                  name: "Event Home",
-                  path: `/sa/events/${eventId}`,
-                  onClick: goEventHome,
-              },
-              {
-                  name: "User Management",
-                  path: "/sa/users",
-                  onClick: goManageUsers,
-              },
-          ]
-        : [
-              {
-                  name: "Event Management",
-                  path: "/sa/events",
-                  onClick: goMyEvents,
-              },
-              {
-                  name: "User Management",
-                  path: "/sa/users",
-                  onClick: goManageUsers,
-              },
-          ];
+    const navLinks: NavLink[] = [
+        {
+            name: "Home",
+            path: "/sa/management",
+            onClick: goHome,
+        },
+        {
+            name: "Event Management",
+            path: "/sa/management/events",
+            onClick: goEventMng,
+        },
+        {
+            name: "User Management",
+            path: "/sa/management/users",
+            onClick: goUserMng,
+        },
+        {
+            name: "Event Logs",
+            path: "/sa/management/logs/events",
+            onClick: goEventLog,
+        },
+        {
+            name: "Database Logs",
+            path: "/sa/management/logs/data",
+            onClick: goDataLog,
+        },
+    ];
 
     const isActiveLink = (path: string) => {
-        return pathname === path;
+        if (path === "/sa/management") {
+            return pathname === path;
+        } else {
+            return pathname.startsWith(path);
+        }
     };
 
     return (
@@ -67,7 +79,7 @@ export default function HeaderSA() {
                     <img
                         className="h-[0.5in] w-auto cursor-pointer pl-[0.25in]"
                         src="/images/redbank_onred.png"
-                        onClick={goMyEvents}
+                        onClick={goHome}
                         alt="RedBank Logo"
                     />
 
@@ -75,8 +87,10 @@ export default function HeaderSA() {
                         {navLinks.map((link) => (
                             <p
                                 key={link.path}
-                                className={`cursor-pointer hover:scale-110 ${
-                                    isActiveLink(link.path) ? "font-bold" : "font-normal"
+                                className={`cursor-pointer hover:text-[#1b4054] ${
+                                    isActiveLink(link.path)
+                                        ? "font-bold"
+                                        : "font-normal"
                                 }`}
                                 onClick={link.onClick}
                             >
@@ -87,7 +101,7 @@ export default function HeaderSA() {
                 </div>
 
                 <button
-                    className="mr-[0.25in] text-[18px] text-white font-[Montserrat] cursor-pointer hover:scale-110 hover:underline"
+                    className="mr-[0.25in] text-[18px] text-white font-[Montserrat] cursor-pointer hover:text-[#1b4054]"
                     onClick={goLogout}
                 >
                     Log Out
