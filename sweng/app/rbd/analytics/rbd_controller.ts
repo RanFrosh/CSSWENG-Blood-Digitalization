@@ -2,7 +2,6 @@ import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { helpGateKeep } from "../../global/helper_bouncer/bouncer";
 import { AnalyticsController, AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { ApiResponse } from "@/types/api_res_type";
-import { blood_type } from "@/db/enums/blood_type";
 
 export class ImpAnalyticsManager implements AnalyticsController {
     
@@ -36,7 +35,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 age: d.age,
                 sex: d.sex,
                 blood: d.blood || 'Unknown',
-                isVerified: d.verifiedBlood,
+                verifiedBlood: d.verifiedBlood,
                 status: d.active ? 'Active' : 'Inactive',
                 assessmentStatus: d.assessment_status
             }));

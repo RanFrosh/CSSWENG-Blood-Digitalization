@@ -175,8 +175,8 @@ export default function DonorAnalyticsPage() {
                                 onChange={(e) => setSortBy(e.target.value)}
                                 className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
                             >
-                                <option value="Default">Name (A-Z)</option>
-                                <option value="Name (Z-A)">Name (Z-A)</option>
+                                <option value="Default">ID (ascending)</option>
+                                <option value="ID (Descending)">ID (descending)</option>
                                 <option value="Age (Youngest)">Age (ascending)</option>
                                 <option value="Age (Oldest">Age (descending)</option>
                             </select>

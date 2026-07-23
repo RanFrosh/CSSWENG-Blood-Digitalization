@@ -15,14 +15,10 @@ export default function DonorCard({ donor, onViewAnalytics }: DonorCardProps) {
         <div className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm">
             {/* Header Area */}
             <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between gap-5 flex-wrap">
-                <div className="flex flex-col">
-                    <span className="text-sm text-gray-300 font-semibold mb-1">
-                        Donor ID: #{safeId}
-                    </span>
-                    <h2 className="text-[24px] font-['Montserrat'] font-bold">
-                        {donor.first_name} {donor.last_name}
-                    </h2>
-                </div>
+                    
+                <h2 className="text-[24px] font-['Montserrat'] font-bold">
+                    Donor ID: #{safeId}
+                </h2>
 
                 <button
                     type="button"
@@ -41,7 +37,12 @@ export default function DonorCard({ donor, onViewAnalytics }: DonorCardProps) {
                     {/* Basic Demographics */}
                     <p>
                         <span className="font-semibold text-[#002940]">Blood Type: </span> 
-                        {donor.blood}
+                        <span className="font-bold text-[#fd5448] text-xl">{donor.blood || "N/A"}</span>
+                        {donor.verifiedBlood && (
+                            <span className="ml-2 text-[11px] bg-green-100 text-green-700 px-2 py-1 rounded-full uppercase font-bold align-middle">
+                                Verified
+                            </span>
+                        )}
                     </p>
                     
                     <p>

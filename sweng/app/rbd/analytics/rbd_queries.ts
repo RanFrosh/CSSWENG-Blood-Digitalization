@@ -73,12 +73,12 @@ export class ImpAnalyticsData implements AnalyticsData {
             case "Age (Oldest)":
                 orderLogic = desc(donor.age);
                 break;
-            case "Name (Z-A)":
-                orderLogic = desc(donor.last_name);
+            case "ID (Descending)":
+                orderLogic = desc(donor.id);
                 break;
-            case "Name (A-Z)":
+            case "ID (Ascending)":
             default:
-                orderLogic = asc(donor.last_name);
+                orderLogic = asc(donor.id);
                 break;
         }
 
