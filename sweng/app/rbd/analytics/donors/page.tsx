@@ -26,6 +26,13 @@ export default function DonorAnalyticsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const totalPages = Math.ceil(donors.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentDonors = donors.slice(startIndex, startIndex + itemsPerPage);
+
     useEffect(() => {
         const loadDonors = async () => {
             setIsLoading(true);
@@ -52,6 +59,16 @@ export default function DonorAnalyticsPage() {
 
     const viewDonorAnalytics = (donorId: string) => {
         router.push(`/rbd/analytics/donors/${donorId}`);
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+        
+        const resultsSection = document.getElementById('results-top');
+
+        if (resultsSection) {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     };
 
     if (isLoading) {
@@ -184,7 +201,7 @@ export default function DonorAnalyticsPage() {
                     </div>
                 </section>
 
-                <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
+                <section id="results-top" className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
 
                     {/* Divider & Result Count */}
                     <div className="mt-8 flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
@@ -198,7 +215,7 @@ export default function DonorAnalyticsPage() {
                     </div>
 
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {donors.map((donor) => (
+                        {currentDonors.map((donor) => (
                             <DonorCard 
                                 key={donor.id?.toString()} 
                                 donor={donor} 
@@ -217,16 +234,22 @@ export default function DonorAnalyticsPage() {
                     <div className="mt-5 flex flex-row items-center justify-between gap-5">
                         <button
                             type="button"
-                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
                         >
                             Previous
                         </button>
 
-                        <p className="text-[18px] text-[#002940]">Page 1</p>
+                        <p className="text-[18px] text-[#002940]">
+                            Page {currentPage} of {totalPages || 1}
+                        </p>
 
                         <button
                             type="button"
-                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage >= totalPages}
+                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
                         >
                             Next
                         </button>

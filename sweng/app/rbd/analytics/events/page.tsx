@@ -31,6 +31,13 @@ export default function SearchEventsPage() {
     // Error display
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const totalPages = Math.ceil(events.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentEvents = events.slice(startIndex, startIndex + itemsPerPage);
+
     useEffect(() => {
         const loadEvents = async () => {
             setIsLoading(true);
@@ -74,6 +81,16 @@ export default function SearchEventsPage() {
         } 
         
         return null;
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+        
+        const resultsSection = document.getElementById('results-top');
+
+        if (resultsSection) {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     };
 
     if (isLoading) {
@@ -195,53 +212,61 @@ export default function SearchEventsPage() {
                     </div>
 
                     {/* Divider & Result Count */}
-                    <div className="mt-8 flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
-                        <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                            Results
-                        </h3>
+                    <section id="results-top" className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
                         
-                        <span className="bg-[#e2e8ec] text-[#002940] px-4 py-1 rounded-full text-[16px] font-semibold">
-                            Showing {events.length} {events.length === 1 ? 'event' : 'events'}
-                        </span>
-                    </div>
+                        <div className="mt-8 flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
+                            
+                            <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                                Results
+                            </h3>
+                            
+                            <span className="bg-[#e2e8ec] text-[#002940] px-4 py-1 rounded-full text-[16px] font-semibold">
+                                Showing {events.length} {events.length === 1 ? 'event' : 'events'}
+                            </span>
+                        </div>
 
-                    {/* Events List */}
-                    <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
-                        {events.map((event) => (
-                            <EventCard 
-                                key={event.id} 
-                                event={event} 
-                                actionButton={createActionButton(event)} 
-                            />
-                        ))}
+                        {/* Events List */}
+                        <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
+                            {currentEvents.map((event) => (
+                                <EventCard 
+                                    key={event.id} 
+                                    event={event} 
+                                    actionButton={createActionButton(event)} 
+                                />
+                            ))}
 
-                        {events.length === 0 && !isLoading && (
-                            <div className="p-10 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#c0cad0] rounded-[16px] bg-[#f9fdff]">
-                                <p className="text-[20px] font-semibold text-[#002940] mb-2">No events found</p>
-                                <p className="text-[16px] text-gray-500">Try adjusting your filters or search term.</p>
-                            </div>
-                        )}
-                    </div>
+                            {events.length === 0 && !isLoading && (
+                                <div className="p-10 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#c0cad0] rounded-[16px] bg-[#f9fdff]">
+                                    <p className="text-[20px] font-semibold text-[#002940] mb-2">No events found</p>
+                                    <p className="text-[16px] text-gray-500">Try adjusting your filters or search term.</p>
+                                </div>
+                            )}
+                        </div>
 
-                    <div className="mt-5 flex flex-row items-center justify-between gap-5">
-                        <button
-                            type="button"
-                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
-                        >
-                            Previous
-                        </button>
+                        <div className="mt-5 flex flex-row items-center justify-between gap-5">
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                            >
+                                Previous
+                            </button>
 
-                        <p className="text-[18px] text-[#002940]">
-                            Page 1
-                        </p>
+                            <p className="text-[18px] text-[#002940]">
+                                Page {currentPage} of {totalPages || 1}
+                            </p>
 
-                        <button
-                            type="button"
-                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
-                        >
-                            Next
-                        </button>
-                    </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage >= totalPages}
+                                className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </section>
                 </section>
             </div>
         </main>
