@@ -121,114 +121,112 @@ export default function DonorAnalyticsDetailsPage() {
                 </section>
 
                 <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                    <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        Analytics Summary
+                    <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940] mb-6">
+                        Donation Metrics
                     </h2>
 
-                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Total Visits:
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+                        {/* Blood Donated */}
+                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-col justify-center">
+                            <p className="text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                                Blood Donated
                             </p>
-
-                            <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor?.totalVisits}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Blood Donated:
-                            </p>
-
-                            <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor?.bloodDonated}
+                            <p className="mt-1 text-[26px] font-['Montserrat'] font-bold text-[#002940]">
+                                {selectedDonor?.bloodDonated || "0 mL"}
                             </p>
                         </div>
 
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Blood Bags Filled:
+                        {/* Blood Bags Filled */}
+                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-col justify-center">
+                            <p className="text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                                Blood Bags Filled
                             </p>
-
-                            <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor?.bloodBagsFilled}
+                            <p className="mt-1 text-[26px] font-['Montserrat'] font-bold text-[#002940]">
+                                {selectedDonor?.bloodBagsFilled || 0}
                             </p>
                         </div>
 
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Successful Donations:
+                        {/* Successful Donations */}
+                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-col justify-center">
+                            <p className="text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                                Successful Donations
                             </p>
+                            <p className="mt-1 text-[26px] font-['Montserrat'] font-bold text-[#002940]">
+                                {selectedDonor?.successfulDonations || 0}
+                            </p>
+                        </div>
 
-                            <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor?.successfulDonations}
+                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-col justify-center">
+                            <p className="text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                                Success Rate
+                            </p>
+                            <p className="mt-1 text-[26px] font-['Montserrat'] font-bold text-[#002940]">
+                                {selectedDonor?.totalVisits > 0 
+                                    ? `${((Number(selectedDonor.successfulDonations) || 0) / Number(selectedDonor.totalVisits) * 100).toFixed(1)}%` 
+                                    : "0.0%"}
                             </p>
                         </div>
                     </div>
                 </section>
 
-                <section className="mt-[0.35in] grid grid-cols-1 xl:grid-cols-2 gap-[0.35in]">
-                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Most Recent Visit
-                        </h2>
+                <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
+                    <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940] mb-6">
+                        Visit History & Metrics
+                    </h2>
 
-                        <div className="mt-[0.25in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="mt-5 text-[18px] font-semibold text-[#002940]">
-                                Event:
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+                        {/* Recent Event */}
+                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-col justify-center">
+                            <p className="text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                                Most Recent Event
                             </p>
+                            <p className="mt-1 text-[20px] font-['Montserrat'] font-bold text-[#002940] truncate">
+                                {selectedDonor?.recentVisitEvent || "N/A"} ({selectedDonor?.recentVisitDate || "N/A"})
+                            </p>
+                        </div>
 
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor?.recentVisitEvent}
+                        {/* Total Visits */}
+                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-col justify-center">
+                            <p className="text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                                Total Visits
                             </p>
-                            
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Date:
+                            <p className="mt-1 text-[22px] font-['Montserrat'] font-bold text-[#002940]">
+                                {selectedDonor?.totalVisits}
                             </p>
+                        </div>
 
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {selectedDonor?.recentVisitDate}
+                        {/* Deferred Visits */}
+                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-col justify-center">
+                            <p className="text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                                Deferred Visits
+                            </p>
+                            <p className="mt-1 text-[26px] font-['Montserrat'] font-bold text-[#002940]">
+                                {selectedDonor?.deferredVisits || 0}
+                            </p>
+                        </div>
+
+                        {/* Eligibility Status */}
+                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-col justify-center">
+                            <p className="text-[14px] font-bold text-gray-500 uppercase tracking-wide">
+                                Next Eligible Date
+                            </p>
+                            <p className={`mt-1 text-[22px] font-['Montserrat'] font-bold ${(!selectedDonor?.nextEligibleDate || new Date(selectedDonor.nextEligibleDate) <= new Date()) ? 'text-emerald-600' : 'text-[#002940]'}`}>
+                                {(!selectedDonor?.nextEligibleDate || new Date(selectedDonor.nextEligibleDate) <= new Date()) 
+                                    ? "Eligible Now" 
+                                    : selectedDonor.nextEligibleDate
+                                }
                             </p>
                         </div>
                     </div>
 
-                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Donor Visit Metrics
-                        </h2>
-
-                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                                <p className="text-[18px] font-semibold text-[#002940]">
-                                    Deferred Visits: 
-                                </p>
-
-                                <p className="mt-2 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                    {selectedDonor?.deferredVisits}
-                                </p>
-                            </div>
-
-                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                                <p className="text-[18px] font-semibold text-[#002940]">
-                                    Next Eligible Donation Date:
-                                </p>
-
-                                <p className="mt-2 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                    {(!selectedDonor?.nextEligibleDate || new Date(selectedDonor.nextEligibleDate) <= new Date()) 
-                                        ? "Eligible Now" 
-                                        : selectedDonor.nextEligibleDate
-                                    }
-                                </p>
-                            </div>
-                        </div>
-
+                    {/* Footer */}
+                    <div className="mt-8 border-t-2 border-dashed border-[#c0cad0] pt-6">
                         <button
                             type="button"
                             onClick={goBack}
-                            className="mt-[0.35in] bg-white text-[#002940] border-2 border-[#002940] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:bg-[#fd5448] hover:border-[#fd5448] hover:text-white transition"
+                            className="bg-white text-[#002940] border-2 border-[#002940] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:bg-[#fd5448] hover:border-[#fd5448] hover:text-white transition flex items-center gap-2 w-fit"
                         >
-                            Back to Donor List
+                            <span>←</span> Back to Donor List
                         </button>
                     </div>
                 </section>

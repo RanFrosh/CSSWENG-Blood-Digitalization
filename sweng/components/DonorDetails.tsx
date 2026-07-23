@@ -46,16 +46,16 @@ export default function DonorDetails({ donor }: { donor: DonorDetails }) {
     if (!donor) 
         return null;
 
-    const rawStatus = donor.assessment_status || "default";
     const eligibility = getEligibility(donor)
 
     return (
+
         <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-            {/* Top Row: Name and Badges */}
+
             <div className="flex flex-row items-center justify-between gap-5 flex-wrap border-b-2 border-gray-100 pb-4">
                 <div>
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        {donor.name}
+                        Donor Details
                     </h2>
                 </div>
 
@@ -68,7 +68,7 @@ export default function DonorDetails({ donor }: { donor: DonorDetails }) {
             </div>
 
             {/* Bottom Row: Expanded Demographics */}
-            <div className="mt-[0.25in] grid grid-cols-2 md:grid-cols-4 gap-x-[0.5in] gap-y-[0.25in] text-[18px]">
+            <div className="mt-[0.25in] grid grid-cols-3 md:grid-cols-3 gap-x-[0.5in] gap-y-[0.25in] text-[18px]">
                 <p>
                     <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Blood Type:</span> 
                     <span className="font-bold text-[#fd5448] text-xl">{donor.bloodType || "N/A"}</span>
@@ -80,18 +80,13 @@ export default function DonorDetails({ donor }: { donor: DonorDetails }) {
                 </p>
 
                 <p>
+                    <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Age:</span> 
+                    <span className="font-semibold text-[#002940]">{donor.age || "N/A"}</span>
+                </p>
+                
+                <p>
                     <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Sex:</span> 
                     <span className="font-semibold text-[#002940]">{donor.sex || "N/A"}</span>
-                </p>
-
-                <p>
-                    <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Location:</span> 
-                    <span className="font-semibold text-[#002940]">{donor.location || "N/A"}</span>
-                </p>
-
-                <p>
-                    <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Email:</span> 
-                    <span className="font-semibold text-[#002940] break-words">{donor.email || "N/A"}</span>
                 </p>
 
                 <p>
@@ -100,11 +95,6 @@ export default function DonorDetails({ donor }: { donor: DonorDetails }) {
                     <span className={`font-semibold ${eligibility.color}`}>
                         {eligibility.label}
                     </span>
-                </p>
-
-                <p>
-                    <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Age:</span> 
-                    <span className="font-semibold text-[#002940]">{donor.age || "N/A"}</span>
                 </p>
 
                 <p>
