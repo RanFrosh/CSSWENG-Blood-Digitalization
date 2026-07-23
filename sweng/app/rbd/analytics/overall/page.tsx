@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Header from "@/components/HeaderRBD";
 import { fetchOverallAnalytics } from "../rbd_action";
+import { fetchFilteredCampaigns } from "../rbd_action";
 
 type BloodTypeData = {
     bloodType: string;
@@ -39,6 +40,13 @@ export default function OverallAnalyticsPage() {
     const [analytics, setAnalytics] = useState<OverallAnalytics | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    const [campaigns, setCampaigns] = useState(analytics?.campaignEvents);
+    const [isFiltering, setIsFiltering] = useState(false);
+
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+    const [partner, setPartner] = useState("All Partners");
+
     const colorMap: Record<string, string> = {
         "O+": "#fd5448",
         "A+": "#ff7669",
@@ -51,11 +59,6 @@ export default function OverallAnalyticsPage() {
         "Rh-null": "#EAB308",
         'Rh-null (or "Golden Blood")': "#EAB308"
     };
-
-    const maxVal = Math.max(
-        ...(analytics?.campaignEvents || []).map(e => Math.max(e.extractionGoal, e.totalBagsProduced)),
-        1
-    );
 
     useEffect(() => {
         const loadDashboard = async () => {
@@ -106,6 +109,43 @@ export default function OverallAnalyticsPage() {
         loadDashboard();
     }, []);
 
+    useEffect(() => {
+
+        if (isLoading) 
+            return;
+
+        const applyFilters = async () => {
+            setIsFiltering(true);
+            
+            const res = await fetchFilteredCampaigns({
+                startDate: startDate || undefined,
+                endDate: endDate || undefined,
+                partner: partner
+            });
+
+            if (res.success && res.data) {
+                setAnalytics(prev => {
+                    
+                    if (!prev) 
+                        return prev; 
+                    
+                    return {
+                        ...prev,
+                        campaignEvents: res.data
+                    };
+                });
+            } else {
+                console.error("Filter failed:", res.message);
+            }
+            
+            setIsFiltering(false);
+        };
+
+        applyFilters();
+    }, [startDate, endDate, partner, isLoading]);
+
+    const uniquePartners = Array.from(new Set(analytics?.campaignEvents.map(event => event.partner)));
+
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
@@ -131,23 +171,36 @@ export default function OverallAnalyticsPage() {
                             <label className="text-[18px] font-semibold text-[#002940]">Start Date</label>
                             <input
                                 type="date"
+                                value={startDate || ""}
+                                onChange={(e) => setStartDate(e.target.value)}
                                 className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
                             />
                         </div>
 
+                        {/* End Date */}
                         <div className="flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">End Date</label>
                             <input
                                 type="date"
+                                value={endDate || ""}
+                                onChange={(e) => setEndDate(e.target.value)}
                                 className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
                             />
                         </div>
 
                         <div className="flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">Partner</label>
-                            <select className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white">
-                                <option>All Partners</option>
-                                <option>Manila Doctors Hospital</option>
+                            <select 
+                                value={partner || "All Partners"}
+                                onChange={(e) => setPartner(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                            >
+                                <option value="All Partners">All Partners</option>
+                                {uniquePartners.map((partnerName) => (
+                                    <option key={partnerName} value={partnerName}>
+                                        {partnerName}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -341,8 +394,14 @@ export default function OverallAnalyticsPage() {
 
                             <div className="mt-8 flex flex-col gap-6">
                                 {analytics.campaignEvents.map((event) => {
-                                    const actualWidth = (event.totalBagsProduced / maxVal) * 100;
-                                    const goalWidth = (event.extractionGoal / maxVal) * 100;
+                                    // Calculate the raw percentage
+                                    const rawPercent = (event.totalBagsProduced / event.extractionGoal) * 100;
+                                    
+                                    // Cap the width at 100% 
+                                    const safeWidth = Math.min(rawPercent, 100);
+                                    
+                                    // Determine if the event overperformed
+                                    const hitTarget = rawPercent >= 100;
 
                                     return (
                                         <div key={`chart-${event.id}`} className="grid grid-cols-1 lg:grid-cols-4 items-center gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
@@ -355,28 +414,22 @@ export default function OverallAnalyticsPage() {
                                                 </p>
                                             </div>
 
-                                            <div className="lg:col-span-3 flex flex-col gap-2 relative w-full">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex-1 bg-gray-100 h-6 rounded-md overflow-hidden">
-                                                        <div 
-                                                            className="h-full bg-[#002940] rounded-md transition-all duration-500 ease-out"
-                                                            style={{ width: `${actualWidth}%` }}
-                                                        />
+                                            <div className="lg:col-span-3 flex items-center gap-4 w-full">
+                                                {/* Percentage Bar */}
+                                                <div className="flex-1 relative h-7 bg-[#e2e8ec] rounded-md overflow-hidden shadow-inner">
+                                                    
+                                                    <div 
+                                                        // Shifts to green if they hit/exceed target, stays coral otherwise
+                                                        className={`absolute top-0 left-0 h-full rounded-md transition-all duration-500 ease-out ${hitTarget ? 'bg-[#4ade80]' : 'bg-[#fd5448]'}`}
+                                                        style={{ width: `${safeWidth}%` }}
+                                                    >
+                                                        <div className="absolute top-0 left-0 w-full h-full bg-white/10" />
                                                     </div>
-                                                    <span className="w-20 text-[15px] font-bold text-[#002940] text-right shrink-0">
-                                                        {event.totalBagsProduced} Bags
-                                                    </span>
                                                 </div>
-
-                                                <div className="flex items-center gap-3">
-                                                    <div className="flex-1 bg-gray-50 h-4 rounded-md overflow-hidden border border-dashed border-[#c0cad0]">
-                                                        <div 
-                                                            className="h-full bg-[#fd5448]/20 rounded-md border-r-2 border-[#fd5448] transition-all duration-500 ease-out"
-                                                            style={{ width: `${goalWidth}%` }}
-                                                        />
-                                                    </div>
-                                                    <span className="w-20 text-[13px] font-semibold text-gray-400 text-right shrink-0">
-                                                        Target: {event.extractionGoal}
+                                                
+                                                <div className="w-[100px] flex flex-col text-right shrink-0">
+                                                    <span className={`text-[16px] font-bold ${hitTarget ? 'text-[#4ade80]' : 'text-[#002940]'}`}>
+                                                        {event.totalBagsProduced} / {event.extractionGoal}
                                                     </span>
                                                 </div>
                                             </div>

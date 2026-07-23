@@ -273,4 +273,32 @@ export class ImpAnalyticsManager implements AnalyticsController {
             return { success: false, message: "Failed to load dashboard statistics" };
         }
     }
+
+    async invokeGetFilteredCampaigns(filters: { startDate?: string; endDate?: string; partner?: string }) {
+
+        const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
+        
+        if (!authRes.success) 
+            return { success: false, message: authRes.message };
+
+        try {
+
+            const rawCampaigns = await this.analyticsModel.getFilteredCampaigns(filters);
+
+            const formattedCampaigns = rawCampaigns.map((c: any) => ({
+                id: String(c.id),
+                name: c.name,
+                partner: c.partner,
+                date: c.event_date,
+                extractionGoal: Number(c.target_blood || 0),
+                totalBagsProduced: Number(c.produced_bags || 0)
+            }));
+
+            return { success: true, data: formattedCampaigns };
+
+        } catch (error: any) {
+            console.error("Campaign Filter Error:", error);
+            return { success: false, message: "Failed to filter campaign events" };
+        }
+    }
 }

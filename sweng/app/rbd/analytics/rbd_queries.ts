@@ -1,6 +1,6 @@
 import { orm } from "../../../db/drizzle";
 import { donor } from "../../../db/models/donor";
-import { eq, sql, or, and, ilike, ne, sum, count, asc, desc } from "drizzle-orm";
+import { eq, sql, or, and, ilike, lte, gte, ne, sum, count, asc, desc } from "drizzle-orm";
 import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { event_log } from "@/db/models/event_log";
 import { donor_to_event } from "@/db/models/donor_to_event";
@@ -288,5 +288,27 @@ export class ImpAnalyticsData implements AnalyticsData {
             metrics: eventMetricsRes[0],
             campaigns: recentCampaignsRes
         };
+    }
+
+    async getFilteredCampaigns(filters: { startDate?: string; endDate?: string; partner?: string }) {
+
+        const { startDate, endDate, partner } = filters;
+        const conditions = [];
+
+        if (startDate) {
+            conditions.push(gte(event_log.event_date, startDate));
+        }
+        if (endDate) {
+            conditions.push(lte(event_log.event_date, endDate));
+        }
+
+        if (partner && partner !== "All Partners") {
+            conditions.push(eq(event_log.partner, partner));
+        }
+
+        return await orm.select()
+            .from(event_log)
+            .where(conditions.length > 0 ? and(...conditions) : undefined)
+            .orderBy(desc(event_log.event_date));
     }
 }

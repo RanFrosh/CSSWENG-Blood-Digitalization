@@ -97,3 +97,15 @@ export async function fetchOverallAnalytics() {
 
     return await analyticsController.invokeGetOverallAnalytics();
 }
+
+export async function fetchFilteredCampaigns(filters: { startDate?: string; endDate?: string; partner?: string }) {
+
+    const dataLayer = new ImpAnalyticsData();
+
+    const supabaseClient = await serverSupa();
+    const authProvider = new ImpProfileGetter(supabaseClient)
+
+    const analyticsController = new ImpAnalyticsManager(dataLayer, authProvider);
+
+    return await analyticsController.invokeGetFilteredCampaigns(filters);
+}
