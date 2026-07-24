@@ -209,7 +209,12 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
     }
 
-    async invokeGetOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string } = {}) {
+    async invokeGetOverallAnalytics(filters: { 
+        startDate?: string; 
+        endDate?: string; 
+        partner?: string;
+        sortBy?: string;     
+    } = {}) {
     
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
 
@@ -290,7 +295,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 femalePct: femalePercent,
                 activeEngagementRate: 85, // Dynamic placeholder
                 bloodTypes: parsedBloodTypes,
-                campaignEvents: formattedCampaigns
+                campaignEvents: formattedCampaigns,
             };
 
             return { success: true, data: payload };

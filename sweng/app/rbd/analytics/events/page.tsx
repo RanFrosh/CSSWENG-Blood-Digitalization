@@ -21,7 +21,6 @@ export default function SearchEventsPage() {
     const [searchInput, setSearchInput] = useState("");
     const [activeSearch, setActiveSearch] = useState("");
     
-    
     // State for holding events from the backend
     const [events, setEvents] = useState<ViewEvents[]>([]);
 
@@ -176,7 +175,7 @@ export default function SearchEventsPage() {
                         {/* Status Filter */}
                         <div className="w-full md:w-[1.5in] flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">
-                                Satus
+                                Status
                             </label>
                             
                             <select 

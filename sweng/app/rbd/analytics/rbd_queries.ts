@@ -261,9 +261,14 @@ export class ImpAnalyticsData implements AnalyticsData {
         return await query.groupBy(donor.blood);
     }
 
-    async getOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string } = {}) {
+    async getOverallAnalytics(filters: { 
+        startDate?: string; 
+        endDate?: string; 
+        partner?: string;
+        sortBy?: string;     
+    } = {}) {
         
-        const { startDate, endDate, partner } = filters;
+        const { startDate, endDate, partner, sortBy = "recent"} = filters;
         const conditions = [];
 
         if (startDate) 
@@ -277,51 +282,63 @@ export class ImpAnalyticsData implements AnalyticsData {
 
         const eventWhereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-        const [
-            totalDonors,
-            bloodTypesRes,
-            genderRes,
-            eventMetricsRes,
-            campaignsRes
-        ] = await Promise.all([
+        let orderByClause;
+        switch (sortBy) {
+            case "highest_yield":
+                orderByClause = desc(event_log.produced_bags);
+                break;
+            case "lowest_yield":
+                orderByClause = asc(event_log.produced_bags);
+                break;
+            case "highest_goal":
+                orderByClause = desc(event_log.target_blood);
+                break;
+            case "oldest":
+                orderByClause = asc(event_log.event_date);
+                break;
+            case "recent":
+            default:
+                orderByClause = desc(event_log.event_date);
+                break;
+        }
 
-            this.countActiveDonors(eventWhereClause),
-            this.getDonorBloodTypeBreakdown(eventWhereClause),
-        
-            // Gender Distribution
-            (async () => {
-                const q = orm.select({ sex: donor.sex, count: sql<number>`count(distinct ${donor.id})` }).from(donor);
-                if (eventWhereClause) {
-                    q.innerJoin(donor_to_event, eq(donor.id, donor_to_event.donor_id))
-                     .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
-                     .where(eventWhereClause);
-                }
-                return await q.groupBy(donor.sex);
-            })(),
-            
-            // Global Event Metrics
-            orm.select({
-                totalBags: sql<number>`sum(${event_log.produced_bags})`,
-                totalTarget: sql<number>`sum(${event_log.target_blood})`,
-                totalExtractions: sql<number>`sum(${event_log.extractions})`, 
-            })
-            .from(event_log)
-            .where(eventWhereClause),
+        const totalDonors = await this.countActiveDonors(eventWhereClause);
+        const bloodTypesRes = await this.getDonorBloodTypeBreakdown(eventWhereClause);
 
-            // Campaign Performance
-            orm.select()
-               .from(event_log)
-               .where(eventWhereClause)
-               .orderBy(desc(event_log.event_date))
-        ]);
+        const genderRes = await (async () => {
+            const q = orm.select({ sex: donor.sex, count: sql<number>`count(distinct ${donor.id})` }).from(donor);
+            if (eventWhereClause) {
+                q.innerJoin(donor_to_event, eq(donor.id, donor_to_event.donor_id))
+                .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+                .where(eventWhereClause);
+            }
+            return await q.groupBy(donor.sex);
+        })();
+
+        const eventMetricsRes = await orm.select({
+            totalBags: sql<number>`sum(${event_log.produced_bags})`,
+            totalTarget: sql<number>`sum(${event_log.target_blood})`,
+            totalExtractions: sql<number>`sum(${event_log.extractions})`, 
+        })
+        .from(event_log)
+        .where(eventWhereClause);
+
+        const campaignsRes = await orm.select()
+        .from(event_log)
+        .where(eventWhereClause)
+        .orderBy(orderByClause);
+
+        const totalCampaignsRes = await orm.select({ count: sql<number>`count(*)` })
+        .from(event_log)
+        .where(eventWhereClause);
 
         return {
             totalDonors,
             bloodTypes: bloodTypesRes,
             genders: genderRes,
             metrics: eventMetricsRes[0],
-            campaigns: campaignsRes
+            campaigns: campaignsRes,
+            totalCampaigns: Number(totalCampaignsRes[0]?.count || 0)
         };
     }
-
 }

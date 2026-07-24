@@ -10,7 +10,12 @@ export interface AnalyticsData {
     getEventAnalyticsData(eventIdStr: string): Promise<any>;
     countActiveDonors(eventWhereClause: any): Promise<number>;
     getDonorBloodTypeBreakdown(eventWhereClause: any): Promise<any[]>;
-    getOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string }): Promise<any>;
+    getOverallAnalytics(filters: { 
+        startDate?: string; 
+        endDate?: string; 
+        partner?: string;
+        sortBy?: string;     
+    }): Promise<any>;
 }
 
 export interface AnalyticsController {
@@ -18,5 +23,10 @@ export interface AnalyticsController {
     invokeGetDonorAnalytics(donorIdStr: string): Promise<ApiResponse<any>>;
     invokeGetFilteredEvents(search: string, status: string, sortBy: string): Promise<ApiResponse<any>>;
     invokeGetEventAnalytics(eventIdStr: string): Promise<ApiResponse<any>>;
-    invokeGetOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string }): Promise<any>;
+    invokeGetOverallAnalytics(filters: { 
+        startDate?: string; 
+        endDate?: string; 
+        partner?: string;
+        sortBy?: string;     
+    }): Promise<any>;
 }

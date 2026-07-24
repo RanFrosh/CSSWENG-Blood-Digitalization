@@ -53,7 +53,12 @@ export async function fetchEventAnalytics(eventIdStr: string) {
     return await eventController.invokeGetEventAnalytics(eventIdStr);
 }
 
-export async function fetchOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string } = {}) {
+export async function fetchOverallAnalytics(filters: { 
+        startDate?: string; 
+        endDate?: string; 
+        partner?: string;
+        sortBy?: string;
+    } = {}) {
 
     const dataLayer = new ImpAnalyticsData();
 
