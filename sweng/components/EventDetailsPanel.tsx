@@ -32,7 +32,7 @@ export const EventDetailsPanel = ({ event }: EventDetailsPanelProps) => {
 
                 <p>
                     <span className="font-semibold text-[#002940]">Date: </span>{" "}
-                    {event.event_date}
+                    {event.event_date.split('-').reverse().join('/')}
                 </p>
 
                 <p>

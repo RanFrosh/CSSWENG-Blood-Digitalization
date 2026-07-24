@@ -181,7 +181,7 @@ export default function DonorAnalyticsDetailsPage() {
                                 Most Recent Event
                             </p>
                             <p className="mt-1 text-[20px] font-['Montserrat'] font-bold text-[#002940] truncate">
-                                {selectedDonor?.recentVisitEvent || "N/A"} ({selectedDonor?.recentVisitDate || "N/A"})
+                                {selectedDonor?.recentVisitEvent || "N/A"} ({selectedDonor?.recentVisitDate.split('-').reverse().join('/') || "N/A"})
                             </p>
                         </div>
 
@@ -213,7 +213,7 @@ export default function DonorAnalyticsDetailsPage() {
                             <p className={`mt-1 text-[22px] font-['Montserrat'] font-bold ${(!selectedDonor?.nextEligibleDate || new Date(selectedDonor.nextEligibleDate) <= new Date()) ? 'text-emerald-600' : 'text-[#002940]'}`}>
                                 {(!selectedDonor?.nextEligibleDate || new Date(selectedDonor.nextEligibleDate) <= new Date()) 
                                     ? "Eligible Now" 
-                                    : selectedDonor.nextEligibleDate
+                                    : selectedDonor.nextEligibleDate.split('-').reverse().join('/')
                                 }
                             </p>
                         </div>

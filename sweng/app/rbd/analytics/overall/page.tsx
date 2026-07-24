@@ -395,7 +395,7 @@ export default function OverallAnalyticsPage() {
                                                 {event.name}
                                             </p>
                                             <p className="text-[14px] text-gray-400 font-medium">
-                                                {event.date} • {event.partner}
+                                                {event.date.split('-').reverse().join('/')} • {event.partner}
                                             </p>
                                         </div>
 
