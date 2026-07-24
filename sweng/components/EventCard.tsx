@@ -43,7 +43,7 @@ export const EventCard = ({ event, actionButton }: EventCardProps) => {
 
                     <p>
                         <span className="font-semibold text-[#002940]">Time: </span>{" "}
-                        {event.start_time && event.end_time ? `${event.start_time} - ${event.end_time}` : "—"}
+                        {event.start_time && event.end_time ? `${event.start_time.slice(0, 5)} - ${event.end_time.slice(0, 5)}` : "—"}
                     </p>
 
                 </div>
