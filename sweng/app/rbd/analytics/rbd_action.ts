@@ -7,39 +7,6 @@ import { ImpAnalyticsData } from "./rbd_queries";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
 
-export async function checkAuthentication(data?: ViewEventFilters) {
-    
-    return authenticate('access_rbd_page', async (userId) => {
-        
-        
-        /* const model = new ImpLabModel(orm);
-        const controller = new ImpLabController(model);
-        return controller.getQueue(userId); */
-
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        // Hardcoded
-        return {
-            success: true,
-            message: "Mock OA data loaded successfully",
-            data: [
-                { 
-                    id: 1, 
-                    eventName: "Campus Blood Drive", 
-                    status: "Ongoing", 
-                    donorsWaiting: 12 
-                },
-                { 
-                    id: 2, 
-                    eventName: "Community Center Drive", 
-                    status: "Upcoming", 
-                    donorsWaiting: 0 
-                }
-            ]
-        };
-    })
-}
-
 export async function fetchDonorAnalytics(donorIdStr: string) {
     
     const dataLayer = new ImpAnalyticsData();
@@ -86,7 +53,7 @@ export async function fetchEventAnalytics(eventIdStr: string) {
     return await eventController.invokeGetEventAnalytics(eventIdStr);
 }
 
-export async function fetchOverallAnalytics() {
+export async function fetchOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string } = {}) {
 
     const dataLayer = new ImpAnalyticsData();
 
@@ -95,17 +62,38 @@ export async function fetchOverallAnalytics() {
 
     const analyticsController = new ImpAnalyticsManager(dataLayer, authProvider);
 
-    return await analyticsController.invokeGetOverallAnalytics();
+    return await analyticsController.invokeGetOverallAnalytics(filters);
 }
 
-export async function fetchFilteredCampaigns(filters: { startDate?: string; endDate?: string; partner?: string }) {
+export async function checkAuthentication(data?: ViewEventFilters) {
+    
+    return authenticate('access_rbd_page', async (userId) => {
+        
+        
+        /* const model = new ImpLabModel(orm);
+        const controller = new ImpLabController(model);
+        return controller.getQueue(userId); */
 
-    const dataLayer = new ImpAnalyticsData();
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-    const supabaseClient = await serverSupa();
-    const authProvider = new ImpProfileGetter(supabaseClient)
-
-    const analyticsController = new ImpAnalyticsManager(dataLayer, authProvider);
-
-    return await analyticsController.invokeGetFilteredCampaigns(filters);
+        // Hardcoded
+        return {
+            success: true,
+            message: "Mock OA data loaded successfully",
+            data: [
+                { 
+                    id: 1, 
+                    eventName: "Campus Blood Drive", 
+                    status: "Ongoing", 
+                    donorsWaiting: 12 
+                },
+                { 
+                    id: 2, 
+                    eventName: "Community Center Drive", 
+                    status: "Upcoming", 
+                    donorsWaiting: 0 
+                }
+            ]
+        };
+    })
 }

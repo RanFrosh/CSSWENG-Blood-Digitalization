@@ -39,6 +39,7 @@ export default function OverallAnalyticsPage() {
     
     const [analytics, setAnalytics] = useState<OverallAnalytics | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const [campaigns, setCampaigns] = useState(analytics?.campaignEvents);
     const [isFiltering, setIsFiltering] = useState(false);
@@ -61,90 +62,70 @@ export default function OverallAnalyticsPage() {
     };
 
     useEffect(() => {
-        const loadDashboard = async () => {
-            const result = await fetchOverallAnalytics();
+        const loadAnalyticsData = async () => {
+
+            const isFirstLoad = !analytics;
             
-            if (result.success && result.data) {
-
-                
-                const db = result.data;
-                
-                const baseTotalBags = db.extractionGoals?.currentCollected || 0;
-                const totalDonorsCount = db.totalActiveDonors || 0;
-                
-                const fetchedMalePct = db.genderDemographics?.malePercent ?? 60;
-                const fetchedFemalePct = db.genderDemographics?.femalePercent ?? 40;
-                const dynamicEngagement = db.engagementMetrics?.activeRate ?? 100;
-
-                const rawBloodTypes = db.donorDemographics || [];
-                const parsedBloodTypes = rawBloodTypes.map((demo: any) => {
-                    const countVal = Number(demo.count) || 0;
-                    const pctVal = totalDonorsCount > 0 ? (countVal / totalDonorsCount) * 100 : 0;
-                    const typeStr = demo.blood_type || "O+";
-                    return {
-                        bloodType: typeStr,
-                        count: countVal,
-                        pct: pctVal,
-                        color: colorMap[typeStr] || "#fd5448"
-                    };
-                });
-
-                setAnalytics({
-                    totalDonors: totalDonorsCount,
-                    bloodDonated: `${(baseTotalBags * 450).toLocaleString()} mL`, 
-                    totalBagsProduced: baseTotalBags,
-                    extractionSuccessRate: `${db.extractionMetrics?.successRatePercent ?? 95.4}%`, // Mapped to phlebotomy extraction outcome
-                    extractionGoal: db.extractionGoals?.targetGoal ?? 500,
-                    extractionProgress: db.extractionGoals?.progressPercent ?? 62.4,
-                    malePct: fetchedMalePct,
-                    femalePct: fetchedFemalePct,
-                    activeEngagementRate: dynamicEngagement,
-                    bloodTypes: parsedBloodTypes,
-                    campaignEvents: db.campaignEvents || []
-                });
-            }
-            setIsLoading(false);
-        };
-        
-        loadDashboard();
-    }, []);
-
-    useEffect(() => {
-
-        if (isLoading) 
-            return;
-
-        const applyFilters = async () => {
-            setIsFiltering(true);
-            
-            const res = await fetchFilteredCampaigns({
-                startDate: startDate || undefined,
-                endDate: endDate || undefined,
-                partner: partner
-            });
-
-            if (res.success && res.data) {
-                setAnalytics(prev => {
-                    
-                    if (!prev) 
-                        return prev; 
-                    
-                    return {
-                        ...prev,
-                        campaignEvents: res.data
-                    };
-                });
+            if (isFirstLoad) {
+                setIsLoading(true);
             } else {
-                console.error("Filter failed:", res.message);
+                setIsFiltering(true);
             }
             
-            setIsFiltering(false);
+            setErrorMessage("");
+
+            try {
+                const result = await fetchOverallAnalytics({
+                    startDate: startDate || undefined,
+                    endDate: endDate || undefined,
+                    partner: partner !== "All Partners" ? partner : undefined
+                });
+
+                if (result.success && result.data) {
+                    setAnalytics(result.data); 
+                } else {
+                    setErrorMessage(result.message || "Failed to load analytics.");
+                }
+            } catch (error) {
+                console.error("Dashboard Fetch Error:", error);
+                setErrorMessage("Failed to connect to the database");
+            } finally {
+                setIsLoading(false);
+                setIsFiltering(false);
+            }
         };
 
-        applyFilters();
-    }, [startDate, endDate, partner, isLoading]);
+        loadAnalyticsData();
+
+    }, [startDate, endDate, partner]);
 
     const uniquePartners = Array.from(new Set(analytics?.campaignEvents.map(event => event.partner)));
+
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="mt-[0.35in] h-[400px] flex items-center justify-center text-[#002940] text-xl font-semibold animate-pulse">
+                    Fetching analytics...
+                </div>
+            </main>
+        );
+    }
+
+    if (isFiltering) {
+
+    }
+
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -160,313 +141,307 @@ export default function OverallAnalyticsPage() {
                     </h1>
                 </section>
 
-                {/* Filters Section */}
-                <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
-                    <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        Filters
-                    </h2>
+                <div className={`transition-opacity duration-300 ease-in-out ${
+                    isFiltering ? 'opacity-50 pointer-events-none' : 'opacity-100'
+                }`}>
 
-                    <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[18px] font-semibold text-[#002940]">Start Date</label>
-                            <input
-                                type="date"
-                                value={startDate || ""}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
-                            />
-                        </div>
+                    {/* Filters Section */}
+                    <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
+                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
+                            Filters
+                        </h2>
 
-                        {/* End Date */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[18px] font-semibold text-[#002940]">End Date</label>
-                            <input
-                                type="date"
-                                value={endDate || ""}
-                                onChange={(e) => setEndDate(e.target.value)}
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
-                            />
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[18px] font-semibold text-[#002940]">Partner</label>
-                            <select 
-                                value={partner || "All Partners"}
-                                onChange={(e) => setPartner(e.target.value)}
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
-                            >
-                                <option value="All Partners">All Partners</option>
-                                {uniquePartners.map((partnerName) => (
-                                    <option key={partnerName} value={partnerName}>
-                                        {partnerName}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="flex flex-col gap-2">
-                            <label className="text-[18px] font-semibold text-[#002940]">Location</label>
-                            <select className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white">
-                                <option>All Locations</option>
-                                <option>DLSU</option>
-                            </select>
-                        </div>
-                    </div>
-                </section>
-
-                {isLoading ? (
-                     <div className="mt-[0.35in] h-[400px] flex items-center justify-center text-[#002940] text-xl font-semibold animate-pulse">
-                            Fetching analytics...
-                     </div>
-                ) : !analytics ? (
-                     <div className="mt-[0.35in] h-[400px] flex items-center justify-center text-red-500 text-xl font-semibold">
-                            Failed to load aggregated base statistics.
-                     </div>
-                ) : (
-                    <>
-                        {/* Core Global Metrics Panel Layout */}
-                        <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                            <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                Overall Donor Base Insights
-                            </h2>
-
-                            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
-                                <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
-                                    <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Total Registered Donors</p>
-                                    <p className="mt-2 text-[42px] font-['Montserrat'] font-bold text-[#002940] leading-none">
-                                        {analytics.totalDonors}
-                                    </p>
-                                </div>
-                                <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
-                                    <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Active Engagement Rate</p>
-                                    <p className="mt-2 text-[42px] font-['Montserrat'] font-bold text-[#002940] leading-none">
-                                        {analytics.activeEngagementRate.toFixed(0)}%
-                                    </p>
-                                </div>
-                                <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
-                                    <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Blood Volume Collected</p>
-                                    <p className="mt-2 text-[32px] font-['Montserrat'] font-bold text-[#002940] leading-none py-1.5">
-                                        {analytics.bloodDonated}
-                                    </p>
-                                </div>
-                                <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
-                                    <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Extraction Success Rate</p>
-                                    <p className="mt-2 text-[42px] font-['Montserrat'] font-bold text-[#002940] leading-none">
-                                        {analytics.extractionSuccessRate}
-                                    </p>
-                                </div>
+                        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[18px] font-semibold text-[#002940]">Start Date</label>
+                                <input
+                                    type="date"
+                                    value={startDate || ""}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
+                                />
                             </div>
 
-                            {/* Gender Ratios Balance Slider Track */}
-                            <div className="mt-8">
-                                <div className="flex flex-row justify-between text-[13px] font-bold text-[#002940] mb-2 font-['Montserrat']">
-                                    <span>Male Base Ratio ({analytics.malePct.toFixed(0)}%)</span>
-                                    <span>Female Base Ratio ({analytics.femalePct.toFixed(0)}%)</span>
-                                </div>
-                                <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
-                                    <div 
-                                        style={{ width: `${analytics.malePct}%` }} 
-                                        className="bg-[#002940] h-full transition-all duration-500 ease-out"
-                                    />
-                                    <div 
-                                        style={{ width: `${analytics.femalePct}%` }} 
-                                        className="bg-[#fd5448] h-full transition-all duration-500 ease-out"
-                                    />
-                                </div>
+                            {/* End Date */}
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[18px] font-semibold text-[#002940]">End Date</label>
+                                <input
+                                    type="date"
+                                    value={endDate || ""}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
+                                />
                             </div>
 
-                            <hr className="my-8 border-t border-[#c0cad0]" />
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[18px] font-semibold text-[#002940]">Partner</label>
+                                <select 
+                                    value={partner || "All Partners"}
+                                    onChange={(e) => setPartner(e.target.value)}
+                                    className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                                >
+                                    <option value="All Partners">All Partners</option>
+                                    {uniquePartners.map((partnerName) => (
+                                        <option key={partnerName} value={partnerName}>
+                                            {partnerName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                            {/* ABO+Rh Systemic Distribution Breakdown */}
-                            <div>
-                                <h3 className="text-[22px] font-['Montserrat'] font-bold text-[#002940] mb-5">
-                                    ABO+Rh Systemic Distribution Breakdown
-                                </h3>
-                                
-                                <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-stretch">
-                                    <div className="w-full lg:w-[3.2in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-6 flex flex-col items-center justify-center min-h-[260px] shrink-0">
-                                        <div className="relative w-40 h-40 flex items-center justify-center">
-                                            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
-                                                {analytics.totalDonors === 0 && (
-                                                    <circle cx="40" cy="40" r="34" className="stroke-gray-100" strokeWidth="7" fill="transparent" />
-                                                )}
-                                                {(() => {
-                                                    let cumulativeOffset = 0;
-                                                    return analytics.bloodTypes.map((stat) => {
-                                                        if (stat.count === 0) return null;
-                                                        const circumference = 2 * Math.PI * 34;
-                                                        const dashArray = `${(stat.pct / 100) * circumference} ${circumference}`;
-                                                        const dashOffset = `${-(cumulativeOffset / 100) * circumference}`;
-                                                        cumulativeOffset += stat.pct;
-                                                        return (
-                                                            <circle
-                                                                key={`global-donut-ring-${stat.bloodType}`}
-                                                                cx="40"
-                                                                cy="40"
-                                                                r="34"
-                                                                stroke={stat.color}
-                                                                strokeWidth="7"
-                                                                fill="transparent"
-                                                                strokeDasharray={dashArray}
-                                                                strokeDashoffset={dashOffset}
-                                                                className="transition-all duration-500 ease-out"
-                                                            />
-                                                        );
-                                                    });
-                                                })()}
-                                            </svg>
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
-                                                <span className="text-[38px] font-['Montserrat'] font-bold text-[#002940] leading-none">
-                                                    {analytics.totalDonors}
-                                                </span>
-                                                <span className="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1.5">
-                                                    Total Records
-                                                </span>
-                                            </div>
+                            <div className="flex flex-col gap-2">
+                                <label className="text-[18px] font-semibold text-[#002940]">Location</label>
+                                <select className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white">
+                                    <option>All Locations</option>
+                                    <option>DLSU</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Core Global Metrics Panel Layout */}
+                    <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
+                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
+                            Overall Donor Base Insights
+                        </h2>
+
+                        <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
+                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
+                                <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Total Registered Donors</p>
+                                <p className="mt-2 text-[42px] font-['Montserrat'] font-bold text-[#002940] leading-none">
+                                    {analytics?.totalDonors}
+                                </p>
+                            </div>
+                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
+                                <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Active Engagement Rate</p>
+                                <p className="mt-2 text-[42px] font-['Montserrat'] font-bold text-[#002940] leading-none">
+                                    {analytics?.activeEngagementRate.toFixed(0)}%
+                                </p>
+                            </div>
+                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
+                                <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Blood Volume Collected</p>
+                                <p className="mt-2 text-[32px] font-['Montserrat'] font-bold text-[#002940] leading-none py-1.5">
+                                    {analytics?.bloodDonated}
+                                </p>
+                            </div>
+                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
+                                <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Extraction Success Rate</p>
+                                <p className="mt-2 text-[42px] font-['Montserrat'] font-bold text-[#002940] leading-none">
+                                    {analytics?.extractionSuccessRate}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Gender Ratios Balance Slider Track */}
+                        <div className="mt-8">
+                            <div className="flex flex-row justify-between text-[13px] font-bold text-[#002940] mb-2 font-['Montserrat']">
+                                <span>Male Base Ratio ({analytics?.malePct.toFixed(0)}%)</span>
+                                <span>Female Base Ratio ({analytics?.femalePct.toFixed(0)}%)</span>
+                            </div>
+                            <div className="w-full h-4 bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
+                                <div 
+                                    style={{ width: `${analytics?.malePct}%` }} 
+                                    className="bg-[#002940] h-full transition-all duration-500 ease-out"
+                                />
+                                <div 
+                                    style={{ width: `${analytics?.femalePct}%` }} 
+                                    className="bg-[#fd5448] h-full transition-all duration-500 ease-out"
+                                />
+                            </div>
+                        </div>
+
+                        <hr className="my-8 border-t border-[#c0cad0]" />
+
+                        {/* ABO+Rh Systemic Distribution Breakdown */}
+                        <div>
+                            <h3 className="text-[22px] font-['Montserrat'] font-bold text-[#002940] mb-5">
+                                ABO+Rh Systemic Distribution Breakdown
+                            </h3>
+                            
+                            <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-stretch">
+                                <div className="w-full lg:w-[3.2in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-6 flex flex-col items-center justify-center min-h-[260px] shrink-0">
+                                    <div className="relative w-40 h-40 flex items-center justify-center">
+                                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
+                                            {analytics?.totalDonors === 0 && (
+                                                <circle cx="40" cy="40" r="34" className="stroke-gray-100" strokeWidth="7" fill="transparent" />
+                                            )}
+                                            {(() => {
+                                                let cumulativeOffset = 0;
+                                                return analytics?.bloodTypes.map((stat) => {
+                                                    if (stat.count === 0) 
+                                                        return null;
+                                                    const circumference = 2 * Math.PI * 34;
+                                                    const dashArray = `${(stat.pct / 100) * circumference} ${circumference}`;
+                                                    const dashOffset = `${-(cumulativeOffset / 100) * circumference}`;
+                                                    cumulativeOffset += stat.pct;
+                                                    return (
+                                                        <circle
+                                                            key={`global-donut-ring-${stat.bloodType}`}
+                                                            cx="40"
+                                                            cy="40"
+                                                            r="34"
+                                                            stroke={stat.color}
+                                                            strokeWidth="7"
+                                                            fill="transparent"
+                                                            strokeDasharray={dashArray}
+                                                            strokeDashoffset={dashOffset}
+                                                            className="transition-all duration-500 ease-out"
+                                                        />
+                                                    );
+                                                });
+                                            })()}
+                                        </svg>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
+                                            <span className="text-[38px] font-['Montserrat'] font-bold text-[#002940] leading-none">
+                                                {analytics?.totalDonors}
+                                            </span>
+                                            <span className="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1.5">
+                                                Total Records
+                                            </span>
                                         </div>
                                     </div>
-
-                                    <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                        {analytics.bloodTypes.map((item) => {
-                                            const circleRadius = 34;
-                                            const circumference = 2 * Math.PI * circleRadius; 
-                                            const strokeDashoffset = `${(item.pct / 100) * circumference + 1.5} ${circumference}`;
-
-                                            return (
-                                                <div 
-                                                    key={item.bloodType} 
-                                                    className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-4 flex flex-row items-center justify-between shadow-sm min-w-0"
-                                                >
-                                                    <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
-                                                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
-                                                            <circle
-                                                                cx="40"
-                                                                cy="40"
-                                                                r={circleRadius}
-                                                                className="stroke-gray-100"
-                                                                strokeWidth="8"
-                                                                fill="transparent"
-                                                            />
-                                                            <circle
-                                                                cx="40"
-                                                                cy="40"
-                                                                r={circleRadius}
-                                                                stroke={item.color}
-                                                                strokeWidth="8"
-                                                                fill="transparent"
-                                                                strokeDasharray={circumference}
-                                                                strokeDashoffset={strokeDashoffset}
-                                                                strokeLinecap="round"
-                                                                className="transition-all duration-500 ease-out"
-                                                            />
-                                                        </svg>
-                                                        <div className="absolute inset-0 flex items-center justify-center px-1 text-center">
-                                                            <span className={`${item.bloodType.includes('Golden') || item.bloodType.includes('null') ? 'text-[8px] leading-tight' : 'text-[16px]'} font-['Montserrat'] font-bold text-[#002940] break-words line-clamp-2`}>
-                                                                {item.bloodType.includes('Golden') || item.bloodType.includes('null') ? "Rh-null" : item.bloodType}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="text-right flex flex-col justify-center">
-                                                        <span className="text-[26px] font-['Montserrat'] font-bold text-[#002940] leading-none">
-                                                            {item.count}
-                                                        </span>
-                                                        <span className="text-[12px] text-gray-400 font-medium mt-1">
-                                                            {item.pct.toFixed(1)}%
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
                                 </div>
-                            </div>
-                        </section>
 
-                        {/* Campaign Performance Analytics Section */}
-                        <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                            <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                Event Performance (Goal vs. Actual)
-                            </h2>
-                            <p className="text-[16px] text-gray-500 mt-1">
-                                Comparative review of targeted blood bag extractions against actual performance.
-                            </p>
+                                <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    {analytics?.bloodTypes.map((item) => {
+                                        const circleRadius = 34;
+                                        const circumference = 2 * Math.PI * circleRadius; 
+                                        const strokeDashoffset = `${(item.pct / 100) * circumference + 1.5} ${circumference}`;
 
-                            <div className="mt-8 flex flex-col gap-6">
-                                {analytics.campaignEvents.map((event) => {
-                                    // Calculate the raw percentage
-                                    const rawPercent = (event.totalBagsProduced / event.extractionGoal) * 100;
-                                    
-                                    // Cap the width at 100% 
-                                    const safeWidth = Math.min(rawPercent, 100);
-                                    
-                                    // Determine if the event overperformed
-                                    const hitTarget = rawPercent >= 100;
-
-                                    return (
-                                        <div key={`chart-${event.id}`} className="grid grid-cols-1 lg:grid-cols-4 items-center gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                                            <div className="lg:col-span-1">
-                                                <p className="font-['Montserrat'] font-bold text-[#002940] truncate">
-                                                    {event.name}
-                                                </p>
-                                                <p className="text-[14px] text-gray-400 font-medium">
-                                                    {event.date} • {event.partner}
-                                                </p>
-                                            </div>
-
-                                            <div className="lg:col-span-3 flex items-center gap-4 w-full">
-                                                {/* Percentage Bar */}
-                                                <div className="flex-1 relative h-7 bg-[#e2e8ec] rounded-md overflow-hidden shadow-inner">
-                                                    
-                                                    <div 
-                                                        // Shifts to green if they hit/exceed target, stays coral otherwise
-                                                        className={`absolute top-0 left-0 h-full rounded-md transition-all duration-500 ease-out ${hitTarget ? 'bg-[#4ade80]' : 'bg-[#fd5448]'}`}
-                                                        style={{ width: `${safeWidth}%` }}
-                                                    >
-                                                        <div className="absolute top-0 left-0 w-full h-full bg-white/10" />
+                                        return (
+                                            <div 
+                                                key={item.bloodType} 
+                                                className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-4 flex flex-row items-center justify-between shadow-sm min-w-0"
+                                            >
+                                                <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                                                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
+                                                        <circle
+                                                            cx="40"
+                                                            cy="40"
+                                                            r={circleRadius}
+                                                            className="stroke-gray-100"
+                                                            strokeWidth="8"
+                                                            fill="transparent"
+                                                        />
+                                                        <circle
+                                                            cx="40"
+                                                            cy="40"
+                                                            r={circleRadius}
+                                                            stroke={item.color}
+                                                            strokeWidth="8"
+                                                            fill="transparent"
+                                                            strokeDasharray={circumference}
+                                                            strokeDashoffset={strokeDashoffset}
+                                                            strokeLinecap="round"
+                                                            className="transition-all duration-500 ease-out"
+                                                        />
+                                                    </svg>
+                                                    <div className="absolute inset-0 flex items-center justify-center px-1 text-center">
+                                                        <span className={`${item.bloodType.includes('Golden') || item.bloodType.includes('null') ? 'text-[8px] leading-tight' : 'text-[16px]'} font-['Montserrat'] font-bold text-[#002940] break-words line-clamp-2`}>
+                                                            {item.bloodType.includes('Golden') || item.bloodType.includes('null') ? "Rh-null" : item.bloodType}
+                                                        </span>
                                                     </div>
                                                 </div>
-                                                
-                                                <div className="w-[100px] flex flex-col text-right shrink-0">
-                                                    <span className={`text-[16px] font-bold ${hitTarget ? 'text-[#4ade80]' : 'text-[#002940]'}`}>
-                                                        {event.totalBagsProduced} / {event.extractionGoal}
+
+                                                <div className="text-right flex flex-col justify-center">
+                                                    <span className="text-[26px] font-['Montserrat'] font-bold text-[#002940] leading-none">
+                                                        {item.count}
+                                                    </span>
+                                                    <span className="text-[12px] text-gray-400 font-medium mt-1">
+                                                        {item.pct.toFixed(1)}%
                                                     </span>
                                                 </div>
                                             </div>
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })}
+                                </div>
                             </div>
-                        </section>
+                        </div>
+                    </section>
 
-                        {/* Extraction Objective Framework Component View */}
-                        <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                            <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                                Extraction Goal Progress
-                            </h2>
+                    {/* Campaign Performance Analytics Section */}
+                    <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
+                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
+                            Event Performance (Goal vs. Actual)
+                        </h2>
+                        <p className="text-[16px] text-gray-500 mt-1">
+                            Comparative review of targeted blood bag extractions against actual performance.
+                        </p>
 
-                            <div className="mt-[0.25in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                                <div className="flex flex-row items-center justify-between gap-5 flex-wrap">
-                                    <p className="text-[18px] font-semibold text-[#002940]">Target Bags</p>
-                                    <p className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                        {analytics.totalBagsProduced} / {analytics.extractionGoal}
-                                    </p>
-                                </div>
+                        <div className="mt-8 flex flex-col gap-6">
+                            {analytics?.campaignEvents.map((event) => {
+                                // Calculate the raw percentage
+                                const rawPercent = (event.totalBagsProduced / event.extractionGoal) * 100;
+                                
+                                // Cap the width at 100% 
+                                const safeWidth = Math.min(rawPercent, 100);
+                                
+                                // Determine if the event overperformed
+                                const hitTarget = rawPercent >= 100;
 
-                                <div className="mt-5 w-full h-[24px] bg-white border-2 border-[#c0cad0] rounded-full overflow-hidden">
-                                    <div
-                                        className="h-full bg-[#002940] transition-all duration-1000 ease-out"
-                                        style={{ width: `${analytics.extractionProgress}%` }}
-                                    ></div>
-                                </div>
+                                return (
+                                    <div key={`chart-${event.id}`} className="grid grid-cols-1 lg:grid-cols-4 items-center gap-4 border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                        <div className="lg:col-span-1">
+                                            <p className="font-['Montserrat'] font-bold text-[#002940] truncate">
+                                                {event.name}
+                                            </p>
+                                            <p className="text-[14px] text-gray-400 font-medium">
+                                                {event.date} • {event.partner}
+                                            </p>
+                                        </div>
 
-                                <p className="mt-4 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                                    {analytics.extractionProgress.toFixed(2)}%
+                                        <div className="lg:col-span-3 flex items-center gap-4 w-full">
+                                            {/* Percentage Bar */}
+                                            <div className="flex-1 relative h-7 bg-[#e2e8ec] rounded-md overflow-hidden shadow-inner">
+                                                
+                                                <div 
+                                                    // Shifts to green if they hit/exceed target, stays coral otherwise
+                                                    className={`absolute top-0 left-0 h-full rounded-md transition-all duration-500 ease-out ${hitTarget ? 'bg-[#4ade80]' : 'bg-[#fd5448]'}`}
+                                                    style={{ width: `${safeWidth}%` }}
+                                                >
+                                                    <div className="absolute top-0 left-0 w-full h-full bg-white/10" />
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="w-[100px] flex flex-col text-right shrink-0">
+                                                <span className={`text-[16px] font-bold ${hitTarget ? 'text-[#4ade80]' : 'text-[#002940]'}`}>
+                                                    {event.totalBagsProduced} / {event.extractionGoal}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </section>
+
+                    {/* Extraction Objective Framework Component View */}
+                    <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
+                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
+                            Extraction Goal Progress
+                        </h2>
+
+                        <div className="mt-[0.25in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
+                            <div className="flex flex-row items-center justify-between gap-5 flex-wrap">
+                                <p className="text-[18px] font-semibold text-[#002940]">Target Bags</p>
+                                <p className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                                    {analytics?.totalBagsProduced} / {analytics?.extractionGoal}
                                 </p>
                             </div>
-                        </section>
-                    </>
-                )}
+
+                            <div className="mt-5 w-full h-[24px] bg-white border-2 border-[#c0cad0] rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-[#002940] transition-all duration-1000 ease-out"
+                                    style={{ width: `${analytics?.extractionProgress}%` }}
+                                ></div>
+                            </div>
+
+                            <p className="mt-4 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
+                                {analytics?.extractionProgress.toFixed(2)}%
+                            </p>
+                        </div>
+                    </section>
+                </div>
             </div>
         </main>
     );

@@ -209,7 +209,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
     }
 
-    async invokeGetOverallAnalytics() {
+    async invokeGetOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string } = {}) {
     
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
 
@@ -217,37 +217,57 @@ export class ImpAnalyticsManager implements AnalyticsController {
             return { success: false, message: authRes.message };
 
         try {
-            const raw = await this.analyticsModel.getOverallAnalytics();
 
-            // Gender Demographics
+            const raw = await this.analyticsModel.getOverallAnalytics(filters);
+
+            // Donor Base Insights
+            const totalDonorsCount = Number(raw.totalDonors || 0);
+            const baseTotalBags = Number(raw.metrics?.totalBags || 0);
+            const target = Number(raw.metrics?.totalTarget || 1); // Prevent division by zero
+            const extractions = Number(raw.metrics?.totalExtractions || 0);
+
+            // Gender Distribution
             let mCount = 0;
             let fCount = 0;
 
             (raw.genders || []).forEach((g: any) => {
                 const sexLabel = String(g.sex || "").trim().toLowerCase();
                 const countVal = Number(g.count || 0);
-
-                if (sexLabel === 'male' || sexLabel === 'm') {
-                    mCount += countVal;
-                } else if (sexLabel === 'female' || sexLabel === 'f') {
-                    fCount += countVal;
-                }
+                if (sexLabel === 'male' || sexLabel === 'm') mCount += countVal;
+                else if (sexLabel === 'female' || sexLabel === 'f') fCount += countVal;
             });
 
             const totalGenders = mCount + fCount;
             const malePercent = totalGenders > 0 ? (mCount / totalGenders) * 100 : 0;
             const femalePercent = totalGenders > 0 ? (fCount / totalGenders) * 100 : 0;
 
-            // Event Metrics
-            const bags = Number(raw.metrics?.totalBags || 0);
-            const target = Number(raw.metrics?.totalTarget || 1); // fallback to 1 to prevent division by zero
-            const extractions = Number(raw.metrics?.totalExtractions || 0);
-            
-            const progressPercent = target > 0 ? (bags / target) * 100 : 0;
-            const successRatePercent = extractions > 0 ? (bags / extractions) * 100 : 0;
+            // Blood Type Breakdown
+            const colorMap: Record<string, string> = {
+                "O+": "#fd5448",
+                "A+": "#ff7669",
+                "B+": "#fca130",
+                "AB+": "#94a3b8",
+                "O-": "#dc2626",
+                "A-": "#f87171",
+                "B-": "#fbbf24",
+                "AB-": "#cbd5e1",
+                "Rh-null": "#EAB308",
+                'Rh-null (or "Golden Blood")': "#EAB308",
+            };
 
-            // Format Campaigns
-            const formattedCampaigns = raw.campaigns.map((c: any) => ({
+            const parsedBloodTypes = (raw.bloodTypes || []).map((demo: any) => {
+                const countVal = Number(demo.count) || 0;
+                const typeStr = demo.blood_type || "Unknown";
+                return {
+                    bloodType: typeStr,
+                    count: countVal,
+                    pct: totalDonorsCount > 0 ? (countVal / totalDonorsCount) * 100 : 0,
+                    color: colorMap[typeStr] || "#c0cad0" // Fallback gray
+                };
+            });
+
+            // Campaigns
+            const formattedCampaigns = (raw.campaigns || []).map((c: any) => ({
                 id: String(c.id),
                 name: c.name,
                 partner: c.partner,
@@ -256,13 +276,20 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 totalBagsProduced: Number(c.produced_bags || 0)
             }));
 
+            const successRate = extractions > 0 ? (baseTotalBags / extractions) * 100 : 0;
+            const progressPercent = target > 0 ? (baseTotalBags / target) * 100 : 0;
+
             const payload = {
-                totalActiveDonors: Number(raw.totalDonors),
-                genderDemographics: { malePercent, femalePercent },
-                engagementMetrics: { activeRate: 85 }, // Can be dynamically calculated later based on activity thresholds
-                donorDemographics: raw.bloodTypes,
-                extractionGoals: { currentCollected: bags, targetGoal: target, progressPercent },
-                extractionMetrics: { successRatePercent: successRatePercent.toFixed(1) },
+                totalDonors: totalDonorsCount,
+                bloodDonated: `${(baseTotalBags * 450).toLocaleString()} mL`, 
+                totalBagsProduced: baseTotalBags,
+                extractionSuccessRate: `${successRate.toFixed(1)}%`, 
+                extractionGoal: target,
+                extractionProgress: progressPercent,
+                malePct: malePercent,
+                femalePct: femalePercent,
+                activeEngagementRate: 85, // Dynamic placeholder
+                bloodTypes: parsedBloodTypes,
                 campaignEvents: formattedCampaigns
             };
 
@@ -270,35 +297,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
 
         } catch (error: any) {
             console.error("Analytics Error:", error);
-            return { success: false, message: "Failed to load dashboard statistics" };
-        }
-    }
-
-    async invokeGetFilteredCampaigns(filters: { startDate?: string; endDate?: string; partner?: string }) {
-
-        const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
-        
-        if (!authRes.success) 
-            return { success: false, message: authRes.message };
-
-        try {
-
-            const rawCampaigns = await this.analyticsModel.getFilteredCampaigns(filters);
-
-            const formattedCampaigns = rawCampaigns.map((c: any) => ({
-                id: String(c.id),
-                name: c.name,
-                partner: c.partner,
-                date: c.event_date,
-                extractionGoal: Number(c.target_blood || 0),
-                totalBagsProduced: Number(c.produced_bags || 0)
-            }));
-
-            return { success: true, data: formattedCampaigns };
-
-        } catch (error: any) {
-            console.error("Campaign Filter Error:", error);
-            return { success: false, message: "Failed to filter campaign events" };
+            return { success: false, message: "Failed to load overall analytics" };
         }
     }
 }

@@ -1,9 +1,6 @@
 import { ApiResponse } from "@/types/api_res_type";
-import { ViewDirectorStats } from "@/types/analytics_type";
 
 export interface AnalyticsData {
-    countActiveDonors(): Promise<number>;
-    getDonorBloodTypeBreakdown(): Promise<any[]>;
     getDonorById(numericId: bigint): Promise<any | undefined>;
     getFilteredDonors(search: string, bloodFilter: string, sexFilter: string, sortBy: string): Promise<any>;
     getLatestVisit(numericId: bigint): Promise<any>;
@@ -11,8 +8,9 @@ export interface AnalyticsData {
     getEventById(numericId: bigint): Promise<any | undefined>;
     getFilteredEvents(status: string, search: string, sortBy: string): Promise<any>;
     getEventAnalyticsData(eventIdStr: string): Promise<any>;
-    getOverallAnalytics(): Promise<any>;
-    getFilteredCampaigns(filters: { startDate?: string; endDate?: string; partner?: string }): Promise<any>
+    countActiveDonors(eventWhereClause: any): Promise<number>;
+    getDonorBloodTypeBreakdown(eventWhereClause: any): Promise<any[]>;
+    getOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string }): Promise<any>;
 }
 
 export interface AnalyticsController {
@@ -20,6 +18,5 @@ export interface AnalyticsController {
     invokeGetDonorAnalytics(donorIdStr: string): Promise<ApiResponse<any>>;
     invokeGetFilteredEvents(search: string, status: string, sortBy: string): Promise<ApiResponse<any>>;
     invokeGetEventAnalytics(eventIdStr: string): Promise<ApiResponse<any>>;
-    invokeGetOverallAnalytics(): Promise<any>;
-    invokeGetFilteredCampaigns(filters: { startDate?: string; endDate?: string; partner?: string }):  Promise<any>;
+    invokeGetOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string }): Promise<any>;
 }

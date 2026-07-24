@@ -7,28 +7,6 @@ import { donor_to_event } from "@/db/models/donor_to_event";
 
 export class ImpAnalyticsData implements AnalyticsData {
 
-    async countActiveDonors(): Promise<number> {
-
-        const query = await orm
-            .select({ count: sql<number>`count(*)`})
-            .from(donor)
-            .where(eq(donor.active, true));
-
-        return Number(query[0].count);  
-    }
-
-    async getDonorBloodTypeBreakdown(): Promise<any[]> {
-
-        return await orm
-            .select({
-                blood_type: donor.blood,
-                count: sql<number>`count(*)`
-            })
-            .from(donor)
-            .where(eq(donor.active, true))
-            .groupBy(donor.blood);
-    }
-
     async getDonorById(numericId: bigint) {
         const [dbDonor] = await orm
             .select()
@@ -249,66 +227,101 @@ export class ImpAnalyticsData implements AnalyticsData {
         };
     }
 
-    async getOverallAnalytics() {
+    async countActiveDonors(eventWhereClause?: any): Promise<number> {
+
+        const query = orm.select({ count: sql<number>`count(distinct ${donor.id})` }).from(donor);
+        
+        if (eventWhereClause) {
+            query.innerJoin(donor_to_event, eq(donor.id, donor_to_event.donor_id))
+                 .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+                 .where(and(eq(donor.active, true), eventWhereClause));
+        } else {
+            query.where(eq(donor.active, true));
+        }
+        
+        const res = await query;
+        return Number(res[0]?.count || 0);  
+    }
+
+    async getDonorBloodTypeBreakdown(eventWhereClause?: any): Promise<any[]> {
+
+        const query = orm.select({
+            blood_type: donor.blood,
+            count: sql<number>`count(distinct ${donor.id})`
+        }).from(donor);
+
+        if (eventWhereClause) {
+            query.innerJoin(donor_to_event, eq(donor.id, donor_to_event.donor_id))
+                 .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+                 .where(and(eq(donor.active, true), eventWhereClause));
+        } else {
+            query.where(eq(donor.active, true));
+        }
+
+        return await query.groupBy(donor.blood);
+    }
+
+    async getOverallAnalytics(filters: { startDate?: string; endDate?: string; partner?: string } = {}) {
+        
+        const { startDate, endDate, partner } = filters;
+        const conditions = [];
+
+        if (startDate) 
+            conditions.push(gte(event_log.event_date, startDate));
+
+        if (endDate) 
+            conditions.push(lte(event_log.event_date, endDate));
+
+        if (partner && partner !== "All Partners") 
+            conditions.push(eq(event_log.partner, partner));
+
+        const eventWhereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
         const [
             totalDonors,
             bloodTypesRes,
             genderRes,
             eventMetricsRes,
-            recentCampaignsRes
+            campaignsRes
         ] = await Promise.all([
 
-            this.countActiveDonors(), // Total Active Donors
-            this.getDonorBloodTypeBreakdown(), // Blood Type Distribution
+            this.countActiveDonors(eventWhereClause),
+            this.getDonorBloodTypeBreakdown(eventWhereClause),
         
             // Gender Distribution
-            orm.select({ sex: donor.sex, count: sql<number>`count(*)` })
-               .from(donor)
-               .groupBy(donor.sex),
+            (async () => {
+                const q = orm.select({ sex: donor.sex, count: sql<number>`count(distinct ${donor.id})` }).from(donor);
+                if (eventWhereClause) {
+                    q.innerJoin(donor_to_event, eq(donor.id, donor_to_event.donor_id))
+                     .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+                     .where(eventWhereClause);
+                }
+                return await q.groupBy(donor.sex);
+            })(),
             
-            // Global Event Metrics (Bags and Targets)
+            // Global Event Metrics
             orm.select({
                 totalBags: sql<number>`sum(${event_log.produced_bags})`,
                 totalTarget: sql<number>`sum(${event_log.target_blood})`,
                 totalExtractions: sql<number>`sum(${event_log.extractions})`, 
-            }).from(event_log),
+            })
+            .from(event_log)
+            .where(eventWhereClause),
 
-            // Recent Campaign Performance
+            // Campaign Performance
             orm.select()
                .from(event_log)
+               .where(eventWhereClause)
                .orderBy(desc(event_log.event_date))
-               .limit(5)
         ]);
 
         return {
-            totalDonors: totalDonors,
+            totalDonors,
             bloodTypes: bloodTypesRes,
             genders: genderRes,
             metrics: eventMetricsRes[0],
-            campaigns: recentCampaignsRes
+            campaigns: campaignsRes
         };
     }
 
-    async getFilteredCampaigns(filters: { startDate?: string; endDate?: string; partner?: string }) {
-
-        const { startDate, endDate, partner } = filters;
-        const conditions = [];
-
-        if (startDate) {
-            conditions.push(gte(event_log.event_date, startDate));
-        }
-        if (endDate) {
-            conditions.push(lte(event_log.event_date, endDate));
-        }
-
-        if (partner && partner !== "All Partners") {
-            conditions.push(eq(event_log.partner, partner));
-        }
-
-        return await orm.select()
-            .from(event_log)
-            .where(conditions.length > 0 ? and(...conditions) : undefined)
-            .orderBy(desc(event_log.event_date));
-    }
 }
