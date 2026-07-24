@@ -47,7 +47,7 @@ export default function OverallAnalyticsPage() {
     const [sortBy, setSortBy] = useState("recent");
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10;
+    const itemsPerPage = 5;
 
     const events = analytics?.campaignEvents || [];
     const bloodTypes = analytics?.bloodTypes || [];
