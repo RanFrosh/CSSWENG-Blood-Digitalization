@@ -231,6 +231,11 @@ export class ImpAnalyticsManager implements AnalyticsController {
             const target = Number(raw.metrics?.totalTarget || 1); // Prevent division by zero
             const extractions = Number(raw.metrics?.totalExtractions || 0);
 
+            const activeDonorsLastYearCount = Number(raw.activeDonorsLastYear || 0);
+            const calculatedEngagementRate = totalDonorsCount > 0 
+                ? (activeDonorsLastYearCount / totalDonorsCount) * 100 
+                : 0;
+
             // Gender Distribution
             let mCount = 0;
             let fCount = 0;
@@ -293,7 +298,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 extractionProgress: progressPercent,
                 malePct: malePercent,
                 femalePct: femalePercent,
-                activeEngagementRate: 85, // Dynamic placeholder
+                activeEngagementRate: calculatedEngagementRate,
                 bloodTypes: parsedBloodTypes,
                 campaignEvents: formattedCampaigns,
             };

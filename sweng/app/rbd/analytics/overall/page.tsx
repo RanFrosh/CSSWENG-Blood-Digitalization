@@ -218,9 +218,9 @@ export default function OverallAnalyticsPage() {
                                 </p>
                             </div>
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
-                                <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Active Engagement Rate</p>
+                                <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Extraction Success Rate</p>
                                 <p className="mt-2 text-[42px] font-['Montserrat'] font-bold text-[#002940] leading-none">
-                                    {Number(analytics?.activeEngagementRate || 0).toFixed(0)}%
+                                    {analytics?.extractionSuccessRate || "0%"}
                                 </p>
                             </div>
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
@@ -230,9 +230,9 @@ export default function OverallAnalyticsPage() {
                                 </p>
                             </div>
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 shadow-sm">
-                                <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Extraction Success Rate</p>
+                                <p className="text-[15px] font-bold text-[#002940] uppercase tracking-wide">Active Engagement Rate</p>
                                 <p className="mt-2 text-[42px] font-['Montserrat'] font-bold text-[#002940] leading-none">
-                                    {analytics?.extractionSuccessRate || "0%"}
+                                    {Number(analytics?.activeEngagementRate || 0).toFixed(0)}%
                                 </p>
                             </div>
                         </div>

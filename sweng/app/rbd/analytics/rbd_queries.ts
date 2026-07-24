@@ -305,6 +305,24 @@ export class ImpAnalyticsData implements AnalyticsData {
         const totalDonors = await this.countActiveDonors(eventWhereClause);
         const bloodTypesRes = await this.getDonorBloodTypeBreakdown(eventWhereClause);
 
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+        const oneYearAgoStr = oneYearAgo.toISOString().split('T')[0];
+
+        const engagementConditions = [gte(event_log.event_date, oneYearAgoStr)];
+
+        if (partner && partner !== "All Partners") {
+            engagementConditions.push(eq(event_log.partner, partner));
+        }
+
+        // Count distinct donors
+        const activeDonorsLastYearRes = await orm.select({ 
+            count: sql<number>`count(distinct ${donor_to_event.donor_id})` 
+        })
+        .from(donor_to_event)
+        .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+        .where(and(...engagementConditions));
+
         const genderRes = await (async () => {
             const q = orm.select({ sex: donor.sex, count: sql<number>`count(distinct ${donor.id})` }).from(donor);
             if (eventWhereClause) {
@@ -338,7 +356,8 @@ export class ImpAnalyticsData implements AnalyticsData {
             genders: genderRes,
             metrics: eventMetricsRes[0],
             campaigns: campaignsRes,
-            totalCampaigns: Number(totalCampaignsRes[0]?.count || 0)
+            totalCampaigns: Number(totalCampaignsRes[0]?.count || 0),
+            activeDonorsLastYear: Number(activeDonorsLastYearRes[0]?.count || 0)
         };
     }
 }
