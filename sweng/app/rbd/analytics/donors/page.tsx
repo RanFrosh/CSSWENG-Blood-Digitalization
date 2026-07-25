@@ -113,7 +113,7 @@ export default function DonorAnalyticsPage() {
                         {/* Search Input with embedded button */}
                         <div className="flex-1 flex flex-col gap-2 min-w-[250px]">
                             <label className="text-[18px] font-semibold text-[#002940]">
-                                Search Name or Email
+                                Search
                             </label>
                             
                             <div className="flex flex-row items-center w-full h-[54px] bg-white border-2 border-[#c0cad0] rounded-[10px] focus-within:border-[#002940] transition-colors overflow-hidden">
@@ -135,7 +135,7 @@ export default function DonorAnalyticsPage() {
                                     onKeyDown={(e) => {
                                         if (e.key === 'Enter') setActiveSearch(searchInput);
                                     }}
-                                    placeholder="Input donor details..."
+                                    placeholder="Input donor id..."
                                     className="flex-1 h-full pr-4 text-[18px] outline-none bg-transparent text-[#002940] placeholder-gray-400"
                                 />
                             </div>

@@ -23,8 +23,12 @@ export class ImpAnalyticsData implements AnalyticsData {
 
         // Search
         if (search && search.trim() !== "") {
+
+            const isNumeric = /^\d+$/.test(search.trim());
+            
             conditions.push(
                 or(
+                    isNumeric ? eq(donor.id, BigInt(search.trim())) : undefined,
                     ilike(donor.first_name, `%${search}%`),
                     ilike(donor.last_name, `%${search}%`),
                     ilike(donor.email, `%${search}%`)
