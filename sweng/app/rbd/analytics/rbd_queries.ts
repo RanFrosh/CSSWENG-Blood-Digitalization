@@ -5,6 +5,7 @@ import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { event_log } from "@/db/models/event_log";
 import { donor_to_event } from "@/db/models/donor_to_event";
 import { city } from "@/db/models/city";
+import { blood_bag } from "@/db/models/blood_bag";
 
 export class ImpAnalyticsData implements AnalyticsData {
 
@@ -25,7 +26,7 @@ export class ImpAnalyticsData implements AnalyticsData {
         if (search && search.trim() !== "") {
 
             const isNumeric = /^\d+$/.test(search.trim());
-            
+
             conditions.push(
                 or(
                     isNumeric ? eq(donor.id, BigInt(search.trim())) : undefined,
@@ -109,26 +110,20 @@ export class ImpAnalyticsData implements AnalyticsData {
 
     async getDonorMetrics(numericId: bigint) {
 
-        const [totalVisitsRes, successStatsRes] = await Promise.all([
-            
-            // Total Visits
-            orm.select({ value: count() })
-               .from(donor_to_event)
-               .where(eq(donor_to_event.donor_id, numericId)),
-            
-            // Blood volume, Bags, and Success Count
-            orm.select({
-                   successCount: count(),
-                   totalBlood: sum(donor_to_event.blood_amount),
-               })
-               .from(donor_to_event)
-               .where(
-                   and(
-                       eq(donor_to_event.donor_id, numericId),
-                       eq(donor_to_event.is_success, true)
-                   )
-               )
-        ]);
+        // Total Visits
+        const totalVisitsRes = await orm.select({ 
+            value: count() 
+        })
+        .from(donor_to_event)
+        .where(eq(donor_to_event.donor_id, numericId));
+
+        // Blood Volume and Bags
+        const successStatsRes = await orm.select({
+            successCount: count(blood_bag.id),
+            totalBlood: sum(blood_bag.volume_ml),
+        })
+        .from(blood_bag)
+        .where(eq(blood_bag.donor_id, numericId));
 
         return {
             totalVisits: totalVisitsRes[0]?.value || 0,
@@ -228,12 +223,17 @@ export class ImpAnalyticsData implements AnalyticsData {
             start_time: event_log.start_time,
             end_time: event_log.end_time,
             target_blood: event_log.target_blood,
-            produced_bags: event_log.produced_bags,
+            produced_bags: sql<number>`count(${blood_bag.id})`,
             city: city.name
         })
         .from(event_log)
         .leftJoin(city, eq(event_log.city_id, city.id))
+        .leftJoin(blood_bag, eq(event_log.id, blood_bag.event_id))
         .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .groupBy(
+            event_log.id, 
+            city.name
+        )
         .orderBy(orderLogic);
         
         return events;
@@ -252,8 +252,8 @@ export class ImpAnalyticsData implements AnalyticsData {
             start_time: event_log.start_time,
             end_time: event_log.end_time,
             street: event_log.street,
+            visitors: event_log.visitors,
             target_blood: event_log.target_blood,
-            produced_bags: event_log.produced_bags,
             extractions: event_log.extractions,            
             city: city.name 
         })
@@ -263,23 +263,24 @@ export class ImpAnalyticsData implements AnalyticsData {
         .limit(1);
 
         const exactBloodResult = await orm.select({
-            totalML: sum(donor_to_event.blood_amount)
+            totalML: sum(blood_bag.volume_ml),
+            totalBags: count(blood_bag.id)
         })
-        .from(donor_to_event)
-        .where(and(eq(donor_to_event.event_id, eventId), eq(donor_to_event.is_success, true)));
+        .from(blood_bag)
+        .where(eq(blood_bag.event_id, eventId));
 
         const bloodTypeResult = await orm.select({
-            bloodType: donor.blood,
+            bloodType: blood_bag.blood_type,
             count: count()
         })
-        .from(donor_to_event)
-        .innerJoin(donor, eq(donor_to_event.donor_id, donor.id))
-        .where(eq(donor_to_event.event_id, eventId))
-        .groupBy(donor.blood);
+        .from(blood_bag)
+        .where(eq(blood_bag.event_id, eventId))
+        .groupBy(blood_bag.blood_type);
 
         return {
             eventRow: eventResult[0],
             totalML: exactBloodResult[0]?.totalML || 0,
+            totalBags: exactBloodResult[0]?.totalBags || 0,
             bloodTypeDist: bloodTypeResult
         };
     }
@@ -366,7 +367,7 @@ export class ImpAnalyticsData implements AnalyticsData {
         }
 
         const totalDonors = await this.countActiveDonors(eventWhereClause);
-        const bloodTypesRes = await this.getDonorBloodTypeBreakdown(eventWhereClause);
+        const donorBloodTypes = await this.getDonorBloodTypeBreakdown(eventWhereClause);
 
         const oneYearAgo = new Date();
         oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
@@ -403,7 +404,6 @@ export class ImpAnalyticsData implements AnalyticsData {
         })();
 
         const eventMetricsRes = await orm.select({
-            totalBags: sql<number>`sum(${event_log.produced_bags})`,
             totalTarget: sql<number>`sum(${event_log.target_blood})`,
             totalExtractions: sql<number>`sum(${event_log.extractions})`, 
         })
@@ -411,18 +411,41 @@ export class ImpAnalyticsData implements AnalyticsData {
         .leftJoin(city, eq(event_log.city_id, city.id))
         .where(eventWhereClause);
 
+        // Blood Bag Metrics
+        const bloodBagMetricsRes = await orm.select({
+            totalBags: sql<number>`count(${blood_bag.id})`,
+            totalML: sql<number>`sum(${blood_bag.volume_ml})`
+        })
+        .from(blood_bag)
+        .innerJoin(event_log, eq(blood_bag.event_id, event_log.id))
+        .leftJoin(city, eq(event_log.city_id, city.id))
+        .where(eventWhereClause);
+
+        // Blood Type per Bag Breakdown
+        const bloodBagTypesRes = await orm.select({
+            bloodType: blood_bag.blood_type,
+            count: sql<number>`count(${blood_bag.id})`
+        })
+        .from(blood_bag)
+        .innerJoin(event_log, eq(blood_bag.event_id, event_log.id))
+        .leftJoin(city, eq(event_log.city_id, city.id))
+        .where(eventWhereClause)
+        .groupBy(blood_bag.blood_type);
+
         const campaignsRes = await orm.select({
             id: event_log.id,
             name: event_log.name,
             partner: event_log.partner,
             event_date: event_log.event_date,
             target_blood: event_log.target_blood,
-            produced_bags: event_log.produced_bags,
-            city: city.name
+            city: city.name,
+            produced_bags: sql<number>`count(${blood_bag.id})`
         })
         .from(event_log)
         .leftJoin(city, eq(event_log.city_id, city.id))
+        .leftJoin(blood_bag, eq(event_log.id, blood_bag.event_id))
         .where(eventWhereClause)
+        .groupBy(event_log.id, city.name)
         .orderBy(orderByClause);
 
         const totalCampaignsRes = await orm.select({ count: sql<number>`count(*)` })
@@ -432,9 +455,14 @@ export class ImpAnalyticsData implements AnalyticsData {
 
         return {
             totalDonors,
-            bloodTypes: bloodTypesRes,
+            bloodTypes: donorBloodTypes,
+            bloodBagTypes: bloodBagTypesRes,
             genders: genderRes,
-            metrics: eventMetricsRes[0],
+            metrics: {
+                ...eventMetricsRes[0], 
+                totalBags: Number(bloodBagMetricsRes[0]?.totalBags || 0),
+                totalML: Number(bloodBagMetricsRes[0]?.totalML || 0)
+            },
             campaigns: campaignsRes,
             totalCampaigns: Number(totalCampaignsRes[0]?.count || 0),
             activeDonorsLastYear: Number(activeDonorsLastYearRes[0]?.count || 0)

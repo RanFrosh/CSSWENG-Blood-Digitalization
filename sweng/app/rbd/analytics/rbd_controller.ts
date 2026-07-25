@@ -52,7 +52,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
     }
 
-    async invokeGetDonorAnalytics(donorIdStr: string): Promise<ApiResponse<any>> {
+    async invokeGetDonorAnalytics(donorIdStr: string) {
 
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
 
@@ -63,18 +63,13 @@ export class ImpAnalyticsManager implements AnalyticsController {
             const idString = donorIdStr.replace(/\D/g, ''); 
             const numericId = BigInt(idString); 
 
-            const [dbDonor, metrics, latestVisit] = await Promise.all([
-                this.analyticsModel.getDonorById(numericId),
-                this.analyticsModel.getDonorMetrics(numericId),
-                this.analyticsModel.getLatestVisit(numericId)
-            ]);
+            const dbDonor = await this.analyticsModel.getDonorById(numericId);
+            const metrics = await this.analyticsModel.getDonorMetrics(numericId);
+            const latestVisit = await this.analyticsModel.getLatestVisit(numericId);
 
             if (!dbDonor) {
                 return { success: false, message: "Donor not found in database" };
             }
-
-            // Derive Blood Bags (Total mL / 450mL)
-            const derivedBags = Math.floor(metrics.bloodDonatedML / 500);
 
             // 3-Month Eligibility
             let nextEligibleDate = undefined;
@@ -91,6 +86,9 @@ export class ImpAnalyticsManager implements AnalyticsController {
                     nextEligibleDate = lastDateObj.toISOString().split('T')[0];
                 }
             }
+
+            const safeTotalVisits = Math.max(metrics.totalVisits, metrics.successfulDonations);
+            const safeDeferredVisits = safeTotalVisits - metrics.successfulDonations;
 
             return {
                 success: true,
@@ -110,12 +108,12 @@ export class ImpAnalyticsManager implements AnalyticsController {
                     weight: dbDonor.weight,
                     assessment_status: dbDonor.assessment_status,
 
-                    totalVisits: metrics.totalVisits,
+                    totalVisits: safeTotalVisits,
                     successfulDonations: metrics.successfulDonations,
-                    deferredVisits: metrics.totalVisits - metrics.successfulDonations,
+                    deferredVisits: safeDeferredVisits,
      
                     bloodDonated: `${(metrics.bloodDonatedML || 0).toLocaleString()} mL`,
-                    bloodBagsFilled: derivedBags,
+                    bloodBagsFilled: metrics.successfulDonations,
                     
                     recentVisitEvent: recentVisitEvent,          
                     recentVisitDate: recentVisitDate,      
@@ -152,7 +150,9 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 status: e.status,
                 start_time: e.start_time,
                 end_time: e.end_time,
-                city: e.city
+                city: e.city,
+                target_blood: e.target_blood,
+                produced_bags: e.produced_bags
             }));
 
             return {
@@ -180,7 +180,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 return { success: false, message: "Event not found" };
             }
 
-            const { eventRow, totalML, bloodTypeDist } = rawData;
+            const { eventRow, totalML, totalBags, bloodTypeDist } = rawData;
 
             const visitors = Number(eventRow.visitors) || 0;
             const extractions = Number(eventRow.extractions) || 0;
@@ -202,12 +202,12 @@ export class ImpAnalyticsManager implements AnalyticsController {
                     
                     totalDonors: visitors,
                     bloodDonated: `${Number(totalML).toLocaleString()} mL`,
-                    totalBagsProduced: Number(eventRow.produced_bags) || 0,
+                    totalBagsProduced: Number(totalBags) || 0,
                     successRate: `${successRate}%`,
                     extractionGoal: Number(eventRow.target_blood) || 0,
                     
                     bloodTypes: bloodTypeDist.map((bt: any) => ({
-                        bloodType: bt.bloodType || 'Unknown',
+                        bloodType: bt.blood_type ||  bt.bloodType || 'Unknown',
                         count: Number(bt.count) || 0
                     }))
                 }
@@ -276,12 +276,29 @@ export class ImpAnalyticsManager implements AnalyticsController {
 
             const parsedBloodTypes = (raw.bloodTypes || []).map((demo: any) => {
                 const countVal = Number(demo.count) || 0;
-                const typeStr = demo.blood_type || "Unknown";
+                const typeStr = demo.blood_type || demo.bloodType || "Unknown";
                 return {
                     bloodType: typeStr,
                     count: countVal,
-                    pct: totalDonorsCount > 0 ? (countVal / totalDonorsCount) * 100 : 0,
+                    pct: baseTotalBags > 0 ? (countVal / totalDonorsCount) * 100 : 0,
                     color: colorMap[typeStr] || "#c0cad0" // Fallback gray
+                };
+            });
+            
+            const totalPhysicalBags = (raw.bloodBagTypes || []).reduce(
+                (sum: number, demo: any) => sum + (Number(demo.count) || 0), 
+                0
+            );
+
+            const parsedBagBloodTypes = (raw.bloodBagTypes || []).map((demo: any) => {
+                const countVal = Number(demo.count) || 0;
+                const typeStr = demo.blood_type || demo.bloodType || "Unknown"; 
+                
+                return {
+                    bloodType: typeStr,
+                    count: countVal,
+                    pct: totalPhysicalBags > 0 ? (countVal / totalPhysicalBags) * 100 : 0, 
+                    color: colorMap[typeStr] || "#c0cad0" 
                 };
             });
 
@@ -301,7 +318,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
 
             const payload = {
                 totalDonors: totalDonorsCount,
-                bloodDonated: `${(baseTotalBags * 450).toLocaleString()} mL`, 
+                bloodDonated: `${Number(raw.metrics?.totalML || 0).toLocaleString()} mL`,
                 totalBagsProduced: baseTotalBags,
                 extractionSuccessRate: `${successRate.toFixed(1)}%`, 
                 extractionGoal: target,
@@ -310,6 +327,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 femalePct: femalePercent,
                 activeEngagementRate: calculatedEngagementRate,
                 bloodTypes: parsedBloodTypes,
+                bloodBags: parsedBagBloodTypes,
                 campaignEvents: formattedCampaigns,
             };
 

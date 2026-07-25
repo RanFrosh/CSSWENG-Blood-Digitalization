@@ -32,6 +32,7 @@ type OverallAnalytics = {
     femalePct: number;
     activeEngagementRate: number;
     bloodTypes: BloodTypeData[];
+    bloodBags: BloodTypeData[];
     campaignEvents: EventCampaign[];
 };
 
@@ -58,6 +59,7 @@ export default function OverallAnalyticsPage() {
 
     const events = analytics?.campaignEvents || [];
     const bloodTypes = analytics?.bloodTypes || [];
+    const bloodBags = analytics?.bloodBags || [];
     
     const totalPages = Math.ceil(events.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -280,10 +282,10 @@ export default function OverallAnalyticsPage() {
 
                         <hr className="my-8 border-t border-[#c0cad0]" />
 
-                        {/* ABO+Rh Systemic Distribution Breakdown */}
+                        {/* Donor ABO+Rh Systemic Distribution Breakdown */}
                         <div>
                             <h3 className="text-[22px] font-['Montserrat'] font-bold text-[#002940] mb-5">
-                                ABO+Rh Systemic Distribution Breakdown
+                                Donor Blood Type Breakdown
                             </h3>
                             
                             <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-stretch">
@@ -296,7 +298,8 @@ export default function OverallAnalyticsPage() {
                                             {(() => {
                                                 let cumulativeOffset = 0;
                                                 return bloodTypes.map((stat) => {
-                                                    if (stat.count === 0) return null;
+                                                    if (stat.count === 0) 
+                                                        return null;
                                                     const circumference = 2 * Math.PI * 34;
                                                     const dashArray = `${(stat.pct / 100) * circumference} ${circumference}`;
                                                     const dashOffset = `${-(cumulativeOffset / 100) * circumference}`;
@@ -333,7 +336,7 @@ export default function OverallAnalyticsPage() {
                                     {bloodTypes.map((item) => {
                                         const circleRadius = 34;
                                         const circumference = 2 * Math.PI * circleRadius; 
-                                        const strokeDashoffset = `${(item.pct / 100) * circumference + 1.5} ${circumference}`;
+                                        const strokeDashoffset = circumference - ((item.pct / 100) * circumference);
 
                                         return (
                                             <div 
@@ -377,6 +380,106 @@ export default function OverallAnalyticsPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Blood Bag ABO+Rh Systemic Distribution Breakdown */}
+                        <div className = "mt-[20px]">
+                            <h3 className="text-[22px] font-['Montserrat'] font-bold text-[#002940] mb-5">
+                                Donated Bags Blood Type Breakdown
+                            </h3>
+                            
+                            <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-stretch">
+                                <div className="w-full lg:w-[3.2in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-6 flex flex-col items-center justify-center min-h-[260px] shrink-0">
+                                    <div className="relative w-40 h-40 flex items-center justify-center">
+                                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
+                                            {(!analytics?.totalBagsProduced || analytics.totalBagsProduced === 0) && (
+                                                <circle cx="40" cy="40" r="34" className="stroke-gray-100" strokeWidth="7" fill="transparent" />
+                                            )}
+                                            {(() => {
+                                                let cumulativeOffset = 0;
+                                                return bloodBags.map((stat) => {
+                                                    if (stat.count === 0) 
+                                                        return null;
+                                                    const circumference = 2 * Math.PI * 34;
+                                                    const dashArray = `${(stat.pct / 100) * circumference} ${circumference}`;
+                                                    const dashOffset = `${-(cumulativeOffset / 100) * circumference}`;
+                                                    cumulativeOffset += stat.pct;
+                                                    return (
+                                                        <circle
+                                                            key={`global-donut-ring-${stat.bloodType}`}
+                                                            cx="40"
+                                                            cy="40"
+                                                            r="34"
+                                                            stroke={stat.color}
+                                                            strokeWidth="7"
+                                                            fill="transparent"
+                                                            strokeDasharray={dashArray}
+                                                            strokeDashoffset={dashOffset}
+                                                            className="transition-all duration-500 ease-out"
+                                                        />
+                                                    );
+                                                });
+                                            })()}
+                                        </svg>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
+                                            <span className="text-[38px] font-['Montserrat'] font-bold text-[#002940] leading-none">
+                                                {analytics?.totalBagsProduced || 0}
+                                            </span>
+                                            <span className="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1.5">
+                                                Total Records
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    {bloodBags.map((item) => {
+                                        const circleRadius = 34;
+                                        const circumference = 2 * Math.PI * circleRadius; 
+                                        const strokeDashoffset = circumference - ((item.pct / 100) * circumference);
+
+                                        return (
+                                            <div 
+                                                key={item.bloodType} 
+                                                className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-4 flex flex-row items-center justify-between shadow-sm min-w-0"
+                                            >
+                                                <div className="relative w-16 h-16 flex items-center justify-center shrink-0">
+                                                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 80 80">
+                                                        <circle cx="40" cy="40" r={circleRadius} className="stroke-gray-100" strokeWidth="8" fill="transparent" />
+                                                        <circle
+                                                            cx="40"
+                                                            cy="40"
+                                                            r={circleRadius}
+                                                            stroke={item.color}
+                                                            strokeWidth="8"
+                                                            fill="transparent"
+                                                            strokeDasharray={circumference}
+                                                            strokeDashoffset={strokeDashoffset}
+                                                            strokeLinecap="round"
+                                                            className="transition-all duration-500 ease-out"
+                                                        />
+                                                    </svg>
+                                                    <div className="absolute inset-0 flex items-center justify-center px-1 text-center">
+                                                        <span className={`${item.bloodType.includes('Golden') || item.bloodType.includes('null') ? 'text-[8px] leading-tight' : 'text-[16px]'} font-['Montserrat'] font-bold text-[#002940] break-words line-clamp-2`}>
+                                                            {item.bloodType.includes('Golden') || item.bloodType.includes('null') ? "Rh-null" : item.bloodType}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="text-right flex flex-col justify-center">
+                                                    <span className="text-[26px] font-['Montserrat'] font-bold text-[#002940] leading-none">
+                                                        {item.count}
+                                                    </span>
+                                                    <span className="text-[12px] text-gray-400 font-medium mt-1">
+                                                        {item.pct.toFixed(1)}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+
                     </section>
 
                     {/* Campaign Performance Analytics */}

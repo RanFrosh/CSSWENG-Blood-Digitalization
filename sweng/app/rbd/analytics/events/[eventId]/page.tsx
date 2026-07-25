@@ -24,6 +24,7 @@ export default function EventAnalyticsDetailsPage() {
                 return;
             
             setIsLoading(true);
+            setErrorMessage("");
 
             try {
                 const result = await fetchEventAnalytics(eventId);
@@ -34,6 +35,7 @@ export default function EventAnalyticsDetailsPage() {
                 }
             } catch (error) {
                 setSelectedEvent(undefined);
+                setErrorMessage("Failed to connect to the database");
             } finally {
                 setIsLoading(false);
             }
