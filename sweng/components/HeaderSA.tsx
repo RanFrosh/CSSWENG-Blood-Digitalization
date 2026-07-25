@@ -32,6 +32,10 @@ export default function HeaderSA() {
         router.push(`/sa/management/logs/data`);
     };
 
+    const goRequests = () => {
+        router.push("/sa/requests");
+    };
+    
     const goLogout = () => {
         router.push("/landing");
     };
@@ -61,6 +65,11 @@ export default function HeaderSA() {
             name: "Database Logs",
             path: "/sa/management/logs/data",
             onClick: goDataLog,
+        },
+        {
+            name: "Requests",
+            path: "/sa/requests",
+            onClick: goRequests,
         },
     ];
 
