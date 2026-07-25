@@ -4,6 +4,7 @@ import { eq, sql, or, and, ilike, lte, gte, ne, sum, count, asc, desc } from "dr
 import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { event_log } from "@/db/models/event_log";
 import { donor_to_event } from "@/db/models/donor_to_event";
+import { city } from "@/db/models/city";
 
 export class ImpAnalyticsData implements AnalyticsData {
 
@@ -143,7 +144,21 @@ export class ImpAnalyticsData implements AnalyticsData {
         return dbEvent;
     }
 
-    async getFilteredEvents(search: string, status: string, sortBy: string) {
+    async getFilteredEvents(filters: {
+        search?: string;
+        status?: string;
+        partner?: string;
+        selectedCity?: string;
+        sortBy?: string;
+    } = {}) {
+
+        const { 
+            search = "", 
+            status = "All", 
+            partner = "All Partners", 
+            selectedCity = "All Cities", 
+            sortBy = "Date" 
+        } = filters;
         
         const conditions = [];
 
@@ -154,12 +169,23 @@ export class ImpAnalyticsData implements AnalyticsData {
             conditions.push(ne(event_log.status, "Upcoming"));
         }
 
+        // Partner Filter
+        if (partner && partner !== "All Partners") {
+            conditions.push(eq(event_log.partner, partner));
+        }
+
+        // City Filter
+        if (selectedCity && selectedCity !== "All Cities") {
+            conditions.push(eq(city.name, selectedCity));
+        }
+
         // Search Filter
         if (search && search.trim() !== "") {
             conditions.push(
                 or(
                     ilike(event_log.name, `%${search}%`),
-                    ilike(event_log.partner, `%${search}%`)
+                    ilike(event_log.partner, `%${search}%`),
+                    ilike(city.name, `%${search}%`)
                 )
             );
         }
@@ -177,48 +203,75 @@ export class ImpAnalyticsData implements AnalyticsData {
             case "Partner (Z-A)":
                 orderLogic = desc(event_log.partner);
                 break;
+            case "City (A-Z)":
+                orderLogic = asc(city.name);
+                break;
+            case "City (Z-A)":
+                orderLogic = desc(city.name);
+                break;
             case "Date":
             default:
                 orderLogic = desc(event_log.event_date);
                 break;
         }
 
-        const events = await orm.select()
-            .from(event_log)
-            .where(conditions.length > 0 ? and(...conditions) : undefined)
-            .orderBy(orderLogic);
-
+        const events = await orm.select({
+            id: event_log.id,
+            name: event_log.name,
+            partner: event_log.partner,
+            status: event_log.status,
+            event_date: event_log.event_date,
+            start_time: event_log.start_time,
+            end_time: event_log.end_time,
+            target_blood: event_log.target_blood,
+            produced_bags: event_log.produced_bags,
+            city: city.name
+        })
+        .from(event_log)
+        .leftJoin(city, eq(event_log.city_id, city.id))
+        .where(conditions.length > 0 ? and(...conditions) : undefined)
+        .orderBy(orderLogic);
+        
         return events;
     }
 
     async getEventAnalyticsData(eventIdStr: string) {
+        
         const eventId = BigInt(eventIdStr);
 
-        const [eventResult, exactBloodResult, bloodTypeResult] = await Promise.all([
+        const eventResult = await orm.select({
+            id: event_log.id,
+            name: event_log.name,
+            partner: event_log.partner,
+            status: event_log.status,
+            event_date: event_log.event_date,
+            start_time: event_log.start_time,
+            end_time: event_log.end_time,
+            street: event_log.street,
+            target_blood: event_log.target_blood,
+            produced_bags: event_log.produced_bags,
+            extractions: event_log.extractions,            
+            city: city.name 
+        })
+        .from(event_log)
+        .leftJoin(city, eq(event_log.city_id, city.id))
+        .where(eq(event_log.id, eventId))
+        .limit(1);
 
-            // Get the pre-calculated stats from event_log
-            orm.select()
-                .from(event_log)
-                .where(eq(event_log.id, eventId))
-                .limit(1),
+        const exactBloodResult = await orm.select({
+            totalML: sum(donor_to_event.blood_amount)
+        })
+        .from(donor_to_event)
+        .where(and(eq(donor_to_event.event_id, eventId), eq(donor_to_event.is_success, true)));
 
-            // Sum up the exact mL of blood donated
-            orm.select({
-                totalML: sum(donor_to_event.blood_amount)
-            })
-            .from(donor_to_event)
-            .where(and(eq(donor_to_event.event_id, eventId), eq(donor_to_event.is_success, true))),
-
-            // Group and count by Blood Type
-            orm.select({
-                bloodType: donor.blood,
-                count: count()
-            })
-            .from(donor_to_event)
-            .innerJoin(donor, eq(donor_to_event.donor_id, donor.id))
-            .where(eq(donor_to_event.event_id, eventId))
-            .groupBy(donor.blood)
-        ]);
+        const bloodTypeResult = await orm.select({
+            bloodType: donor.blood,
+            count: count()
+        })
+        .from(donor_to_event)
+        .innerJoin(donor, eq(donor_to_event.donor_id, donor.id))
+        .where(eq(donor_to_event.event_id, eventId))
+        .groupBy(donor.blood);
 
         return {
             eventRow: eventResult[0],
@@ -234,6 +287,7 @@ export class ImpAnalyticsData implements AnalyticsData {
         if (eventWhereClause) {
             query.innerJoin(donor_to_event, eq(donor.id, donor_to_event.donor_id))
                  .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+                 .leftJoin(city, eq(event_log.city_id, city.id))
                  .where(and(eq(donor.active, true), eventWhereClause));
         } else {
             query.where(eq(donor.active, true));
@@ -253,6 +307,7 @@ export class ImpAnalyticsData implements AnalyticsData {
         if (eventWhereClause) {
             query.innerJoin(donor_to_event, eq(donor.id, donor_to_event.donor_id))
                  .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+                 .leftJoin(city, eq(event_log.city_id, city.id))
                  .where(and(eq(donor.active, true), eventWhereClause));
         } else {
             query.where(eq(donor.active, true));
@@ -265,10 +320,11 @@ export class ImpAnalyticsData implements AnalyticsData {
         startDate?: string; 
         endDate?: string; 
         partner?: string;
+        selectedCity?: string;
         sortBy?: string;     
     } = {}) {
         
-        const { startDate, endDate, partner, sortBy = "recent"} = filters;
+        const { startDate, endDate, partner, selectedCity, sortBy = "recent"} = filters;
         const conditions = [];
 
         if (startDate) 
@@ -279,6 +335,9 @@ export class ImpAnalyticsData implements AnalyticsData {
 
         if (partner && partner !== "All Partners") 
             conditions.push(eq(event_log.partner, partner));
+
+        if (selectedCity && selectedCity !== "All Cities") 
+            conditions.push(eq(city.name, selectedCity));
 
         const eventWhereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -315,12 +374,17 @@ export class ImpAnalyticsData implements AnalyticsData {
             engagementConditions.push(eq(event_log.partner, partner));
         }
 
+        if (selectedCity && selectedCity !== "All Cities") {
+            engagementConditions.push(eq(city.name, selectedCity)); 
+        }
+
         // Count distinct donors
         const activeDonorsLastYearRes = await orm.select({ 
             count: sql<number>`count(distinct ${donor_to_event.donor_id})` 
         })
         .from(donor_to_event)
         .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+        .leftJoin(city, eq(event_log.city_id, city.id))
         .where(and(...engagementConditions));
 
         const genderRes = await (async () => {
@@ -328,6 +392,7 @@ export class ImpAnalyticsData implements AnalyticsData {
             if (eventWhereClause) {
                 q.innerJoin(donor_to_event, eq(donor.id, donor_to_event.donor_id))
                 .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+                .leftJoin(city, eq(event_log.city_id, city.id))
                 .where(eventWhereClause);
             }
             return await q.groupBy(donor.sex);
@@ -339,15 +404,26 @@ export class ImpAnalyticsData implements AnalyticsData {
             totalExtractions: sql<number>`sum(${event_log.extractions})`, 
         })
         .from(event_log)
+        .leftJoin(city, eq(event_log.city_id, city.id))
         .where(eventWhereClause);
 
-        const campaignsRes = await orm.select()
+        const campaignsRes = await orm.select({
+            id: event_log.id,
+            name: event_log.name,
+            partner: event_log.partner,
+            event_date: event_log.event_date,
+            target_blood: event_log.target_blood,
+            produced_bags: event_log.produced_bags,
+            city: city.name
+        })
         .from(event_log)
+        .leftJoin(city, eq(event_log.city_id, city.id))
         .where(eventWhereClause)
         .orderBy(orderByClause);
 
         const totalCampaignsRes = await orm.select({ count: sql<number>`count(*)` })
         .from(event_log)
+        .leftJoin(city, eq(event_log.city_id, city.id))
         .where(eventWhereClause);
 
         return {

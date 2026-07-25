@@ -26,8 +26,8 @@ export const EventDetailsPanel = ({ event }: EventDetailsPanelProps) => {
                 </p>
 
                 <p>
-                    <span className="font-semibold text-[#002940]">Location: </span>{" "}
-                    {event.street}
+                    <span className="font-semibold text-[#002940]">City: </span>{" "}
+                    {event.city}
                 </p>
 
                 <p>

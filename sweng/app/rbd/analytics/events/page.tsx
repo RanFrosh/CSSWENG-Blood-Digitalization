@@ -7,9 +7,6 @@ import { ViewEvents } from "@/types/event_type";
 import Header from "@/components/HeaderRBD";
 import { EventCard } from "@/components/EventCard";
 
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-type EventTab = EventStatus | "All";
-
 export default function SearchEventsPage() {
 
     const router = useRouter();
@@ -30,6 +27,12 @@ export default function SearchEventsPage() {
     // Error display
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [partner, setPartner] = useState("All Partners");
+    const [city, setCity] = useState("All Cities");
+
+    const [availableCities, setAvailableCities] = useState<string[]>([]);
+    const [availablePartners, setAvailablePartners] = useState<string[]>([]);
+
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
@@ -43,9 +46,25 @@ export default function SearchEventsPage() {
             setErrorMessage("");
 
             try {
-                const result = await fetchFilteredEvents(activeSearch, statusFilter, sortBy);
+                const result = await fetchFilteredEvents({
+                    search: activeSearch || undefined, 
+                    status: statusFilter, 
+                    partner: partner !== "All Partners" ? partner : undefined,
+                    selectedCity: city !== "All Cities" ? city : undefined,
+                    sortBy
+                });
 
                 if (result.success && result.data) {
+
+                    if (city === "All Cities") {
+                        const citiesList = Array.from(new Set(result.data.map((e: any) => e.city).filter(Boolean))) as string[];
+                        setAvailableCities(citiesList);
+                        }
+                
+                    if (partner === "All Partners") {
+                        const partnersList = Array.from(new Set(result.data.map((e: any) => e.partner).filter(Boolean))) as string[];
+                        setAvailablePartners(partnersList);
+                    }
                     setEvents(result.data);
                 } else {
                     setErrorMessage(result.message || "Failed to load events.");
@@ -59,7 +78,7 @@ export default function SearchEventsPage() {
 
         loadEvents();
 
-    }, [activeSearch, statusFilter, sortBy]);
+    }, [activeSearch, statusFilter, partner, city, sortBy]);
 
     const viewEventAnalytics = (eventId: BigInt) => {
         router.push(`/rbd/analytics/events/${eventId}`);
@@ -186,6 +205,38 @@ export default function SearchEventsPage() {
                                 <option value="All">All</option>
                                 <option value="Completed">Completed</option>
                                 <option value="Ongoing">Ongoing</option>
+                            </select>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">Partner</label>
+                            <select 
+                                value={partner}
+                                onChange={(e) => setPartner(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                            >
+                                <option value="All Partners">All Partners</option>
+                                {availablePartners.map((partnerName) => (
+                                    <option key={partnerName} value={partnerName}>
+                                        {partnerName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">City</label>
+                            <select 
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                            >
+                                <option value="All Cities">All Cities</option>
+                                {availableCities.map((cityName) => (
+                                    <option key={cityName} value={cityName}>
+                                        {cityName}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 

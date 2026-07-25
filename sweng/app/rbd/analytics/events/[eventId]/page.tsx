@@ -19,7 +19,10 @@ export default function EventAnalyticsDetailsPage() {
 
     useEffect(() => {
         const loadEvent = async () => {
-            if (!eventId) return;
+
+            if (!eventId) 
+                return;
+            
             setIsLoading(true);
 
             try {

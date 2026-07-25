@@ -127,7 +127,13 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
     }
 
-    async invokeGetFilteredEvents(search: string, status: string, sortBy: string): Promise<ApiResponse<any>> {
+    async invokeGetFilteredEvents(filters: { 
+        search?: string;
+        status?: string;
+        partner?: string;
+        selectedCity?: string;
+        sortBy?: string;
+    } = {}) {
         
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
 
@@ -135,7 +141,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
             return { success: false, message: authRes.message };
 
         try {
-            const rawEvents = await this.analyticsModel.getFilteredEvents(search, status, sortBy);
+            const rawEvents = await this.analyticsModel.getFilteredEvents(filters);
 
             const formattedEvents = rawEvents.map((e: any) => ({
                 id: e.id,
@@ -145,7 +151,8 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 street: e.street,
                 status: e.status,
                 start_time: e.start_time,
-                end_time: e.end_time
+                end_time: e.end_time,
+                city: e.city
             }));
 
             return {
@@ -191,6 +198,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                     event_date: eventRow.event_date,
                     start_time: eventRow.start_time,
                     end_time: eventRow.end_time,
+                    city: eventRow.city,
                     
                     totalDonors: visitors,
                     bloodDonated: `${Number(totalML).toLocaleString()} mL`,
@@ -213,6 +221,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
         startDate?: string; 
         endDate?: string; 
         partner?: string;
+        selectedCity?: string;
         sortBy?: string;     
     } = {}) {
     
@@ -281,6 +290,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 id: String(c.id),
                 name: c.name,
                 partner: c.partner,
+                city: c.city,
                 date: c.event_date,
                 extractionGoal: Number(c.target_blood || 0),
                 totalBagsProduced: Number(c.produced_bags || 0)

@@ -15,6 +15,7 @@ type EventCampaign = {
     id: string;
     name: string;
     partner: string;
+    city: string;
     date: string;
     extractionGoal: number;
     totalBagsProduced: number;
@@ -43,8 +44,14 @@ export default function OverallAnalyticsPage() {
 
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
-    const [partner, setPartner] = useState("All Partners");
+    
     const [sortBy, setSortBy] = useState("recent");
+
+    const [partner, setPartner] = useState("All Partners");
+    const [city, setCity] = useState("All Cities");
+
+    const [availableCities, setAvailableCities] = useState<string[]>([]);
+    const [availablePartners, setAvailablePartners] = useState<string[]>([]);
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
@@ -55,8 +62,6 @@ export default function OverallAnalyticsPage() {
     const totalPages = Math.ceil(events.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const currentEvents = events.slice(startIndex, startIndex + itemsPerPage);
-
-    const uniquePartners = Array.from(new Set(events.map(event => event.partner)));
 
     useEffect(() => {
         const loadAnalyticsData = async () => {
@@ -75,10 +80,20 @@ export default function OverallAnalyticsPage() {
                     startDate: startDate || undefined,
                     endDate: endDate || undefined,
                     partner: partner !== "All Partners" ? partner : undefined,
+                    selectedCity: city != "All Cities" ? city : undefined,
                     sortBy
                 });
 
                 if (result.success && result.data) {
+                    if (city === "All Cities") {
+                        const citiesList = Array.from(new Set(result.data.campaignEvents.map((e: any) => e.city).filter(Boolean))) as string[];
+                        setAvailableCities(citiesList);
+                        }
+                
+                    if (partner === "All Partners") {
+                        const partnersList = Array.from(new Set(result.data.campaignEvents.map((e: any) => e.partner).filter(Boolean))) as string[];
+                        setAvailablePartners(partnersList);
+                    }
                     setAnalytics(result.data); 
                 } else {
                     setErrorMessage(result.message || "Failed to load analytics.");
@@ -93,7 +108,7 @@ export default function OverallAnalyticsPage() {
         };
 
         loadAnalyticsData();
-    }, [startDate, endDate, partner, sortBy]);
+    }, [startDate, endDate, partner, city, sortBy]);
 
     const handlePageChange = (newPage: number) => {
         setCurrentPage(newPage);
@@ -186,7 +201,7 @@ export default function OverallAnalyticsPage() {
                                     className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
                                 >
                                     <option value="All Partners">All Partners</option>
-                                    {uniquePartners.map((partnerName) => (
+                                    {availablePartners.map((partnerName) => (
                                         <option key={partnerName} value={partnerName}>
                                             {partnerName}
                                         </option>
@@ -195,10 +210,18 @@ export default function OverallAnalyticsPage() {
                             </div>
 
                             <div className="flex flex-col gap-2">
-                                <label className="text-[18px] font-semibold text-[#002940]">Location</label>
-                                <select className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white">
-                                    <option>All Locations</option>
-                                    <option>DLSU</option>
+                                <label className="text-[18px] font-semibold text-[#002940]">City</label>
+                                <select 
+                                    value={city}
+                                    onChange={(e) => setCity(e.target.value)}
+                                    className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                                >
+                                    <option value="All Cities">All Cities</option>
+                                    {availableCities.map((cityName) => (
+                                        <option key={cityName} value={cityName}>
+                                            {cityName}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
                         </div>

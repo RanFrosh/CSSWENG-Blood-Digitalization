@@ -6,6 +6,7 @@ interface EventCardProps {
 }
 
 export const EventCard = ({ event, actionButton }: EventCardProps) => {
+
     return (
         <div className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm">
             {/* Event Header */}
@@ -32,8 +33,8 @@ export const EventCard = ({ event, actionButton }: EventCardProps) => {
                     </p>
                     
                     <p>
-                        <span className="font-semibold text-[#002940]">Street: </span> 
-                        {event.street}
+                        <span className="font-semibold text-[#002940]">City: </span> 
+                        {event.city}
                     </p>
 
                     <p>
