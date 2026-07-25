@@ -204,7 +204,7 @@ export default function DonorAnalyticsPage() {
                 <section id="results-top" className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
 
                     {/* Divider & Result Count */}
-                    <div className="mt-8 flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
+                    <div className="flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
                         <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
                             Results
                         </h3>
