@@ -2,7 +2,13 @@ import { ApiResponse } from "@/types/api_res_type";
 
 export interface AnalyticsData {
     getDonorById(numericId: bigint): Promise<any | undefined>;
-    getFilteredDonors(search: string, bloodFilter: string, sexFilter: string, sortBy: string): Promise<any>;
+    getFilteredDonors(filters: { 
+        search?: string;
+        bloodFilter?: string;
+        sexFilter?: string;
+        eligibilityFilter?: string;
+        sortBy?: string;
+    }): Promise<any>;
     getLatestVisit(numericId: bigint): Promise<any>;
     getDonorMetrics(numericId: bigint): Promise<any>;
     getEventById(numericId: bigint): Promise<any | undefined>;
@@ -26,7 +32,13 @@ export interface AnalyticsData {
 }
 
 export interface AnalyticsController {
-    invokeGetFilteredDonors(search: string, bloodFilter: string, sexFilter: string, sortBy: string): Promise<ApiResponse<any>>; 
+    invokeGetFilteredDonors(filters: { 
+        search?: string;
+        bloodFilter?: string;
+        sexFilter?: string;
+        eligibilityFilter?: string;
+        sortBy?: string;
+    }): Promise<ApiResponse<any>>; 
     invokeGetDonorAnalytics(donorIdStr: string): Promise<ApiResponse<any>>;
     invokeGetFilteredEvents(filters: { 
         startDate?: string; 

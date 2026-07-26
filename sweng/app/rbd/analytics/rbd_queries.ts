@@ -1,6 +1,6 @@
 import { orm } from "../../../db/drizzle";
 import { donor } from "../../../db/models/donor";
-import { eq, sql, or, and, ilike, lte, gte, ne, sum, count, asc, desc } from "drizzle-orm";
+import { eq, sql, or, and, ilike, isNull, isNotNull, lte, gt, gte, ne, sum, count, asc, desc } from "drizzle-orm";
 import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { event_log } from "@/db/models/event_log";
 import { donor_to_event } from "@/db/models/donor_to_event";
@@ -18,7 +18,31 @@ export class ImpAnalyticsData implements AnalyticsData {
         return dbDonor;
     }
 
-    async getFilteredDonors(search: string, bloodFilter: string, sexFilter: string, sortBy: string, limit: number = 50) {
+    async getFilteredDonors(filters: { 
+        search?: string;
+        bloodFilter?: string;
+        sexFilter?: string;
+        eligibilityFilter?: string;
+        sortBy?: string;
+    } = {}) {
+
+        const { 
+            search = "", 
+            bloodFilter = "All", 
+            sexFilter = "All Partners", 
+            eligibilityFilter = "All Cities", 
+            sortBy = "ID (Descending)" 
+        } = filters;
+
+        const latestSuccessSq = orm.select({
+                donor_id: donor_to_event.donor_id,
+                last_date: sql<string>`MAX(${event_log.event_date})`.as('last_date')
+            })
+            .from(donor_to_event)
+            .innerJoin(event_log, eq(donor_to_event.event_id, event_log.id))
+            .where(eq(donor_to_event.is_success, true))
+            .groupBy(donor_to_event.donor_id)
+            .as('latest_success_sq');
 
         const conditions = [];
 
@@ -47,6 +71,29 @@ export class ImpAnalyticsData implements AnalyticsData {
             conditions.push(eq(donor.sex, sexFilter as "Male" | "Female"));
         }
 
+        // Eligibility Filter
+        if (eligibilityFilter && eligibilityFilter.trim() !== "" && eligibilityFilter !== "All") {
+            const cutoffDate = new Date();
+            cutoffDate.setMonth(cutoffDate.getMonth() - 3);
+            const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+            if (eligibilityFilter === "Eligible") {
+                conditions.push(
+                    and(
+                        eq(donor.active, true),
+                        or(
+                            isNull(latestSuccessSq.last_date),
+                            lte(latestSuccessSq.last_date, cutoffStr)
+                        )
+                    )
+                );
+            } else if (eligibilityFilter === "Recovery") {
+                conditions.push(
+                    gt(latestSuccessSq.last_date, cutoffStr)
+                );
+            }
+        }
+
         // Sort Logic
         let orderLogic: any = desc(donor.last_name);
 
@@ -66,8 +113,7 @@ export class ImpAnalyticsData implements AnalyticsData {
                 break;
         }
 
-        // Execute Query
-        return await orm
+        const rawDonors = await orm
             .select({
                 id: donor.id,
                 first_name: donor.first_name,
@@ -78,17 +124,29 @@ export class ImpAnalyticsData implements AnalyticsData {
                 age: donor.age,
                 blood: donor.blood,
                 sex: donor.sex,
-                street: donor.street,
-                zip_code: donor.zip_code,
                 verifiedBlood: donor.verifiedBlood,
-                height: donor.height,
-                weight: donor.weight,
-                assessment_status: donor.assessment_status
+                last_donation_date: latestSuccessSq.last_date
             })
             .from(donor)
+            .leftJoin(latestSuccessSq, eq(donor.id, latestSuccessSq.donor_id))
             .where(conditions.length > 0 ? and(...conditions) : undefined)
             .orderBy(orderLogic)
-            .limit(limit);
+
+        // Execute Query
+        return rawDonors.map(row => {
+            let nextEligibleDate = undefined;
+
+            if (row.last_donation_date) {
+                const dateObj = new Date(row.last_donation_date);
+                dateObj.setMonth(dateObj.getMonth() + 3);
+                nextEligibleDate = dateObj.toISOString().split('T')[0];
+            }
+
+            return {
+                ...row,
+                nextEligibleDate
+            };
+        });
     }
 
     async getLatestVisit(numericId: bigint) {

@@ -13,7 +13,13 @@ export class ImpAnalyticsManager implements AnalyticsController {
         this.profileReader = injectProfileReader;
     }
 
-    async invokeGetFilteredDonors(search: string, bloodFilter: string, sexFilter: string, sortBy: string) {
+    async invokeGetFilteredDonors(filters: { 
+        search?: string;
+        bloodFilter?: string;
+        sexFilter?: string;
+        eligibilityFilter?: string;
+        sortBy?: string;
+    } = {}) {
         
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
         
@@ -22,7 +28,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
 
         try {
-            const rawDonors = await this.analyticsModel.getFilteredDonors(search, bloodFilter, sexFilter, sortBy);
+            const rawDonors = await this.analyticsModel.getFilteredDonors(filters);
 
             const formattedDonors = rawDonors.map((d: any) => ({
 
@@ -37,7 +43,8 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 blood: d.blood || 'Unknown',
                 verifiedBlood: d.verifiedBlood,
                 status: d.active ? 'Active' : 'Inactive',
-                assessmentStatus: d.assessment_status
+                assessmentStatus: d.assessment_status,
+                nextEligibleDate: d.nextEligibleDate
             }));
 
             return {
