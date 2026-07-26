@@ -1,49 +1,50 @@
 "use server"
 
 import { ApiResponse } from "@/types/api_res_type";
-import { orm } from "@/db/drizzle";
 import { serverSupa } from "@/db/supaserver";
-import { ImpEventManager } from "@/app/event_records/imp_event_controller";
-import { ImpEventModel } from "@/app/event_records/imp_event_data";
+import { ImpLabStaffManager } from "./ls_controller";
+import { ImpLabStaffModel } from "./ls.query";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { ViewEvents } from "@/types/event_type";
-import { ViewEventFilters } from "@/types/event_type";
-import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
+
+async function getLabController() {
+
+    const database = await serverSupa();
+    const model = new ImpLabStaffModel();
+    const profiler = new ImpProfileGetter(database);
+
+    return new ImpLabStaffManager(model, profiler);
+}
 
 export async function getLabStaffEvents(statusTab?: string): Promise<ApiResponse<ViewEvents[]>> {
     
     try {
-        const database = await serverSupa();
-        const model = new ImpEventModel(orm);
-        const profiler = new ImpProfileGetter(database);
-        const controller = new ImpEventManager(model, profiler);
-
-        const eventFilter = (statusTab && statusTab !== "All" 
-            ? { status: statusTab } 
-            : {}) as ViewEventFilters;
-
-        const dummyStaffFilter = {} as ViewAssignedStaffFilter;
-
-        return await controller.invokeQueryEventStaff(eventFilter, dummyStaffFilter);
+        const controller = await getLabController();
+        return await controller.invokeGetStaffEvents(statusTab);
     } catch (err: any) {
         console.error("Server Action Error:", err);
-        return { success: false, message: "Internal server error", data: undefined };
+        return { success: false, message: "Internal server error" };
     }
 }
 
 export async function verifyLabStaffEventAccess(eventIdStr: string): Promise<ApiResponse<ViewEvents>> {
     
     try {
-        const database = await serverSupa();
-        const model = new ImpEventModel(orm);
-        const profiler = new ImpProfileGetter(database);
-        const controller = new ImpEventManager(model, profiler);
-
-        const eventId = BigInt(eventIdStr);
-
-        return await controller.invokeVerifyEventAccess(eventId);
+        const controller = await getLabController();
+        return await controller.invokeVerifyEventAccess(eventIdStr);
     } catch (err: any) {
         console.error("Server Action Error:", err);
-        return { success: false, message: "Invalid Event ID format", data: undefined };
+        return { success: false, message: "Invalid Event ID format" };
+    }
+}
+
+export async function getLabStaffQueue(eventIdStr: string) {
+
+    try {
+        const controller = await getLabController();
+        return await controller.invokeGetQueue(eventIdStr);
+    } catch (err: any) {
+        console.error("Queue Fetch Error:", err);
+        return { success: false, message: "Failed to fetch donor queue" };
     }
 }

@@ -15,7 +15,7 @@ export default function LSEventsPage() {
     const router = useRouter();
 
     // Set the initial active tab to "Ongoing"
-    const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
+    const [activeTab, setActiveTab] = useState<EventTab>("All");
     
     // State for holding events from the backend
     const [events, setEvents] = useState<ViewEvents[]>([]);

@@ -5,7 +5,7 @@ import Header from "@/components/HeaderLS";
 import { EventDetailsPanel } from "@/components/EventDetailsPanel";
 import { ViewEvents } from "@/types/event_type";
 import { verifyLabStaffEventAccess } from "../ls_action";
-import { viewQueueWithDonors } from "@/app/queue/queue_action";
+import { getLabStaffQueue } from "../ls_action";
 import { QueueEntryWithDonor } from "@/types/queue_type";
 
 export default function LSEventPage() {
@@ -20,25 +20,26 @@ export default function LSEventPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
 
-
     const [showModal, setShowModal] = useState(false);
 
     useEffect(() => {
         const fetchPageData = async () => {
+
             setIsLoading(true);
+            setErrorMessage("");
             
-            const [eventRes, queueRes] = await Promise.all([
-                verifyLabStaffEventAccess(eventId),
-                viewQueueWithDonors(eventId)
-            ]);
-            
-            // Handle Event Data
-            if (eventRes.success && eventRes.data) {
-                setSelectedEvent(eventRes.data);
-            } else {
+            const eventRes = await verifyLabStaffEventAccess(eventId);
+        
+            if (!eventRes.success || !eventRes.data) {
                 setErrorMessage(eventRes.message || "Event not found or not assigned to you.");
+                setIsLoading(false);
+                return;
             }
 
+            setSelectedEvent(eventRes.data);
+
+            const queueRes = await getLabStaffQueue(eventId);
+            
             if (queueRes.success && queueRes.data && queueRes.data.length > 0) {
                 setNextDonor(queueRes.data[0]); 
             } else {
@@ -46,9 +47,11 @@ export default function LSEventPage() {
             }
 
             setIsLoading(false);
-        };
+            };
 
-        if (eventId) fetchPageData();
+        if (eventId) 
+            fetchPageData();
+
     }, [eventId]);
 
     const goQueue = () => {
@@ -154,6 +157,18 @@ export default function LSEventPage() {
                             </p>
                         </button>
                     </div>
+
+                    {/* Footer */}
+                    <div className="mt-8 border-t-2 border-dashed border-[#c0cad0] pt-6">
+                        <button
+                            type="button"
+                            onClick={goBack}
+                            className="bg-white text-[#002940] border-2 border-[#002940] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:bg-[#fd5448] hover:border-[#fd5448] hover:text-white transition flex items-center gap-2 w-fit"
+                        >
+                            <span>←</span> Back to My Events
+                        </button>
+                    </div>
+
                 </section>
             </div>
 
