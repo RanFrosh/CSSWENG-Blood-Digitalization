@@ -94,8 +94,54 @@ export class ImpLabStaffManager implements LabStaffController {
             return { 
                 success: true, 
                 message: "Queue retrieved", 
-                data: formattedQueue 
+                data: {
+                    eventName: event.name,
+                    queue: formattedQueue 
+                }
             };
+
+        } catch (error: any) {
+            return { success: false, message: error.message };
+        }
+    }
+
+    async invokeGetStaffStatus(eventIdStr: string) {
+
+        const authRes = await helpGateKeep(this.profileReader, 'viewqueue');
+        
+        if (!authRes.success || !authRes.data) {
+            return { success: false, message: authRes.message };
+        }
+
+        try {
+            const numericEventId = BigInt(eventIdStr.replace(/\D/g, ''));
+            const staffId = authRes.data.id;
+
+            const event = await this.labStaffModel.verifyAccess(staffId, numericEventId);
+
+            if (!event) 
+                return { success: false, message: "Not assigned to this event." };
+
+            const rawStaffData = await this.labStaffModel.getStaffStatusForEvent(numericEventId, staffId);
+
+            if (rawStaffData.length === 0) {
+                return { success: true, message: "No same-role staff assigned", data: [] };
+            }
+
+            const isBusy = rawStaffData.queue !== null;
+            const formattedStaff = {
+                profiles_id: rawStaffData.profile.id,
+                name: rawStaffData.profile.name,
+                role: rawStaffData.profile.role,
+                isBusy: isBusy,
+                queueEntryId: isBusy ? rawStaffData.queue!.id : null,
+                currentDonorId: isBusy ? rawStaffData.queue!.donor_id : null,
+                currentDonorName: (isBusy && rawStaffData.donor) 
+                    ? `${rawStaffData.donor.first_name} ${rawStaffData.donor.last_name}` 
+                    : null
+            };
+
+            return { success: true, message: "Status retrieved", data: formattedStaff };
 
         } catch (error: any) {
             return { success: false, message: error.message };

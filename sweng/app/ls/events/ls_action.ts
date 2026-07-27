@@ -48,3 +48,14 @@ export async function getLabStaffQueue(eventIdStr: string) {
         return { success: false, message: "Failed to fetch donor queue" };
     }
 }
+
+export async function getStaffStatus(eventIdStr: string) {
+
+    try {
+        const controller = await getLabController();
+        return await controller.invokeGetStaffStatus(eventIdStr);
+    } catch (err: any) {
+        console.error("Staff Status Fetch Error:", err);
+        return { success: false, message: "Failed to fetch staff status" };
+    }
+}

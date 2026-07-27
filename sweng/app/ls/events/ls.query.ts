@@ -4,6 +4,7 @@ import { LabStaffData } from "@/abstract/ls/ls_abstract";
 import { donor } from "@/db/models/donor";
 import { event_log } from "@/db/models/event_log";
 import { event_queue } from "@/db/models/event_queue";
+import { profiles } from "@/db/models/profiles";
 import { assigned_staff } from "@/db/models/assigned_staff";
 import { city } from "@/db/models/city";
 
@@ -90,4 +91,29 @@ export class ImpLabStaffModel implements LabStaffData {
         return rawQueue;
     }
 
+    async getStaffStatusForEvent(eventId: bigint, staffId: string) {
+
+        const rawStaffStatus = await orm
+            .select({
+                profile: profiles,
+                queue: event_queue,
+                donor: donor
+            })
+            .from(assigned_staff)
+            .innerJoin(profiles, eq(assigned_staff.profiles_id, profiles.id))
+            .leftJoin(event_queue, and(
+                eq(event_queue.profile_id, profiles.id),
+                eq(event_queue.event_log_id, eventId),
+                isNull(event_queue.station) 
+            ))
+            .leftJoin(donor, eq(event_queue.donor_id, donor.id))
+            .where(
+                and(
+                    eq(assigned_staff.event_log_id, eventId),
+                    eq(assigned_staff.profiles_id, staffId)
+                )
+            );
+
+        return rawStaffStatus;
+    }
 }
