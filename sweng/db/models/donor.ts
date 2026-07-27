@@ -74,5 +74,8 @@ export const donor = pgTable("donor", {
   // Additional fields from dev
   verifiedBlood: boolean("verifiedBlood").default(false).notNull(),
   medicalNote: text("medicalNote"),
-  assessment_status: assessment_status("assessment_status")
+  assessment_status: assessment_status("assessment_status"),
+
+  // Date of when donor is eligible to go to an event
+  next_eligibility: date("next_eligibility")
 });
