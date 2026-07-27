@@ -129,15 +129,15 @@ export class ImpLabStaffManager implements LabStaffController {
             }
 
             const myData = rawStaffData[0];
-            const isBusy = !!rawStaffData.queue;
+            const isBusy = !!myData?.queue;
 
             const formattedStaff = {
                 profiles_id: myData.profile.id,
                 name: myData.profile.name,
                 role: myData.profile.role,
                 isBusy: isBusy,
-                queueEntryId: isBusy ? myData.queue!.id : null,
-                currentDonorId: isBusy ? myData.queue!.donor_id : null,
+                queueEntryId: isBusy ? Number(myData.queue!.id) : null,
+                currentDonorId: isBusy ? Number(myData.queue!.donor_id) : null,
                 currentDonorName: (isBusy && myData.donor) 
                     ? `${myData.donor.first_name} ${myData.donor.last_name}` 
                     : null

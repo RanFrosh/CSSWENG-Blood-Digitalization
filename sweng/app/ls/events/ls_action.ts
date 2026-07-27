@@ -6,6 +6,7 @@ import { ImpLabStaffManager } from "./ls_controller";
 import { ImpLabStaffModel } from "./ls.query";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { ViewEvents } from "@/types/event_type";
+import { revalidatePath } from "next/cache";
 
 async function getLabController() {
 
@@ -64,7 +65,13 @@ export async function acceptDonor(queueIdStr: string, eventIdStr: string) {
 
     try {
         const controller = await getLabController();
-        return await controller.invokeAcceptDonor(queueIdStr, eventIdStr);
+        const res = await controller.invokeAcceptDonor(queueIdStr, eventIdStr);
+
+        if (res.success) {
+            revalidatePath(`/ls/events/${eventIdStr}`);
+        }
+
+        return res;
     } catch (err: any) {
         console.error("Action Error:", err);
         return { success: false, message: "Failed to communicate with server." };

@@ -93,10 +93,6 @@ export default function LSEventPage() {
 
     }, [eventId]);
 
-    const goQueue = () => {
-        router.push(`/ls/events/${eventId}/queue`);
-    };
-
     const goBack = () => {
         router.push("/ls/events");
     };
@@ -110,10 +106,10 @@ export default function LSEventPage() {
         
         const res = await acceptDonor(nextDonor.id.toString(), eventId);
         
-        if (res.success) {
+        if (res?.success) {
             router.push(`/ls/events/${eventId}/record/${nextDonor.donor_id}`);
         } else {
-            alert(res.message); 
+            alert(res?.message); 
             setIsProcessing(false);
             setShowAcceptModal(false);
         }
@@ -218,7 +214,7 @@ export default function LSEventPage() {
                                 disabled={(!myStation?.isBusy && waitlist.length === 0)}
                                 onClick={() => {
                                     if (myStation?.isBusy) {
-                                        router.push(`/record/${myStation.currentDonorId}`);
+                                        router.push(`/ls/events/${eventId}/record/${myStation.currentDonorId}`);
                                     } else {
                                         setShowAcceptModal(true);
                                     }

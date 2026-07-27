@@ -68,13 +68,16 @@ export class ImpLabStaffModel implements LabStaffData {
 
     async getEventQueueWithDonors(eventId: bigint, stationFilter?: string | null) {
 
-        const conditions: SQL[] = [eq(event_queue.event_log_id, eventId)];
+        const conditions: SQL[] = [
+            eq(event_queue.event_log_id, eventId),
+            isNull(event_queue.profile_id)
+        ];
 
         if (stationFilter !== undefined) {
             if (stationFilter === null) {
                 conditions.push(isNull(event_queue.station));
             } else {
-                conditions.push(eq(event_queue.station, stationFilter as "med_queue" || "lab_queue"));
+                conditions.push(eq(event_queue.station, stationFilter as "med_queue" | "lab_queue"));
             }
         }
 
@@ -104,7 +107,6 @@ export class ImpLabStaffModel implements LabStaffData {
             .leftJoin(event_queue, and(
                 eq(event_queue.profile_id, profiles.id),
                 eq(event_queue.event_log_id, eventId),
-                isNull(event_queue.station) 
             ))
             .leftJoin(donor, eq(event_queue.donor_id, donor.id))
             .where(
@@ -123,7 +125,6 @@ export class ImpLabStaffModel implements LabStaffData {
             .update(event_queue)
             .set({ 
                 profile_id: staffProfileId 
-                // Note: Depending on your schema, you might also update a status column here
             })
             .where(
                 and(
