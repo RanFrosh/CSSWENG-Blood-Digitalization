@@ -218,7 +218,7 @@ export default function DonorAnalyticsPage() {
                                 <option value="Default">ID (ascending)</option>
                                 <option value="ID (Descending)">ID (descending)</option>
                                 <option value="Age (Youngest)">Age (ascending)</option>
-                                <option value="Age (Oldest">Age (descending)</option>
+                                <option value="Age (Oldest)">Age (descending)</option>
                             </select>
                         </div>
                     </div>
