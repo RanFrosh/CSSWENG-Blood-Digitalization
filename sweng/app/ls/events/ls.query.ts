@@ -116,4 +116,23 @@ export class ImpLabStaffModel implements LabStaffData {
 
         return rawStaffStatus;
     }
+
+    async acceptDonor(queueId: bigint, staffProfileId: string) {
+
+        const updatedQueueRow = await orm
+            .update(event_queue)
+            .set({ 
+                profile_id: staffProfileId 
+                // Note: Depending on your schema, you might also update a status column here
+            })
+            .where(
+                and(
+                    eq(event_queue.id, queueId),
+                    isNull(event_queue.profile_id) 
+                )
+            )
+            .returning();
+
+        return updatedQueueRow;
+    }
 }

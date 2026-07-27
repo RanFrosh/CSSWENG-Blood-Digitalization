@@ -59,3 +59,14 @@ export async function getStaffStatus(eventIdStr: string) {
         return { success: false, message: "Failed to fetch staff status" };
     }
 }
+
+export async function acceptDonor(queueIdStr: string, eventIdStr: string) {
+
+    try {
+        const controller = await getLabController();
+        return await controller.invokeAcceptDonor(queueIdStr, eventIdStr);
+    } catch (err: any) {
+        console.error("Action Error:", err);
+        return { success: false, message: "Failed to communicate with server." };
+    }
+}

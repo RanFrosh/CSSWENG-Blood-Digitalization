@@ -5,6 +5,7 @@ export interface LabStaffData {
     verifyAccess(staffId: string, eventId: bigint): Promise<any>;
     getEventQueueWithDonors(eventId: bigint, stationFilter?: string | null): Promise<any>;
     getStaffStatusForEvent(eventId: bigint, staffId: string): Promise<any>;
+    acceptDonor(queueId: bigint, staffProfileId: string): Promise<any>;
 }
 
 export interface LabStaffController {
@@ -12,4 +13,5 @@ export interface LabStaffController {
     invokeVerifyEventAccess(eventIdStr: string): Promise<ApiResponse<any>>;
     invokeGetQueue(eventIdStr: string, station?: string | null): Promise<ApiResponse<any>>;
     invokeGetStaffStatus(eventIdStr: string): Promise<ApiResponse<any>>;
+    invokeAcceptDonor(queueIdStr: string, eventIdStr: string): Promise<ApiResponse<any>>;
 }

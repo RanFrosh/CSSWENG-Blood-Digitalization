@@ -101,7 +101,7 @@ export class ImpLabStaffManager implements LabStaffController {
             };
 
         } catch (error: any) {
-            return { success: false, message: error.message };
+            return { success: false, message: error.message, data: null };
         }
     }
 
@@ -125,26 +125,63 @@ export class ImpLabStaffManager implements LabStaffController {
             const rawStaffData = await this.labStaffModel.getStaffStatusForEvent(numericEventId, staffId);
 
             if (rawStaffData.length === 0) {
-                return { success: true, message: "No same-role staff assigned", data: [] };
+                return { success: false, message: "You are not assigned to this event" };
             }
 
-            const isBusy = rawStaffData.queue !== null;
+            const myData = rawStaffData[0];
+            const isBusy = !!rawStaffData.queue;
+
             const formattedStaff = {
-                profiles_id: rawStaffData.profile.id,
-                name: rawStaffData.profile.name,
-                role: rawStaffData.profile.role,
+                profiles_id: myData.profile.id,
+                name: myData.profile.name,
+                role: myData.profile.role,
                 isBusy: isBusy,
-                queueEntryId: isBusy ? rawStaffData.queue!.id : null,
-                currentDonorId: isBusy ? rawStaffData.queue!.donor_id : null,
-                currentDonorName: (isBusy && rawStaffData.donor) 
-                    ? `${rawStaffData.donor.first_name} ${rawStaffData.donor.last_name}` 
+                queueEntryId: isBusy ? myData.queue!.id : null,
+                currentDonorId: isBusy ? myData.queue!.donor_id : null,
+                currentDonorName: (isBusy && myData.donor) 
+                    ? `${myData.donor.first_name} ${myData.donor.last_name}` 
                     : null
             };
 
             return { success: true, message: "Status retrieved", data: formattedStaff };
 
         } catch (error: any) {
-            return { success: false, message: error.message };
+            return { success: false, message: error.message, data: null };
+        }
+    }
+
+    async invokeAcceptDonor(queueIdStr: string, eventIdStr: string) {
+
+        const authRes = await helpGateKeep(this.profileReader, 'viewqueue'); 
+        
+        if (!authRes.success || !authRes.data) {
+            return { success: false, message: authRes.message };
+        }
+
+        try {
+            const numericQueueId = BigInt(queueIdStr);
+            const numericEventId = BigInt(eventIdStr.replace(/\D/g, ''));
+            const staffId = authRes.data.id;
+
+            const event = await this.labStaffModel.verifyAccess(staffId, numericEventId);
+
+            if (!event) 
+                return { success: false, message: "Not assigned to this event." };
+
+            const claimed = await this.labStaffModel.acceptDonor(numericQueueId, staffId);
+            
+            if (claimed.length === 0) {
+                return { 
+                    success: false, 
+                    message: "Someone else just claimed this donor! Please close and refresh the queue." 
+                };
+            }
+
+            return { success: true, message: "Donor claimed successfully", data: claimed[0] };
+
+        } catch (error: any) {
+            console.error("Claim Donor Error:", error);
+            return { success: false, message: "An error occurred while claiming the donor." };
         }
     }
 
