@@ -203,12 +203,13 @@ export class ImpLabStaffModel implements LabStaffData {
                 await tx.insert(blood_bag).values({
                     donor_id: payload.donor_id,
                     event_id: payload.event_id,
+                    staff_id: payload.staff_id,
                     serial_number: payload.blood_bag_id,
                     blood_type: payload.blood_type,
                     volume_ml: payload.volume,
-                    //outcome: payload.outcome,
-                    //quality: payload.quality,
-                    //observations: payload.observations,
+                    outcome: payload.outcome,
+                    quality: payload.quality,
+                    observations: payload.observations,
                     collection_date: payload.collection_date, 
                 });
 
@@ -219,6 +220,21 @@ export class ImpLabStaffModel implements LabStaffData {
                             eq(event_queue.event_log_id, payload.event_id)
                         )
                     );
+
+                if (payload.outcome === 'Successful') { 
+
+                    const collectionDate = new Date(payload.collection_date);
+                    
+                    // Add 3 months
+                    const nextEligibleDate = new Date(collectionDate);
+                    nextEligibleDate.setMonth(collectionDate.getMonth() + 3);
+
+                    await tx.update(donor)
+                        .set({ 
+                            next_eligibility: nextEligibleDate.toISOString() 
+                        })
+                        .where(eq(donor.id, payload.donor_id));
+                }
             });
 
             return { success: true, message: "Donation record saved successfully." };

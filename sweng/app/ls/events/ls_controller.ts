@@ -197,7 +197,7 @@ export class ImpLabStaffManager implements LabStaffController {
         return await this.labStaffModel.getSingleDonor(filter);        
     }
 
-    async invokeSubmitDonationRecord(payload: SubmitDonationPayload) {
+    async invokeSubmitDonationRecord(payload: Omit<SubmitDonationPayload, 'staff_id'>) {
     
         const auth = await helpGateKeep(this.profileReader, 'updatequeue');
         
@@ -205,7 +205,14 @@ export class ImpLabStaffManager implements LabStaffController {
             return { success: false, message: auth.message };
         }
 
-        return await this.labStaffModel.submitDonationRecord(payload);
+        console.log("AUTH DATA:", auth.data); // 💥 Add this!
+
+        const securePayload: SubmitDonationPayload = {
+            ...payload,
+            staff_id: auth.data.id
+        };
+
+        return await this.labStaffModel.submitDonationRecord(securePayload);
     }
 
 }

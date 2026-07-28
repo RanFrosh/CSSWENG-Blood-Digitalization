@@ -101,7 +101,7 @@ export async function submitDonationRecordAction(rawPayload: any) {
     try {
         const controller = await getLabController();
 
-        const formattedPayload: SubmitDonationPayload = {
+        const formattedPayload: Omit<SubmitDonationPayload, 'staff_id'> = {
             ...rawPayload,
             donor_id: BigInt(rawPayload.donor_id),
             event_id: BigInt(rawPayload.event_id),

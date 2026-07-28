@@ -1,9 +1,10 @@
 import { ApiResponse } from "@/types/api_res_type";
-import { ViewDonorPartial, ViewDonor } from "@/types/donor_type";
+import { ViewDonorPartial } from "@/types/donor_type";
 
 export interface SubmitDonationPayload {
     donor_id: bigint;
     event_id: bigint;
+    staff_id: string;
     blood_bag_id: string;
     blood_type: string;
     volume: number;
