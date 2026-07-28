@@ -78,20 +78,18 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 return { success: false, message: "Donor not found in database" };
             }
 
-            // 3-Month Eligibility
             let nextEligibleDate = undefined;
+
+            if (dbDonor.next_eligibility) {
+                nextEligibleDate = new Date(dbDonor.next_eligibility).toISOString().split('T')[0];
+            }
+
             let recentVisitEvent = "No previous visits";
             let recentVisitDate = "N/A";
 
             if (latestVisit) {
                 recentVisitEvent = latestVisit.eventName;
                 recentVisitDate = latestVisit.date;
-                
-                if (latestVisit.isSuccess && latestVisit.date) {
-                    const lastDateObj = new Date(latestVisit.date);
-                    lastDateObj.setMonth(lastDateObj.getMonth() + 3);
-                    nextEligibleDate = lastDateObj.toISOString().split('T')[0];
-                }
             }
 
             const safeTotalVisits = Math.max(metrics.totalVisits, metrics.successfulDonations);
@@ -124,6 +122,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                     
                     recentVisitEvent: recentVisitEvent,          
                     recentVisitDate: recentVisitDate,      
+                    
                     nextEligibleDate: nextEligibleDate
                 }
             };

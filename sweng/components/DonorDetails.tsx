@@ -28,17 +28,18 @@ const getEligibility = (donor: any) => {
     if (!donor.nextEligibleDate) 
         return { label: "Eligible to Donate", color: "text-green-700" };
 
-    const today = new Date();
-    const eligibleDate = new Date(donor.nextEligibleDate);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isRecovering = donor.nextEligibleDate > todayStr;
 
-    today.setHours(0, 0, 0, 0);
-    eligibleDate.setHours(0, 0, 0, 0);
+    if (isRecovering) {
 
-    if (eligibleDate > today) {
-        return { label: "In Recovery Window", color: "text-yellow-800" };
-    } else {
-        return { label: "Eligible to Donate", color: "text-green-700" };
+        return { 
+            label: `In Recovery`, 
+            color: "text-yellow-800" 
+        };
     }
+
+    return { label: "Eligible to Donate", color: "text-green-700" };
 };
 
 export default function DonorDetails({ donor }: { donor: DonorDetails }) {

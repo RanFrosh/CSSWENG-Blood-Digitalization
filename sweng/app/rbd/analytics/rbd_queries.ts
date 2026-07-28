@@ -73,23 +73,22 @@ export class ImpAnalyticsData implements AnalyticsData {
 
         // Eligibility Filter
         if (eligibilityFilter && eligibilityFilter.trim() !== "" && eligibilityFilter !== "All") {
-            const cutoffDate = new Date();
-            cutoffDate.setMonth(cutoffDate.getMonth() - 3);
-            const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+            const nowStr = new Date().toISOString(); 
 
             if (eligibilityFilter === "Eligible") {
                 conditions.push(
                     and(
                         eq(donor.active, true),
                         or(
-                            isNull(latestSuccessSq.last_date),
-                            lte(latestSuccessSq.last_date, cutoffStr)
+                            isNull(donor.next_eligibility),
+                            lte(donor.next_eligibility, nowStr)
                         )
                     )
                 );
             } else if (eligibilityFilter === "Recovery") {
                 conditions.push(
-                    gt(latestSuccessSq.last_date, cutoffStr)
+                    gt(donor.next_eligibility, nowStr)
                 );
             }
         }
@@ -125,7 +124,8 @@ export class ImpAnalyticsData implements AnalyticsData {
                 blood: donor.blood,
                 sex: donor.sex,
                 verifiedBlood: donor.verifiedBlood,
-                last_donation_date: latestSuccessSq.last_date
+                last_donation_date: latestSuccessSq.last_date,
+                next_eligiblilty: donor.next_eligibility
             })
             .from(donor)
             .leftJoin(latestSuccessSq, eq(donor.id, latestSuccessSq.donor_id))
@@ -136,10 +136,8 @@ export class ImpAnalyticsData implements AnalyticsData {
         return rawDonors.map(row => {
             let nextEligibleDate = undefined;
 
-            if (row.last_donation_date) {
-                const dateObj = new Date(row.last_donation_date);
-                dateObj.setMonth(dateObj.getMonth() + 3);
-                nextEligibleDate = dateObj.toISOString().split('T')[0];
+            if (row.next_eligiblilty) {
+                nextEligibleDate = new Date(row.next_eligiblilty).toISOString().split('T')[0];
             }
 
             return {
