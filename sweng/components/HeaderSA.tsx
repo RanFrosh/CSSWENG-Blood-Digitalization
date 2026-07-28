@@ -16,6 +16,10 @@ export default function HeaderSA() {
         router.push("/sa/management");
     };
 
+    const goMyProfile = () => {
+        router.push("/sa/profile");
+    };
+
     const goEventMng = () => {
         router.push(`/sa/management/events`);
     };
@@ -32,10 +36,6 @@ export default function HeaderSA() {
         router.push(`/sa/management/logs/data`);
     };
 
-    const goRequests = () => {
-        router.push("/sa/requests");
-    };
-    
     const goLogout = () => {
         router.push("/landing");
     };
@@ -45,6 +45,11 @@ export default function HeaderSA() {
             name: "Home",
             path: "/sa/management",
             onClick: goHome,
+        },
+        {
+            name: "Profile",
+            path: "/sa/profile",
+            onClick: goMyProfile,
         },
         {
             name: "Event Management",
@@ -65,11 +70,6 @@ export default function HeaderSA() {
             name: "Database Logs",
             path: "/sa/management/logs/data",
             onClick: goDataLog,
-        },
-        {
-            name: "Requests",
-            path: "/sa/requests",
-            onClick: goRequests,
         },
     ];
 

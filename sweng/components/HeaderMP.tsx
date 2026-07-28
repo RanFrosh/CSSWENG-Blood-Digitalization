@@ -15,6 +15,10 @@ export default function HeaderMP() {
         router.push("/mp/events");
     };
 
+    const goMyProfile = () => {
+        router.push("/mp/profile");
+    };
+
     const goEventHome = () => {
         if (eventId) router.push(`/mp/events/${eventId}`);
     };
@@ -33,11 +37,18 @@ export default function HeaderMP() {
 
     const navLinks = [];
 
-    navLinks.push({
-        name: "My Events",
-        path: "/mp/events",
-        onClick: goMyEvents,
-    });
+    navLinks.push(
+        {
+            name: "Home",
+            path: "/mp/events",
+            onClick: goMyEvents,
+        },
+        {
+            name: "Profile",
+            path: "/mp/profile",
+            onClick: goMyProfile,
+        },
+    );
 
     if (eventId) {
         navLinks.push({

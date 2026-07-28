@@ -14,6 +14,10 @@ export default function HeaderOA() {
         router.push("/rs/events");
     };
 
+    const goMyProfile = () => {
+        router.push("/rs/profile");
+    };
+
     const goEventHome = () => {
         if (eventId) router.push(`/rs/events/${eventId}`);
     };
@@ -34,6 +38,11 @@ export default function HeaderOA() {
                   onClick: goMyEvents,
               },
               {
+                  name: "Profile",
+                  path: "/rs/profile",
+                  onClick: goMyProfile,
+              },
+              {
                   name: "Event Home",
                   path: `/rs/events/${eventId}`,
                   onClick: goEventHome,
@@ -49,6 +58,11 @@ export default function HeaderOA() {
                   name: "My Events",
                   path: "/rs/events",
                   onClick: goMyEvents,
+              },
+              {
+                  name: "Profile",
+                  path: "/rs/profile",
+                  onClick: goMyProfile,
               },
           ];
 
