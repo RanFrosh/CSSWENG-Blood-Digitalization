@@ -7,6 +7,8 @@ import { ImpLabStaffModel } from "./ls.query";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { ViewEvents } from "@/types/event_type";
 import { revalidatePath } from "next/cache";
+import { bigintToStr } from "@/app/global/serializer/serial";
+import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
 
 async function getLabController() {
 
@@ -75,5 +77,42 @@ export async function acceptDonor(queueIdStr: string, eventIdStr: string) {
     } catch (err: any) {
         console.error("Action Error:", err);
         return { success: false, message: "Failed to communicate with server." };
+    }
+}
+
+export async function retrieveDonor (donorIdStr: string) {
+
+    try {
+        const controller = await getLabController();
+        const numericDonorId = BigInt(donorIdStr);
+
+        const res = await controller.invokeGetSingleDonor({ id: numericDonorId });
+
+        return bigintToStr(res);
+
+    } catch (err: any) {
+        console.error("Error retrieving donor:", err);
+        return { success: false, message: "Failed to load donor record." };
+    }
+}
+
+export async function submitDonationRecordAction(rawPayload: any) {
+
+    try {
+        const controller = await getLabController();
+
+        const formattedPayload: SubmitDonationPayload = {
+            ...rawPayload,
+            donor_id: BigInt(rawPayload.donor_id),
+            event_id: BigInt(rawPayload.event_id),
+        };
+
+        const res = await controller.invokeSubmitDonationRecord(formattedPayload);
+
+        return bigintToStr(res);
+
+    } catch (err: any) {
+        console.error("Error submitting record:", err);
+        return { success: false, message: "Failed to process submission." };
     }
 }

@@ -1,4 +1,17 @@
 import { ApiResponse } from "@/types/api_res_type";
+import { ViewDonorPartial, ViewDonor } from "@/types/donor_type";
+
+export interface SubmitDonationPayload {
+    donor_id: bigint;
+    event_id: bigint;
+    blood_bag_id: string;
+    blood_type: string;
+    volume: number;
+    outcome: string;
+    quality: string;
+    observations: string;
+    collection_date: string;
+}
 
 export interface LabStaffData {
     getStaffEvents (staffId: string, statusTab?: string): Promise<any>;
@@ -6,6 +19,8 @@ export interface LabStaffData {
     getEventQueueWithDonors(eventId: bigint, stationFilter?: string | null): Promise<any>;
     getStaffStatusForEvent(eventId: bigint, staffId: string): Promise<any>;
     acceptDonor(queueId: bigint, staffProfileId: string): Promise<any>;
+    getSingleDonor(filter: ViewDonorPartial): Promise<any>;
+    submitDonationRecord(payload: SubmitDonationPayload): Promise<any>;
 }
 
 export interface LabStaffController {
@@ -14,4 +29,6 @@ export interface LabStaffController {
     invokeGetQueue(eventIdStr: string, station?: string | null): Promise<ApiResponse<any>>;
     invokeGetStaffStatus(eventIdStr: string): Promise<ApiResponse<any>>;
     invokeAcceptDonor(queueIdStr: string, eventIdStr: string): Promise<ApiResponse<any>>;
+    invokeGetSingleDonor(filter: ViewDonorPartial): Promise<ApiResponse<any>>;
+    invokeSubmitDonationRecord(payload: SubmitDonationPayload): Promise<ApiResponse<any>>;
 }

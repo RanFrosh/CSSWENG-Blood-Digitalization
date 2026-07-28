@@ -5,8 +5,11 @@ import { donor } from "@/db/models/donor";
 import { event_log } from "@/db/models/event_log";
 import { event_queue } from "@/db/models/event_queue";
 import { profiles } from "@/db/models/profiles";
+import { blood_bag } from "@/db/models/blood_bag";
 import { assigned_staff } from "@/db/models/assigned_staff";
 import { city } from "@/db/models/city";
+import { ViewDonorPartial, ViewDonor } from "@/types/donor_type";
+import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
 
 export class ImpLabStaffModel implements LabStaffData {
 
@@ -135,5 +138,93 @@ export class ImpLabStaffModel implements LabStaffData {
             .returning();
 
         return updatedQueueRow;
+    }
+
+    async getSingleDonor(filter: ViewDonorPartial) {
+
+        try {
+
+            if (Object.keys(filter).length === 0) {
+                return { success: false, message: "No search filters provided." };
+            }
+
+            const filtersDonor: SQL[] = [];
+            
+            if (filter.id) 
+                filtersDonor.push(eq(donor.id, filter.id));
+
+            if (filter.sex) 
+                filtersDonor.push(eq(donor.sex, filter.sex));
+
+            if (filter.email) 
+                filtersDonor.push(eq(donor.email, filter.email));
+
+            if (filter.first_name) 
+                filtersDonor.push(eq(donor.first_name, filter.first_name));
+
+            if (filter.last_name) 
+                filtersDonor.push(eq(donor.last_name, filter.last_name));
+
+            if (filter.middle_name) 
+                filtersDonor.push(eq(donor.middle_name, filter.middle_name));
+
+            if (filter.mobile_no) 
+                filtersDonor.push(eq(donor.mobile_no, filter.mobile_no));
+
+            if (filter.blood) 
+                filtersDonor.push(eq(donor.blood, filter.blood));
+
+            if (filter.city_id) 
+                filtersDonor.push(eq(donor.city_id, filter.city_id));
+
+            filtersDonor.push(eq(donor.active, true));
+            filtersDonor.push(isNull(donor.delete_datetime));
+
+            const [result] = await orm
+                .select()
+                .from(donor)
+                .where(and(...filtersDonor))
+                .limit(1);
+
+            if (!result) 
+                return { success: false, message: "Donor not found." };
+            
+            return { success: true, message: "Donor retrieved", data: result };    
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }
+    }
+
+    async submitDonationRecord(payload: SubmitDonationPayload) {
+        try {
+
+            await orm.transaction(async (tx: any) => {
+                
+                await tx.insert(blood_bag).values({
+                    donor_id: payload.donor_id,
+                    event_id: payload.event_id,
+                    serial_number: payload.blood_bag_id,
+                    blood_type: payload.blood_type,
+                    volume_ml: payload.volume,
+                    //outcome: payload.outcome,
+                    //quality: payload.quality,
+                    //observations: payload.observations,
+                    collection_date: payload.collection_date, 
+                });
+
+                await tx.delete(event_queue)
+                    .where(
+                        and(
+                            eq(event_queue.donor_id, payload.donor_id),
+                            eq(event_queue.event_log_id, payload.event_id)
+                        )
+                    );
+            });
+
+            return { success: true, message: "Donation record saved successfully." };
+        } catch (err: any) {
+            console.error("Database error saving record:", err);
+            return { success: false, message: "Failed to save donation record." };
+        }
     }
 }

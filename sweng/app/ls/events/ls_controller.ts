@@ -1,6 +1,8 @@
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { helpGateKeep } from "../../global/helper_bouncer/bouncer";
 import { LabStaffController, LabStaffData } from "@/abstract/ls/ls_abstract";
+import { ViewDonorPartial, ViewDonor } from "@/types/donor_type";
+import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
 
 export class ImpLabStaffManager implements LabStaffController {
     
@@ -183,6 +185,27 @@ export class ImpLabStaffManager implements LabStaffController {
             console.error("Claim Donor Error:", error);
             return { success: false, message: "An error occurred while claiming the donor." };
         }
+    }
+
+    async invokeGetSingleDonor(filter: ViewDonorPartial) {
+
+        const res = await helpGateKeep(this.profileReader, 'viewdonor');
+
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message };
+        
+        return await this.labStaffModel.getSingleDonor(filter);        
+    }
+
+    async invokeSubmitDonationRecord(payload: SubmitDonationPayload) {
+    
+        const auth = await helpGateKeep(this.profileReader, 'updatequeue');
+        
+        if (!auth.success || !auth.data) {
+            return { success: false, message: auth.message };
+        }
+
+        return await this.labStaffModel.submitDonationRecord(payload);
     }
 
 }

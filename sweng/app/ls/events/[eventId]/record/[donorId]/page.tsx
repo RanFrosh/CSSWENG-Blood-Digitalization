@@ -1,9 +1,12 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Header from "@/components/HeaderLS";
-import { retrieveDonor } from "@/app/queue/queue_action";
+import { retrieveDonor } from "../../../ls_action";
 import { ViewDonor } from "@/types/donor_type";
+import DonorDetails from "@/components/DonorDetails";
+import { submitDonationRecordAction } from "../../../ls_action";
 
 export default function RecordPage() {
     
@@ -12,20 +15,20 @@ export default function RecordPage() {
     const eventId = params.eventId as string;
     const donorId = params.donorId as string;
 
+    const [selectedDonor, setSelectedDonor] = useState<any>(null);
     const [donorInfo, setDonorInfo] = useState<ViewDonor | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
 
     const [bloodBagId, setBloodBagId] = useState("");
     const [volumeCollected, setVolumeCollected] = useState("");
-    const [completionTime, setCompletionTime] = useState("");
     const [collectionOutcome, setCollectionOutcome] = useState("");
     const [bloodQuality, setBloodQuality] = useState("");
     const [observations, setObservations] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [showModal, setShowModal] = useState(false);
 
-    // Fetch the donor data when the page loads
     useEffect(() => {
         const fetchDonor = async () => {
 
@@ -35,11 +38,14 @@ export default function RecordPage() {
             setIsLoading(true);
             
             try {
-                const res = await retrieveDonor(BigInt(donorId));
+                const res = await retrieveDonor(donorId as string);
+
                 if (res.success && res.data) {
                     setDonorInfo(res.data);
+                    setSelectedDonor(res.data);
                 } else {
                     setErrorMessage(res.message || "Failed to load donor data.");
+                    setSelectedDonor(undefined);
                 }
             } catch (err) {
                 setErrorMessage("Database connection error.");
@@ -51,36 +57,48 @@ export default function RecordPage() {
         fetchDonor();
     }, [donorId]);
 
-    // Helper to calculate age if your DB stores DOB
-    const calculateAge = (dob: string | Date) => {
-        const birthDate = new Date(dob);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
-    };
+    const isFormValid = 
+        bloodBagId && 
+        collectionOutcome && 
+        (collectionOutcome === "Incomplete" || (volumeCollected && bloodQuality));
 
     const handleConfirmRecord = async () => {
-        // TODO: Call your Server Action here to save the blood bag 
-        // and update the queue status to 'Completed'!
-        
-        // Example payload ready for the backend:
-        /*
-        const payload = {
-            blood_bag_id: bloodBagId,
-            volume: volumeCollected,
-            time: completionTime,
-            outcome: collectionOutcome,
-            quality: bloodQuality,
-            observations: observations
-        }
-        */
 
-        setShowModal(false);
-        router.push(`/ls/events/${eventId}`);
+        setIsSubmitting(true);
+
+        const exactDate = new Date();
+        const currentYear = exactDate.getFullYear();
+        
+        const formattedSerialNumber = `BAG-${currentYear}-${bloodBagId}`;
+        
+        try {
+            const payload = {
+                donor_id: donorId,
+                event_id: eventId,
+                blood_bag_id: formattedSerialNumber,
+                blood_type: donorInfo?.blood,
+                volume: Number(volumeCollected), 
+                outcome: collectionOutcome,
+                quality: bloodQuality,
+                observations: observations,
+                collection_date: exactDate.toISOString()
+            };
+
+            const res = await submitDonationRecordAction(payload);
+            
+            if (res.success) {
+                setShowModal(false);
+                router.push(`/ls/events/${eventId}`);
+            } else {
+                alert(res.message);
+            }
+
+        } catch (error) {
+            console.error("Failed to submit record:", error);
+            alert("An unexpected error occurred. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (isLoading) {
@@ -118,58 +136,20 @@ export default function RecordPage() {
                 </section>
 
                 {/* Donor Info Section */}
-                <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                    <div className="flex flex-row items-center justify-between gap-5 flex-wrap">
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Basic Donor Information
-                        </h2>
-                        <div>
-                            <span className="bg-[#002940] text-white border-2 border-[#002940] px-5 py-3 rounded-full text-[18px] font-semibold">
-                                Donor ID: {donorInfo.id.toString()}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-4 gap-[0.25in]">
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">Name</p>
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.first_name} {donorInfo.last_name}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">Age</p>
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {/* Using calculateAge assuming you have a dob field */}
-                                {donorInfo.birthdate ? calculateAge(donorInfo.birthdate) : "N/A"}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">Sex</p>
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.sex || "N/A"}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">Blood Type</p>
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.blood || "Unknown"}
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                <DonorDetails donor={{
+                    ...selectedDonor,
+                    bloodType: selectedDonor.blood
+                }}/>
 
                 <form className="mt-[0.35in] flex flex-col gap-[0.35in]" onSubmit={(e) => e.preventDefault()}>
+
                     {/* Donation Details Section */}
                     <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
                         <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Donation Details
+                            Donation Details & Outcome
                         </h2>
 
-                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[0.25in]">
+                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 gap-[0.25in]">
                             <div className="flex flex-col gap-[5px]">
                                 <label className="text-[18px] font-semibold text-[#002940]">Blood Bag ID</label>
                                 <input
@@ -189,26 +169,11 @@ export default function RecordPage() {
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
-                            
-                            <div className="flex flex-col gap-[5px]">
-                                <label className="text-[18px] font-semibold text-[#002940]">Completion Time</label>
-                                <input
-                                    type="time"
-                                    value={completionTime}
-                                    onChange={(e) => setCompletionTime(e.target.value)}
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                                />
-                            </div>
                         </div>
-                    </section>
 
-                    {/* Collection Outcome Section */}
-                    <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Collection Outcome
-                        </h2>
+                        <hr className="my-[0.35in] border-t-2 border-dashed border-[#c0cad0]/50" />
 
-                        <div className="mt-[0.25in] grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-[0.25in]">
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                                 <p className="text-[18px] font-semibold text-[#002940]">Donation Outcome</p>
                                 <div className="mt-5 flex flex-row gap-5 flex-wrap text-[18px] text-[#002940]">
@@ -285,7 +250,7 @@ export default function RecordPage() {
                                 type="button"
                                 onClick={() => setShowModal(true)}
                                 // Disable button if crucial fields are missing
-                                disabled={!bloodBagId || !collectionOutcome}
+                                disabled={!isFormValid || isSubmitting}
                                 className={`min-w-[1.5in] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold transition ${
                                     !bloodBagId || !collectionOutcome 
                                         ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
@@ -301,7 +266,7 @@ export default function RecordPage() {
 
             {/* The Confirmation Modal */}
             {showModal && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
                     <div className="bg-white p-8 rounded-[16px] shadow-2xl max-w-md w-full border-2 border-[#002940]">
                         <h2 className="text-2xl font-['Montserrat'] font-bold text-[#002940] mb-4">
                             Confirm Record
