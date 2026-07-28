@@ -250,11 +250,10 @@ export default function SearchEventsPage() {
                                 onChange={(e) => setSortBy(e.target.value)}
                                 className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
                             >
-                                {/* Date Options */}
-                                <option value ="Date">Date (earliest)</option>
+                                <option value="Default">ID (ascending)</option>
+                                <option value="ID (Descending)">ID (descending)</option>
+                                <option value ="Date (Earliest)">Date (earliest)</option>
                                 <option value ="Date (Oldest)">Date (oldest)</option>
-                                
-                                {/* Partner Options */}
                                 <option value = "Partner (A-Z)">Partner (A-Z)</option>
                                 <option value = "Partner (Z-A)">Partner (Z-A)</option>
                             </select>

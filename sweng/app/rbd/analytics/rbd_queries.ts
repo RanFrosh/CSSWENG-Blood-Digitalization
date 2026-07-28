@@ -251,6 +251,12 @@ export class ImpAnalyticsData implements AnalyticsData {
         let orderLogic: any = desc(event_log.event_date);
 
         switch (sortBy) {
+            case "ID (Descending)":
+                orderLogic = desc(event_log.id);
+                break;
+            case "Date (Earliest)":
+                orderLogic = desc(event_log.event_date);
+                break;
             case "Date (Oldest)":
                 orderLogic = asc(event_log.event_date);
                 break;
@@ -266,9 +272,9 @@ export class ImpAnalyticsData implements AnalyticsData {
             case "City (Z-A)":
                 orderLogic = desc(city.name);
                 break;
-            case "Date":
+            case "ID (Ascending)":
             default:
-                orderLogic = desc(event_log.event_date);
+                orderLogic = asc(event_log.id);
                 break;
         }
 

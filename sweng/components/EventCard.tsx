@@ -11,15 +11,25 @@ export const EventCard = ({ event, actionButton }: EventCardProps) => {
         <div className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm">
             {/* Event Header */}
             <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between">
+
                 <div className="flex flex-row items-center gap-[0.15in]">
+
                     <h2 className="text-[24px] font-['Montserrat'] font-bold">
                         {event.name}
                     </h2>
+
                     <span className="px-[12px] py-[6px] rounded-full text-[16px] font-semibold bg-white text-[#002940]">
                         {event.status}
                     </span>
+
                 </div>
-                {actionButton}
+
+                <div className="flex flex-row items-center gap-4">
+                    <span className="px-[12px] py-[6px] rounded-full text-[16px] font-semibold bg-white text-[#002940]">
+                        Event ID: {event.id}
+                    </span>
+                    {actionButton}
+                </div>
             </div>
 
             {/* Event Details */}
