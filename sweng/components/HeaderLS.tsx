@@ -41,6 +41,10 @@ export default function HeaderLS() {
         router.push("/ls/events");
     };
 
+    const goMyProfile = () => {
+        router.push("/ls/profile");
+    };
+
     const goEventHome = () => {
         if (eventId) {
             router.push(`/ls/events/${eventId}`);
@@ -77,11 +81,18 @@ export default function HeaderLS() {
 
     const navLinks: NavLink[] = [];
 
-    navLinks.push({
-        name: "Home",
-        path: "/ls/events",
-        onClick: goMyEvents,
-    });
+    navLinks.push(
+        {
+            name: "Home",
+            path: "/ls/events",
+            onClick: goMyEvents,
+        },
+        {
+            name: "Profile",
+            path: "/ls/profile",
+            onClick: goMyProfile,
+        },
+    );
 
     if (eventId) {
         navLinks.push({

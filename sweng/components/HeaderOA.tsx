@@ -13,6 +13,10 @@ export default function HeaderOA() {
         router.push("/oa/events");
     };
 
+    const goMyProfile = () => {
+        router.push("/oa/profile");
+    };
+
     const goEventHome = () => {
         if (eventId) router.push(`/oa/events/${eventId}`);
     };
@@ -41,6 +45,11 @@ export default function HeaderOA() {
                   onClick: goMyEvents,
               },
               {
+                  name: "Profile",
+                  path: "/oa/profile",
+                  onClick: goMyProfile,
+              },
+              {
                   name: "Event Home",
                   path: `/oa/events/${eventId}`,
                   onClick: goEventHome,
@@ -66,6 +75,11 @@ export default function HeaderOA() {
                   name: "Home",
                   path: "/oa/events",
                   onClick: goMyEvents,
+              },
+              {
+                  name: "Profile",
+                  path: "/oa/profile",
+                  onClick: goMyProfile,
               },
           ];
 

@@ -15,6 +15,10 @@ export default function HeaderRBD() {
         router.push("/rbd/analytics");
     };
 
+    const goMyProfile = () => {
+        router.push("/rbd/profile");
+    };
+
     // for some reason this specific folder keeps bugging so im using direct link lmao
     const goEventAnalytics = () => {
         location.href = `/rbd/analytics/events/`;
@@ -34,17 +38,22 @@ export default function HeaderRBD() {
 
     const navLinks: NavLink[] = [
         {
-            name: "Analytics Home",
+            name: "Home",
             path: "/rbd/analytics",
             onClick: goAnalyticsHome,
         },
         {
-            name: "Event Search",
+            name: "Profile",
+            path: "/rbd/profile",
+            onClick: goMyProfile,
+        },
+        {
+            name: "Event Analytics",
             path: "/rbd/analytics/events",
             onClick: goEventAnalytics,
         },
         {
-            name: "Donor Search",
+            name: "Donor Analytics",
             path: "/rbd/analytics/donors",
             onClick: goDonorAnalytics,
         },
