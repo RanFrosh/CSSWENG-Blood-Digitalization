@@ -10,11 +10,11 @@ export default function DonorAnalyticsPage() {
 
     const router = useRouter();
 
-    const [activeTab, setActiveTab] = useState("All");
-
     // Filters
     const [sexFilter, setSexFilter] = useState("All");
     const [bloodFilter, setBloodFilter] = useState("All");
+    const [eligibilityFilter, setEligibilityFilter] = useState("All");
+
     const [sortBy, setSortBy] = useState("Default");
 
     // Search
@@ -39,7 +39,13 @@ export default function DonorAnalyticsPage() {
             setErrorMessage("");
 
             try {
-                const result = await fetchFilteredDonors(activeSearch, bloodFilter, sexFilter, sortBy);
+                const result = await fetchFilteredDonors({
+                    search: activeSearch, 
+                    bloodFilter: bloodFilter, 
+                    sexFilter: sexFilter,
+                    eligibilityFilter: eligibilityFilter,
+                    sortBy: sortBy
+                });
 
                 if (result.success && result.data) {
                     setDonors(result.data);
@@ -55,7 +61,7 @@ export default function DonorAnalyticsPage() {
 
         loadDonors();
 
-    }, [activeSearch, bloodFilter, sexFilter, sortBy]);
+    }, [activeSearch, bloodFilter, sexFilter, eligibilityFilter, sortBy]);
 
     const viewDonorAnalytics = (donorId: string) => {
         router.push(`/rbd/analytics/donors/${donorId}`);
@@ -181,6 +187,23 @@ export default function DonorAnalyticsPage() {
                             </select>
                         </div>
 
+                        {/* Eligibility Filter */}
+                        <div className="w-full md:w-[1.5in] flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Eligibility
+                            </label>
+                            
+                            <select 
+                                value={eligibilityFilter}
+                                onChange={(e) => setEligibilityFilter(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="All">All</option>
+                                <option value="Eligible">Eligible</option>
+                                <option value="Recovery">In Recovery</option>
+                            </select>
+                        </div>
+
                         {/* Sorting */}
                         <div className="w-full md:w-[2in] flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">
@@ -195,7 +218,7 @@ export default function DonorAnalyticsPage() {
                                 <option value="Default">ID (ascending)</option>
                                 <option value="ID (Descending)">ID (descending)</option>
                                 <option value="Age (Youngest)">Age (ascending)</option>
-                                <option value="Age (Oldest">Age (descending)</option>
+                                <option value="Age (Oldest)">Age (descending)</option>
                             </select>
                         </div>
                     </div>

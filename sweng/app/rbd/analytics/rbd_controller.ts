@@ -13,7 +13,13 @@ export class ImpAnalyticsManager implements AnalyticsController {
         this.profileReader = injectProfileReader;
     }
 
-    async invokeGetFilteredDonors(search: string, bloodFilter: string, sexFilter: string, sortBy: string) {
+    async invokeGetFilteredDonors(filters: { 
+        search?: string;
+        bloodFilter?: string;
+        sexFilter?: string;
+        eligibilityFilter?: string;
+        sortBy?: string;
+    } = {}) {
         
         const authRes = await helpGateKeep(this.profileReader, 'view_analytics');
         
@@ -22,7 +28,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
         }
 
         try {
-            const rawDonors = await this.analyticsModel.getFilteredDonors(search, bloodFilter, sexFilter, sortBy);
+            const rawDonors = await this.analyticsModel.getFilteredDonors(filters);
 
             const formattedDonors = rawDonors.map((d: any) => ({
 
@@ -37,7 +43,8 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 blood: d.blood || 'Unknown',
                 verifiedBlood: d.verifiedBlood,
                 status: d.active ? 'Active' : 'Inactive',
-                assessmentStatus: d.assessment_status
+                assessmentStatus: d.assessment_status,
+                nextEligibleDate: d.nextEligibleDate
             }));
 
             return {
@@ -71,20 +78,18 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 return { success: false, message: "Donor not found in database" };
             }
 
-            // 3-Month Eligibility
             let nextEligibleDate = undefined;
+
+            if (dbDonor.next_eligibility) {
+                nextEligibleDate = new Date(dbDonor.next_eligibility).toISOString().split('T')[0];
+            }
+
             let recentVisitEvent = "No previous visits";
             let recentVisitDate = "N/A";
 
             if (latestVisit) {
                 recentVisitEvent = latestVisit.eventName;
                 recentVisitDate = latestVisit.date;
-                
-                if (latestVisit.isSuccess && latestVisit.date) {
-                    const lastDateObj = new Date(latestVisit.date);
-                    lastDateObj.setMonth(lastDateObj.getMonth() + 3);
-                    nextEligibleDate = lastDateObj.toISOString().split('T')[0];
-                }
             }
 
             const safeTotalVisits = Math.max(metrics.totalVisits, metrics.successfulDonations);
@@ -117,6 +122,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                     
                     recentVisitEvent: recentVisitEvent,          
                     recentVisitDate: recentVisitDate,      
+                    
                     nextEligibleDate: nextEligibleDate
                 }
             };
