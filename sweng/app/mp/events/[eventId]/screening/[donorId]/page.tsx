@@ -171,47 +171,39 @@ export default function ScreeningPage() {
                             Vital Signs
                         </h2>
 
-                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
+                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[0.25in]">
                             <div className="flex flex-col gap-[5px]">
                                 <label className="text-[18px] font-semibold text-[#002940]">
-                                    Temperature
+                                    Body Temperature (°C) <span className="text-[#c0392b]">*</span>
                                 </label>
 
                                 <input
                                     type="text"
+                                    placeholder="e.g. 36.5"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
 
                             <div className="flex flex-col gap-[5px]">
                                 <label className="text-[18px] font-semibold text-[#002940]">
-                                    Blood Pressure
+                                    Blood Pressure (mmHg) <span className="text-[#c0392b]">*</span>
                                 </label>
 
                                 <input
                                     type="text"
+                                    placeholder="e.g. 120/80"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
 
                             <div className="flex flex-col gap-[5px]">
                                 <label className="text-[18px] font-semibold text-[#002940]">
-                                    Pulse Rate
+                                    Body Weight (kg) <span className="text-[#c0392b]">*</span>
                                 </label>
 
                                 <input
                                     type="text"
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                                />
-                            </div>
-
-                            <div className="flex flex-col gap-[5px]">
-                                <label className="text-[18px] font-semibold text-[#002940]">
-                                    Weight
-                                </label>
-
-                                <input
-                                    type="text"
+                                    placeholder="e.g. 60"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
@@ -223,56 +215,65 @@ export default function ScreeningPage() {
                             Medical History
                         </h2>
 
-                        <div className="mt-[0.25in] grid grid-cols-1 lg:grid-cols-2 gap-4">
-                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                                <p className="text-[18px] font-semibold text-[#002940]">
-                                    Taken pain relievers within the past 48 hours
-                                </p>
+                        <p className="mt-2 text-[15px] text-[#5a6b74]">
+                            All items are required. Please answer Yes or No for each.
+                        </p>
 
-                                <div className="mt-4 flex flex-row gap-6 text-[18px] text-[#002940]">
-                                    <label><input type="radio" name="pain-relievers" /> Yes</label>
-                                    <label><input type="radio" name="pain-relievers" /> No</label>
+                        <div className="mt-[0.25in] flex flex-col divide-y-2 divide-[#e4eaee] border-2 border-[#c0cad0] rounded-[14px] overflow-hidden">
+                            {[
+                                { name: "pain-relievers", question: "Taken pain relievers within the past 48 hours" },
+                                { name: "aspirin", question: "Taken aspirin within the past 5 days" },
+                                { name: "antibiotics", question: "Taken antibiotics within the past 2 weeks" },
+                                { name: "anti-epileptic", question: "Currently taking anti-epileptic medication" },
+                                { name: "recent-illness", question: "Experienced fever, cold, flu, or infection within the past 2 weeks" },
+                                { name: "chronic-condition", question: "Diagnosed with a chronic illness (e.g. diabetes, hypertension, heart disease)" },
+                                { name: "recent-surgery", question: "Undergone surgery or major dental work within the past 6 months" },
+                                { name: "recent-tattoo", question: "Gotten a tattoo, piercing, or acupuncture within the past 6 months" },
+                                { name: "recent-donation", question: "Donated blood within the past 3 months" },
+                                { name: "pregnancy", question: "Currently pregnant, breastfeeding, or given birth within the past 6 months" },
+                                { name: "alcohol", question: "Consumed alcohol within the past 24 hours" },
+                                { name: "travel-history", question: "Traveled outside the country within the past 12 months" },
+                                { name: "blood-transfusion", question: "Received a blood transfusion within the past 12 months" },
+                                { name: "hepatitis-jaundice", question: "Had hepatitis, jaundice, or liver disease" },
+                                { name: "hiv-std", question: "Diagnosed with or treated for HIV/AIDS or any sexually transmitted disease" },
+                                { name: "malaria", question: "Had malaria or lived in/traveled to a malaria-risk area within the past 3 years" },
+                                { name: "allergies", question: "Have any known drug or food allergies" },
+                                { name: "vaccination", question: "Received any vaccination within the past 4 weeks" },
+                                { name: "weight-loss", question: "Experienced unexplained weight loss within the past 6 months" },
+                                { name: "bleeding-disorder", question: "Diagnosed with a bleeding or clotting disorder" },
+                                { name: "cancer-history", question: "Have a history of cancer or malignant disease" },
+                                { name: "high-risk-contact", question: "Had close contact with a person with a serious infectious disease within the past 4 weeks" },
+                            ].map((item, index) => (
+                                <div
+                                    key={item.name}
+                                    className="flex flex-row items-center justify-between gap-4 flex-wrap bg-[#f9fdff] p-5"
+                                >
+                                    <div className="flex flex-row items-center gap-4">
+                                        <span className="flex items-center justify-center w-[32px] h-[32px] rounded-full bg-[#002940] text-white text-[16px] font-semibold shrink-0">
+                                            {index + 1}
+                                        </span>
+
+                                        <p className="text-[18px] font-semibold text-[#002940]">
+                                            {item.question} <span className="text-[#c0392b]">*</span>
+                                        </p>
+                                    </div>
+
+                                    <div className="flex flex-row gap-6 text-[18px] text-[#002940] shrink-0">
+                                        <label className="flex items-center gap-2">
+                                            <input type="radio" name={item.name} /> Yes
+                                        </label>
+                                        <label className="flex items-center gap-2">
+                                            <input type="radio" name={item.name} /> No
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                                <p className="text-[18px] font-semibold text-[#002940]">
-                                    Taken aspirin within the past 5 days
-                                </p>
-
-                                <div className="mt-4 flex flex-row gap-6 text-[18px] text-[#002940]">
-                                    <label><input type="radio" name="aspirin" /> Yes</label>
-                                    <label><input type="radio" name="aspirin" /> No</label>
-                                </div>
-                            </div>
-
-                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                                <p className="text-[18px] font-semibold text-[#002940]">
-                                    Taken antibiotics within the past 2 weeks
-                                </p>
-
-                                <div className="mt-4 flex flex-row gap-6 text-[18px] text-[#002940]">
-                                    <label><input type="radio" name="antibiotics" /> Yes</label>
-                                    <label><input type="radio" name="antibiotics" /> No</label>
-                                </div>
-                            </div>
-
-                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                                <p className="text-[18px] font-semibold text-[#002940]">
-                                    Taking anti-epileptic medication
-                                </p>
-
-                                <div className="mt-4 flex flex-row gap-6 text-[18px] text-[#002940]">
-                                    <label><input type="radio" name="anti-epileptic" /> Yes</label>
-                                    <label><input type="radio" name="anti-epileptic" /> No</label>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </section>
 
                     <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
                         <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Final Screening Decision
+                            Final Screening Decision <span className="text-[#c0392b]">*</span>
                         </h2>
 
                         <div className="mt-[0.25in]">
