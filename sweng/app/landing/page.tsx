@@ -87,7 +87,7 @@ export default function Home() {
                 router.push("/rbd/analytics");
                 break;
             case "super_admin":
-                router.push("/sa/page");
+                router.push("/sa/management");
                 break;
             default:
                 setErrorMessage("Unauthorized role detected.");
