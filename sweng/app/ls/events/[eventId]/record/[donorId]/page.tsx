@@ -71,6 +71,11 @@ export default function RecordPage() {
         
         const formattedSerialNumber = `BAG-${currentYear}-${bloodBagId}`;
         
+        if (Number(volumeCollected) > 450) {
+            alert("Donation volume cannot exceed 450 mL.");
+            return; 
+        }
+
         try {
             const payload = {
                 donor_id: donorId,
@@ -164,6 +169,8 @@ export default function RecordPage() {
                                 <label className="text-[18px] font-semibold text-[#002940]">Volume Collected (mL)</label>
                                 <input
                                     type="number"
+                                    min="0"
+                                    max="450"
                                     value={volumeCollected}
                                     onChange={(e) => setVolumeCollected(e.target.value)}
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"

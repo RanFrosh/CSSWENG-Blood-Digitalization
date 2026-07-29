@@ -1,5 +1,5 @@
 import { orm } from "../../../db/drizzle";
-import { eq, SQL, and, asc, isNull } from "drizzle-orm";
+import { eq, SQL, and, isNull, ne, or, ilike, asc, desc } from "drizzle-orm";
 import { LabStaffData } from "@/abstract/ls/ls_abstract";
 import { donor } from "@/db/models/donor";
 import { event_log } from "@/db/models/event_log";
@@ -8,17 +8,87 @@ import { profiles } from "@/db/models/profiles";
 import { blood_bag } from "@/db/models/blood_bag";
 import { assigned_staff } from "@/db/models/assigned_staff";
 import { city } from "@/db/models/city";
-import { ViewDonorPartial, ViewDonor } from "@/types/donor_type";
+import { ViewDonorPartial } from "@/types/donor_type";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
 
 export class ImpLabStaffModel implements LabStaffData {
 
-    async getStaffEvents (staffId: string, statusTab?: string) {
+    async getStaffEvents (staffId: string, filters: { 
+        search?: string;
+        status?: string;
+        partner?: string;
+        selectedCity?: string;
+        sortBy?: string;
+    } = {}) {
 
-        const filters: SQL[] = [eq(assigned_staff.profiles_id, staffId)];
+        const { 
+            search = "", 
+            status = "All", 
+            partner = "All Partners", 
+            selectedCity = "All Cities", 
+            sortBy = "Date" 
+        } = filters;
 
-        if (statusTab && statusTab !== "All") {
-            filters.push(eq(event_log.status, statusTab as "Completed" || "Ongoing" || "Upcoming"));
+        const conditions: SQL[] = [eq(assigned_staff.profiles_id, staffId)];
+        
+        // Status Filter
+        if (status !== "All") {
+            conditions.push(eq(event_log.status, status as "Ongoing" | "Completed"));
+        } else {
+            conditions.push(ne(event_log.status, "Upcoming"));
+        }
+
+        // Partner Filter
+        if (partner && partner !== "All Partners") {
+            conditions.push(eq(event_log.partner, partner));
+        }
+
+        // City Filter
+        if (selectedCity && selectedCity !== "All Cities") {
+            conditions.push(eq(city.name, selectedCity));
+        }
+
+        // Search Filter
+        if (search && search.trim() !== "") {
+            const searchPattern = `%${search}%`;
+            conditions.push(
+                or(
+                    ilike(event_log.name, searchPattern),
+                    ilike(event_log.partner, searchPattern),
+                    ilike(city.name, searchPattern)
+                ) as SQL
+            );
+        }
+
+        // Sort Logic
+        let orderLogic: any = desc(event_log.event_date);
+
+        switch (sortBy) {
+            case "ID (Descending)":
+                orderLogic = desc(event_log.id);
+                break;
+            case "Date (Earliest)":
+                orderLogic = desc(event_log.event_date);
+                break;
+            case "Date (Oldest)":
+                orderLogic = asc(event_log.event_date);
+                break;
+            case "Partner (A-Z)":
+                orderLogic = asc(event_log.partner);
+                break;
+            case "Partner (Z-A)":
+                orderLogic = desc(event_log.partner);
+                break;
+            case "City (A-Z)":
+                orderLogic = asc(city.name);
+                break;
+            case "City (Z-A)":
+                orderLogic = desc(city.name);
+                break;
+            case "ID (Ascending)":
+            default:
+                orderLogic = asc(event_log.id);
+                break;
         }
 
         const events = await orm
@@ -37,7 +107,8 @@ export class ImpLabStaffModel implements LabStaffData {
             .from(event_log)
             .innerJoin(assigned_staff, eq(event_log.id, assigned_staff.event_log_id))
             .leftJoin(city, eq(event_log.city_id, city.id))
-            .where(and(...filters));
+            .where(and(...conditions))
+            .orderBy(orderLogic);
 
         return events;
     }

@@ -1,11 +1,9 @@
 "use server"
 
-import { ApiResponse } from "@/types/api_res_type";
 import { serverSupa } from "@/db/supaserver";
 import { ImpLabStaffManager } from "./ls_controller";
 import { ImpLabStaffModel } from "./ls.query";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
-import { ViewEvents } from "@/types/event_type";
 import { revalidatePath } from "next/cache";
 import { bigintToStr } from "@/app/global/serializer/serial";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
@@ -19,18 +17,24 @@ async function getLabController() {
     return new ImpLabStaffManager(model, profiler);
 }
 
-export async function getLabStaffEvents(statusTab?: string): Promise<ApiResponse<ViewEvents[]>> {
+export async function getLabStaffEvents(filters: { 
+        search?: string;
+        status?: string;
+        partner?: string;
+        selectedCity?: string;
+        sortBy?: string;
+    } = {}) {
     
     try {
         const controller = await getLabController();
-        return await controller.invokeGetStaffEvents(statusTab);
+        return await controller.invokeGetStaffEvents(filters);
     } catch (err: any) {
         console.error("Server Action Error:", err);
         return { success: false, message: "Internal server error" };
     }
 }
 
-export async function verifyLabStaffEventAccess(eventIdStr: string): Promise<ApiResponse<ViewEvents>> {
+export async function verifyLabStaffEventAccess(eventIdStr: string) {
     
     try {
         const controller = await getLabController();

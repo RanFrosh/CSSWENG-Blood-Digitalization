@@ -66,6 +66,7 @@ export default function SearchEventsPage() {
                         setAvailablePartners(partnersList);
                     }
                     setEvents(result.data);
+                    
                 } else {
                     setErrorMessage(result.message || "Failed to load events.");
                 }

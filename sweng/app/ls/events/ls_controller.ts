@@ -1,7 +1,7 @@
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { helpGateKeep } from "../../global/helper_bouncer/bouncer";
 import { LabStaffController, LabStaffData } from "@/abstract/ls/ls_abstract";
-import { ViewDonorPartial, ViewDonor } from "@/types/donor_type";
+import { ViewDonorPartial } from "@/types/donor_type";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
 
 export class ImpLabStaffManager implements LabStaffController {
@@ -14,7 +14,13 @@ export class ImpLabStaffManager implements LabStaffController {
         this.profileReader = injectProfileReader;
     }
 
-    async invokeGetStaffEvents(statusTab?: string) {
+    async invokeGetStaffEvents(filters: { 
+        search?: string;
+        status?: string;
+        partner?: string;
+        selectedCity?: string;
+        sortBy?: string;
+    } = {}) {
 
         const authRes = await helpGateKeep(this.profileReader, 'view_event');
         
@@ -24,7 +30,7 @@ export class ImpLabStaffManager implements LabStaffController {
 
         try {
 
-            const events = await this.labStaffModel.getStaffEvents(authRes.data.id, statusTab);
+            const events = await this.labStaffModel.getStaffEvents(authRes.data.id, filters);
             
             return {
                 success: true,
@@ -199,13 +205,15 @@ export class ImpLabStaffManager implements LabStaffController {
 
     async invokeSubmitDonationRecord(payload: Omit<SubmitDonationPayload, 'staff_id'>) {
     
+        if (payload.volume > 450) {
+            return { success: false, message: "Invalid submission: Volume cannot exceed 450 mL." };
+        }
+
         const auth = await helpGateKeep(this.profileReader, 'updatequeue');
         
         if (!auth.success || !auth.data) {
             return { success: false, message: auth.message };
         }
-
-        console.log("AUTH DATA:", auth.data); // 💥 Add this!
 
         const securePayload: SubmitDonationPayload = {
             ...payload,
