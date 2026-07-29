@@ -8,7 +8,7 @@ export const authUsers = authSchema.table('users', {
 
 export const profiles = pgTable('profiles', {
     id: uuid('id').primaryKey().references(() => authUsers.id, { onDelete: 'no action', onUpdate: 'no action'}),
-    name: text('name').notNull(),
+    name: text('name'),
     role: access_level('role').notNull(),
     created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
 });
