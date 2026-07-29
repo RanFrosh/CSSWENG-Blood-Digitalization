@@ -267,22 +267,30 @@ export class ImpLabStaffModel implements LabStaffData {
     }
 
     async submitDonationRecord(payload: SubmitDonationPayload) {
+
         try {
 
             await orm.transaction(async (tx: any) => {
                 
-                await tx.insert(blood_bag).values({
+                const [newBag] = await tx.insert(blood_bag).values({
                     donor_id: payload.donor_id,
                     event_id: payload.event_id,
+                    serial_number: "Pending",
                     staff_id: payload.staff_id,
-                    serial_number: payload.blood_bag_id,
                     blood_type: payload.blood_type,
                     volume_ml: payload.volume,
                     outcome: payload.outcome,
                     quality: payload.quality,
                     observations: payload.observations,
                     collection_date: payload.collection_date, 
-                });
+                }).returning({ insertedId: blood_bag.id });
+
+                const currentYear = new Date().getFullYear();
+                const finalSerialNumber = `BAG-${currentYear}-${newBag.insertedId}`;
+
+                await tx.update(blood_bag)
+                    .set({ serial_number: finalSerialNumber })
+                    .where(eq(blood_bag.id, newBag.insertedId));
 
                 await tx.delete(event_queue)
                     .where(
