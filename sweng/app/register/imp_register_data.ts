@@ -1,5 +1,4 @@
 import { ApiResponse } from "@/types/api_res_type";
-import { SQL, eq, and, inArray } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
 import { RegisterData } from "@/abstract/register/register_abstract";
 import { adminSupa } from "@/db/supaadmin";
@@ -38,10 +37,8 @@ export class ImpRegisterModel implements RegisterData {
                 id,
                 name: null,
                 role,
-        });
-
-        return { success: true, message: "Profile created" };
-        
+            });
+            return { success: true, message: "Profile created" };
         } catch (err: any) {
             return { success: false, message: err.message };
         }       
