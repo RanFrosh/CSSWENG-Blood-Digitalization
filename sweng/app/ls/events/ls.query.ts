@@ -15,7 +15,6 @@ export class ImpLabStaffModel implements LabStaffData {
 
     async getStaffEvents (staffId: string, filters: { 
         search?: string;
-        status?: string;
         partner?: string;
         selectedCity?: string;
         sortBy?: string;
@@ -23,21 +22,16 @@ export class ImpLabStaffModel implements LabStaffData {
 
         const { 
             search = "", 
-            status = "All", 
             partner = "All Partners", 
             selectedCity = "All Cities", 
             sortBy = "Date" 
         } = filters;
-
-        const conditions: SQL[] = [eq(assigned_staff.profiles_id, staffId)];
         
-        // Status Filter
-        if (status !== "All") {
-            conditions.push(eq(event_log.status, status as "Ongoing" | "Completed"));
-        } else {
-            conditions.push(ne(event_log.status, "Upcoming"));
-        }
-
+        const conditions: SQL[] = [
+            eq(assigned_staff.profiles_id, staffId),
+            eq(event_log.status, "Ongoing") 
+        ];
+    
         // Partner Filter
         if (partner && partner !== "All Partners") {
             conditions.push(eq(event_log.partner, partner));

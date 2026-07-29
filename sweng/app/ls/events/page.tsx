@@ -12,7 +12,6 @@ export default function LSEventsPage() {
     const router = useRouter();
 
     // Filters
-    const [statusFilter, setStatusFilter] = useState("All");
     const [sortBy, setSortBy] = useState("Default");
 
     const [searchInput, setSearchInput] = useState("");
@@ -49,7 +48,6 @@ export default function LSEventsPage() {
             try {
                 const result = await getLabStaffEvents({
                     search: activeSearch || undefined, 
-                    status: statusFilter, 
                     partner: partner !== "All Partners" ? partner : undefined,
                     selectedCity: city !== "All Cities" ? city : undefined,
                     sortBy
@@ -78,7 +76,7 @@ export default function LSEventsPage() {
             }
         }
         loadEvents();
-    }, [activeSearch, statusFilter, partner, city, sortBy]);
+    }, [activeSearch, partner, city, sortBy]);
 
     // Can only open events that are ongoing
     const openEvent = (event: ViewEvents) => {
@@ -199,23 +197,6 @@ export default function LSEventsPage() {
                                 />
                             </div>
 
-                        </div>
-
-                        {/* Status Filter */}
-                        <div className="w-full md:w-[1.5in] flex flex-col gap-2">
-                            <label className="text-[18px] font-semibold text-[#002940]">
-                                Status
-                            </label>
-                            
-                            <select 
-                                value={statusFilter}
-                                onChange={(e) => setStatusFilter(e.target.value)}
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
-                            >
-                                <option value="All">All</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Ongoing">Ongoing</option>
-                            </select>
                         </div>
 
                         <div className="flex flex-col gap-2">

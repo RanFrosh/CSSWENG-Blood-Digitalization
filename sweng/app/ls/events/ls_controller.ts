@@ -16,7 +16,6 @@ export class ImpLabStaffManager implements LabStaffController {
 
     async invokeGetStaffEvents(filters: { 
         search?: string;
-        status?: string;
         partner?: string;
         selectedCity?: string;
         sortBy?: string;

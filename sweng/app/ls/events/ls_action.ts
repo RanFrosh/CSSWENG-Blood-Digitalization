@@ -19,7 +19,6 @@ async function getLabController() {
 
 export async function getLabStaffEvents(filters: { 
         search?: string;
-        status?: string;
         partner?: string;
         selectedCity?: string;
         sortBy?: string;
