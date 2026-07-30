@@ -4,6 +4,7 @@ import { access_level } from "../enums/access_level";
 const authSchema = pgSchema('auth');
 export const authUsers = authSchema.table('users', {
 	id: uuid('id').primaryKey().notNull(),
+    email: text('email'),
 });
 
 export const profiles = pgTable('profiles', {

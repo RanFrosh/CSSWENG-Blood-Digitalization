@@ -7,6 +7,8 @@ export interface RegisterData {
     createProfile(id: string, role: AccessType): Promise<ApiResponse>;
     finishProfile(id: string, name: string): Promise<ApiResponse>;
     deleteStaff(id: string): Promise<ApiResponse>;
+    findStaffByEmail(email: string): Promise<ApiResponse<string | null>>;
+    isProfileComplete(id: string): Promise<ApiResponse<boolean>>;
 }
 
 export interface RegisterController {
@@ -15,4 +17,6 @@ export interface RegisterController {
     invokeCreateProfile(id: string, role: AccessType): Promise<ApiResponse>;
     invokeFinishProfile(name: string): Promise<ApiResponse>;
     invokeDeleteStaff(id: string): Promise<ApiResponse>;
+    invokeFindStaffByEmail(email: string): Promise<ApiResponse<string | null>>;
+    invokeIsProfileComplete(id: string): Promise<ApiResponse<boolean>>;
 }

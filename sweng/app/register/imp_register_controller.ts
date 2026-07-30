@@ -42,4 +42,16 @@ export class ImpRegisterManager implements RegisterController {
         if (!res.success) return { success: false, message: res.message };
         return await this.registerModel.deleteStaff(id);
     }
+
+    async invokeFindStaffByEmail(email: string): Promise<ApiResponse<string | null>> {
+        const res = await helpGateKeep(this.profileReader, 'register_user');
+        if (!res.success) return { success: false, message: res.message };
+        return await this.registerModel.findStaffByEmail(email);
+    }
+
+    async invokeIsProfileComplete(id: string): Promise<ApiResponse<boolean>> {
+        const res = await helpGateKeep(this.profileReader, 'register_user');
+        if (!res.success) return { success: false, message: res.message };
+        return await this.registerModel.isProfileComplete(id);
+    }
 }

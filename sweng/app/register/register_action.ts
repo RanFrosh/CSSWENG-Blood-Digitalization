@@ -15,6 +15,16 @@ export async function prepareStaff(email: string, role: AccessType): Promise<Api
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpRegisterManager(model, profiler);
 
+    const existing = await controller.invokeFindStaffByEmail(email);
+    if (!existing.success) return { success: existing.success, message: existing.message };
+    if (existing.data) {
+        const complete = await controller.invokeIsProfileComplete(existing.data);
+        if (!complete.success) return { success: complete.success, message: complete.message };
+        if (complete.data) return { success: false, message: "Already registered" }
+        const reInvite = await controller.invokeCreateStaff(email, `${process.env.APP_URL}/signup`);
+        return { success: reInvite.success, message: reInvite.message };
+    }
+
     const staffResult = await controller.invokeCreateStaff(email, `${process.env.APP_URL}/signup`);
     if (!staffResult.success || !staffResult.data) return { success: staffResult.success, message: staffResult.message };
 

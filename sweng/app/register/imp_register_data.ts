@@ -3,8 +3,8 @@ import { orm } from "@/db/drizzle";
 import { RegisterData } from "@/abstract/register/register_abstract";
 import { adminSupa } from "@/db/supaadmin";
 import { AccessType } from "@/db/enums/access_level";
-import { profiles } from "@/db/models/profiles";
-import { eq } from "drizzle-orm";
+import { authUsers, profiles } from "@/db/models/profiles";
+import { eq, sql } from "drizzle-orm";
 
 export class ImpRegisterModel implements RegisterData {
     private access: typeof orm;
@@ -76,5 +76,35 @@ export class ImpRegisterModel implements RegisterData {
         } catch (err: any) {
             return { success: false, message: err.message };
         }        
+    }
+
+    async findStaffByEmail(email: string): Promise<ApiResponse<string | null>> {
+        try {
+            const [user] = await this.access
+            .select()
+            .from(authUsers)
+            .where(eq(authUsers.email, email))
+            .limit(1);
+            
+            if (!user) return { success: true, message: "No user found" };
+            return { success: true, message: "User found", data: user.id };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }      
+    }
+
+    async isProfileComplete(id: string): Promise<ApiResponse<boolean>> {
+        try {
+            const [profile] = await this.access
+            .select({ name: profiles.name })
+            .from(profiles)
+            .where(eq(profiles.id, id))
+            .limit(1);
+
+            if (!profile) return { success: true, message: "No profile", data: false };
+            return { success: true, message: "Profile checked", data: profile.name !== '' };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }
     }
 }
