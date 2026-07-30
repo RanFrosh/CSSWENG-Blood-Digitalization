@@ -19,7 +19,10 @@ export async function prepareStaff(email: string, role: AccessType): Promise<Api
     if (!staffResult.success || !staffResult.data) return { success: staffResult.success, message: staffResult.message };
 
     const profileResult = await controller.invokeCreateProfile(staffResult.data, role);
-    if (!profileResult.success) return profileResult;
+    if (!profileResult.success) {
+        const deleter = await controller.invokeDeleteStaff(staffResult.data);
+        return { success: false, message: `Profile creation failed: ${profileResult.message}. Additionally, ${deleter.message}` };
+    }
 
     return { success: true, message: "Staff invited" };
 }

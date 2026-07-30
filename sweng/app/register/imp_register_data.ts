@@ -67,4 +67,14 @@ export class ImpRegisterModel implements RegisterData {
             return { success: false, message: err.message };
         }        
     }
+
+    async deleteStaff(id: string): Promise<ApiResponse> {
+        try {
+            const { error } = await this.admin.auth.admin.deleteUser(id);
+            if (error) return { success: false, message: error.message };
+            return { success: true, message: "Staff deleted" };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }        
+    }
 }

@@ -35,5 +35,11 @@ export class ImpRegisterManager implements RegisterController {
         const res = await helpGateKeep(this.profileReader, 'finish_registration');        
         if (!res.success || !res.data) return { success: false, message: res.message };
         return await this.registerModel.finishProfile(res.data.id, name);        
-    }    
+    }
+    
+    async invokeDeleteStaff(id: string): Promise<ApiResponse> {
+        const res = await helpGateKeep(this.profileReader, 'register_user');
+        if (!res.success) return { success: false, message: res.message };
+        return await this.registerModel.deleteStaff(id);
+    }
 }
