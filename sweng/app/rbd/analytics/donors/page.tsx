@@ -11,11 +11,11 @@ type Donor = {
     last_name: string;
     sex: string;
     blood: string;
-    street: string;
-    zip_code: string;
+    street: string | null;
+    zip_code: string | null;
     active: boolean;
     email: string;
-    age: string;
+    age: number | null;
     mobile_no: string
 };
 

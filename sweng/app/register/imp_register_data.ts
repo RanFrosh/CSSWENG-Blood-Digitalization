@@ -36,7 +36,7 @@ export class ImpRegisterModel implements RegisterData {
         try {
             await this.access.insert(profiles).values({
                 id,
-                name: null,
+                name: '',
                 role,
             });
             return { success: true, message: "Profile created" };
