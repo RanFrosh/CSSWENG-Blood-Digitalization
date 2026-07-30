@@ -32,7 +32,7 @@ export default async function OAEventsPage() {
   const staff: StaffDetails | null = staffFromDb[0]
     ? {
         id: staffFromDb[0].id,
-        name: staffFromDb[0].name,
+        name: staffFromDb[0].name ?? '',
         role: staffFromDb[0].role,
       }
     : null;
