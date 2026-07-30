@@ -4,6 +4,7 @@ import { RegisterData } from "@/abstract/register/register_abstract";
 import { adminSupa } from "@/db/supaadmin";
 import { AccessType } from "@/db/enums/access_level";
 import { profiles } from "@/db/models/profiles";
+import { eq } from "drizzle-orm";
 
 export class ImpRegisterModel implements RegisterData {
     private access: typeof orm;
@@ -45,10 +46,25 @@ export class ImpRegisterModel implements RegisterData {
     }
 
     async setPassword(id: string, password: string): Promise<ApiResponse> {
-        
+        try {
+            const { error } = await this.admin.auth.admin.updateUserById(id, { password });
+            if (error) return { success: false, message: error.message };
+            return { success: true, message: "Registration password set" }
+        } catch (err: any) {
+            return { success: false, message: err.message }
+        }     
     }
 
     async finishProfile(id: string, name: string): Promise<ApiResponse> {
-        
+        try {
+            await this.access
+                .update(profiles)
+                .set({ name })
+                .where(eq(profiles.id, id));
+
+            return { success: true, message: "Profile updated" };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }        
     }
 }

@@ -10,7 +10,7 @@ export interface RegisterData {
 
 export interface RegisterController {
     invokeCreateStaff(email:string, redirectTo: string): Promise<ApiResponse<string>>;
-    invokeSetPassword(id: string, password: string): Promise<ApiResponse>;
+    invokeSetPassword(password: string): Promise<ApiResponse>;
     invokeCreateProfile(id: string, role: AccessType): Promise<ApiResponse>;
-    invokeFinishProfile(id: string, name: string): Promise<ApiResponse>;
+    invokeFinishProfile(name: string): Promise<ApiResponse>;
 }
