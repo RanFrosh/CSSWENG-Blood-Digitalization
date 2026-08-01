@@ -34,7 +34,7 @@ describe("ImpProfilesManager", () => {
             const ids = ["1", "2"];
             const result = await profilesManager.invokeGetProfiles(ids);
 
-            expect(mockedHelpGateKeep).toHaveBeenCalledWith(mockProfileReader, "viewdonor");
+            expect(mockedHelpGateKeep).toHaveBeenCalledWith(mockProfileReader, "viewprofiles");
             expect(mockProfilesModel.getProfiles).toHaveBeenCalledWith(ids);
             expect(result.success).toBe(true);
             expect(result.data).toEqual(mockProfiles);

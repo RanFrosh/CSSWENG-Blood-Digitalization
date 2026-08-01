@@ -14,9 +14,15 @@ export class ImpProfilesManager implements ProfilesController {
     }
 
     async invokeGetProfiles(ids: string[]): Promise<ApiResponse<ReadProfile[]>> {
-        const res = await helpGateKeep(this.profileReader, 'viewdonor');
+        const res = await helpGateKeep(this.profileReader, 'viewprofiles');
         if (!res.success || !res.data) return { success: false, message: res.message };
         return await this.profilesModel.getProfiles(ids);        
+    }
+
+    async invokeGetAllProfiles(): Promise<ApiResponse<ReadProfile[]>> {
+        const res = await helpGateKeep(this.profileReader, 'viewprofiles');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.profilesModel.getAllProfiles();       
     }
     
 }
