@@ -47,7 +47,7 @@ export class ImpQueueManager implements QueueController {
 
     async invokeAddToQueue(queueTarget: CreateQueue): Promise<ApiResponse> {
         
-        const res = await helpGateKeep(this.profileReader, 'dequeue');
+        const res = await helpGateKeep(this.profileReader, 'enqueue');
         if (!res.success || !res.data) 
             return { success: false, message: res.message }
 
