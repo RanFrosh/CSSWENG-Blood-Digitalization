@@ -69,12 +69,6 @@ export default function QueuePage() {
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                         #{staff.queueEntryId}
                     </p>
-                    <p className="mt-1 text-[18px] text-[#002940]">
-                        {staff.currentDonorName || "Unknown Donor"}
-                    </p>
-                    <p className="mt-1 text-[18px] text-[#002940]">
-                        Donor ID: {staff.currentDonorId}
-                    </p>
                 </div>
             );
         }
@@ -94,12 +88,6 @@ export default function QueuePage() {
                     <p className="text-[18px] font-semibold text-[#002940]">Next in Line</p>
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                         #{nextInLine.id}
-                    </p>
-                    <p className="mt-1 text-[18px] text-[#002940]">
-                        {nextInLine.donor_profile?.first_name} {nextInLine.donor_profile?.last_name}
-                    </p>
-                    <p className="mt-1 text-[18px] text-[#002940]">
-                        Donor ID: {nextInLine.donor_id}
                     </p>
                 </div>
             );
@@ -127,12 +115,6 @@ export default function QueuePage() {
                                 <div>
                                     <p className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                                         #{entry.id}
-                                    </p>
-                                    <p className="mt-2.5 text-[18px] font-semibold text-[#002940]">
-                                        {entry.donor_profile?.first_name} {entry.donor_profile?.last_name}
-                                    </p>
-                                    <p className="mt-1 text-[18px] text-[#002940]">
-                                        Donor ID: {entry.donor_id}
                                     </p>
                                 </div>
                                 <div className="text-right">

@@ -70,14 +70,6 @@ export default function QueuePage() {
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                         #{medicalProfessional.queueEntryId}
                     </p>
-
-                    <p className="mt-1 text-[18px] text-[#002940]">
-                        {medicalProfessional.currentDonorName}
-                    </p>
-
-                    <p className="mt-1 text-[18px] text-[#002940]">
-                        Donor ID: {medicalProfessional.currentDonorId}
-                    </p>
                 </div>
             );
         }
@@ -110,16 +102,6 @@ export default function QueuePage() {
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                         #{front.id}
                     </p>
-
-                    <p className="mt-1 text-[18px] text-[#002940]">
-                        {front.donor_profile?.first_name && front.donor_profile?.last_name
-                            ? `${front.donor_profile.first_name} ${front.donor_profile.last_name}`
-                            : "Missing name"}
-                    </p>
-
-                    <p className="mt-1 text-[18px] text-[#002940]">
-                        Donor ID: {front.donor_id}
-                    </p>
                 </div>
             );
         }
@@ -149,16 +131,6 @@ export default function QueuePage() {
                                 <div>
                                     <p className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                                         #{donor.id}
-                                    </p>
-
-                                    <p className="mt-2.5 text-[18px] font-semibold text-[#002940]">
-                                        {donor.donor_profile?.first_name && donor.donor_profile?.last_name
-                                            ? `${donor.donor_profile.first_name} ${donor.donor_profile.last_name}`
-                                            : "Missing name"}
-                                    </p>
-
-                                    <p className="mt-1 text-[18px] text-[#002940]">
-                                        Donor ID: {donor.donor_id}
                                     </p>
                                 </div>
 
