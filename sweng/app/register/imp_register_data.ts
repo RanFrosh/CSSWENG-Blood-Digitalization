@@ -70,6 +70,7 @@ export class ImpRegisterModel implements RegisterData {
 
     async deleteStaff(id: string): Promise<ApiResponse> {
         try {
+            await this.access.delete(profiles).where(eq(profiles.id, id));
             const { error } = await this.admin.auth.admin.deleteUser(id);
             if (error) return { success: false, message: error.message };
             return { success: true, message: "Staff deleted" };

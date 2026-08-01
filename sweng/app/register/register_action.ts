@@ -51,3 +51,11 @@ export async function finishRegistration(name: string, password: string): Promis
 
     return { success: true, message: "Registration completed" };
 }
+
+export async function deleteStaffUser(id: string): Promise<ApiResponse> {
+    const database = await serverSupa();
+    const model = new ImpRegisterModel(orm, adminSupa);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpRegisterManager(model, profiler);
+    return await controller.invokeDeleteStaff(id);
+}

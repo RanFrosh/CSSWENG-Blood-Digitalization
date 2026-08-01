@@ -3,6 +3,7 @@ import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { helpGateKeep } from "../global/helper_bouncer/bouncer";
 import { ProfilesController, ProfilesData } from "@/abstract/profiles/profiles_abstract";
 import { ReadProfile } from "@/types/profile_type";
+import { StaffUserRow } from "@/types/staff_type";
 
 export class ImpProfilesManager implements ProfilesController {
     private profilesModel: ProfilesData
@@ -23,6 +24,12 @@ export class ImpProfilesManager implements ProfilesController {
         const res = await helpGateKeep(this.profileReader, 'viewprofiles');
         if (!res.success || !res.data) return { success: false, message: res.message };
         return await this.profilesModel.getAllProfiles();       
+    }
+
+    async invokeGetStaffUsers(): Promise<ApiResponse<StaffUserRow[]>> {
+        const res = await helpGateKeep(this.profileReader, 'viewprofiles');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.profilesModel.getStaffUsers();        
     }
     
 }

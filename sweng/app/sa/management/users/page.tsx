@@ -1,65 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/HeaderSA";
-import { prepareStaff } from "@/app/register/register_action";
+import { prepareStaff, deleteStaffUser } from "@/app/register/register_action";
 import { AccessType } from "@/db/enums/access_level";
+import { StaffUser, StaffStatus } from "@/types/staff_type";
+import { getUsers } from "./users_action";
 
-type UserRole = "SA" | "RBD" | "RS" | "LS" | "MP" | "OA" | "D";
-type UserStatus = "Active" | "Inactive";
-
-type SystemUser = {
-    id: string;
-    name: string;
-    email: string;
-    role: UserRole;
-    status: UserStatus;
-    dateJoined: string;
-};
-
-const initialUsers: SystemUser[] = [
-    {
-        id: "SA-001",
-        name: "Alex Cruz",
-        email: "alex.cruz@example.com",
-        role: "SA",
-        status: "Active",
-        dateJoined: "2026-01-04",
-    },
-    {
-        id: "MP-001",
-        name: "Jane Doe",
-        email: "jane.doe@example.com",
-        role: "MP",
-        status: "Active",
-        dateJoined: "2026-02-12",
-    },
-    {
-        id: "MP-002",
-        name: "Jason Doe",
-        email: "jason.doe@example.com",
-        role: "MP",
-        status: "Inactive",
-        dateJoined: "2026-03-02",
-    },
-    {
-        id: "OA-001",
-        name: "Red Cross Chapter",
-        email: "redcross.chapter@example.com",
-        role: "OA",
-        status: "Active",
-        dateJoined: "2026-04-18",
-    },
-    {
-        id: "D-005",
-        name: "June Doe",
-        email: "june.doe@example.com",
-        role: "D",
-        status: "Active",
-        dateJoined: "2026-05-30",
-    },
-];
-
-type TabFilter = "All" | UserRole
+type TabFilter = "All" | AccessType
 type SortOption =
     | "Default"
     | "Name: A-Z"
@@ -69,27 +16,56 @@ type SortOption =
     | "Status";
 
 export default function SAUsersPage() {
-    const [users, setUsers] = useState<SystemUser[]>(initialUsers);
+    const [users, setUsers] = useState<StaffUser[]>([]);
     const [activeTab, setActiveTab] = useState<TabFilter>("All");
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState<SortOption>("Default");
 
+    const [usersError, setUsersError] = useState("");
+    const [usersLoading, setUsersLoading] = useState(true);
+
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-    const [userToDelete, setUserToDelete] = useState<SystemUser | null>(null);
+    const [userToDelete, setUserToDelete] = useState<StaffUser | null>(null);
+    const [deleteError, setDeleteError] = useState("");
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     const [formEmail, setFormEmail] = useState("");
     const [formRole, setFormRole] = useState<AccessType>("super_admin");
     const [inviteError, setInviteError] = useState("");
 
-    const tabs: TabFilter[] = [
-        "All",
-        "SA",
-        "RBD",
-        "RS",
-        "LS",
-        "MP",
-        "OA",
-        "D",
+    const roleShortLabels: Record<AccessType, string> = {
+        donor: "DR",
+        super_admin: "SA",
+        onsite_admin: "OA",
+        med_prof: "MP",
+        director: "RBD",
+        lab_staff: "LS",
+        recov_staff: "RS",
+    };
+
+    const loadUsers = useCallback(async () => {
+        setUsersLoading(true);
+        const result = await getUsers();
+        if (!result.success) {
+            setUsersError(result.message);
+            setUsers([]);
+        } else {
+            setUsers(result.data ?? []);
+            setUsersError("");
+        }
+        setUsersLoading(false);
+    }, []);
+
+    useEffect(() => { loadUsers(); }, [loadUsers]);
+
+    const tabs: { value: TabFilter; label: string }[] = [
+        { value: "All", label: "All" },
+        { value: "super_admin", label: "SA" },
+        { value: "director", label: "RBD" },
+        { value: "recov_staff", label: "RS" },
+        { value: "lab_staff", label: "LS" },
+        { value: "med_prof", label: "MP" },
+        { value: "onsite_admin", label: "OA" },
     ];
 
     const sortOptions: SortOption[] = [
@@ -113,7 +89,7 @@ export default function SAUsersPage() {
         filteredUsers = filteredUsers.filter(
             (user) =>
                 user.name.toLowerCase().includes(query) ||
-                user.email.toLowerCase().includes(query) ||
+                user.email?.toLowerCase().includes(query) ||
                 user.role.toLowerCase().includes(query) ||
                 user.id.toLowerCase().includes(query)
         );
@@ -123,9 +99,9 @@ export default function SAUsersPage() {
         if (sortBy === "Name: A-Z") {
             return a.name.localeCompare(b.name);
         } else if (sortBy === "Date Joined: Earliest") {
-            return a.dateJoined.localeCompare(b.dateJoined);
+            return a.dateJoined.getTime() - b.dateJoined.getTime();
         } else if (sortBy === "Date Joined: Latest") {
-            return b.dateJoined.localeCompare(a.dateJoined);
+            return b.dateJoined.getTime() - a.dateJoined.getTime();
         } else if (sortBy === "Role: A-Z") {
             return a.role.localeCompare(b.role);
         } else if (sortBy === "Status") {
@@ -159,15 +135,27 @@ export default function SAUsersPage() {
 
         setIsUserModalOpen(false);
         setFormEmail("");
+        loadUsers();
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (!userToDelete) {
+            return;
+        }
+
+        setDeleteLoading(true);
+        setDeleteError("");
+        const result = await deleteStaffUser(userToDelete.id);
+
+        if (!result.success) {
+            setDeleteError(result.message);
+            setDeleteLoading(false);
             return;
         }
 
         setUsers((prev) => prev.filter((user) => user.id !== userToDelete.id));
         setUserToDelete(null);
+        setDeleteLoading(false);
     };
 
     const getTabClass = (tab: TabFilter) => {
@@ -183,7 +171,7 @@ export default function SAUsersPage() {
         return className;
     };
 
-    const getStatusPill = (status: UserStatus) => {
+    const getStatusPill = (status: StaffStatus) => {
         let className = "px-[12px] py-[6px] rounded-full text-[14px] font-semibold ";
 
         if (status === "Active") {
@@ -221,11 +209,11 @@ export default function SAUsersPage() {
                         <div className="flex flex-row items-center flex-wrap gap-[10px]">
                             {tabs.map((tab) => (
                                 <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={getTabClass(tab)}
+                                    key={tab.value}
+                                    onClick={() => setActiveTab(tab.value)}
+                                    className={getTabClass(tab.value)}
                                 >
-                                    {tab}
+                                    {tab.label}
                                 </button>
                             ))}
 
@@ -281,7 +269,19 @@ export default function SAUsersPage() {
                     </div>
 
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {filteredUsers.length === 0 ? (
+                        {usersLoading ? (
+                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] text-center">
+                                <p className="text-[18px] font-semibold text-[#002940]">
+                                    Loading users...
+                                </p>
+                            </div>
+                        ) : usersError !== "" ? (
+                            <div className="bg-[#f5e4e4] border-2 border-[#a32626] rounded-[16px] p-[0.35in] text-center">
+                                <p className="text-[16px] font-semibold text-[#a32626]">
+                                    {usersError}
+                                </p>
+                            </div>
+                        ) : filteredUsers.length === 0 ? (
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] text-center">
                                 <p className="text-[18px] font-semibold text-[#002940]">
                                     No users found
@@ -304,7 +304,7 @@ export default function SAUsersPage() {
                                             </h2>
 
                                             <span className="px-[12px] py-[6px] rounded-full text-[14px] font-semibold bg-white text-[#002940]">
-                                                {user.role}
+                                                {roleShortLabels[user.role]}
                                             </span>
                                         </div>
 
@@ -331,14 +331,14 @@ export default function SAUsersPage() {
                                                 <span className="font-semibold text-[#002940]">
                                                     Email:
                                                 </span>{" "}
-                                                {user.email}
+                                                {user.email ?? "-"}
                                             </p>
 
                                             <p>
                                                 <span className="font-semibold text-[#002940]">
                                                     Date Joined:
                                                 </span>{" "}
-                                                {user.dateJoined}
+                                                {user.dateJoined.toLocaleDateString()}
                                             </p>
 
                                             <p className="flex items-center gap-[10px]">
@@ -444,6 +444,14 @@ export default function SAUsersPage() {
                             action is permanent and cannot be undone.
                         </p>
 
+                        {deleteError !== "" && (
+                            <div className="mt-[0.2in] bg-[#f5e4e4] border-2 border-[#a32626] rounded-[10px] px-[12px] py-[10px]">
+                                <p className="text-[16px] font-semibold text-[#a32626]">
+                                    {deleteError}
+                                </p>
+                            </div>
+                        )}
+
                         <div className="mt-[0.35in] flex flex-row justify-end gap-[10px]">
                             <button
                                 onClick={() => setUserToDelete(null)}
@@ -454,9 +462,10 @@ export default function SAUsersPage() {
 
                             <button
                                 onClick={confirmDelete}
-                                className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#a32626] text-white cursor-pointer hover:opacity-90"
+                                disabled={deleteLoading}
+                                className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#a32626] text-white cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Delete User
+                                {deleteLoading ? "Deleting..." : "Delete User"}
                             </button>
                         </div>
                     </div>
