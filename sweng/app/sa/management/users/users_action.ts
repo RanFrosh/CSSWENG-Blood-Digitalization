@@ -19,7 +19,7 @@ export async function getUsers(): Promise<ApiResponse<StaffUser[]>> {
 
     const users: StaffUser[] = (result.data ?? []).map((row: StaffUserRow) => ({
         ...row,
-        status: row.name.trim() === "" ? "Inactive" : "Active",
+        status: row.active ? "Active" : "Inactive",
     }));
 
     return { success: true, message: "StaffUser retrieved", data: users }

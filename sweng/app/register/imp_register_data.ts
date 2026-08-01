@@ -38,6 +38,7 @@ export class ImpRegisterModel implements RegisterData {
                 id,
                 name: '',
                 role,
+                active: false
             });
             return { success: true, message: "Profile created" };
         } catch (err: any) {
@@ -59,7 +60,7 @@ export class ImpRegisterModel implements RegisterData {
         try {
             await this.access
                 .update(profiles)
-                .set({ name })
+                .set({ name, active: true })
                 .where(eq(profiles.id, id));
 
             return { success: true, message: "Profile updated" };
@@ -97,13 +98,13 @@ export class ImpRegisterModel implements RegisterData {
     async isProfileComplete(id: string): Promise<ApiResponse<boolean>> {
         try {
             const [profile] = await this.access
-            .select({ name: profiles.name })
+            .select({ active: profiles.active })
             .from(profiles)
             .where(eq(profiles.id, id))
             .limit(1);
 
             if (!profile) return { success: true, message: "No profile", data: false };
-            return { success: true, message: "Profile checked", data: profile.name !== '' };
+            return { success: true, message: "Profile checked", data: profile.active === true };
         } catch (err: any) {
             return { success: false, message: err.message };
         }

@@ -46,6 +46,7 @@ export class ImpProfilesModel implements ProfilesData {
                     email: authUsers.email,
                     role: profiles.role,
                     dateJoined: profiles.created_at,
+                    active: profiles.active
                 })
                 .from(profiles)
                 .innerJoin(authUsers, eq(profiles.id, authUsers.id));

@@ -7,7 +7,8 @@ export type StaffUserRow = {
     name: string,
     email: string | null,
     role: AccessType,
-    dateJoined: Date
+    dateJoined: Date,
+    active: boolean | null
 }
 
 export type StaffUser = StaffUserRow & {
