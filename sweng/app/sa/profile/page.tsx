@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "@/components/HeaderOA";
+import Header from "@/components/HeaderSA";
 
 type StaffProfile = {
     id: string;
@@ -13,10 +13,10 @@ type StaffProfile = {
 };
 
 const sampleStaffProfile: StaffProfile = {
-    id: "OA-001",
+    id: "SA-001",
     name: "John Doe",
     email: "john.doe@redbank.com",
-    role: "Onsite Admin",
+    role: "Super Admin",
     profileImage: "/images/user.png",
 };
 
