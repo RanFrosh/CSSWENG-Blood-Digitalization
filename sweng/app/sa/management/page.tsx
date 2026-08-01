@@ -36,6 +36,10 @@ export default function AnalyticsPage() {
         router.push(`/sa/management/logs/data`);
     };
 
+    const goRequests = () => {
+        router.push("/sa/management/requests");
+    };
+
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
@@ -86,12 +90,12 @@ export default function AnalyticsPage() {
                         Event Actions
                     </h2>
 
-                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
+                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-[0.25in]">
                         <button
                             onClick={goEventMng}
                             className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
                         >
-                            <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                            <h3 className="text-[20px] font-['Montserrat'] font-bold">
                                 Manage Events
                             </h3>
 
@@ -104,7 +108,7 @@ export default function AnalyticsPage() {
                             onClick={goUserMng}
                             className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
                         >
-                            <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                            <h3 className="text-[20px] font-['Montserrat'] font-bold">
                                 Manage Users
                             </h3>
 
@@ -117,7 +121,7 @@ export default function AnalyticsPage() {
                             onClick={goEventLog}
                             className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
                         >
-                            <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                            <h3 className="text-[20px] font-['Montserrat'] font-bold">
                                 View Event Logs
                             </h3>
 
@@ -130,12 +134,25 @@ export default function AnalyticsPage() {
                             onClick={goDataLog}
                             className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
                         >
-                            <h3 className="text-[24px] font-['Montserrat'] font-bold">
+                            <h3 className="text-[20px] font-['Montserrat'] font-bold">
                                 View Database Logs
                             </h3>
 
                             <p className="mt-[8px] text-[16px]">
                                 View real-time database updates.
+                            </p>
+                        </button>
+
+                        <button
+                            onClick={goRequests}
+                            className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
+                        >
+                            <h3 className="text-[20px] font-['Montserrat'] font-bold">
+                                Review Edit Requests
+                            </h3>
+
+                            <p className="mt-[8px] text-[16px]">
+                                Review submitted edit requests.
                             </p>
                         </button>
                     </div>
