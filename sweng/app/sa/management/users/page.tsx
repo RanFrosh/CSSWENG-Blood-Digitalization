@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
-
 import Header from "@/components/HeaderSA";
+import { prepareStaff } from "@/app/register/register_action";
+import { AccessType } from "@/db/enums/access_level";
 
 type UserRole = "SA" | "RBD" | "RS" | "LS" | "MP" | "OA" | "D";
 type UserStatus = "Active" | "Inactive";
@@ -77,7 +78,7 @@ export default function SAUsersPage() {
     const [userToDelete, setUserToDelete] = useState<SystemUser | null>(null);
 
     const [formEmail, setFormEmail] = useState("");
-    const [formRole, setFormRole] = useState<UserRole>("SA");
+    const [formRole, setFormRole] = useState<AccessType>("super_admin");
     const [inviteError, setInviteError] = useState("");
 
     const tabs: TabFilter[] = [
@@ -136,14 +137,28 @@ export default function SAUsersPage() {
 
     const openCreateModal = () => {
         setFormEmail("");
-        setFormRole("SA");
+        setFormRole("super_admin");
         setInviteError("");
         setIsUserModalOpen(true);
     };
 
-    const handleGenerateLink = (e: React.FormEvent) => {
+    const handleCreateStaff = async (e: React.FormEvent) => {
         e.preventDefault();
+        setInviteError("");
+        if (!formEmail.trim() || !formRole) {
+            setInviteError("Email address and assigned role are required.");
+            return;
+        }
+
+        const result = await prepareStaff(formEmail.trim(), formRole);
+
+        if (!result.success) {
+            setInviteError(result.message);
+            return;
+        }
+
         setIsUserModalOpen(false);
+        setFormEmail("");
     };
 
     const confirmDelete = () => {
@@ -347,10 +362,10 @@ export default function SAUsersPage() {
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-[0.35in] z-50">
                     <div className="bg-white rounded-[16px] p-[0.35in] max-w-[5in] w-full shadow-lg">
                         <h2 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                            Generate Sign up Link
+                            Create Staff
                         </h2>
 
-                        <form onSubmit={handleGenerateLink} className="mt-[0.2in] flex flex-col gap-[0.15in]">
+                        <form onSubmit={handleCreateStaff} className="mt-[0.2in] flex flex-col gap-[0.15in]">
                             <div>
                                 <label className="block text-[14px] font-semibold text-[#002940] mb-1">
                                     Email Address
@@ -374,15 +389,15 @@ export default function SAUsersPage() {
                                 <select
                                     required
                                     value={formRole}
-                                    onChange={(event) => setFormRole(event.target.value as UserRole)}
+                                    onChange={(event) => setFormRole(event.target.value as AccessType)}
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none bg-white cursor-pointer focus:border-[#002940]"
                                 >
-                                    <option value="SA">Super Admin</option>
-                                    <option value="RBD">Red Bank Director</option>
-                                    <option value="RS">Recovery Staff</option>
-                                    <option value="LS">Lab Staff</option>
-                                    <option value="MP">Medical Professional</option>
-                                    <option value="OA">Onsite Admin</option>
+                                    <option value="super_admin">Super Admin</option>
+                                    <option value="director">Red Bank Director</option>
+                                    <option value="recov_staff">Recovery Staff</option>
+                                    <option value="lab_staff">Lab Staff</option>
+                                    <option value="med_prof">Medical Professional</option>
+                                    <option value="onsite_admin">Onsite Admin</option>
                                 </select>
                             </div>
 
@@ -394,28 +409,6 @@ export default function SAUsersPage() {
                                 </div>
                             )}
 
-                            <div>
-                                <label className="block text-[14px] font-semibold text-[#002940] mb-1">
-                                    Signup Link
-                                </label>
-
-                                <div className="flex flex-row gap-[10px]">
-                                    <input
-                                        type="text"
-                                        readOnly
-                                        placeholder="Add link here :D"
-                                        className="flex-1 border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none bg-[#f9fdff]"
-                                    />
-
-                                    <button
-                                        type="button"
-                                        // onClick for copy lol
-                                        className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white"
-                                    >
-                                        Copy
-                                    </button>
-                                </div>
-                            </div>
 
                             <div className="mt-[0.2in] flex flex-row justify-end gap-[10px]">
                                 <button
@@ -430,7 +423,7 @@ export default function SAUsersPage() {
                                     type="submit"
                                     className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90"
                                 >
-                                    Generate Link
+                                    Create Staff
                                 </button>
                             </div>
                         </form>
