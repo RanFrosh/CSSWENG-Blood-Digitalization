@@ -36,6 +36,7 @@ export default function SignUpPage() {
         if (result.success) {
             setSuccessMsg(`Successfully registered ${formData.name}`);
             setFormData({ name: "", password: ""});
+            router.push("/landing");          
         } else {
             setErrorMsg(result.message);
         }
