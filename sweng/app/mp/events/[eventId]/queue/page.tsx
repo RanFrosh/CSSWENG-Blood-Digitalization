@@ -83,15 +83,15 @@ export default function QueuePage() {
         }
     };
 
-    // Get the last donor added to the queue
-    const getLatestAddition = () => {
-        // No donor has been added to the queue yet
-        const last = waitList.length > 0 ? waitList[waitList.length - 1] : null;
-        if (!last) {
+    // Get the next donor in the queue
+    const getNextInLine = () => {
+        // No donor is in the queue yet
+        const front = waitList.length > 0 ? waitList[0] : null;
+        if (!front) {
             return (
                 <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-5">
                     <p className="text-[18px] font-semibold text-[#002940]">
-                        Latest Addition
+                        Next in Line
                     </p>
 
                     <p className="mt-2.5 text-[18px] text-[#002940]">
@@ -99,26 +99,26 @@ export default function QueuePage() {
                     </p>
                 </div>
             );
-        // At least one donor has been added to the queue
+        // At least one donor is in the queue
         } else {
             return (
                 <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-5">
                     <p className="text-[18px] font-semibold text-[#002940]">
-                        Latest Addition
+                        Next in Line
                     </p>
 
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        #{last.id}
+                        #{front.id}
                     </p>
 
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        {last.donor_profile?.first_name && last.donor_profile?.last_name
-                            ? `${last.donor_profile.first_name} ${last.donor_profile.last_name}`
+                        {front.donor_profile?.first_name && front.donor_profile?.last_name
+                            ? `${front.donor_profile.first_name} ${front.donor_profile.last_name}`
                             : "Missing name"}
                     </p>
 
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        Donor ID: {last.donor_id}
+                        Donor ID: {front.donor_id}
                     </p>
                 </div>
             );
@@ -268,7 +268,7 @@ export default function QueuePage() {
                             </p>
                         </div>
 
-                        {getLatestAddition()}
+                        {getNextInLine()}
                     </div>
                 </section>
 

@@ -48,7 +48,7 @@ export default function QueuePage() {
         fetchQueueData();
     }, [eventId]);
 
-    const latestAddition = waitlist.length > 0 ? waitlist[waitlist.length - 1] : null;
+    const nextInLine = waitlist.length > 0 ? waitlist[0] : null;
 
     // Component Renderers
     const getCurrentDonor = (staff: StaffWithStatus) => {
@@ -80,26 +80,26 @@ export default function QueuePage() {
         }
     };
 
-    const getLatestAddition = () => {
-        if (!latestAddition) {
+    const getNextInLine = () => {
+        if (!nextInLine) {
             return (
                 <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-5">
-                    <p className="text-[18px] font-semibold text-[#002940]">Latest Addition</p>
+                    <p className="text-[18px] font-semibold text-[#002940]">Next in Line</p>
                     <p className="mt-2.5 text-[18px] text-[#002940]">No donors have checked in.</p>
                 </div>
             );
         } else {
             return (
                 <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-5">
-                    <p className="text-[18px] font-semibold text-[#002940]">Latest Addition</p>
+                    <p className="text-[18px] font-semibold text-[#002940]">Next in Line</p>
                     <p className="mt-2.5 text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        #{latestAddition.id}
+                        #{nextInLine.id}
                     </p>
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        {latestAddition.donor_profile?.first_name} {latestAddition.donor_profile?.last_name}
+                        {nextInLine.donor_profile?.first_name} {nextInLine.donor_profile?.last_name}
                     </p>
                     <p className="mt-1 text-[18px] text-[#002940]">
-                        Donor ID: {latestAddition.donor_id}
+                        Donor ID: {nextInLine.donor_id}
                     </p>
                 </div>
             );
@@ -206,7 +206,7 @@ export default function QueuePage() {
                                 {waitlist.length}
                             </p>
                         </div>
-                        {getLatestAddition()}
+                        {getNextInLine()}
                     </div>
                 </section>
 
