@@ -16,13 +16,9 @@ import { blood_type } from "../enums/blood_type";
 import { assessment_status } from "../enums/assessment_status";
 
 export const donor = pgTable("donor", {
+  
   // Primary key
   id: bigserial("id", { mode: "bigint" }).primaryKey(),
-
-  // Creation timestamp
-  created_at: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
 
   // Personal information
   first_name: text("first_name").notNull(),
@@ -56,9 +52,6 @@ export const donor = pgTable("donor", {
     })
     .notNull(),
 
-  // Donor photo
-  photo_path: text("photo_path").notNull(),
-
   // Physical attributes
   height: doublePrecision("height"),
   weight: doublePrecision("weight"),
@@ -66,15 +59,20 @@ export const donor = pgTable("donor", {
   // Status
   active: boolean("active").default(true).notNull(),
 
-  // Soft delete
-  delete_datetime: timestamp("delete_datetime", { withTimezone: true }),
-  delete_reason: text("delete_reason"),
-  deleted_by: bigint("deleted_by", { mode: "bigint" }),
-
   // Additional fields from dev
   verifiedBlood: boolean("verifiedBlood").default(false).notNull(),
   medicalNote: text("medicalNote"),
   assessment_status: assessment_status("assessment_status"),
 
-  next_eligibility: date("next_eligibility")
+  next_eligibility: date("next_eligibility"),
+
+  // Creation timestamp
+  created_at: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+
+  // Soft delete
+  delete_datetime: timestamp("delete_datetime", { withTimezone: true }),
+  delete_reason: text("delete_reason"),
+  deleted_by: bigint("deleted_by", { mode: "bigint" }),
 });
