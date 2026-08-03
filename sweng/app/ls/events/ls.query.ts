@@ -28,7 +28,7 @@ export class ImpLabStaffModel implements LabStaffData {
         } = filters;
         
         const conditions: SQL[] = [
-            eq(assigned_staff.profiles_id, staffId),
+            eq(assigned_staff.staff_id, staffId),
             eq(event_log.status, "Ongoing") 
         ];
     
@@ -126,7 +126,7 @@ export class ImpLabStaffModel implements LabStaffData {
             .where(
                 and(
                     eq(event_log.id, eventId),
-                    eq(assigned_staff.profiles_id, staffId)
+                    eq(assigned_staff.staff_id, staffId)
                 )
             )
             .limit(1);
@@ -138,7 +138,7 @@ export class ImpLabStaffModel implements LabStaffData {
 
         const conditions: SQL[] = [
             eq(event_queue.event_log_id, eventId),
-            isNull(event_queue.profile_id)
+            isNull(event_queue.staff_id)
         ];
 
         if (stationFilter !== undefined) {
@@ -171,16 +171,16 @@ export class ImpLabStaffModel implements LabStaffData {
                 donor: donor
             })
             .from(assigned_staff)
-            .innerJoin(profiles, eq(assigned_staff.profiles_id, profiles.id))
+            .innerJoin(profiles, eq(assigned_staff.staff_id, profiles.id))
             .leftJoin(event_queue, and(
-                eq(event_queue.profile_id, profiles.id),
+                eq(event_queue.staff_id, profiles.id),
                 eq(event_queue.event_log_id, eventId),
             ))
             .leftJoin(donor, eq(event_queue.donor_id, donor.id))
             .where(
                 and(
                     eq(assigned_staff.event_log_id, eventId),
-                    eq(assigned_staff.profiles_id, staffId)
+                    eq(assigned_staff.staff_id, staffId)
                 )
             );
 
@@ -192,12 +192,12 @@ export class ImpLabStaffModel implements LabStaffData {
         const updatedQueueRow = await orm
             .update(event_queue)
             .set({ 
-                profile_id: staffProfileId 
+                staff_id: staffProfileId 
             })
             .where(
                 and(
                     eq(event_queue.id, queueId),
-                    isNull(event_queue.profile_id) 
+                    isNull(event_queue.staff_id) 
                 )
             )
             .returning();

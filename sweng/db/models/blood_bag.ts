@@ -1,4 +1,4 @@
-import { pgTable, bigserial, varchar, bigint, integer, date, timestamp, text } from "drizzle-orm/pg-core";
+import { pgTable, uuid, bigserial, varchar, bigint, integer, date, timestamp, text } from "drizzle-orm/pg-core";
 import { donor } from "./donor"; 
 import { event_log } from "./event_log";
 import { profiles } from "./profiles";
@@ -10,7 +10,7 @@ export const blood_bag = pgTable('blood_bag', {
     
     donor_id: bigint('donor_id', { mode: 'bigint' }).references(() => donor.id),
     event_id: bigint('event_id', { mode: 'bigint' }).references(() => event_log.id),
-    staff_id: text("staff_id").references(() => profiles.id),
+    staff_id: uuid("staff_id").references(() => profiles.id),
     
     blood_type: varchar('blood_type', { length: 5 }).notNull(),
     volume_ml: integer('volume_ml').notNull(),

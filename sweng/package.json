@@ -10,13 +10,23 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "seed:accounts": "tsx --env-file=.env scripts/seed-accounts.ts",
-    "clear:accounts": "tsx --env-file=.env scripts/clear-accounts.ts",
+
+    "seed:accounts": "tsx --env-file=.env.local scripts/seeds/seed-accounts.ts",
     "seed:donors": "tsx --env-file=.env.local scripts/seeds/seed-donors.ts",
-    "clear:donors": "tsx --env-file=.env.local scripts/clears/clear-donors.ts",
     "seed:events": "tsx --env-file=.env.local scripts/seeds/seed-events.ts",
+    "seed:donorToEvent": "tsx --env-file=.env.local scripts/seeds/seed-donor-to-event.ts",
+    "seed:bags": "tsx --env-file=.env.local scripts/seeds/seed-blood-bags.ts",
+    "seed:queue": "tsx --env-file=.env.local scripts/seeds/seed-queue.ts",
+    "seed:assignedStaff": "tsx --env-file=.env.local scripts/seeds/seed-assigned-staff.ts",
+    "seed:corrections": "tsx --env-file=.env.local scripts/seeds/seed-corrections.ts",
+
+    "clear:accounts": "tsx --env-file=.env.local scripts/clears/clear-accounts.ts",
+    "clear:donors": "tsx --env-file=.env.local scripts/clears/clear-donors.ts",
     "clear:events": "tsx --env-file=.env.local scripts/clears/clear-events.ts",
-    "seed:corrections": "tsx --env-file=.env scripts/seed-corrections.ts"
+    "clear:donorToEvent": "tsx --env-file=.env.local scripts/clears/clear-donor-to-event.ts",
+    "clear:bags": "tsx --env-file=.env.local scripts/clears/clear-blood-bags.ts",
+    "clear:queue": "tsx --env-file=.env.local scripts/clears/clear-queue.ts",
+    "clear:assignedStaff": "tsx --env-file=.env.local scripts/clears/clear-assigned-staff.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",

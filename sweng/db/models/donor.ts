@@ -25,24 +25,17 @@ export const donor = pgTable("donor", {
   last_name: text("last_name").notNull(),
   middle_name: text("middle_name"),
 
-  // QR Token
-  qr_token: uuid("qr_token").defaultRandom().unique().notNull(),
+  blood: blood_type("blood").notNull(),
 
   // Age and birthdate
   birthdate: date("birthdate"),
   age: integer("age"),
-  
-  // Contact information
-  email: text("email").notNull(),
-  mobile_no: text("mobile_no").notNull(),
-
-  // Address
-  street: text("street"),
-  zip_code: text("zip_code"),
 
   // Personal attributes
   sex: biological_sex("sex").notNull(),
-  blood: blood_type("blood").notNull(),
+  
+  height: doublePrecision("height"),
+  weight: doublePrecision("weight"),
 
   // City reference
   city_id: bigint("city_id", { mode: "bigint" })
@@ -52,9 +45,12 @@ export const donor = pgTable("donor", {
     })
     .notNull(),
 
-  // Physical attributes
-  height: doublePrecision("height"),
-  weight: doublePrecision("weight"),
+  // Address
+  zip_code: text("zip_code"),
+
+  // Contact information
+  email: text("email").notNull(),
+  mobile_no: text("mobile_no").notNull(),
 
   // Status
   active: boolean("active").default(true).notNull(),
@@ -66,6 +62,8 @@ export const donor = pgTable("donor", {
 
   next_eligibility: date("next_eligibility"),
 
+  qr_token: uuid("qr_token").defaultRandom().unique().notNull(),
+  
   // Creation timestamp
   created_at: timestamp("created_at", { withTimezone: true })
     .defaultNow()
