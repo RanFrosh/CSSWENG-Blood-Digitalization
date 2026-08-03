@@ -5,7 +5,7 @@ import { profiles } from "./profiles";
 export const assigned_staff = pgTable("assigned_staff", {
     id: bigserial("id", { mode: "bigint" }).primaryKey(),
 
-    profiles_id: uuid("profiles_id")
+    staff_id: uuid("staff_id")
         .references(() => profiles.id, {
             onDelete: "no action",
             onUpdate: "no action",

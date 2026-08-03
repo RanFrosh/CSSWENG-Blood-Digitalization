@@ -7,15 +7,15 @@ import { EventCard } from "@/components/EventCard";
 import { ViewEvents } from "@/types/event_type";
 import { getLabStaffEvents } from "./ls_action";
 
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-type EventTab = EventStatus | "All";
-
 export default function LSEventsPage() {
 
     const router = useRouter();
 
-    // Set the initial active tab to "Ongoing"
-    const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
+    // Filters
+    const [sortBy, setSortBy] = useState("Default");
+
+    const [searchInput, setSearchInput] = useState("");
+    const [activeSearch, setActiveSearch] = useState("");
     
     // State for holding events from the backend
     const [events, setEvents] = useState<ViewEvents[]>([]);
@@ -26,8 +26,18 @@ export default function LSEventsPage() {
     // Error display
     const [errorMessage, setErrorMessage] = useState("");
 
-    // Status filters
-    const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
+    const [partner, setPartner] = useState("All Partners");
+    const [city, setCity] = useState("All Cities");
+
+    const [availableCities, setAvailableCities] = useState<string[]>([]);
+    const [availablePartners, setAvailablePartners] = useState<string[]>([]);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
+    const totalPages = Math.ceil(events.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentEvents = events.slice(startIndex, startIndex + itemsPerPage);
 
     useEffect(() => {
         const loadEvents = async () => {
@@ -36,10 +46,26 @@ export default function LSEventsPage() {
             setErrorMessage("");
 
             try {
-                const result = await getLabStaffEvents(activeTab);
+                const result = await getLabStaffEvents({
+                    search: activeSearch || undefined, 
+                    partner: partner !== "All Partners" ? partner : undefined,
+                    selectedCity: city !== "All Cities" ? city : undefined,
+                    sortBy
+                });
 
                 if (result.success && result.data) {
+
+                    if (city === "All Cities") {
+                        const citiesList = Array.from(new Set(result.data.map((e: any) => e.city).filter(Boolean))) as string[];
+                        setAvailableCities(citiesList);
+                        }
+                
+                    if (partner === "All Partners") {
+                        const partnersList = Array.from(new Set(result.data.map((e: any) => e.partner).filter(Boolean))) as string[];
+                        setAvailablePartners(partnersList);
+                    }
                     setEvents(result.data);
+
                 } else {
                     setErrorMessage(result.message);
                 }
@@ -50,11 +76,7 @@ export default function LSEventsPage() {
             }
         }
         loadEvents();
-    }, [activeTab]);
-
-    const filteredEvents = activeTab === "All" 
-        ? events 
-        : events.filter((event) => event.status === activeTab);
+    }, [activeSearch, partner, city, sortBy]);
 
     // Can only open events that are ongoing
     const openEvent = (event: ViewEvents) => {
@@ -64,22 +86,6 @@ export default function LSEventsPage() {
         } else {
             return;
         }
-    };
-
-    // Change tab style based on selected filter
-    const getTab = (tab: EventTab) => {
-        let className =
-            "px-[20px] py-[10px] rounded-full border-2 font-['Montserrat'] text-[16px] cursor-pointer transition ";
-
-        if (activeTab === tab) {
-            // selected tab
-            className += "bg-[#002940] border-[#002940] text-white font-bold";
-        } else {
-            // unselected tab
-            className += "bg-white border-[#002940] text-[#002940] hover:bg-[#002940] hover:text-white";
-        }
-
-        return className;
     };
     
     // Create button to open event if it is ongoing
@@ -95,6 +101,17 @@ export default function LSEventsPage() {
             );
         } else {
             return null;
+        }
+    };
+
+    const handlePageChange = (newPage: number) => {
+
+        setCurrentPage(newPage);
+        
+        const resultsSection = document.getElementById('results-top');
+
+        if (resultsSection) {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     };
 
@@ -125,51 +142,171 @@ export default function LSEventsPage() {
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
-                {/* Title */}
-                <section className="bg-[#f9fdff] p-[0.25in]">
-                    <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">
-                        My Events
-                    </h1>
-                </section>
 
                 {/* Staff Details */}
                 <StaffDetails />
 
                 {/* Assigned Events */}
-                <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                    <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
-                        <div>
-                            <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
-                                Assigned Events
-                            </h2>
-                        </div>
+                <section className="mt-5 bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
 
-                        {/* Tabs */}
-                        <div className="flex flex-row flex-wrap gap-[10px]">
-                            {tabs.map((tab) => (
+                    <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
+                        Assigned Events
+                    </h2>
+
+                    {/* Search and Sort */}
+                    <div className="mt-6 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-end gap-5 flex-wrap">
+                        
+                        <div className="flex-1 flex flex-col gap-2 min-w-[250px]">
+                            
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Search by
+                            </label>
+
+                            {/* Wrapper */}
+                            <div className="flex flex-row items-center w-full h-[54px] bg-white border-2 border-[#c0cad0] rounded-[10px] focus-within:border-[#002940] transition-colors overflow-hidden">
+                                
+                                {/* The Search Button */}
                                 <button
-                                    key={tab}
-                                    onClick={() => {
-                                        setActiveTab(tab);
-                                    }}
-                                    className={getTab(tab)}
+                                    type="button"
+                                    onClick={() => setActiveSearch(searchInput)}
+                                    className="pl-4 pr-2 h-full flex items-center justify-center text-gray-400 hover:text-[#002940] transition-colors cursor-pointer"
+                                    title="Search"
                                 >
-                                    {tab}
+                                    <svg 
+                                        xmlns="http://www.w3.org/2000/svg" 
+                                        fill="none" 
+                                        viewBox="0 0 24 24" 
+                                        strokeWidth={2.5} 
+                                        stroke="currentColor" 
+                                        className="w-6 h-6"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                    </svg>
                                 </button>
-                            ))}
+
+                                {/* The Borderless Input */}
+                                <input
+                                    type="text"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') setActiveSearch(searchInput);
+                                    }}
+                                    placeholder="Input event name or partner..."
+                                    className="flex-1 h-full pr-4 text-[18px] outline-none bg-transparent text-[#002940] placeholder-gray-400"
+                                />
+                            </div>
+
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">Partner</label>
+                            <select 
+                                value={partner}
+                                onChange={(e) => setPartner(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                            >
+                                <option value="All Partners">All Partners</option>
+                                {availablePartners.map((partnerName) => (
+                                    <option key={partnerName} value={partnerName}>
+                                        {partnerName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">City</label>
+                            <select 
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                            >
+                                <option value="All Cities">All Cities</option>
+                                {availableCities.map((cityName) => (
+                                    <option key={cityName} value={cityName}>
+                                        {cityName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="w-full md:w-[2in] flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Sort By
+                            </label>
+                            
+                            <select 
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="Default">ID (ascending)</option>
+                                <option value="ID (Descending)">ID (descending)</option>
+                                <option value ="Date (Earliest)">Date (earliest)</option>
+                                <option value ="Date (Oldest)">Date (oldest)</option>
+                                <option value = "Partner (A-Z)">Partner (A-Z)</option>
+                                <option value = "Partner (Z-A)">Partner (Z-A)</option>
+                            </select>
                         </div>
                     </div>
 
-                    {/* Event Cards */}
-                    <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {filteredEvents.map((event) => (
-                            <EventCard 
-                                key={event.id} 
-                                event={event} 
-                                actionButton={createActionButton(event)} 
-                            />
-                        ))}
-                    </div>
+                    {/* Divider & Result Count */}
+                    <section id="results-top" className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
+                        
+                        <div className="flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
+                            
+                            <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                                Results
+                            </h3>
+                            
+                            <span className="bg-[#e2e8ec] text-[#002940] px-4 py-1 rounded-full text-[16px] font-semibold">
+                                Showing {events.length} {events.length === 1 ? 'event' : 'events'}
+                            </span>
+                        </div>
+
+                        {/* Events List */}
+                        <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
+                            {currentEvents.map((event) => (
+                                <EventCard 
+                                    key={event.id} 
+                                    event={event} 
+                                    actionButton={createActionButton(event)} 
+                                />
+                            ))}
+
+                            {events.length === 0 && !isLoading && (
+                                <div className="p-10 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#c0cad0] rounded-[16px] bg-[#f9fdff]">
+                                    <p className="text-[20px] font-semibold text-[#002940] mb-2">No events found</p>
+                                    <p className="text-[16px] text-gray-500">Try adjusting your filters or search term.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-5 flex flex-row items-center justify-between gap-5">
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                            >
+                                Previous
+                            </button>
+
+                            <p className="text-[18px] text-[#002940]">
+                                Page {currentPage} of {totalPages || 1}
+                            </p>
+
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage >= totalPages}
+                                className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </section>
                 </section>
             </div>
         </main>

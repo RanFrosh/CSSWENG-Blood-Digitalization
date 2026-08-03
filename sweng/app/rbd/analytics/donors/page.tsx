@@ -1,178 +1,278 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { fetchFilteredDonors } from "../rbd_action";
+import DonorCard from "@/components/DonorCard";
 import Header from "@/components/HeaderRBD";
-import { fetchAllDonors } from "@/app/analytics/donor_action";
-
-type Donor = {
-    id: bigint; 
-    first_name: string;
-    last_name: string;
-    sex: string;
-    blood: string;
-    street: string | null;
-    zip_code: string | null;
-    active: boolean;
-    email: string;
-    age: number | null;
-    mobile_no: string
-};
 
 export default function DonorAnalyticsPage() {
-    
+
     const router = useRouter();
-    const [donors, setDonors] = useState<Donor[]>([]);
+
+    // Filters
+    const [sexFilter, setSexFilter] = useState("All");
+    const [bloodFilter, setBloodFilter] = useState("All");
+    const [eligibilityFilter, setEligibilityFilter] = useState("All");
+
+    const [sortBy, setSortBy] = useState("Default");
+
+    // Search
+    const [searchInput, setSearchInput] = useState(""); 
+    const [activeSearch, setActiveSearch] = useState("");
+
+    const [donors, setDonors] = useState<any[]>([]);
+
     const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const totalPages = Math.ceil(donors.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentDonors = donors.slice(startIndex, startIndex + itemsPerPage);
 
     useEffect(() => {
         const loadDonors = async () => {
-            const result = await fetchAllDonors();
-            if (result.success && result.data) {
-                setDonors(result.data);
-            }
-            setIsLoading(false);
-        };
-        loadDonors();
-    }, []);
-    
+            setIsLoading(true);
+            setErrorMessage("");
 
-    const viewDonorAnalytics = (donorId: bigint) => {
-        router.push(`/rbd/analytics/donors/${donorId.toString()}`);
+            try {
+                const result = await fetchFilteredDonors({
+                    search: activeSearch, 
+                    bloodFilter: bloodFilter, 
+                    sexFilter: sexFilter,
+                    eligibilityFilter: eligibilityFilter,
+                    sortBy: sortBy
+                });
+
+                if (result.success && result.data) {
+                    setDonors(result.data);
+                } else {
+                    setErrorMessage(result.message || "Failed to load donors.");
+                }
+            } catch (error) {
+                setErrorMessage("Failed to connect to the database");
+            } finally {
+                setIsLoading(false); 
+            }
+        }
+
+        loadDonors();
+
+    }, [activeSearch, bloodFilter, sexFilter, eligibilityFilter, sortBy]);
+
+    const viewDonorAnalytics = (donorId: string) => {
+        router.push(`/rbd/analytics/donors/${donorId}`);
     };
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+        
+        const resultsSection = document.getElementById('results-top');
+
+        if (resultsSection) {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading Donors...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+            
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
-                <section className="bg-[#f9fdff] p-[0.25in]">
-                    <p className="text-[18px] font-['Montserrat'] text-[#002940]">
-                        Red Bank Director
-                    </p>
 
-                    <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                        Donor Analytics
-                    </h1>
-                </section>
-
+                {/* Filters Section */}
                 <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
+                    
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        Search Donors
+                        Donor Directory
                     </h2>
-
-                    <div className="mt-5 flex flex-row items-end gap-5">
-                        <div className="flex-1 flex flex-col gap-2">
+                    
+                    {/* 2. Search, Blood Filter, and Sort (Tinted Container) */}
+                    <div className="mt-6 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-end gap-5 flex-wrap">
+                        
+                        {/* Search Input with embedded button */}
+                        <div className="flex-1 flex flex-col gap-2 min-w-[250px]">
                             <label className="text-[18px] font-semibold text-[#002940]">
-                                Search by
+                                Search
                             </label>
+                            
+                            <div className="flex flex-row items-center w-full h-[54px] bg-white border-2 border-[#c0cad0] rounded-[10px] focus-within:border-[#002940] transition-colors overflow-hidden">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveSearch(searchInput)}
+                                    className="pl-4 pr-2 h-full flex items-center justify-center text-gray-400 hover:text-[#002940] transition-colors cursor-pointer"
+                                    title="Search"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                    </svg>
+                                </button>
 
-                            <input
-                                type="text"
-                                placeholder="Input donor name"
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
-                            />
+                                <input
+                                    type="text"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') setActiveSearch(searchInput);
+                                    }}
+                                    placeholder="Input donor id..."
+                                    className="flex-1 h-full pr-4 text-[18px] outline-none bg-transparent text-[#002940] placeholder-gray-400"
+                                />
+                            </div>
                         </div>
 
-                        <div className="w-[2in] flex flex-col gap-2">
+                        {/* Blood Type Filter */}
+                        <div className="w-full md:w-[1.5in] flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Blood Type
+                            </label>
+                            
+                            <select 
+                                value={bloodFilter}
+                                onChange={(e) => setBloodFilter(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="All">All Types</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                            </select>
+                        </div>
+
+                        {/* Sex Filter */}
+                        <div className="w-full md:w-[1.5in] flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Sex
+                            </label>
+                            
+                            <select 
+                                value={sexFilter}
+                                onChange={(e) => setSexFilter(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="All">All</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+
+                        {/* Eligibility Filter */}
+                        <div className="w-full md:w-[1.5in] flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Eligibility
+                            </label>
+                            
+                            <select 
+                                value={eligibilityFilter}
+                                onChange={(e) => setEligibilityFilter(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="All">All</option>
+                                <option value="Eligible">Eligible</option>
+                                <option value="Recovery">In Recovery</option>
+                            </select>
+                        </div>
+
+                        {/* Sorting */}
+                        <div className="w-full md:w-[2in] flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Sort By
                             </label>
-
-                            <select className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white">
-                                <option>Default</option>
-                                <option>Sex</option>
-                                <option>Blood Type</option>
-                                <option>Location</option>
+                            
+                            <select 
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="Default">ID (ascending)</option>
+                                <option value="ID (Descending)">ID (descending)</option>
+                                <option value="Age (Youngest)">Age (ascending)</option>
+                                <option value="Age (Oldest)">Age (descending)</option>
                             </select>
                         </div>
                     </div>
                 </section>
 
-                <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                    <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
-                        <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
-                            Donors
-                        </h2>
+                <section id="results-top" className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
 
-                        <p className="text-[18px] text-[#002940]">
-                            Showing {isLoading ? "..." : donors.length} donor/s
-                        </p>
+                    {/* Divider & Result Count */}
+                    <div className="flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
+                        <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                            Results
+                        </h3>
+                        
+                        <span className="bg-[#e2e8ec] text-[#002940] px-4 py-1 rounded-full text-[16px] font-semibold">
+                            Showing {donors.length} {donors.length === 1 ? 'event' : 'events'}
+                        </span>
                     </div>
 
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {isLoading ? (
-                            <p className="text-[18px] text-[#002940] animate-pulse">Fetching database records...</p>
-                        ) : donors.length === 0 ? (
-                            <p className="text-[18px] text-gray-500 italic">No donors found in the system.</p>
-                        ) : (
-                            donors.slice(0, 5).map((donor) => (
-                                <div
-                                    key={donor.id.toString()}
-                                    className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
-                                >
-                                    <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between gap-5 flex-wrap">
-                                        <div className="flex flex-row items-center gap-[0.15in] flex-wrap">
-                                            <h2 className="text-[24px] font-['Montserrat'] font-bold">
-                                                {donor.first_name} {donor.last_name}
-                                            </h2>
-                                        </div>
+                        {currentDonors.map((donor) => (
+                            <DonorCard 
+                                key={donor.id?.toString()} 
+                                donor={donor} 
+                                onViewAnalytics={viewDonorAnalytics} 
+                            />
+                        ))}
 
-                                        <button
-                                            type="button"
-                                            onClick={() => viewDonorAnalytics(donor.id)}
-                                            className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:underline hover:bg-gray-100 transition"
-                                        >
-                                            View Analytics
-                                        </button>
-                                    </div>
-
-                                    <div className="p-[0.35in]">
-                                        <div className="grid grid-cols-2 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                                            
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">Blood Type: </span> 
-                                                {donor.blood}
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">Email: </span> 
-                                                {donor.email}
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">Sex: </span> 
-                                                {donor.sex}
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">Mobile Number: </span> 
-                                                {donor.mobile_no}
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">Age: </span> 
-                                                {donor.age}
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">Location: </span> 
-                                                {`${donor.street}, ${donor.zip_code}`}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
+                        {/* Empty State Fallback */}
+                        {donors.length === 0 && (
+                            <div className="p-8 text-center text-gray-500 italic border-2 border-dashed border-gray-300 rounded-[16px]">
+                                No donors found matching your criteria.
+                            </div>
                         )}
                     </div>
 
-                    {/* Pagination (View-Only for Demo) */}
                     <div className="mt-5 flex flex-row items-center justify-between gap-5">
                         <button
                             type="button"
-                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
                         >
                             Previous
                         </button>
-                        <p className="text-[18px] text-[#002940]">Page 1</p>
+
+                        <p className="text-[18px] text-[#002940]">
+                            Page {currentPage} of {totalPages || 1}
+                        </p>
+
                         <button
                             type="button"
-                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage >= totalPages}
+                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
                         >
                             Next
                         </button>

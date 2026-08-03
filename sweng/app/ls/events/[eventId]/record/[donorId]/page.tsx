@@ -1,9 +1,12 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Header from "@/components/HeaderLS";
-import { retrieveDonor } from "@/app/queue/queue_action";
+import { retrieveDonor } from "../../../ls_action";
 import { ViewDonor } from "@/types/donor_type";
+import DonorDetails from "@/components/DonorDetails";
+import { submitDonationRecordAction } from "../../../ls_action";
 
 export default function RecordPage() {
     
@@ -12,20 +15,19 @@ export default function RecordPage() {
     const eventId = params.eventId as string;
     const donorId = params.donorId as string;
 
+    const [selectedDonor, setSelectedDonor] = useState<any>(null);
     const [donorInfo, setDonorInfo] = useState<ViewDonor | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
 
-    const [bloodBagId, setBloodBagId] = useState("");
     const [volumeCollected, setVolumeCollected] = useState("");
-    const [completionTime, setCompletionTime] = useState("");
     const [collectionOutcome, setCollectionOutcome] = useState("");
     const [bloodQuality, setBloodQuality] = useState("");
     const [observations, setObservations] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [showModal, setShowModal] = useState(false);
 
-    // Fetch the donor data when the page loads
     useEffect(() => {
         const fetchDonor = async () => {
 
@@ -35,11 +37,14 @@ export default function RecordPage() {
             setIsLoading(true);
             
             try {
-                const res = await retrieveDonor(BigInt(donorId));
+                const res = await retrieveDonor(donorId as string);
+
                 if (res.success && res.data) {
                     setDonorInfo(res.data);
+                    setSelectedDonor(res.data);
                 } else {
                     setErrorMessage(res.message || "Failed to load donor data.");
+                    setSelectedDonor(undefined);
                 }
             } catch (err) {
                 setErrorMessage("Database connection error.");
@@ -51,36 +56,51 @@ export default function RecordPage() {
         fetchDonor();
     }, [donorId]);
 
-    // Helper to calculate age if your DB stores DOB
-    const calculateAge = (dob: string | Date) => {
-        const birthDate = new Date(dob);
-        const today = new Date();
-        let age = today.getFullYear() - birthDate.getFullYear();
-        const m = today.getMonth() - birthDate.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-            age--;
-        }
-        return age;
-    };
+    const isValidVolume = volumeCollected !== "" && Number(volumeCollected) >= 0 && Number(volumeCollected) <= 450;
+
+    const isFormValid = 
+        isValidVolume && 
+        collectionOutcome !== "" && 
+        (collectionOutcome === "Incomplete" ? true : bloodQuality !== "");
 
     const handleConfirmRecord = async () => {
-        // TODO: Call your Server Action here to save the blood bag 
-        // and update the queue status to 'Completed'!
-        
-        // Example payload ready for the backend:
-        /*
-        const payload = {
-            blood_bag_id: bloodBagId,
-            volume: volumeCollected,
-            time: completionTime,
-            outcome: collectionOutcome,
-            quality: bloodQuality,
-            observations: observations
-        }
-        */
 
-        setShowModal(false);
-        router.push(`/ls/events/${eventId}`);
+        setIsSubmitting(true);
+
+        const exactDate = new Date();
+                
+        if (Number(volumeCollected) > 450) {
+            alert("Donation volume cannot exceed 450 mL.");
+            return; 
+        }
+
+        try {
+            const payload = {
+                donor_id: donorId,
+                event_id: eventId,
+                blood_type: donorInfo?.blood,
+                volume: Number(volumeCollected), 
+                outcome: collectionOutcome,
+                quality: bloodQuality,
+                observations: observations,
+                collection_date: exactDate.toISOString()
+            };
+
+            const res = await submitDonationRecordAction(payload);
+            
+            if (res.success) {
+                setShowModal(false);
+                router.push(`/ls/events/${eventId}`);
+            } else {
+                alert(res.message);
+            }
+
+        } catch (error) {
+            console.error("Failed to submit record:", error);
+            alert("An unexpected error occurred. Please try again.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (isLoading) {
@@ -118,152 +138,95 @@ export default function RecordPage() {
                 </section>
 
                 {/* Donor Info Section */}
-                <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                    <div className="flex flex-row items-center justify-between gap-5 flex-wrap">
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Basic Donor Information
-                        </h2>
-                        <div>
-                            <span className="bg-[#002940] text-white border-2 border-[#002940] px-5 py-3 rounded-full text-[18px] font-semibold">
-                                Donor ID: {donorInfo.id.toString()}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-4 gap-[0.25in]">
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">Name</p>
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.first_name} {donorInfo.last_name}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">Age</p>
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {/* Using calculateAge assuming you have a dob field */}
-                                {donorInfo.birthdate ? calculateAge(donorInfo.birthdate) : "N/A"}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">Sex</p>
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.sex || "N/A"}
-                            </p>
-                        </div>
-
-                        <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">Blood Type</p>
-                            <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                                {donorInfo.blood || "Unknown"}
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                <DonorDetails donor={{
+                    ...selectedDonor,
+                    bloodType: selectedDonor.blood
+                }}/>
 
                 <form className="mt-[0.35in] flex flex-col gap-[0.35in]" onSubmit={(e) => e.preventDefault()}>
+
                     {/* Donation Details Section */}
                     <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
                         <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Donation Details
+                            Donation Details & Outcome
                         </h2>
 
-                        <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[0.25in]">
-                            <div className="flex flex-col gap-[5px]">
-                                <label className="text-[18px] font-semibold text-[#002940]">Blood Bag ID</label>
-                                <input
-                                    type="text"
-                                    value={bloodBagId}
-                                    onChange={(e) => setBloodBagId(e.target.value)}
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                                />
-                            </div>
-
-                            <div className="flex flex-col gap-[5px]">
-                                <label className="text-[18px] font-semibold text-[#002940]">Volume Collected (mL)</label>
-                                <input
-                                    type="number"
-                                    value={volumeCollected}
-                                    onChange={(e) => setVolumeCollected(e.target.value)}
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                                />
-                            </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-[0.25in]">
                             
-                            <div className="flex flex-col gap-[5px]">
-                                <label className="text-[18px] font-semibold text-[#002940]">Completion Time</label>
-                                <input
-                                    type="time"
-                                    value={completionTime}
-                                    onChange={(e) => setCompletionTime(e.target.value)}
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                                />
+                            {/* Volume */}
+                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-col">
+                                <label className="text-[18px] font-semibold text-[#002940]">Volume Collected (mL)</label>
+                                <div className="mt-5 flex-1 flex items-center">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="450"
+                                        value={volumeCollected}
+                                        onChange={(e) => setVolumeCollected(e.target.value)}
+                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940] transition-colors"
+                                        placeholder="e.g. 450"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                    </section>
 
-                    {/* Collection Outcome Section */}
-                    <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Collection Outcome
-                        </h2>
-
-                        <div className="mt-[0.25in] grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            {/* Outcome */}
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
                                 <p className="text-[18px] font-semibold text-[#002940]">Donation Outcome</p>
                                 <div className="mt-5 flex flex-row gap-5 flex-wrap text-[18px] text-[#002940]">
-                                    <label className="cursor-pointer">
+                                    <label className="cursor-pointer flex items-center">
                                         <input
                                             type="radio"
                                             name="collection-outcome"
                                             value="Successful"
                                             checked={collectionOutcome === "Successful"}
                                             onChange={(e) => setCollectionOutcome(e.target.value)}
-                                            className="mr-2 cursor-pointer"
+                                            className="mr-2 cursor-pointer w-5 h-5 accent-[#002940]"
                                         />
                                         Successful
                                     </label>
-                                    <label className="cursor-pointer">
+                                    <label className="cursor-pointer flex items-center">
                                         <input
                                             type="radio"
                                             name="collection-outcome"
                                             value="Incomplete"
                                             checked={collectionOutcome === "Incomplete"}
                                             onChange={(e) => setCollectionOutcome(e.target.value)}
-                                            className="mr-2 cursor-pointer"
+                                            className="mr-2 cursor-pointer w-5 h-5 accent-[#002940]"
                                         />
                                         Incomplete
                                     </label>
                                 </div>
                             </div>
 
+                            {/* Quality */}
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                                <p className="text-[18px] font-semibold text-[#002940]">Blood Quality Assessment</p>
+                                <p className="text-[18px] font-semibold text-[#002940]">Blood Quality</p>
                                 <div className="mt-5 flex flex-row gap-5 flex-wrap text-[18px] text-[#002940]">
-                                    <label className="cursor-pointer">
+                                    <label className="cursor-pointer flex items-center">
                                         <input
                                             type="radio"
                                             name="blood-quality"
                                             value="Pass"
                                             checked={bloodQuality === "Pass"}
                                             onChange={(e) => setBloodQuality(e.target.value)}
-                                            className="mr-2 cursor-pointer"
+                                            className="mr-2 cursor-pointer w-5 h-5 accent-[#002940]"
                                         />
                                         Pass
                                     </label>
-                                    <label className="cursor-pointer">
+                                    <label className="cursor-pointer flex items-center">
                                         <input
                                             type="radio"
                                             name="blood-quality"
                                             value="Fail"
                                             checked={bloodQuality === "Fail"}
                                             onChange={(e) => setBloodQuality(e.target.value)}
-                                            className="mr-2 cursor-pointer"
+                                            className="mr-2 cursor-pointer w-5 h-5 accent-[#002940]"
                                         />
                                         Fail
                                     </label>
                                 </div>
                             </div>
+
                         </div>
                     </section>
 
@@ -285,9 +248,9 @@ export default function RecordPage() {
                                 type="button"
                                 onClick={() => setShowModal(true)}
                                 // Disable button if crucial fields are missing
-                                disabled={!bloodBagId || !collectionOutcome}
+                                disabled={!isFormValid || isSubmitting}
                                 className={`min-w-[1.5in] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold transition ${
-                                    !bloodBagId || !collectionOutcome 
+                                    (!isFormValid || isSubmitting)
                                         ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
                                         : "bg-[#002940] text-white hover:bg-blue-900 cursor-pointer"
                                 }`}
@@ -301,31 +264,57 @@ export default function RecordPage() {
 
             {/* The Confirmation Modal */}
             {showModal && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-8 rounded-[16px] shadow-2xl max-w-md w-full border-2 border-[#002940]">
-                        <h2 className="text-2xl font-['Montserrat'] font-bold text-[#002940] mb-4">
-                            Confirm Record
-                        </h2>
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                         
-                        <div className="mb-6 text-lg bg-gray-50 p-4 rounded-lg border border-gray-200">
-                            <p className="mb-2"><span className="font-bold text-[#002940]">Donor:</span> {donorInfo.first_name} {donorInfo.last_name}</p>
-                            <p className="mb-2"><span className="font-bold text-[#002940]">Bag ID:</span> {bloodBagId}</p>
-                            <p><span className="font-bold text-[#002940]">Outcome:</span> {collectionOutcome}</p>
+                        {/* Header */}
+                        <div className="bg-[#002940] p-6 text-white text-center">
+                            <h3 className="text-3xl font-bold font-['Montserrat']">Confirm Record</h3>
+                            <p className="text-blue-200 mt-2 font-medium">Verify details before proceeding</p>
                         </div>
                         
-                        <div className="flex justify-end gap-3">
-                            <button 
-                                onClick={() => setShowModal(false)}
-                                className="px-5 py-2 font-semibold border-2 border-gray-400 rounded-lg text-gray-600 hover:bg-gray-100 transition"
-                            >
-                                Cancel
-                            </button>
-                            <button 
-                                onClick={handleConfirmRecord}
-                                className="px-5 py-2 font-semibold bg-[#002940] text-white rounded-lg hover:bg-blue-900 transition"
-                            >
-                                Confirm & Save
-                            </button>
+                        <div className="p-6">
+
+                            <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200 grid grid-cols-2 gap-y-4 gap-x-2">
+                                
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-semibold">Donor ID</p>
+                                    <p className="font-bold text-[#002940]">{donorInfo.id}</p>
+                                </div>
+
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-semibold">Donated Volume</p>
+                                    <p className="font-bold text-[#002940]">{volumeCollected} mL</p>
+                                </div>
+
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-semibold">Collection Outcome</p>
+                                    <p className="font-bold text-[#002940]">{collectionOutcome}</p>
+                                </div>
+
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-semibold">Blood Quality</p>
+                                    <p className="font-bold text-[#002940]">{bloodQuality}</p>
+                                </div>
+
+                            </div>
+                            
+                            {/* Buttons block */}
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={() => setShowModal(false)}
+                                    className="flex-1 px-6 py-4 rounded-xl border-2 border-slate-200 text-lg font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={handleConfirmRecord}
+                                    className="flex-1 px-6 py-4 rounded-xl bg-emerald-600 text-white text-lg font-bold hover:bg-emerald-700 transition-colors shadow-md active:scale-[0.98] disabled:opacity-50 flex justify-center items-center cursor-pointer"
+                                >
+                                    Confirm & Save
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

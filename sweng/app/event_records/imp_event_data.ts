@@ -98,14 +98,14 @@ export class ImpEventModel implements EventData {
     async queryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>> {
         try {
 
-            if (!staff.profiles_id) {
+            if (!staff.staff_id) {
                 return { success: false, message: "No profile ID", data: undefined };
             }
 
             const assignments = await this.access
             .select()
             .from(assigned_staff)
-            .where(eq(assigned_staff.profiles_id, staff.profiles_id));
+            .where(eq(assigned_staff.staff_id, staff.staff_id));
 
             if (assignments.length === 0) {
                 return { success: true, message: "No events assigned", data: [] };

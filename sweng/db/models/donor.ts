@@ -16,37 +16,26 @@ import { blood_type } from "../enums/blood_type";
 import { assessment_status } from "../enums/assessment_status";
 
 export const donor = pgTable("donor", {
+  
   // Primary key
   id: bigserial("id", { mode: "bigint" }).primaryKey(),
-
-  // Creation timestamp
-  created_at: timestamp("created_at", { withTimezone: true })
-    .defaultNow()
-    .notNull(),
 
   // Personal information
   first_name: text("first_name").notNull(),
   last_name: text("last_name").notNull(),
   middle_name: text("middle_name"),
 
-  // QR Token
-  qr_token: uuid("qr_token").defaultRandom().unique().notNull(),
+  blood: blood_type("blood").notNull(),
 
   // Age and birthdate
   birthdate: date("birthdate"),
   age: integer("age"),
-  
-  // Contact information
-  email: text("email").notNull(),
-  mobile_no: text("mobile_no").notNull(),
-
-  // Address
-  street: text("street"),
-  zip_code: text("zip_code"),
 
   // Personal attributes
   sex: biological_sex("sex").notNull(),
-  blood: blood_type("blood").notNull(),
+  
+  height: doublePrecision("height"),
+  weight: doublePrecision("weight"),
 
   // City reference
   city_id: bigint("city_id", { mode: "bigint" })
@@ -56,26 +45,32 @@ export const donor = pgTable("donor", {
     })
     .notNull(),
 
-  // Donor photo
-  photo_path: text("photo_path").notNull(),
+  // Address
+  zip_code: text("zip_code"),
 
-  // Physical attributes
-  height: doublePrecision("height"),
-  weight: doublePrecision("weight"),
+  // Contact information
+  email: text("email").notNull(),
+  mobile_no: text("mobile_no").notNull(),
 
   // Status
   active: boolean("active").default(true).notNull(),
-
-  // Soft delete
-  delete_datetime: timestamp("delete_datetime", { withTimezone: true }),
-  delete_reason: text("delete_reason"),
-  deleted_by: bigint("deleted_by", { mode: "bigint" }),
 
   // Additional fields from dev
   verifiedBlood: boolean("verifiedBlood").default(false).notNull(),
   medicalNote: text("medicalNote"),
   assessment_status: assessment_status("assessment_status"),
 
-  // Date of when donor is eligible to go to an event
-  next_eligibility: date("next_eligibility")
+  next_eligibility: date("next_eligibility"),
+
+  qr_token: uuid("qr_token").defaultRandom().unique().notNull(),
+  
+  // Creation timestamp
+  created_at: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+
+  // Soft delete
+  delete_datetime: timestamp("delete_datetime", { withTimezone: true }),
+  delete_reason: text("delete_reason"),
+  deleted_by: bigint("deleted_by", { mode: "bigint" }),
 });

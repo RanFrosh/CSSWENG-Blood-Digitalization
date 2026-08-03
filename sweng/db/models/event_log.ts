@@ -18,13 +18,8 @@ export const eventStatusEnum = pgEnum("event_status", [
 ]);
 
 export const event_log = pgTable("event_log", {
-    id: bigserial("id", { mode: "bigint" }).primaryKey(),
 
-    created_at: timestamp("created_at", {
-        withTimezone: true,
-    })
-        .defaultNow()
-        .notNull(),
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
 
     // Event Information
     name: text("name").notNull(),
@@ -67,5 +62,11 @@ export const event_log = pgTable("event_log", {
 
     perk_claims: bigint("perk_claims", { mode: "bigint" })
         .default(BigInt(0))
+        .notNull(),
+
+    created_at: timestamp("created_at", {
+        withTimezone: true,
+    })
+        .defaultNow()
         .notNull(),
 });

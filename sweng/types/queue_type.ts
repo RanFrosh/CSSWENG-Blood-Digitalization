@@ -25,7 +25,7 @@ export type StaffWithStatus = {
     name: string
     role: string
     isBusy: boolean
-    currentDonorId: bigint | null
+    currentDonorId: number | null
     currentDonorName: string | null
-    queueEntryId: bigint | null
+    queueEntryId: number | null
 }

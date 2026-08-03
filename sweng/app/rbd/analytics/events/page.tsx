@@ -1,199 +1,322 @@
 "use client";
+
 import { useRouter } from "next/navigation";
-
+import { useState, useEffect } from "react";
+import { fetchFilteredEvents } from "../rbd_action";
+import { ViewEvents } from "@/types/event_type";
 import Header from "@/components/HeaderRBD";
+import { EventCard } from "@/components/EventCard";
 
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
+export default function SearchEventsPage() {
 
-type EventAnalytics = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatus;
-};
-
-const events: EventAnalytics[] = [
-    {
-        id: "1",
-        name: "Blood Donation Drive",
-        location: "DLSU",
-        date: "2026-07-15",
-        time: "9:00 AM - 4:00 PM",
-        partner: "Manila Doctors Hospital",
-        status: "Ongoing",
-    },
-    {
-        id: "2",
-        name: "Name 2",
-        location: "Location 2",
-        date: "Date 2",
-        time: "Time 2",
-        partner: "Partner 2",
-        status: "Upcoming",
-    },
-    {
-        id: "3",
-        name: "Name 3",
-        location: "Location 3",
-        date: "Date 3",
-        time: "Time 3",
-        partner: "Partner 3",
-        status: "Completed",
-    },
-];
-
-export default function EventAnalyticsPage() {
     const router = useRouter();
+    
+    // Filters
+    const [statusFilter, setStatusFilter] = useState("All");
+    const [sortBy, setSortBy] = useState("Default");
 
-    // for some reason this specific folder keeps bugging so im using direct link lmao
-    const viewEventAnalytics = (eventId: string) => {
-        location.href = `/rbd/analytics/events/${eventId}`;
+    const [searchInput, setSearchInput] = useState("");
+    const [activeSearch, setActiveSearch] = useState("");
+    
+    // State for holding events from the backend
+    const [events, setEvents] = useState<ViewEvents[]>([]);
+
+    // Loading State
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Error display
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const [partner, setPartner] = useState("All Partners");
+    const [city, setCity] = useState("All Cities");
+
+    const [availableCities, setAvailableCities] = useState<string[]>([]);
+    const [availablePartners, setAvailablePartners] = useState<string[]>([]);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const totalPages = Math.ceil(events.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentEvents = events.slice(startIndex, startIndex + itemsPerPage);
+
+    useEffect(() => {
+        const loadEvents = async () => {
+            setIsLoading(true);
+            setErrorMessage("");
+
+            try {
+                const result = await fetchFilteredEvents({
+                    search: activeSearch || undefined, 
+                    status: statusFilter, 
+                    partner: partner !== "All Partners" ? partner : undefined,
+                    selectedCity: city !== "All Cities" ? city : undefined,
+                    sortBy
+                });
+
+                if (result.success && result.data) {
+
+                    if (city === "All Cities") {
+                        const citiesList = Array.from(new Set(result.data.map((e: any) => e.city).filter(Boolean))) as string[];
+                        setAvailableCities(citiesList);
+                        }
+                
+                    if (partner === "All Partners") {
+                        const partnersList = Array.from(new Set(result.data.map((e: any) => e.partner).filter(Boolean))) as string[];
+                        setAvailablePartners(partnersList);
+                    }
+                    setEvents(result.data);
+                    
+                } else {
+                    setErrorMessage(result.message || "Failed to load events.");
+                }
+            } catch (error) {
+                setErrorMessage("Failed to connect to the database");
+            } finally {
+                setIsLoading(false); 
+            }
+        }
+
+        loadEvents();
+
+    }, [activeSearch, statusFilter, partner, city, sortBy]);
+
+    const viewEventAnalytics = (eventId: BigInt) => {
+        router.push(`/rbd/analytics/events/${eventId}`);
     };
+
+    // Create button to open event if it is ongoing
+    const createActionButton = (event: ViewEvents) => {
+
+        if (event.status === "Ongoing" || event.status === "Completed") {
+            return (
+                <button
+                    onClick={() => viewEventAnalytics(event.id)}
+                    className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] transition hover:bg-gray-200 cursor-pointer"
+                >
+                    View Event
+                </button>
+            );
+        } 
+        
+        return null;
+    };
+
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+        
+        const resultsSection = document.getElementById('results-top');
+
+        if (resultsSection) {
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading Events...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
 
-            <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
-                <section className="bg-[#f9fdff] p-[0.25in]">
-                    <p className="text-[18px] font-['Montserrat'] text-[#002940]">
-                        Red Bank Director
-                    </p>
+            <div className="flex-1 bg-[#f9fdff] p-[0.35in] flex flex-col gap-[0.35in]">
 
-                    <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
-                        Event Analytics
-                    </h1>
-                </section>
+                <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
 
-                <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-5 shadow-sm">
-                    <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        Search Events
+                    <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
+                        Event Directory
                     </h2>
 
-                    <div className="mt-5 flex flex-row items-end gap-5">
-                        <div className="flex-1 flex flex-col gap-2">
+                    {/* Search and Sort */}
+                    <div className="mt-6 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-end gap-5 flex-wrap">
+                        
+                        <div className="flex-1 flex flex-col gap-2 min-w-[250px]">
+                            
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Search by
                             </label>
 
-                            <input
-                                type="text"
-                                placeholder="Input event name or partner"
-                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940]"
-                            />
+                            {/* Wrapper */}
+                            <div className="flex flex-row items-center w-full h-[54px] bg-white border-2 border-[#c0cad0] rounded-[10px] focus-within:border-[#002940] transition-colors overflow-hidden">
+                                
+                                {/* The Search Button */}
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveSearch(searchInput)}
+                                    className="pl-4 pr-2 h-full flex items-center justify-center text-gray-400 hover:text-[#002940] transition-colors cursor-pointer"
+                                    title="Search"
+                                >
+                                    <svg 
+                                        xmlns="http://www.w3.org/2000/svg" 
+                                        fill="none" 
+                                        viewBox="0 0 24 24" 
+                                        strokeWidth={2.5} 
+                                        stroke="currentColor" 
+                                        className="w-6 h-6"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                                    </svg>
+                                </button>
+
+                                {/* The Borderless Input */}
+                                <input
+                                    type="text"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') setActiveSearch(searchInput);
+                                    }}
+                                    placeholder="Input event name or partner..."
+                                    className="flex-1 h-full pr-4 text-[18px] outline-none bg-transparent text-[#002940] placeholder-gray-400"
+                                />
+                            </div>
+
                         </div>
 
-                        <div className="w-[2in] flex flex-col gap-2">
+                        {/* Status Filter */}
+                        <div className="w-full md:w-[1.5in] flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">
+                                Status
+                            </label>
+                            
+                            <select 
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="All">All</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Ongoing">Ongoing</option>
+                            </select>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">Partner</label>
+                            <select 
+                                value={partner}
+                                onChange={(e) => setPartner(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                            >
+                                <option value="All Partners">All Partners</option>
+                                {availablePartners.map((partnerName) => (
+                                    <option key={partnerName} value={partnerName}>
+                                        {partnerName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="flex flex-col gap-2">
+                            <label className="text-[18px] font-semibold text-[#002940]">City</label>
+                            <select 
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                            >
+                                <option value="All Cities">All Cities</option>
+                                {availableCities.map((cityName) => (
+                                    <option key={cityName} value={cityName}>
+                                        {cityName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="w-full md:w-[2in] flex flex-col gap-2">
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Sort By
                             </label>
-
-                            <select className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white">
-                                <option>Default</option>
-                                <option>Date</option>
-                                <option>Partner</option>
-                                <option>Status</option>
+                            
+                            <select 
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer transition-colors"
+                            >
+                                <option value="Default">ID (ascending)</option>
+                                <option value="ID (Descending)">ID (descending)</option>
+                                <option value ="Date (Earliest)">Date (earliest)</option>
+                                <option value ="Date (Oldest)">Date (oldest)</option>
+                                <option value = "Partner (A-Z)">Partner (A-Z)</option>
+                                <option value = "Partner (Z-A)">Partner (Z-A)</option>
                             </select>
                         </div>
                     </div>
-                </section>
 
-                <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                    <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
-                        <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
-                            Events
-                        </h2>
+                    {/* Divider & Result Count */}
+                    <section id="results-top" className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
+                        
+                        <div className="flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
+                            
+                            <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                                Results
+                            </h3>
+                            
+                            <span className="bg-[#e2e8ec] text-[#002940] px-4 py-1 rounded-full text-[16px] font-semibold">
+                                Showing {events.length} {events.length === 1 ? 'event' : 'events'}
+                            </span>
+                        </div>
 
-                        <p className="text-[18px] text-[#002940]">
-                            Showing {events.length} event/s
-                        </p>
-                    </div>
+                        {/* Events List */}
+                        <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
+                            {currentEvents.map((event) => (
+                                <EventCard 
+                                    key={event.id} 
+                                    event={event} 
+                                    actionButton={createActionButton(event)} 
+                                />
+                            ))}
 
-                    <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {events.slice(0, 5).map((event) => (
-                            <div
-                                key={event.id}
-                                className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
+                            {events.length === 0 && !isLoading && (
+                                <div className="p-10 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#c0cad0] rounded-[16px] bg-[#f9fdff]">
+                                    <p className="text-[20px] font-semibold text-[#002940] mb-2">No events found</p>
+                                    <p className="text-[16px] text-gray-500">Try adjusting your filters or search term.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-5 flex flex-row items-center justify-between gap-5">
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
                             >
-                                <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between gap-5 flex-wrap">
-                                    <div className="flex flex-row items-center gap-[0.15in] flex-wrap">
-                                        <h2 className="text-[24px] font-['Montserrat'] font-bold">
-                                            {event.name}
-                                        </h2>
+                                Previous
+                            </button>
 
-                                        <span className="px-[12px] py-[6px] rounded-full text-[16px] font-semibold bg-white text-[#002940]">
-                                            {event.status}
-                                        </span>
-                                    </div>
+                            <p className="text-[18px] text-[#002940]">
+                                Page {currentPage} of {totalPages || 1}
+                            </p>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            viewEventAnalytics(event.id);
-                                        }}
-                                        className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:underline"
-                                    >
-                                        View Analytics
-                                    </button>
-                                </div>
-
-                                <div className="p-[0.35in]">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Partner:
-                                            </span>{" "}
-                                            {event.partner}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Location:
-                                            </span>{" "}
-                                            {event.location}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Date:
-                                            </span>{" "}
-                                            {event.date}
-                                        </p>
-
-                                        <p>
-                                            <span className="font-semibold text-[#002940]">
-                                                Time:
-                                            </span>{" "}
-                                            {event.time}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="mt-5 flex flex-row items-center justify-between gap-5">
-                        <button
-                            type="button"
-                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
-                        >
-                            Previous
-                        </button>
-
-                        <p className="text-[18px] text-[#002940]">
-                            Page 1
-                        </p>
-
-                        <button
-                            type="button"
-                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
-                        >
-                            Next
-                        </button>
-                    </div>
+                            <button
+                                type="button"
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage >= totalPages}
+                                className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </section>
                 </section>
             </div>
         </main>
