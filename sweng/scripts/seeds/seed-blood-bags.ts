@@ -44,7 +44,7 @@ async function seedBloodBags() {
         serial_number: `TEMP-${Date.now()}-${i}`,
         donor_id: record.donor_id,
         event_id: record.event_id,
-        staff_id: assignedStaffId, // 💥 Added the assigned staff ID!
+        staff_id: assignedStaffId,
         blood_type: record.blood_type,
         volume_ml: record.volume_ml ?? 450,
         collection_date: record.collection_date,

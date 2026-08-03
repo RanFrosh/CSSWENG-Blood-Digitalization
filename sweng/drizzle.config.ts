@@ -1,3 +1,7 @@
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 import { defineConfig } from 'drizzle-kit';
 import * as dotenv from "dotenv";
 
@@ -10,5 +14,5 @@ export default defineConfig({
     schemaFilter: ['public'],
     dbCredentials: {
         url: process.env.DATABASE_URL!
-    }
+    },
 });
