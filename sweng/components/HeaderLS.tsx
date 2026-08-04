@@ -23,10 +23,6 @@ export default function HeaderLS() {
         if (eventId) router.push(`/ls/events/${eventId}`);
     };
 
-    const goQueue = () => {
-        if (eventId) router.push(`/ls/events/${eventId}/queue`);
-    };
-
     const goRecord = () => {
         if (eventId && donorId) router.push(`/ls/events/${eventId}/record/${donorId}`);
     };
@@ -55,12 +51,6 @@ export default function HeaderLS() {
             name: "Event Home",
             path: `/ls/events/${eventId}`,
             onClick: goEventHome,
-        });
-
-        navLinks.push({
-            name: "Donation Queue",
-            path: `/ls/events/${eventId}/queue`,
-            onClick: goQueue,
         });
 
         if (donorId) {

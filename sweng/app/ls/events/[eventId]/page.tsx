@@ -312,7 +312,15 @@ export default function LSEventPage() {
                         {/* Page controls */}
                         <div className="flex items-center justify-between border-t-2 border-slate-100 pt-6 mt-4">
                             <p className="text-lg text-slate-500 font-medium">
-                                Showing <span className="text-slate-800 font-bold">{startIndex + 1}</span> to <span className="text-slate-800 font-bold">{Math.min(startIndex + itemsPerPage, waitlist.length)}</span> of <span className="text-slate-800 font-bold">{waitlist.length}</span>
+                                Showing{" "}
+                                <span className="text-slate-800 font-bold">
+                                    {waitlist.length === 0 ? 0 : startIndex + 1}
+                                </span>{" "}
+                                to{" "}
+                                <span className="text-slate-800 font-bold">
+                                    {Math.min(startIndex + itemsPerPage, waitlist.length)}
+                                </span>{" "}
+                                of <span className="text-slate-800 font-bold">{waitlist.length}</span>
                             </p>
                             <div className="flex gap-3">
                                 <button
@@ -323,7 +331,8 @@ export default function LSEventPage() {
                                     Previous
                                 </button>
                                 <button
-                                    disabled={currentPage === totalPages}
+                                    // FIX: Use >= and handle the case where totalPages is 0
+                                    disabled={currentPage >= totalPages || waitlist.length === 0} 
                                     onClick={() => setCurrentPage(p => p + 1)}
                                     className="px-6 py-2.5 rounded-lg border-2 border-slate-200 text-base font-bold text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
                                 >
