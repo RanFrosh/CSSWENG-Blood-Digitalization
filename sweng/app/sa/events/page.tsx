@@ -14,6 +14,7 @@ type BloodEvent = {
     status: EventStatus;
     targetBags: number;
     collectedBags: number;
+    imageLink: string;
 };
 
 const initialEvents: BloodEvent[] = [
@@ -27,6 +28,7 @@ const initialEvents: BloodEvent[] = [
         status: "Ongoing",
         targetBags: 100,
         collectedBags: 72,
+        imageLink: "/images/event.png",
     },
     {
         id: "EVT-2026-002",
@@ -38,6 +40,7 @@ const initialEvents: BloodEvent[] = [
         status: "Upcoming",
         targetBags: 150,
         collectedBags: 0,
+        imageLink: "/images/event.png",
     },
     {
         id: "EVT-2026-003",
@@ -49,6 +52,7 @@ const initialEvents: BloodEvent[] = [
         status: "Completed",
         targetBags: 80,
         collectedBags: 85,
+        imageLink: "/images/event.png",
     },
 ];
 
@@ -79,6 +83,7 @@ export function SAEventsPage() {
     const [formProvince, setFormProvince] = useState("");
     const [formDate, setFormDate] = useState("");
     const [formTargetBags, setFormTargetBags] = useState("100");
+    const [formImageLink, setFormImageLink] = useState("");
 
     const tabs: TabFilter[] = ["All", "Ongoing", "Upcoming", "Completed"];
     const sortOptions: SortOption[] = [
@@ -128,6 +133,7 @@ export function SAEventsPage() {
         setFormProvince("");
         setFormDate("");
         setFormTargetBags("100");
+        setFormImageLink("");
         setEventToEdit(null);
         setIsCreateModalOpen(true);
     };
@@ -140,6 +146,7 @@ export function SAEventsPage() {
         setFormProvince(evt.province);
         setFormDate(evt.date);
         setFormTargetBags(evt.targetBags.toString());
+        setFormImageLink(evt.imageLink);
         setIsCreateModalOpen(true);
     };
 
@@ -167,6 +174,7 @@ export function SAEventsPage() {
                               date: formDate,
                               status: calculatedStatus,
                               targetBags: parseInt(formTargetBags) || 100,
+                              imageLink: formImageLink,
                           }
                         : item
                 )
@@ -182,6 +190,7 @@ export function SAEventsPage() {
                 status: calculatedStatus,
                 targetBags: parseInt(formTargetBags) || 100,
                 collectedBags: 0,
+                imageLink: formImageLink,
             };
             setEvents([newEvent, ...events]);
         }
@@ -339,43 +348,58 @@ export function SAEventsPage() {
                                     </div>
 
                                     <div className="p-[0.35in]">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">
-                                                    Event ID:
-                                                </span>{" "}
-                                                {evt.id}
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">
-                                                    Corporate Partner:
-                                                </span>{" "}
-                                                {evt.partner}
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">
-                                                    Location:
-                                                </span>{" "}
-                                                {evt.city}, {evt.province}
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">
-                                                    Scheduled Date:
-                                                </span>{" "}
-                                                {evt.date}
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">
-                                                    Target Collection:
-                                                </span>{" "}
-                                                {evt.targetBags} Bags
-                                            </p>
-                                            <p>
-                                                <span className="font-semibold text-[#002940]">
-                                                    Current Collected:
-                                                </span>{" "}
-                                                {evt.collectedBags} Bags
-                                            </p>
+                                        <div className="grid grid-cols-1 xl:grid-cols-[1fr_2.6in] gap-[0.35in] items-start">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Event ID:
+                                                    </span>{" "}
+                                                    {evt.id}
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Corporate Partner:
+                                                    </span>{" "}
+                                                    {evt.partner}
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Location:
+                                                    </span>{" "}
+                                                    {evt.city}, {evt.province}
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Scheduled Date:
+                                                    </span>{" "}
+                                                    {evt.date}
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Target Collection:
+                                                    </span>{" "}
+                                                    {evt.targetBags} Bags
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Current Collected:
+                                                    </span>{" "}
+                                                    {evt.collectedBags} Bags
+                                                </p>
+                                            </div>
+
+                                            <div className="w-full h-[1.6in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] overflow-hidden flex items-center justify-center">
+                                                <img
+                                                    src={evt.imageLink || "/images/event-placeholder.png"}
+                                                    alt={evt.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -416,6 +440,19 @@ export function SAEventsPage() {
                                     value={formPartner}
                                     onChange={(e) => setFormPartner(e.target.value)}
                                     placeholder="e.g. Acme Corporation"
+                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-[14px] font-semibold text-[#002940] mb-1">
+                                    Event Image Link
+                                </label>
+
+                                <input
+                                    type="text"
+                                    value={formImageLink}
+                                    onChange={(e) => setFormImageLink(e.target.value)}
+                                    placeholder="Paste image link here"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
                                 />
                             </div>
