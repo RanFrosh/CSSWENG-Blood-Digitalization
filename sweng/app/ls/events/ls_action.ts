@@ -48,7 +48,7 @@ export async function getLabStaffQueue(eventIdStr: string) {
 
     try {
         const controller = await getLabController();
-        return await controller.invokeGetQueue(eventIdStr);
+        return await controller.invokeGetQueue(eventIdStr, "lab_queue");
     } catch (err: any) {
         console.error("Queue Fetch Error:", err);
         return { success: false, message: "Failed to fetch donor queue" };

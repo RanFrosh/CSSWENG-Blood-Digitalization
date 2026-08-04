@@ -145,7 +145,7 @@ export class ImpLabStaffModel implements LabStaffData {
             if (stationFilter === null) {
                 conditions.push(isNull(event_queue.station));
             } else {
-                conditions.push(eq(event_queue.station, stationFilter as "med_queue" | "lab_queue"));
+                conditions.push(eq(event_queue.station, stationFilter as "lab_queue"));
             }
         }
 
