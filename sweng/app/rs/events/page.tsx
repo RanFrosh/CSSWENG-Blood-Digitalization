@@ -24,7 +24,7 @@ export default async function RSEventsPage() {
         .select()
         .from(assigned_staff)
         .innerJoin(event_log, eq(assigned_staff.event_log_id, event_log.id))
-        .where(eq(assigned_staff.profiles_id, user.id));
+        .where(eq(assigned_staff.staff_id, user.id));
 
     const assignedEvents: AssignedEvent[] = eventsFromDb.map((row) => ({
         id: row.event_log.id.toString(),
