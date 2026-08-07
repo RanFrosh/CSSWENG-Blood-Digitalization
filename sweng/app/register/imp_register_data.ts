@@ -17,19 +17,23 @@ export class ImpRegisterModel implements RegisterData {
 
     async createStaff(email: string, redirectTo: string): Promise<ApiResponse<string>> {
         try {
-            const { data, error } = await this.admin.auth.admin.generateLink({
-                type: 'invite',
-                email,
-                options: { redirectTo }
-            });
+            const { data, error } = await this.admin.auth.admin.createUser({ email, email_confirm: true });
+            if (error) {
+                if (error.code !== 'user_already_exists') return { success: false, message: error.message };
+            } else if (!data?.user) {
+                return { success: false, message: "Failed to create user" };
+            }
 
-            if (error) return { success: false, message: error.message };
-            if (!data?.user) return { success: false, message: "Failed to create user" };
+            const { error: inviteError } = await this.admin.auth.admin.inviteUserByEmail(email, { redirectTo });
+            if (inviteError) {
+                if (data?.user) await this.admin.auth.admin.deleteUser(data.user.id);
+                return { success: false, message: inviteError.message };
+            }
 
-            return { success: true, message: "Staff invited", data: data.user.id };
+            return { success: true, message: "Staff invited", data: data?.user?.id ?? undefined };
         } catch (err: any) {
             return { success: false, message: err.message };
-        }        
+        }
     }
 
     async createProfile(id: string, role: AccessType): Promise<ApiResponse> {
