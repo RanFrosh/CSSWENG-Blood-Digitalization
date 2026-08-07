@@ -6,7 +6,68 @@ import { AccessType } from "@/db/enums/access_level";
 import { StaffUser, StaffStatus } from "@/types/staff_type";
 import { getUsers } from "./users_action";
 
+<<<<<<< HEAD
 type TabFilter = "All" | AccessType
+=======
+type UserRole = "SA" | "RBD" | "RS" | "LS" | "MP" | "OA" | "D";
+type UserStatus = "Active" | "Inactive";
+type UserAction = "Deactivate" | "Reactivate" | "Delete";
+
+type SystemUser = {
+    id: string;
+    name: string;
+    email: string;
+    role: UserRole;
+    status: UserStatus;
+    dateJoined: string;
+};
+
+const initialUsers: SystemUser[] = [
+    {
+        id: "SA-001",
+        name: "Alex Cruz",
+        email: "alex.cruz@example.com",
+        role: "SA",
+        status: "Active",
+        dateJoined: "2026-01-04",
+    },
+    {
+        id: "MP-001",
+        name: "Jane Doe",
+        email: "jane.doe@example.com",
+        role: "MP",
+        status: "Active",
+        dateJoined: "2026-02-12",
+    },
+    {
+        id: "MP-002",
+        name: "Jason Doe",
+        email: "jason.doe@example.com",
+        role: "MP",
+        status: "Inactive",
+        dateJoined: "2026-03-02",
+    },
+    {
+        id: "OA-001",
+        name: "Red Cross Chapter",
+        email: "redcross.chapter@example.com",
+        role: "OA",
+        status: "Active",
+        dateJoined: "2026-04-18",
+    },
+    {
+        id: "D-005",
+        name: "June Doe",
+        email: "june.doe@example.com",
+        role: "D",
+        status: "Active",
+        dateJoined: "2026-05-30",
+    },
+];
+
+type TabFilter = "All" | UserRole;
+
+>>>>>>> 61c82ee (added deactivate and reactivate)
 type SortOption =
     | "Default"
     | "Name: A-Z"
@@ -25,11 +86,18 @@ export default function SAUsersPage() {
     const [usersLoading, setUsersLoading] = useState(true);
 
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+<<<<<<< HEAD
     const [userToDelete, setUserToDelete] = useState<StaffUser | null>(null);
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [togglingId, setTogglingId] = useState<string | null>(null);
     const [toggleError, setToggleError] = useState("");
+=======
+
+    const [selectedUser, setSelectedUser] = useState<SystemUser | null>(null);
+    const [selectedUserAction, setSelectedUserAction] =
+        useState<UserAction | null>(null);
+>>>>>>> 61c82ee (added deactivate and reactivate)
 
     const [formEmail, setFormEmail] = useState("");
     const [formRole, setFormRole] = useState<AccessType>("super_admin");
@@ -156,6 +224,7 @@ export default function SAUsersPage() {
         }
     };
 
+<<<<<<< HEAD
     const copyLink = async () => {
         try {
             await navigator.clipboard.writeText(inviteLink);
@@ -207,6 +276,46 @@ export default function SAUsersPage() {
             prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
         );
         setTogglingId(null);
+=======
+    const openUserActionModal = (user: SystemUser, action: UserAction) => {
+        setSelectedUser(user);
+        setSelectedUserAction(action);
+    };
+
+    const closeUserActionModal = () => {
+        setSelectedUser(null);
+        setSelectedUserAction(null);
+    };
+
+    const confirmUserAction = () => {
+        if (!selectedUser || !selectedUserAction) {
+            return;
+        }
+
+        if (selectedUserAction === "Deactivate") {
+            setUsers((prev) =>
+                prev.map((user) =>
+                    user.id === selectedUser.id
+                        ? { ...user, status: "Inactive" }
+                        : user
+                )
+            );
+        } else if (selectedUserAction === "Reactivate") {
+            setUsers((prev) =>
+                prev.map((user) =>
+                    user.id === selectedUser.id
+                        ? { ...user, status: "Active" }
+                        : user
+                )
+            );
+        } else {
+            setUsers((prev) =>
+                prev.filter((user) => user.id !== selectedUser.id)
+            );
+        }
+
+        closeUserActionModal();
+>>>>>>> 61c82ee (added deactivate and reactivate)
     };
 
     const getTabClass = (tab: TabFilter) => {
@@ -216,14 +325,21 @@ export default function SAUsersPage() {
         if (activeTab === tab) {
             className += "bg-[#002940] border-[#002940] text-white font-bold";
         } else {
-            className += "bg-white border-[#002940] text-[#002940] hover:bg-[#002940] hover:text-white";
+            className +=
+                "bg-white border-[#002940] text-[#002940] hover:bg-[#002940] hover:text-white";
         }
 
         return className;
     };
 
+<<<<<<< HEAD
     const getStatusPill = (status: StaffStatus) => {
         let className = "px-[12px] py-[6px] rounded-full text-[14px] font-semibold ";
+=======
+    const getStatusPill = (status: UserStatus) => {
+        let className =
+            "px-[12px] py-[6px] rounded-full text-[14px] font-semibold ";
+>>>>>>> 61c82ee (added deactivate and reactivate)
 
         if (status === "Active") {
             className += "bg-[#e4f5ea] text-[#1a7a3f]";
@@ -297,7 +413,9 @@ export default function SAUsersPage() {
                                 <input
                                     type="text"
                                     value={search}
-                                    onChange={(event) => setSearch(event.target.value)}
+                                    onChange={(event) =>
+                                        setSearch(event.target.value)
+                                    }
                                     placeholder="Input name, email, or ID"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[16px] py-[10px] text-[16px] outline-none bg-white focus:border-[#002940]"
                                 />
@@ -311,7 +429,9 @@ export default function SAUsersPage() {
                                 <select
                                     value={sortBy}
                                     onChange={(event) =>
-                                        setSortBy(event.target.value as SortOption)
+                                        setSortBy(
+                                            event.target.value as SortOption
+                                        )
                                     }
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[16px] py-[10px] text-[16px] outline-none bg-white cursor-pointer focus:border-[#002940]"
                                 >
@@ -342,11 +462,9 @@ export default function SAUsersPage() {
                         ) : filteredUsers.length === 0 ? (
 =======
                     <div className="mt-[0.25in] text-[16px]">
-                        <p>
-                            Showing {filteredUsers.length} result/s
-                        </p>
+                        <p>Showing {filteredUsers.length} result/s</p>
                     </div>
-                    
+
                     <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
                         {filteredUsers.length === 0 ? (
 >>>>>>> 9065fd4 (sa view overhaul )
@@ -356,7 +474,8 @@ export default function SAUsersPage() {
                                 </p>
 
                                 <p className="mt-1 text-[16px] text-[#5c6b73]">
-                                    Try a different search term, sort option, or tab filter.
+                                    Try a different search term, sort option, or
+                                    tab filter.
                                 </p>
                             </div>
                         ) : (
@@ -376,6 +495,7 @@ export default function SAUsersPage() {
                                             </span>
                                         </div>
 
+<<<<<<< HEAD
                                         <div className="flex flex-row gap-[10px]">
                                             <button
                                                 onClick={() => toggleStaff(user)}
@@ -398,6 +518,48 @@ export default function SAUsersPage() {
                                             >
                                                 Delete User
                                             </button>
+=======
+                                        <div className="flex flex-row gap-[10px] flex-wrap">
+                                            {user.status === "Active" ? (
+                                                <button
+                                                    onClick={() =>
+                                                        openUserActionModal(
+                                                            user,
+                                                            "Deactivate"
+                                                        )
+                                                    }
+                                                    className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#a32626] cursor-pointer hover:bg-[#fef2f2]"
+                                                >
+                                                    Deactivate User
+                                                </button>
+                                            ) : (
+                                                <>
+                                                    <button
+                                                        onClick={() =>
+                                                            openUserActionModal(
+                                                                user,
+                                                                "Reactivate"
+                                                            )
+                                                        }
+                                                        className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#1a7a3f] cursor-pointer hover:bg-[#e4f5ea]"
+                                                    >
+                                                        Reactivate User
+                                                    </button>
+
+                                                    <button
+                                                        onClick={() =>
+                                                            openUserActionModal(
+                                                                user,
+                                                                "Delete"
+                                                            )
+                                                        }
+                                                        className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#a32626] cursor-pointer hover:bg-[#fef2f2]"
+                                                    >
+                                                        Delete User
+                                                    </button>
+                                                </>
+                                            )}
+>>>>>>> 61c82ee (added deactivate and reactivate)
                                         </div>
                                     </div>
 
@@ -428,7 +590,11 @@ export default function SAUsersPage() {
                                                 <span className="font-semibold text-[#002940]">
                                                     Status:
                                                 </span>{" "}
-                                                <span className={getStatusPill(user.status)}>
+                                                <span
+                                                    className={getStatusPill(
+                                                        user.status
+                                                    )}
+                                                >
                                                     {user.status}
                                                 </span>
                                             </p>
@@ -447,9 +613,7 @@ export default function SAUsersPage() {
                             Previous
                         </button>
 
-                        <p className="text-[18px] text-[#002940]">
-                            Page 1
-                        </p>
+                        <p className="text-[18px] text-[#002940]">Page 1</p>
 
                         <button
                             type="button"
@@ -468,7 +632,14 @@ export default function SAUsersPage() {
                             Create Staff
                         </h2>
 
+<<<<<<< HEAD
                         <form onSubmit={handleCreateStaff} className="mt-[0.2in] flex flex-col gap-[0.15in]">
+=======
+                        <form
+                            onSubmit={handleGenerateLink}
+                            className="mt-[0.2in] flex flex-col gap-[0.15in]"
+                        >
+>>>>>>> 61c82ee (added deactivate and reactivate)
                             <div>
                                 <label className="block text-[14px] font-semibold text-[#002940] mb-1">
                                     Email Address
@@ -478,7 +649,9 @@ export default function SAUsersPage() {
                                     type="email"
                                     required
                                     value={formEmail}
-                                    onChange={(event) => setFormEmail(event.target.value)}
+                                    onChange={(event) =>
+                                        setFormEmail(event.target.value)
+                                    }
                                     placeholder="e.g. staff@example.com"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
                                 />
@@ -492,6 +665,7 @@ export default function SAUsersPage() {
                                 <select
                                     required
                                     value={formRole}
+<<<<<<< HEAD
                                     onChange={(event) => setFormRole(event.target.value as AccessType)}
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none bg-white cursor-pointer focus:border-[#002940]"
                                 >
@@ -501,6 +675,25 @@ export default function SAUsersPage() {
                                     <option value="lab_staff">Lab Staff</option>
                                     <option value="med_prof">Medical Professional</option>
                                     <option value="onsite_admin">Onsite Admin</option>
+=======
+                                    onChange={(event) =>
+                                        setFormRole(
+                                            event.target.value as UserRole
+                                        )
+                                    }
+                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none bg-white cursor-pointer focus:border-[#002940]"
+                                >
+                                    <option value="SA">Super Admin</option>
+                                    <option value="RBD">
+                                        Red Bank Director
+                                    </option>
+                                    <option value="RS">Recovery Staff</option>
+                                    <option value="LS">Lab Staff</option>
+                                    <option value="MP">
+                                        Medical Professional
+                                    </option>
+                                    <option value="OA">Onsite Admin</option>
+>>>>>>> 61c82ee (added deactivate and reactivate)
                                 </select>
                             </div>
 
@@ -512,6 +705,30 @@ export default function SAUsersPage() {
                                 </div>
                             )}
 
+<<<<<<< HEAD
+=======
+                            <div>
+                                <label className="block text-[14px] font-semibold text-[#002940] mb-1">
+                                    Signup Link
+                                </label>
+
+                                <div className="flex flex-row gap-[10px]">
+                                    <input
+                                        type="text"
+                                        readOnly
+                                        placeholder="Add link here :D"
+                                        className="flex-1 border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none bg-[#f9fdff]"
+                                    />
+
+                                    <button
+                                        type="button"
+                                        className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white"
+                                    >
+                                        Copy
+                                    </button>
+                                </div>
+                            </div>
+>>>>>>> 61c82ee (added deactivate and reactivate)
 
                             <div className="mt-[0.2in] flex flex-row justify-end gap-[10px]">
                                 <button
@@ -558,17 +775,26 @@ export default function SAUsersPage() {
                 </div>
             )}
 
-            {userToDelete && (
+            {selectedUser && selectedUserAction && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-[0.35in] z-50">
                     <div className="bg-white rounded-[16px] p-[0.35in] max-w-[4.5in] w-full shadow-lg">
                         <h2 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                            Delete this user?
+                            {selectedUserAction} this user?
                         </h2>
 
                         <p className="mt-[0.15in] text-[16px] text-[#002940]">
-                            Are you sure you want to delete{" "}
-                            <span className="font-semibold">{userToDelete.name}</span>? This
-                            action is permanent and cannot be undone.
+                            Are you sure you want to{" "}
+                            {selectedUserAction.toLowerCase()}{" "}
+                            <span className="font-semibold">
+                                {selectedUser.name}
+                            </span>
+                            ?
+                            {selectedUserAction === "Deactivate" &&
+                                " This will mark the user as inactive without deleting the account."}
+                            {selectedUserAction === "Reactivate" &&
+                                " This will restore the user's active status."}
+                            {selectedUserAction === "Delete" &&
+                                " This action is permanent and cannot be undone."}
                         </p>
 
                         {deleteError !== "" && (
@@ -581,18 +807,29 @@ export default function SAUsersPage() {
 
                         <div className="mt-[0.35in] flex flex-row justify-end gap-[10px]">
                             <button
-                                onClick={() => setUserToDelete(null)}
+                                onClick={closeUserActionModal}
                                 className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white"
                             >
                                 Cancel
                             </button>
 
                             <button
+<<<<<<< HEAD
                                 onClick={confirmDelete}
                                 disabled={deleteLoading}
                                 className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#a32626] text-white cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {deleteLoading ? "Deleting..." : "Delete User"}
+=======
+                                onClick={confirmUserAction}
+                                className={`px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold text-white cursor-pointer hover:opacity-90 ${
+                                    selectedUserAction === "Reactivate"
+                                        ? "bg-[#1a7a3f]"
+                                        : "bg-[#a32626]"
+                                }`}
+                            >
+                                Confirm {selectedUserAction}
+>>>>>>> 61c82ee (added deactivate and reactivate)
                             </button>
                         </div>
                     </div>

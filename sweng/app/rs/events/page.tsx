@@ -16,10 +16,8 @@ export default async function RSEventsPage() {
         data: { user },
     } = await supabase.auth.getUser();
 
-<<<<<<< HEAD
     if (!user) {
         redirect("/login");
-=======
 // Sample events
 const assignedEvents: AssignedEvent[] = [
     {
@@ -72,7 +70,6 @@ export default function RSEventsPage() {
         filteredEvents = assignedEvents;
     } else {
         filteredEvents = assignedEvents.filter((event) => event.status === activeTab);
->>>>>>> e10d50f (added join event)
     }
 
     const eventsFromDb = await orm
@@ -91,9 +88,7 @@ export default function RSEventsPage() {
         status: row.event_log.status,
     }));
 
-<<<<<<< HEAD
     return <RSClient assignedEvents={assignedEvents} />;
-=======
         if (activeTab === tab) {
             // selected tab
             className += "bg-[#002940] border-[#002940] text-white font-bold";
@@ -307,5 +302,4 @@ export default function RSEventsPage() {
             )}
         </main>
     );
->>>>>>> e10d50f (added join event)
 }
