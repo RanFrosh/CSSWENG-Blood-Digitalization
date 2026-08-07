@@ -1,6 +1,5 @@
 "use client";
-
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useParams } from "next/navigation";
 
 type NavLink = {
     name: string;
@@ -11,6 +10,9 @@ type NavLink = {
 export default function HeaderSA() {
     const router = useRouter();
     const pathname = usePathname();
+    const params = useParams();
+
+    const eventId = params?.eventId as string | undefined;
 
     const goHome = () => {
         router.push("/sa/management");
@@ -21,7 +23,11 @@ export default function HeaderSA() {
     };
 
     const goEventMng = () => {
-        router.push(`/sa/management/events`);
+        router.push("/sa/management/events");
+    };
+
+    const goEventStaff = () => {
+        if (eventId) router.push(`/sa/management/events/${eventId}/staff`);
     };
 
     const goUserMng = () => {
@@ -29,11 +35,11 @@ export default function HeaderSA() {
     };
 
     const goEventLog = () => {
-        router.push(`/sa/management/logs/events`);
+        router.push("/sa/management/logs/events");
     };
 
     const goDataLog = () => {
-        router.push(`/sa/management/logs/data`);
+        router.push("/sa/management/logs/data");
     };
 
     const goRequests = () => {
@@ -44,50 +50,89 @@ export default function HeaderSA() {
         router.push("/landing");
     };
 
-    const navLinks: NavLink[] = [
-        {
-            name: "Home",
-            path: "/sa/management",
-            onClick: goHome,
-        },
-        {
-            name: "Profile",
-            path: "/sa/profile",
-            onClick: goMyProfile,
-        },
-        {
-            name: "Event Management",
-            path: "/sa/management/events",
-            onClick: goEventMng,
-        },
-        {
-            name: "User Management",
-            path: "/sa/management/users",
-            onClick: goUserMng,
-        },
-        {
-            name: "Event Logs",
-            path: "/sa/management/logs/events",
-            onClick: goEventLog,
-        },
-        {
-            name: "Database Logs",
-            path: "/sa/management/logs/data",
-            onClick: goDataLog,
-        },
-        {
-            name: "Requests",
-            path: "/sa/management/requests",
-            onClick: goRequests,
-        },
-    ];
+    const navLinks: NavLink[] = eventId
+        ? [
+              {
+                  name: "Home",
+                  path: "/sa/management",
+                  onClick: goHome,
+              },
+              {
+                  name: "Profile",
+                  path: "/sa/profile",
+                  onClick: goMyProfile,
+              },
+              {
+                  name: "Event Management",
+                  path: "/sa/management/events",
+                  onClick: goEventMng,
+              },
+              {
+                  name: "Event Staff Management",
+                  path: `/sa/management/events/${eventId}/staff`,
+                  onClick: goEventStaff,
+              },
+              {
+                  name: "User Management",
+                  path: "/sa/management/users",
+                  onClick: goUserMng,
+              },
+              {
+                  name: "Event Logs",
+                  path: "/sa/management/logs/events",
+                  onClick: goEventLog,
+              },
+              {
+                  name: "Database Logs",
+                  path: "/sa/management/logs/data",
+                  onClick: goDataLog,
+              },
+              {
+                  name: "Requests",
+                  path: "/sa/management/requests",
+                  onClick: goRequests,
+              },
+          ]
+        : [
+              {
+                  name: "Home",
+                  path: "/sa/management",
+                  onClick: goHome,
+              },
+              {
+                  name: "Profile",
+                  path: "/sa/profile",
+                  onClick: goMyProfile,
+              },
+              {
+                  name: "Event Management",
+                  path: "/sa/management/events",
+                  onClick: goEventMng,
+              },
+              {
+                  name: "User Management",
+                  path: "/sa/management/users",
+                  onClick: goUserMng,
+              },
+              {
+                  name: "Event Logs",
+                  path: "/sa/management/logs/events",
+                  onClick: goEventLog,
+              },
+              {
+                  name: "Database Logs",
+                  path: "/sa/management/logs/data",
+                  onClick: goDataLog,
+              },
+              {
+                  name: "Requests",
+                  path: "/sa/management/requests",
+                  onClick: goRequests,
+              },
+          ];
 
     const isActiveLink = (path: string) => {
-        if (path === "/sa/management") {
-            return pathname === path;
-        } else {
-            return pathname.startsWith(path);
-        }
+        return pathname === path;
     };
 
     return (
