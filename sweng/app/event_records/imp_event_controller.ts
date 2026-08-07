@@ -71,7 +71,7 @@ export class ImpEventManager implements EventController {
 
         const securedStaffFilter: ViewAssignedStaffFilter = {
             ...staff,
-            profiles_id: res.data.id 
+            staff_id: res.data.id 
         };
 
         const events = await this.eventModel.queryEventStaff(data, securedStaffFilter);

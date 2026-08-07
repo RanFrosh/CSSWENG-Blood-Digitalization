@@ -22,13 +22,13 @@ export class ImpQueueManager implements QueueController {
 
         const appendedFilterer: ViewQueueFilters = {
             ...filterer,
-            profile_id: res.data.id,
+            staff_id: res.data.id,
             station: getQueueStation(res.data.role)
         }
 
         console.log("3. CONTROLLER SENDING TO MODEL:", { 
             event_id: appendedFilterer.event_log_id, 
-            profile_id: appendedFilterer.profile_id 
+            staff_id: appendedFilterer.staff_id 
         });
 
         const outcome = await this.queueModel.queryQueue(appendedFilterer);
@@ -78,7 +78,7 @@ export class ImpQueueManager implements QueueController {
 
         const busyCheck = await this.queueModel.queryQueue({
             event_log_id: event_guy,
-            profile_id: res.data.id,
+            staff_id: res.data.id,
             station: null
         });
         if (busyCheck.data && busyCheck.data.length > 0) {
@@ -88,7 +88,7 @@ export class ImpQueueManager implements QueueController {
         const stationRes = getQueueStation(res.data.role);
         if (!stationRes) return { success: false, message: "Invalid role for queue", data: undefined };
 
-        const queueResult = await this.queueModel.queryQueue({ event_log_id: event_guy, profile_id: res.data.id, station: stationRes });
+        const queueResult = await this.queueModel.queryQueue({ event_log_id: event_guy, staff_id: res.data.id, station: stationRes });
 
         if (!queueResult.success || !queueResult.data || queueResult.data.length === 0) {
             return { success: queueResult.success, message: queueResult.message, data: undefined };
@@ -107,7 +107,7 @@ export class ImpQueueManager implements QueueController {
         }
 
         nextDonor.station = null;
-        nextDonor.profile_id = res.data.id
+        nextDonor.staff_id = res.data.id
 
         return { success: true, message: `Donor assigned and ${updateResult.message}`, data: nextDonor };
     }
@@ -119,7 +119,7 @@ export class ImpQueueManager implements QueueController {
 
         const busyCheck = await this.queueModel.queryQueue({
             event_log_id: event_guy,
-            profile_id: res.data.id,
+            staff_id: res.data.id,
             station: null
         });
         if (busyCheck.data && busyCheck.data.length > 0) {
@@ -129,7 +129,7 @@ export class ImpQueueManager implements QueueController {
         const stationRes = getQueueStation(res.data.role);
         if (!stationRes) return { success: false, message: "Invalid role for queue", data: undefined };
 
-        const queueResult = await this.queueModel.queryQueue({ event_log_id: event_guy, profile_id: res.data.id, station: stationRes });
+        const queueResult = await this.queueModel.queryQueue({ event_log_id: event_guy, staff_id: res.data.id, station: stationRes });
 
         if (!queueResult.success || !queueResult.data || queueResult.data.length === 0) {
             return { success: queueResult.success, message: queueResult.message, data: undefined };
