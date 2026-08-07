@@ -22,7 +22,6 @@ export async function verifyDonorAction(token: string) {
                 sex: donor.sex,
                 verifiedBlood: donor.verifiedBlood,
                 medicalNote: donor.medicalNote,
-                photo_path: donor.photo_path,
                 active: donor.active,
             })
             .from(donor)
