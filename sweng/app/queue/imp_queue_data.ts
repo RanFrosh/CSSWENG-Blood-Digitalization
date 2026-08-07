@@ -16,7 +16,7 @@ export class ImpQueueModel implements QueueData {
 
     async queryQueue(filterer: ViewQueueFilters): Promise<ApiResponse<ViewQueue[]>> {
         try {
-            if (!filterer.profile_id || !filterer.event_log_id) {
+            if (!filterer.staff_id || !filterer.event_log_id) {
                 return { success: false, message: "Missing profile or event", data: undefined };
             }
 
@@ -103,7 +103,7 @@ export class ImpQueueModel implements QueueData {
             .update(event_queue)
             .set({
                 station: queueTarget.station,
-                profile_id: queueTarget.staff_id
+                staff_id: queueTarget.staff_id
             })
             .where(eq(event_queue.id, queueTarget.id));          
 

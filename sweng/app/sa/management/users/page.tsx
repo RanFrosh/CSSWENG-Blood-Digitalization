@@ -34,6 +34,9 @@ export default function SAUsersPage() {
     const [formEmail, setFormEmail] = useState("");
     const [formRole, setFormRole] = useState<AccessType>("super_admin");
     const [inviteError, setInviteError] = useState("");
+    const [inviteLink, setInviteLink] = useState("");
+    const [copied, setCopied] = useState(false);
+    const [inviteLoading, setInviteLoading] = useState(false);
 
     const roleShortLabels: Record<AccessType, string> = {
         donor: "DR",
@@ -117,27 +120,55 @@ export default function SAUsersPage() {
         setFormEmail("");
         setFormRole("super_admin");
         setInviteError("");
+        setInviteLink("");
+        setCopied(false);
         setIsUserModalOpen(true);
     };
 
     const handleCreateStaff = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (inviteLink) return;
         setInviteError("");
         if (!formEmail.trim() || !formRole) {
             setInviteError("Email address and assigned role are required.");
             return;
         }
 
-        const result = await prepareStaff(formEmail.trim(), formRole);
+        setInviteLoading(true);
+        try {
+            const result = await prepareStaff(formEmail.trim(), formRole);
 
-        if (!result.success) {
-            setInviteError(result.message);
-            return;
+            if (!result.success) {
+                setInviteError(result.message);
+                return;
+            }
+
+            if (result.data) {
+                setInviteLink(result.data);
+                return;
+            }
+
+            setIsUserModalOpen(false);
+            setFormEmail("");
+            loadUsers();
+        } finally {
+            setInviteLoading(false);
         }
+    };
 
-        setIsUserModalOpen(false);
-        setFormEmail("");
-        loadUsers();
+    const copyLink = async () => {
+        try {
+            await navigator.clipboard.writeText(inviteLink);
+        } catch {
+            const textarea = document.createElement("textarea");
+            textarea.value = inviteLink;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     const confirmDelete = async () => {
@@ -462,12 +493,36 @@ export default function SAUsersPage() {
 
                                 <button
                                     type="submit"
-                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90"
+                                    disabled={inviteLoading || inviteLink !== ""}
+                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Create Staff
+                                    {inviteLoading ? "Processing..." : "Create Staff"}
                                 </button>
                             </div>
                         </form>
+
+                        {inviteLink !== "" && (
+                            <div className="mt-[0.2in] bg-[#e4f5ea] border-2 border-[#1a7a3f] rounded-[10px] px-[12px] py-[10px] flex flex-col gap-[10px]">
+                                <p className="text-[16px] font-semibold text-[#1a7a3f]">
+                                    Invite link generated. Share this link with the staff member to complete their signup.
+                                </p>
+
+                                <input
+                                    readOnly
+                                    value={inviteLink}
+                                    onFocus={(event) => event.currentTarget.select()}
+                                    className="w-full border-2 border-[#1a7a3f] rounded-[10px] px-[12px] py-[8px] text-[14px] text-[#002940] bg-white outline-none"
+                                />
+
+                                <button
+                                    type="button"
+                                    onClick={copyLink}
+                                    className="self-end px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#1a7a3f] text-white cursor-pointer hover:opacity-90"
+                                >
+                                    {copied ? "Copied!" : "Copy Link"}
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

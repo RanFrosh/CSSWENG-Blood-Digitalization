@@ -8,6 +8,7 @@ import { corrected_event } from "@/db/models/corrected_event";
 import { orm } from "@/db/drizzle";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 import { assigned_staff } from "@/db/models/assigned_staff";
+import { city } from "@/db/models/city";
 
 export class ImpEventModel implements EventData {
     private access: typeof orm;
@@ -25,10 +26,11 @@ export class ImpEventModel implements EventData {
         if (data.zip_code) filtersEvent.push(eq(event_log.zip_code, data.zip_code));
 
         sort.forEach((item) => {
+            const column = event_log[item.col as keyof typeof event_log];
             if (item.direction === 'up') {
-                sortersEvent.push(asc(event_log[item.col]))
+                sortersEvent.push(asc(column))
             } else {
-                sortersEvent.push(desc(event_log[item.col]))
+                sortersEvent.push(desc(column))
             }
         })
 
@@ -141,5 +143,29 @@ export class ImpEventModel implements EventData {
         } catch (err: any) {
             return { success: false, message: err.message, data: undefined };        
         }
+    }
+
+    async isStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>> {
+        try {
+            const assignments = await this.access
+                .select()
+                .from(assigned_staff)
+                .where(eq(assigned_staff.staff_id, staff_id));
+
+            if (assignments.length === 0) {
+                return { success: true, message: "No events assigned", data: false };
+            }
+
+        const eventIds = assignments.map((a) => a.event_log_id);
+
+        const ongoing = await this.access
+            .select({ id: event_log.id })
+            .from(event_log)
+            .where(and(inArray(event_log.id, eventIds), eq(event_log.status, "Ongoing")));
+
+        return { success: true, message: "Ongoing event check completed", data: ongoing.length > 0 };
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };
+        }        
     }
 }

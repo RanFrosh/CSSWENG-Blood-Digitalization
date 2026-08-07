@@ -11,7 +11,7 @@ export type CreateQueue = Omit<InferInsertModel<typeof event_queue>, 'station'>;
 export type UpdateQueue = {
     id: bigint,
     station: QueueStationType | null
-    profiles_id: string | null
+    staff_id: string | null
 }
 
 export type DeleteQueue = {

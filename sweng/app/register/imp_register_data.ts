@@ -17,20 +17,22 @@ export class ImpRegisterModel implements RegisterData {
 
     async createStaff(email: string, redirectTo: string): Promise<ApiResponse<string>> {
         try {
-            const { data, error } = await this.admin.auth.admin.createUser({ email, email_confirm: true });
+            const { data, error } = await this.admin.auth.admin.inviteUserByEmail(email, { redirectTo });
             if (error) {
-                if (error.code !== 'user_already_exists') return { success: false, message: error.message };
-            } else if (!data?.user) {
-                return { success: false, message: "Failed to create user" };
+                if (error.code === 'user_already_exists') {
+                    const { data: linkData, error: linkError } = await this.admin.auth.admin.generateLink({
+                        type: 'invite',
+                        email,
+                        options: { redirectTo },
+                    });
+                    if (linkError) return { success: false, message: linkError.message };
+                    if (!linkData?.properties?.action_link) return { success: false, message: "Failed to generate invite link" };
+                    return { success: true, message: "Invite link generated", data: linkData.properties.action_link };
+                }
+                return { success: false, message: error.message };
             }
-
-            const { error: inviteError } = await this.admin.auth.admin.inviteUserByEmail(email, { redirectTo });
-            if (inviteError) {
-                if (data?.user) await this.admin.auth.admin.deleteUser(data.user.id);
-                return { success: false, message: inviteError.message };
-            }
-
-            return { success: true, message: "Staff invited", data: data?.user?.id ?? undefined };
+            if (!data?.user) return { success: false, message: "Failed to create user" };
+            return { success: true, message: "Staff invited", data: data.user.id };
         } catch (err: any) {
             return { success: false, message: err.message };
         }

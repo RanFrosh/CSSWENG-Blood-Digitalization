@@ -8,8 +8,10 @@ import { ImpRegisterModel } from "./imp_register_data";
 import { ImpRegisterManager } from "./imp_register_controller";
 import { AccessType } from "@/db/enums/access_level";
 import { orm } from "@/db/drizzle";
+import { ImpEventModel } from "../event_records/imp_event_data";
+import { ImpEventManager } from "../event_records/imp_event_controller";
 
-export async function prepareStaff(email: string, role: AccessType): Promise<ApiResponse> {
+export async function prepareStaff(email: string, role: AccessType): Promise<ApiResponse<string | null>> {
     const database = await serverSupa();
     const model = new ImpRegisterModel(orm, adminSupa);
     const profiler = new ImpProfileGetter(database);
@@ -22,7 +24,7 @@ export async function prepareStaff(email: string, role: AccessType): Promise<Api
         if (!complete.success) return { success: complete.success, message: complete.message };
         if (complete.data) return { success: false, message: "Already registered" }
         const reInvite = await controller.invokeCreateStaff(email, `${process.env.APP_URL}/signup`);
-        return { success: reInvite.success, message: reInvite.message };
+        return { success: reInvite.success, message: reInvite.message, data: reInvite.data ?? null };
     }
 
     const staffResult = await controller.invokeCreateStaff(email, `${process.env.APP_URL}/signup`);
@@ -57,6 +59,15 @@ export async function deleteStaffUser(id: string): Promise<ApiResponse> {
     const model = new ImpRegisterModel(orm, adminSupa);
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpRegisterManager(model, profiler);
+    const eventModel = new ImpEventModel(orm);
+    const eventController = new ImpEventManager(eventModel, profiler);
+
+    const guard = await eventController.invokeIsStaffOnOngoingEvent(id);
+    if (!guard.success) return { success: false, message: guard.message };
+    if (guard.data) {
+        return { success: false, message: "Cannot delete: staff is assigned to an ongoing event" };
+    }
+
     return await controller.invokeDeleteStaff(id);
 }
 
@@ -65,5 +76,19 @@ export async function staffToggler(id: string): Promise<ApiResponse<boolean>> {
     const model = new ImpRegisterModel(orm, adminSupa);
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpRegisterManager(model, profiler);
+    const eventModel = new ImpEventModel(orm);
+    const eventController = new ImpEventManager(eventModel, profiler);
+
+    const current = await controller.invokeIsProfileComplete(id);
+    if (!current.success) return { success: false, message: current.message };
+    
+    if (current.data === true) {
+        const guard = await eventController.invokeIsStaffOnOngoingEvent(id);
+        if (!guard.success) return { success: false, message: guard.message };
+        if (guard.data) {
+            return { success: false, message: "Cannot deactivate: staff is assigned to an ongoing event" };
+        }
+    }
+
     return await controller.invokeToggleStaff(id);
 }

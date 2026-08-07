@@ -17,6 +17,7 @@ export interface EventData {
     createCorrection(data: CreateCorrections): Promise<ApiResponse>
 
     queryEventById(id: bigint): Promise<ApiResponse<ViewEvents>>
+    isStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
 }
 
 export interface EventController {
@@ -28,4 +29,5 @@ export interface EventController {
     invokeCreateCorrection(data: Omit<CreateCorrections, 'ref_profile_id'>): Promise<ApiResponse>
 
     invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>>
+    invokeIsStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
 }

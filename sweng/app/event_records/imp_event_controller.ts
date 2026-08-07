@@ -93,4 +93,10 @@ export class ImpEventManager implements EventController {
 
         return { success: true, message: "Access verified", data: eventResult.data };
     }
+
+    async invokeIsStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>> {
+        const res = await helpGateKeep(this.profileReader, 'view_event');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.eventModel.isStaffOnOngoingEvent(staff_id);        
+    }
 }
