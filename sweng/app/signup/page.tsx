@@ -19,8 +19,22 @@ export default function SignUpPage() {
     useEffect(() => {
         const initSession = async () => {
             const supabase = await clientSupa();
-            const { data } = await supabase.auth.getSession();
-            if (!data.session) setErrorMsg("Invalid or expired invite link");
+            const code = new URLSearchParams(window.location.search).get("code");
+
+            if (code) {
+                const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+                if (exchangeError) {
+                    setErrorMsg(exchangeError.message);
+                    return;
+                }
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            const { data, error } = await supabase.auth.getSession();
+            if (!data.session || error) {
+                if (error) setErrorMsg(error.message);
+                else if (!data.session) setErrorMsg("No active session found");
+            }
         };
         initSession();
     }, []);
