@@ -1,257 +1,407 @@
 "use client";
+
 import { useState } from "react";
 import {
     UserPlus,
-    ClipboardCheck,
-    UserX,
-    Droplets,
-    Gift,
+    UserMinus,
+    CalendarClock,
+    FileText,
     ChevronRight,
 } from "lucide-react";
 
 import Header from "@/components/HeaderSA";
 
-type StaffType = "Onsite Admin" | "Medical Professional" | "Lab Staff" | "Recovery Staff";
+type ActorType = "Super Admin" | "Lab Staff" | "Donor";
+
+type LogCategory =
+    | "Event Management"
+    | "User Management"
+    | "Edit Requests";
 
 type LogAction =
-    | "Registration"
-    | "Check-In"
-    | "Deferral"
-    | "Donation Outcome"
-    | "Perk Claiming";
+    | "User Registration"
+    | "User Deletion"
+    | "Event Creation"
+    | "Event Update"
+    | "Event Deletion"
+    | "Staff Assignment"
+    | "Staff Removal"
+    | "Edit Request Submission"
+    | "Edit Request Approval"
+    | "Edit Request Rejection";
 
-type DonationOutcome = "Successful" | "Incomplete";
-
-type OnsiteLog = {
+type DatabaseLog = {
     id: string;
-    staffType: StaffType;
+    category: LogCategory;
     action: LogAction;
-    staff: string;
-    donor: string;
-    eventName: string;
+    actor: string;
+    actorType: ActorType;
+    target: string;
+    targetType?: string;
+    eventName?: string;
+    requestId?: string;
     timestamp: string;
-    donationOutcome?: DonationOutcome;
 };
 
-const initialLogs: OnsiteLog[] = [
+const initialLogs: DatabaseLog[] = [
     {
-        id: "LOG-1001",
-        staffType: "Onsite Admin",
-        action: "Registration",
-        staff: "Maria Santos",
-        donor: "John Doe",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 8:45 AM",
+        id: "LOG-2001",
+        category: "User Management",
+        action: "User Registration",
+        actor: "John Doe",
+        actorType: "Donor",
+        target: "John Doe",
+        targetType: "Donor",
+        timestamp: "14/07/2026 - 8:12 AM",
     },
     {
-        id: "LOG-1002",
-        staffType: "Onsite Admin",
-        action: "Check-In",
-        staff: "Maria Santos",
-        donor: "John Doe",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 9:02 AM",
+        id: "LOG-2002",
+        category: "User Management",
+        action: "User Registration",
+        actor: "June Doe",
+        actorType: "Donor",
+        target: "June Doe",
+        targetType: "Donor",
+        timestamp: "14/07/2026 - 8:45 AM",
     },
     {
-        id: "LOG-1003",
-        staffType: "Medical Professional",
-        action: "Deferral",
-        staff: "Jane Doe",
-        donor: "Paolo Reyes",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 9:25 AM",
+        id: "LOG-2003",
+        category: "User Management",
+        action: "User Registration",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Liza Fernandez",
+        targetType: "Recovery Staff",
+        timestamp: "14/07/2026 - 9:05 AM",
     },
     {
-        id: "LOG-1004",
-        staffType: "Lab Staff",
-        action: "Donation Outcome",
-        staff: "Jason Cruz",
-        donor: "John Doe",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 10:10 AM",
-        donationOutcome: "Successful",
+        id: "LOG-2004",
+        category: "User Management",
+        action: "User Registration",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Lance Garcia",
+        targetType: "Lab Staff",
+        timestamp: "14/07/2026 - 9:20 AM",
     },
     {
-        id: "LOG-1005",
-        staffType: "Recovery Staff",
-        action: "Perk Claiming",
-        staff: "Liza Fernandez",
-        donor: "John Doe",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 10:28 AM",
+        id: "LOG-2005",
+        category: "User Management",
+        action: "User Deletion",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Jason Doe",
+        targetType: "Medical Professional",
+        timestamp: "14/07/2026 - 10:40 AM",
     },
     {
-        id: "LOG-1006",
-        staffType: "Onsite Admin",
-        action: "Registration",
-        staff: "Carlo Reyes",
-        donor: "June Doe",
+        id: "LOG-2006",
+        category: "User Management",
+        action: "User Deletion",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Old Chapter Admin",
+        targetType: "Onsite Admin",
+        timestamp: "14/07/2026 - 11:15 AM",
+    },
+    {
+        id: "LOG-2007",
+        category: "Event Management",
+        action: "Event Creation",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Quezon City Blood Drive",
         eventName: "Quezon City Blood Drive",
-        timestamp: "16/07/2026 - 8:35 AM",
+        timestamp: "15/07/2026 - 8:30 AM",
     },
     {
-        id: "LOG-1007",
-        staffType: "Onsite Admin",
-        action: "Check-In",
-        staff: "Carlo Reyes",
-        donor: "June Doe",
+        id: "LOG-2008",
+        category: "Event Management",
+        action: "Event Update",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Quezon City Blood Drive",
         eventName: "Quezon City Blood Drive",
-        timestamp: "16/07/2026 - 8:50 AM",
+        timestamp: "15/07/2026 - 9:10 AM",
     },
     {
-        id: "LOG-1008",
-        staffType: "Lab Staff",
-        action: "Donation Outcome",
-        staff: "Jason Cruz",
-        donor: "June Doe",
+        id: "LOG-2009",
+        category: "Event Management",
+        action: "Staff Assignment",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Maria Santos",
+        targetType: "Onsite Admin",
         eventName: "Quezon City Blood Drive",
-        timestamp: "16/07/2026 - 10:05 AM",
-        donationOutcome: "Incomplete",
+        timestamp: "15/07/2026 - 9:35 AM",
     },
     {
-        id: "LOG-1009",
-        staffType: "Recovery Staff",
-        action: "Perk Claiming",
-        staff: "Liza Fernandez",
-        donor: "June Doe",
+        id: "LOG-2010",
+        category: "Event Management",
+        action: "Staff Assignment",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Jane Doe",
+        targetType: "Medical Professional",
         eventName: "Quezon City Blood Drive",
-        timestamp: "16/07/2026 - 10:20 AM",
+        timestamp: "15/07/2026 - 9:40 AM",
+    },
+    {
+        id: "LOG-2011",
+        category: "Event Management",
+        action: "Event Deletion",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Pasig City Blood Drive",
+        eventName: "Pasig City Blood Drive",
+        timestamp: "15/07/2026 - 10:25 AM",
+    },
+    {
+        id: "LOG-2012",
+        category: "Edit Requests",
+        action: "Edit Request Submission",
+        actor: "Lance Garcia",
+        actorType: "Lab Staff",
+        target: "Blood Test Result Change",
+        requestId: "REQ-001",
+        timestamp: "16/07/2026 - 1:05 PM",
+    },
+    {
+        id: "LOG-2013",
+        category: "Edit Requests",
+        action: "Edit Request Approval",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Blood Test Result Change",
+        requestId: "REQ-001",
+        timestamp: "16/07/2026 - 1:40 PM",
+    },
+    {
+        id: "LOG-2014",
+        category: "Edit Requests",
+        action: "Edit Request Submission",
+        actor: "June Cruz",
+        actorType: "Lab Staff",
+        target: "Blood Type Correction",
+        requestId: "REQ-002",
+        timestamp: "16/07/2026 - 2:15 PM",
+    },
+    {
+        id: "LOG-2015",
+        category: "Edit Requests",
+        action: "Edit Request Rejection",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Blood Type Correction",
+        requestId: "REQ-002",
+        timestamp: "16/07/2026 - 2:45 PM",
+    },
+    {
+        id: "LOG-2016",
+        category: "Event Management",
+        action: "Staff Removal",
+        actor: "Alex Cruz",
+        actorType: "Super Admin",
+        target: "Maria Santos",
+        targetType: "Onsite Admin",
+        eventName: "Quezon City Blood Drive",
+        timestamp: "15/07/2026 - 9:55 AM",
     },
 ];
 
-type StaffTypeFilter = StaffType | "All Staff Types";
-type EventFilter = string;
+type ActorTypeFilter = ActorType | "All Staff Types";
+type CategoryFilter = LogCategory | "All Categories";
 type ActionFilter = LogAction | "All Actions";
 
-const staffTypeOptions: StaffTypeFilter[] = [
+const actorTypeOptions: ActorTypeFilter[] = [
     "All Staff Types",
-    "Onsite Admin",
-    "Medical Professional",
+    "Super Admin",
     "Lab Staff",
-    "Recovery Staff",
+    "Donor",
+];
+
+const categoryOptions: CategoryFilter[] = [
+    "All Categories",
+    "Event Management",
+    "User Management",
+    "Edit Requests",
 ];
 
 const actionOptions: ActionFilter[] = [
     "All Actions",
-    "Registration",
-    "Check-In",
-    "Deferral",
-    "Donation Outcome",
-    "Perk Claiming",
+    "User Registration",
+    "User Deletion",
+    "Event Creation",
+    "Event Update",
+    "Event Deletion",
+    "Staff Assignment",
+    "Staff Removal",
+    "Edit Request Submission",
+    "Edit Request Approval",
+    "Edit Request Rejection",
 ];
 
-export default function SAOnsiteLogsPage() {
-    const [logs] = useState<OnsiteLog[]>(initialLogs);
+export default function SADatabaseLogsPage() {
+    const [logs] = useState<DatabaseLog[]>(initialLogs);
 
-    const [staffTypeFilter, setStaffTypeFilter] =
-        useState<StaffTypeFilter>("All Staff Types");
+    const [actorTypeFilter, setActorTypeFilter] =
+        useState<ActorTypeFilter>("All Staff Types");
 
-    const [eventFilter, setEventFilter] = useState<EventFilter>("All Events");
-    const [actionFilter, setActionFilter] = useState<ActionFilter>("All Actions");
+    const [categoryFilter, setCategoryFilter] =
+        useState<CategoryFilter>("All Categories");
+
+    const [actionFilter, setActionFilter] =
+        useState<ActionFilter>("All Actions");
 
     const [expandedId, setExpandedId] = useState<string | null>(null);
 
-    const eventOptions = [
-        "All Events",
-        ...Array.from(new Set(logs.map((log) => log.eventName))),
-    ];
-
     let filteredLogs = [...logs];
 
-    if (staffTypeFilter !== "All Staff Types") {
+    if (actorTypeFilter !== "All Staff Types") {
         filteredLogs = filteredLogs.filter(
-            (log) => log.staffType === staffTypeFilter
+            (log) => log.actorType === actorTypeFilter
         );
     }
 
-    if (eventFilter !== "All Events") {
+    if (categoryFilter !== "All Categories") {
         filteredLogs = filteredLogs.filter(
-            (log) => log.eventName === eventFilter
+            (log) => log.category === categoryFilter
         );
     }
 
     if (actionFilter !== "All Actions") {
-        filteredLogs = filteredLogs.filter((log) => log.action === actionFilter);
+        filteredLogs = filteredLogs.filter(
+            (log) => log.action === actionFilter
+        );
     }
 
     const getActionIcon = (action: LogAction) => {
-        if (action === "Registration") {
+        if (action === "User Registration") {
             return UserPlus;
-        } else if (action === "Check-In") {
-            return ClipboardCheck;
-        } else if (action === "Deferral") {
-            return UserX;
-        } else if (action === "Donation Outcome") {
-            return Droplets;
+        } else if (action === "User Deletion") {
+            return UserMinus;
+        } else if (
+            action === "Event Creation" ||
+            action === "Event Update" ||
+            action === "Event Deletion" ||
+            action === "Staff Assignment" ||
+            action === "Staff Removal"
+        ) {
+            return CalendarClock;
         } else {
-            return Gift;
+            return FileText;
         }
     };
 
-    const getIconColors = (log: OnsiteLog) => {
-        if (log.action === "Deferral") {
-            return "bg-[#f5e4e4] text-[#a32626]";
+    const getIconColors = (log: DatabaseLog) => {
+        if (
+            log.action === "User Registration" ||
+            log.action === "Event Creation" ||
+            log.action === "Staff Assignment" ||
+            log.action === "Edit Request Approval"
+        ) {
+            return "bg-[#e4f5ea] text-[#1a7a3f]";
         }
 
         if (
-            log.action === "Donation Outcome" &&
-            log.donationOutcome === "Incomplete"
+            log.action === "Event Update" ||
+            log.action === "Edit Request Submission"
         ) {
-            return "bg-[#f7edda] text-[#9a6200]";
-        }
-
-        if (log.action === "Donation Outcome") {
             return "bg-[#e4edf5] text-[#1a4d7a]";
         }
 
-        return "bg-[#e4f5ea] text-[#1a7a3f]";
+        return "bg-[#f5e4e4] text-[#a32626]";
     };
 
-    const getSentence = (log: OnsiteLog) => {
-        const actor = <span className="font-bold">{log.staff}</span>;
-        const donor = <span className="font-bold">{log.donor}</span>;
+    const getSentence = (log: DatabaseLog) => {
+        const actor = <span className="font-bold">{log.actor}</span>;
+        const target = <span className="font-bold">{log.target}</span>;
         const eventName = <span className="font-bold">{log.eventName}</span>;
+        const requestId = <span className="font-bold">{log.requestId}</span>;
 
-        if (log.action === "Registration") {
+        if (log.action === "User Registration") {
+            if (log.actor === log.target) {
+                return (
+                    <>
+                        {actor} manually registered an account
+                    </>
+                );
+            }
+
             return (
                 <>
-                    {actor} registered donor {donor} at {eventName}
+                    {actor} registered a new account for {target}
                 </>
             );
         }
 
-        if (log.action === "Check-In") {
+        if (log.action === "User Deletion") {
             return (
                 <>
-                    {actor} scanned and checked in donor {donor} at {eventName}
+                    {actor} deleted the account of {target}
                 </>
             );
         }
 
-        if (log.action === "Deferral") {
+        if (log.action === "Event Creation") {
             return (
                 <>
-                    {actor} deferred donor {donor} after medical screening at{" "}
-                    {eventName}
+                    {actor} created event {target}
                 </>
             );
         }
 
-        if (log.action === "Donation Outcome") {
+        if (log.action === "Event Update") {
             return (
                 <>
-                    {actor} recorded donor {donor}&apos;s donation as{" "}
-                    <span className="font-bold">
-                        {log.donationOutcome || "Recorded"}
-                    </span>{" "}
-                    at {eventName}
+                    {actor} updated event {target}
+                </>
+            );
+        }
+
+        if (log.action === "Event Deletion") {
+            return (
+                <>
+                    {actor} deleted event {target}
+                </>
+            );
+        }
+
+        if (log.action === "Staff Assignment") {
+            return (
+                <>
+                    {actor} assigned {target} to {eventName}
+                </>
+            );
+        }
+
+        if (log.action === "Staff Removal") {
+            return (
+                <>
+                    {actor} removed {target} from {eventName}
+                </>
+            );
+        }
+
+        if (log.action === "Edit Request Submission") {
+            return (
+                <>
+                    {actor} submitted edit request {requestId} for {target}
+                </>
+            );
+        }
+
+        if (log.action === "Edit Request Approval") {
+            return (
+                <>
+                    {actor} approved edit request {requestId} for {target}
                 </>
             );
         }
 
         return (
             <>
-                {actor} confirmed perk claim for donor {donor} at {eventName}
+                {actor} rejected edit request {requestId} for {target}
             </>
         );
     };
@@ -277,7 +427,7 @@ export default function SAOnsiteLogsPage() {
                     </p>
 
                     <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">
-                        Event Logs
+                        Database Logs
                     </h1>
                 </section>
 
@@ -288,26 +438,27 @@ export default function SAOnsiteLogsPage() {
                         </h2>
                     </div>
 
-                    {/* Filters */}
                     <div className="mt-[0.25in] border-2 border-[#c0cad0] rounded-[14px] p-[0.2in] bg-[#f9fdff]">
                         <h3 className="text-[20px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
                             Filters
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[0.2in]">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-[0.2in]">
                             <div>
                                 <label className="block text-[14px] font-semibold text-[#002940] mb-[6px]">
-                                    Filter by Event
+                                    Filter by Staff Type
                                 </label>
 
                                 <select
-                                    value={eventFilter}
+                                    value={actorTypeFilter}
                                     onChange={(event) =>
-                                        setEventFilter(event.target.value)
+                                        setActorTypeFilter(
+                                            event.target.value as ActorTypeFilter
+                                        )
                                     }
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[14px] py-[10px] text-[16px] text-[#002940] bg-white cursor-pointer outline-none focus:border-[#002940]"
                                 >
-                                    {eventOptions.map((option) => (
+                                    {actorTypeOptions.map((option) => (
                                         <option key={option} value={option}>
                                             {option}
                                         </option>
@@ -317,19 +468,19 @@ export default function SAOnsiteLogsPage() {
 
                             <div>
                                 <label className="block text-[14px] font-semibold text-[#002940] mb-[6px]">
-                                    Filter by Staff Type
+                                    Filter by Category
                                 </label>
 
                                 <select
-                                    value={staffTypeFilter}
+                                    value={categoryFilter}
                                     onChange={(event) =>
-                                        setStaffTypeFilter(
-                                            event.target.value as StaffTypeFilter
+                                        setCategoryFilter(
+                                            event.target.value as CategoryFilter
                                         )
                                     }
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[14px] py-[10px] text-[16px] text-[#002940] bg-white cursor-pointer outline-none focus:border-[#002940]"
                                 >
-                                    {staffTypeOptions.map((option) => (
+                                    {categoryOptions.map((option) => (
                                         <option key={option} value={option}>
                                             {option}
                                         </option>
@@ -367,7 +518,7 @@ export default function SAOnsiteLogsPage() {
                         </p>
                     </div>
 
-                    <div className="mt-[0.3in] flex flex-col">
+                    <div className="mt-[0.25in] flex flex-col">
                         {filteredLogs.length === 0 ? (
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] text-center">
                                 <p className="text-[18px] font-semibold text-[#002940]">
@@ -375,8 +526,7 @@ export default function SAOnsiteLogsPage() {
                                 </p>
 
                                 <p className="mt-1 text-[16px] text-[#5c6b73]">
-                                    Try a different event, staff type, user, or action
-                                    filter.
+                                    Try a different staff type, category, or action filter.
                                 </p>
                             </div>
                         ) : (
@@ -431,6 +581,13 @@ export default function SAOnsiteLogsPage() {
 
                                                     <p>
                                                         <span className="font-semibold">
+                                                            Category:
+                                                        </span>{" "}
+                                                        {log.category}
+                                                    </p>
+
+                                                    <p>
+                                                        <span className="font-semibold">
                                                             Action:
                                                         </span>{" "}
                                                         {log.action}
@@ -438,31 +595,49 @@ export default function SAOnsiteLogsPage() {
 
                                                     <p>
                                                         <span className="font-semibold">
+                                                            Staff Type:
+                                                        </span>{" "}
+                                                        {log.actorType}
+                                                    </p>
+
+                                                    <p>
+                                                        <span className="font-semibold">
                                                             User:
                                                         </span>{" "}
-                                                        {log.staff}
+                                                        {log.actor}
                                                     </p>
 
                                                     <p>
                                                         <span className="font-semibold">
-                                                            Donor:
+                                                            Target:
                                                         </span>{" "}
-                                                        {log.donor}
+                                                        {log.target}
                                                     </p>
 
-                                                    <p>
-                                                        <span className="font-semibold">
-                                                            Event:
-                                                        </span>{" "}
-                                                        {log.eventName}
-                                                    </p>
-
-                                                    {log.donationOutcome && (
+                                                    {log.targetType && (
                                                         <p>
                                                             <span className="font-semibold">
-                                                                Donation Outcome:
+                                                                Target Type:
                                                             </span>{" "}
-                                                            {log.donationOutcome}
+                                                            {log.targetType}
+                                                        </p>
+                                                    )}
+
+                                                    {log.eventName && (
+                                                        <p>
+                                                            <span className="font-semibold">
+                                                                Event:
+                                                            </span>{" "}
+                                                            {log.eventName}
+                                                        </p>
+                                                    )}
+
+                                                    {log.requestId && (
+                                                        <p>
+                                                            <span className="font-semibold">
+                                                                Request ID:
+                                                            </span>{" "}
+                                                            {log.requestId}
                                                         </p>
                                                     )}
                                                 </div>

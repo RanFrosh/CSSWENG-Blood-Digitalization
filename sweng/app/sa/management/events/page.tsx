@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderSA";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
@@ -15,8 +16,6 @@ type BloodEvent = {
     targetBags: number;
     collectedBags: number;
     imageLink: string;
-    eventCode: string;
-    timeFrame: string;
 };
 
 const initialEvents: BloodEvent[] = [
@@ -31,8 +30,6 @@ const initialEvents: BloodEvent[] = [
         targetBags: 100,
         collectedBags: 72,
         imageLink: "/images/event.png",
-        eventCode: "event code",
-        timeFrame: "8:00 AM - 5:00 PM",
     },
     {
         id: "EVT-2026-002",
@@ -45,8 +42,6 @@ const initialEvents: BloodEvent[] = [
         targetBags: 150,
         collectedBags: 0,
         imageLink: "/images/event.png",
-        eventCode: "event code",
-        timeFrame: "8:00 AM - 5:00 PM",
     },
     {
         id: "EVT-2026-003",
@@ -59,8 +54,6 @@ const initialEvents: BloodEvent[] = [
         targetBags: 80,
         collectedBags: 85,
         imageLink: "/images/event.png",
-        eventCode: "event code",
-        timeFrame: "8:00 AM - 5:00 PM",
     },
 ];
 
@@ -74,6 +67,8 @@ type SortOption =
     | "Name: A-Z";
 
 export function SAEventsPage() {
+    const router = useRouter();
+
     const [events, setEvents] = useState<BloodEvent[]>(initialEvents);
     const [activeTab, setActiveTab] = useState<TabFilter>("All");
     const [search, setSearch] = useState("");
@@ -92,8 +87,6 @@ export function SAEventsPage() {
     const [formDate, setFormDate] = useState("");
     const [formTargetBags, setFormTargetBags] = useState("100");
     const [formImageLink, setFormImageLink] = useState("");
-    const [formEventCode, setFormEventCode] = useState("");
-    const [formTimeFrame, setFormTimeFrame] = useState("");
 
     const tabs: TabFilter[] = ["All", "Ongoing", "Upcoming", "Completed"];
     const sortOptions: SortOption[] = [
@@ -144,8 +137,6 @@ export function SAEventsPage() {
         setFormDate("");
         setFormTargetBags("100");
         setFormImageLink("");
-        setFormEventCode("");
-        setFormTimeFrame("");
         setEventToEdit(null);
         setIsCreateModalOpen(true);
     };
@@ -159,8 +150,6 @@ export function SAEventsPage() {
         setFormDate(evt.date);
         setFormTargetBags(evt.targetBags.toString());
         setFormImageLink(evt.imageLink);
-        setFormEventCode(evt.eventCode);
-        setFormTimeFrame(evt.timeFrame);
         setIsCreateModalOpen(true);
     };
 
@@ -189,8 +178,6 @@ export function SAEventsPage() {
                               status: calculatedStatus,
                               targetBags: parseInt(formTargetBags) || 100,
                               imageLink: formImageLink,
-                              eventCode: formEventCode,
-                              timeFrame: formTimeFrame,
                           }
                         : item
                 )
@@ -207,8 +194,6 @@ export function SAEventsPage() {
                 targetBags: parseInt(formTargetBags) || 100,
                 collectedBags: 0,
                 imageLink: formImageLink,
-                eventCode: formEventCode,
-                timeFrame: formTimeFrame,
             };
             setEvents([newEvent, ...events]);
         }
@@ -242,6 +227,10 @@ export function SAEventsPage() {
             className += "bg-[#f5e4e4] text-[#a32626]";
         }
         return className;
+    };
+
+    const manageStaff = (evt: BloodEvent) => {
+        router.push(`/sa/management/events/${evt.id}/staff`);
     };
 
     return (
@@ -323,7 +312,13 @@ export function SAEventsPage() {
                         </div>
                     </div>
 
-                    <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
+                    <div className="mt-[0.25in] text-[16px]">
+                        <p>
+                            Showing {filteredEvents.length} result/s
+                        </p>
+                    </div>
+
+                    <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
                         {filteredEvents.length === 0 ? (
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] text-center">
                                 <p className="text-[18px] font-semibold text-[#002940]">
@@ -349,13 +344,21 @@ export function SAEventsPage() {
                                             </span>
                                         </div>
 
-                                        <div className="flex flex-row gap-[10px]">
+                                        <div className="flex flex-row gap-[10px] flex-wrap">
+                                            <button
+                                                onClick={() => manageStaff(evt)}
+                                                className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:bg-[#f0f0f0]"
+                                            >
+                                                Manage Staff
+                                            </button>
+
                                             <button
                                                 onClick={() => openEditModal(evt)}
                                                 className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:bg-[#f0f0f0]"
                                             >
                                                 Edit Event
                                             </button>
+
                                             <button
                                                 onClick={() => setEventToDelete(evt)}
                                                 className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#a32626] cursor-pointer hover:bg-[#fef2f2]"
@@ -377,13 +380,6 @@ export function SAEventsPage() {
 
                                                 <p>
                                                     <span className="font-semibold text-[#002940]">
-                                                        Signup Code:
-                                                    </span>{" "}
-                                                    {evt.eventCode}
-                                                </p>
-
-                                                <p>
-                                                    <span className="font-semibold text-[#002940]">
                                                         Corporate Partner:
                                                     </span>{" "}
                                                     {evt.partner}
@@ -401,13 +397,6 @@ export function SAEventsPage() {
                                                         Scheduled Date:
                                                     </span>{" "}
                                                     {evt.date}
-                                                </p>
-
-                                                <p>
-                                                    <span className="font-semibold text-[#002940]">
-                                                        Time Frame:
-                                                    </span>{" "}
-                                                    {evt.timeFrame}
                                                 </p>
 
                                                 <p>
@@ -438,6 +427,26 @@ export function SAEventsPage() {
                             ))
                         )}
                     </div>
+
+                    <div className="mt-5 flex flex-row items-center justify-between gap-5">
+                        <button
+                            type="button"
+                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
+                        >
+                            Previous
+                        </button>
+
+                        <p className="text-[18px] text-[#002940]">
+                            Page 1
+                        </p>
+
+                        <button
+                            type="button"
+                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
+                        >
+                            Next
+                        </button>
+                    </div>
                 </section>
             </div>
 
@@ -459,20 +468,6 @@ export function SAEventsPage() {
                                     value={formName}
                                     onChange={(e) => setFormName(e.target.value)}
                                     placeholder="e.g. Community Blood Donation"
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-[14px] font-semibold text-[#002940] mb-1">
-                                    Event Code
-                                </label>
-
-                                <input
-                                    type="text"
-                                    required
-                                    value={formEventCode}
-                                    onChange={(e) => setFormEventCode(e.target.value)}
-                                    placeholder="e.g. 1F34BG7P"
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
                                 />
                             </div>
@@ -540,20 +535,6 @@ export function SAEventsPage() {
                                         required
                                         value={formDate}
                                         onChange={(e) => setFormDate(e.target.value)}
-                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[14px] font-semibold text-[#002940] mb-1">
-                                        Time Frame
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formTimeFrame}
-                                        onChange={(e) => setFormTimeFrame(e.target.value)}
-                                        placeholder="Time Frame"
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
                                     />
                                 </div>
