@@ -25,7 +25,7 @@ export class ImpQueueModel implements QueueData {
             .from(assigned_staff)
             .where(
                 and(
-                    eq(assigned_staff.staff_id, filterer.profile_id),
+                    eq(assigned_staff.staff_id, filterer.staff_id),
                     eq(assigned_staff.event_log_id, filterer.event_log_id)
                 )
             )

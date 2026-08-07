@@ -2,7 +2,7 @@ import { EventData } from "@/abstract/events/event_abstract";
 import { ApiResponse } from "@/types/api_res_type";
 import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
-import { SQL, eq, asc, desc, and, inArray } from "drizzle-orm";
+import { SQL, eq, asc, desc, and, inArray, getTableColumns } from "drizzle-orm";
 import { event_log } from "@/db/models/event_log";
 import { corrected_event } from "@/db/models/corrected_event";
 import { orm } from "@/db/drizzle";
@@ -26,7 +26,7 @@ export class ImpEventModel implements EventData {
         if (data.zip_code) filtersEvent.push(eq(event_log.zip_code, data.zip_code));
 
         sort.forEach((item) => {
-            const column = event_log[item.col as keyof typeof event_log];
+            const column = item.col === 'city' ? city.name : event_log[item.col as keyof typeof event_log.$inferSelect];
             if (item.direction === 'up') {
                 sortersEvent.push(asc(column))
             } else {
@@ -36,8 +36,9 @@ export class ImpEventModel implements EventData {
 
         try {
             const events = await this.access
-            .select()
+            .select({ ...getTableColumns(event_log), city: city.name })
             .from(event_log)
+            .innerJoin(city, eq(event_log.city_id, city.id))
             .where(and(...filtersEvent))
             .orderBy(...sortersEvent)
             return { success: true, message: "Events retrieved", data: events }
@@ -119,8 +120,9 @@ export class ImpEventModel implements EventData {
             if (data.status) filters.push(eq(event_log.status, data.status));
 
             const events = await this.access
-            .select()
+            .select({ ...getTableColumns(event_log), city: city.name })
             .from(event_log)
+            .innerJoin(city, eq(event_log.city_id, city.id))
             .where(and(...filters));
 
             return { success: true, message: "Events retrieved", data: events };
@@ -133,8 +135,9 @@ export class ImpEventModel implements EventData {
     async queryEventById(id: bigint): Promise<ApiResponse<ViewEvents>> {
         try {
             const [event] = await this.access
-            .select()
+            .select({ ...getTableColumns(event_log), city: city.name })
             .from(event_log)
+            .innerJoin(city, eq(event_log.city_id, city.id))
             .where(eq(event_log.id, id))
             .limit(1);
 

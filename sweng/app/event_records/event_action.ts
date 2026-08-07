@@ -27,7 +27,7 @@ export async function executeEventQueryStaff(data: ViewEventFilters): Promise<Ap
         return { success: false, message: "Not authenticated" };
     }
 
-    const staff: ViewAssignedStaffFilter = { profiles_id: profile.data.id };
+    const staff: ViewAssignedStaffFilter = { staff_id: profile.data.id };
 
     const model = new ImpEventModel(orm);
     const controller = new ImpEventManager(model, profiler);
