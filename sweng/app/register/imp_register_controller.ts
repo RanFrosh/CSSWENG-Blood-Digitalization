@@ -54,4 +54,10 @@ export class ImpRegisterManager implements RegisterController {
         if (!res.success) return { success: false, message: res.message };
         return await this.registerModel.isProfileComplete(id);
     }
+
+    async invokeToggleStaff(id: string): Promise<ApiResponse<boolean>> {
+        const res = await helpGateKeep(this.profileReader, 'register_user');
+        if (!res.success) return { success: false, message: res.message };
+        return await this.registerModel.toggleStaff(id);
+    }
 }

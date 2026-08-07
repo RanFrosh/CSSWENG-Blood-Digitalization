@@ -9,6 +9,7 @@ export interface RegisterData {
     deleteStaff(id: string): Promise<ApiResponse>;
     findStaffByEmail(email: string): Promise<ApiResponse<string | null>>;
     isProfileComplete(id: string): Promise<ApiResponse<boolean>>;
+    toggleStaff(id: string): Promise<ApiResponse<boolean>>;
 }
 
 export interface RegisterController {
@@ -19,4 +20,5 @@ export interface RegisterController {
     invokeDeleteStaff(id: string): Promise<ApiResponse>;
     invokeFindStaffByEmail(email: string): Promise<ApiResponse<string | null>>;
     invokeIsProfileComplete(id: string): Promise<ApiResponse<boolean>>;
+    invokeToggleStaff(id: string): Promise<ApiResponse<boolean>>;
 }

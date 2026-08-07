@@ -113,4 +113,26 @@ export class ImpRegisterModel implements RegisterData {
             return { success: false, message: err.message };
         }
     }
+
+    async toggleStaff(id: string): Promise<ApiResponse<boolean>> {
+        try {
+            const [profile] = await this.access
+                .select({ active: profiles.active })
+                .from(profiles)
+                .where(eq(profiles.id, id))
+                .limit(1);
+
+            if (!profile) return { success: false, message: "Staff not found" };
+
+            const nextActive = profile.active === true ? false : true;
+            await this.access
+                .update(profiles)
+                .set({ active: nextActive })
+                .where(eq(profiles.id, id));
+
+            return { success: true, message: "Active toggled", data: nextActive };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }
+    }
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/HeaderSA";
-import { prepareStaff, deleteStaffUser } from "@/app/register/register_action";
+import { prepareStaff, deleteStaffUser, staffToggler } from "@/app/register/register_action";
 import { AccessType } from "@/db/enums/access_level";
 import { StaffUser, StaffStatus } from "@/types/staff_type";
 import { getUsers } from "./users_action";
@@ -28,6 +28,8 @@ export default function SAUsersPage() {
     const [userToDelete, setUserToDelete] = useState<StaffUser | null>(null);
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
+    const [toggleError, setToggleError] = useState("");
 
     const [formEmail, setFormEmail] = useState("");
     const [formRole, setFormRole] = useState<AccessType>("super_admin");
@@ -158,6 +160,24 @@ export default function SAUsersPage() {
         setDeleteLoading(false);
     };
 
+    const toggleStaff = async (user: StaffUser) => {
+        setTogglingId(user.id);
+        setToggleError("");
+        const result = await staffToggler(user.id);
+
+        if (!result.success) {
+            setToggleError(result.message);
+            setTogglingId(null);
+            return;
+        }
+
+        const newStatus: StaffStatus = result.data === true ? "Active" : "Inactive";
+        setUsers((prev) =>
+            prev.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
+        );
+        setTogglingId(null);
+    };
+
     const getTabClass = (tab: TabFilter) => {
         let className =
             "px-[20px] py-[10px] rounded-full border-2 font-['Montserrat'] text-[16px] cursor-pointer transition ";
@@ -225,6 +245,12 @@ export default function SAUsersPage() {
                             </button>
                         </div>
                     </div>
+
+                    {toggleError !== "" && (
+                                <div className="bg-[#f5e4e4] border-2 border-[#a32626] rounded-[10px] px-[12px] py-[10px]">
+                                    <p className="text-[16px] font-semibold text-[#a32626]">{toggleError}</p>
+                                </div>
+                            )}
 
                     <div className="mt-[0.25in] border-2 border-[#c0cad0] rounded-[14px] p-[0.2in] bg-[#f9fdff]">
                         <h3 className="text-[20px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
@@ -309,6 +335,21 @@ export default function SAUsersPage() {
                                         </div>
 
                                         <div className="flex flex-row gap-[10px]">
+                                            <button
+                                                onClick={() => toggleStaff(user)}
+                                                disabled={togglingId === user.id}
+                                                className={`px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                                                    user.status === "Active"
+                                                        ? "bg-white text-[#002940] hover:bg-[#eaf3f8]"
+                                                        : "bg-white text-[#1a7a3f] hover:bg-[#e4f5ea]"
+                                                }`}
+                                            >
+                                                {togglingId === user.id
+                                                    ? "Toggling..."
+                                                    : user.status === "Active"
+                                                    ? "Deactivate"
+                                                    : "Activate"}
+                                            </button>
                                             <button
                                                 onClick={() => setUserToDelete(user)}
                                                 className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#a32626] cursor-pointer hover:bg-[#fef2f2]"

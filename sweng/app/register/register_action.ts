@@ -59,3 +59,11 @@ export async function deleteStaffUser(id: string): Promise<ApiResponse> {
     const controller = new ImpRegisterManager(model, profiler);
     return await controller.invokeDeleteStaff(id);
 }
+
+export async function staffToggler(id: string): Promise<ApiResponse<boolean>> {
+    const database = await serverSupa();
+    const model = new ImpRegisterModel(orm, adminSupa);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpRegisterManager(model, profiler);
+    return await controller.invokeToggleStaff(id);
+}
