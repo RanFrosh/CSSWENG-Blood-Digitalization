@@ -265,7 +265,13 @@ export default function SAUsersPage() {
                         </div>
                     </div>
 
-                    <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
+                    <div className="mt-[0.25in] text-[16px]">
+                        <p>
+                            Showing {filteredUsers.length} result/s
+                        </p>
+                    </div>
+                    
+                    <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
                         {filteredUsers.length === 0 ? (
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] text-center">
                                 <p className="text-[18px] font-semibold text-[#002940]">
@@ -339,6 +345,26 @@ export default function SAUsersPage() {
                                 </div>
                             ))
                         )}
+                    </div>
+
+                    <div className="mt-5 flex flex-row items-center justify-between gap-5">
+                        <button
+                            type="button"
+                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
+                        >
+                            Previous
+                        </button>
+
+                        <p className="text-[18px] text-[#002940]">
+                            Page 1
+                        </p>
+
+                        <button
+                            type="button"
+                            className="px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[#002940] text-[18px] font-semibold cursor-pointer hover:underline hover:text-[#fd5448]"
+                        >
+                            Next
+                        </button>
                     </div>
                 </section>
             </div>
