@@ -3,6 +3,7 @@ import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { helpGateKeep } from "../global/helper_bouncer/bouncer";
 import { RegisterData, RegisterController } from "@/abstract/register/register_abstract";
 import { AccessType } from "@/db/enums/access_level";
+import { ReadProfile } from "@/types/profile_type";
 
 export class ImpRegisterManager implements RegisterController {
     private registerModel: RegisterData
@@ -49,7 +50,7 @@ export class ImpRegisterManager implements RegisterController {
         return await this.registerModel.findStaffByEmail(email);
     }
 
-    async invokeIsProfileComplete(id: string): Promise<ApiResponse<boolean>> {
+    async invokeIsProfileComplete(id: string): Promise<ApiResponse<ReadProfile>> {
         const res = await helpGateKeep(this.profileReader, 'register_user');
         if (!res.success) return { success: false, message: res.message };
         return await this.registerModel.isProfileComplete(id);
