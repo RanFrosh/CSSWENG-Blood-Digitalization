@@ -22,7 +22,7 @@ export async function prepareStaff(email: string, role: AccessType): Promise<Api
     if (existing.data) {
         const complete = await controller.invokeIsProfileComplete(existing.data);
         if (!complete.success) return { success: complete.success, message: complete.message };
-        if (complete.data) return { success: false, message: "Already registered" }
+        if (complete.data?.active === true) return { success: false, message: "Already registered" }
         const reInvite = await controller.invokeCreateStaff(email, `${process.env.APP_URL}/signup`);
         return { success: reInvite.success, message: reInvite.message, data: reInvite.data ?? null };
     }
@@ -93,13 +93,18 @@ export async function staffToggler(id: string): Promise<ApiResponse<boolean>> {
 
     const current = await controller.invokeIsProfileComplete(id);
     if (!current.success) return { success: false, message: current.message };
+    if (!current.data) return { success: false, message: "Profile not found" };
     
-    if (current.data === true) {
+    if (current.data.active === true) {
         const guard = await eventController.invokeIsStaffOnOngoingEvent(id);
         if (!guard.success) return { success: false, message: guard.message };
         if (guard.data) {
             return { success: false, message: "Cannot deactivate: staff is assigned to an ongoing event" };
         }
+    }
+
+    if (current.data.active !== true && current.data.name.trim() === "") {
+        return { success: false, message: "Cannot activate: staff has not completed registration" };
     }
 
     return await controller.invokeToggleStaff(id);
