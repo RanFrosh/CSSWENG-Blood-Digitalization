@@ -17,7 +17,7 @@ export async function completeScreening(queueId: bigint): Promise<ApiResponse> {
         const result = await controller.invokeUpdateQueueStation({
             id: queueId,
             station: 'lab_queue',
-            profiles_id: null,
+            staff_id: null,
         });
 
         return result;
