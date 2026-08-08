@@ -39,16 +39,28 @@ export async function prepareStaff(email: string, role: AccessType): Promise<Api
     return { success: true, message: "Staff invited" };
 }
 
-export async function finishRegistration(name: string, password: string): Promise<ApiResponse> {
+export async function finishRegistration(
+    name: string,
+    password: string
+): Promise<ApiResponse> {
     const database = await serverSupa();
     const model = new ImpRegisterModel(orm, adminSupa);
     const profiler = new ImpProfileGetter(database);
-    const controller = new ImpRegisterManager(model, profiler);
 
-    const passRes = await controller.invokeSetPassword(password);
+    const current = await profiler.getCurrentUser();
+    if (!current.success || !current.data?.id) {
+        return { success: false, message: current.message };
+    }
+    if (current.data.active === true) {
+        return { success: false, message: "Already registered" };
+    }
+
+    const id = current.data.id;
+
+    const passRes = await model.setPassword(id, password);
     if (!passRes.success) return passRes;
 
-    const profileRes = await controller.invokeFinishProfile(name);
+    const profileRes = await model.finishProfile(id, name);
     if (!profileRes.success) return profileRes;
 
     return { success: true, message: "Registration completed" };
@@ -91,4 +103,34 @@ export async function staffToggler(id: string): Promise<ApiResponse<boolean>> {
     }
 
     return await controller.invokeToggleStaff(id);
+}
+
+export async function establishInviteSession(
+    accessToken: string,
+    refreshToken: string
+): Promise<ApiResponse> {
+    const database = await serverSupa();
+
+    const { data, error } = await database.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+    });
+
+    if (error || !data.session) {
+        return { success: false, message: error?.message ?? "Invite session could not be established" };
+    }
+
+    return { success: true, message: "Invite session established" };
+}
+
+export async function hasInviteSession(): Promise<ApiResponse<string>> {
+    const database = await serverSupa();
+    const profiler = new ImpProfileGetter(database);
+
+    const current = await profiler.getCurrentUser();
+    if (!current.success || !current.data?.id) {
+        return { success: false, message: current.message };
+    }
+
+    return { success: true, message: "Invite session active", data: current.data.id };
 }

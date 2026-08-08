@@ -1,15 +1,15 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { finishRegistration } from "../register/register_action";
+import { finishRegistration, establishInviteSession, hasInviteSession } from "../register/register_action";
 import { useEffect } from "react";
-import { clientSupa } from "@/db/supaclient";
 
 export default function SignUpPage() {    
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
+    const [inviteReady, setInviteReady] = useState(false);
     
     const [formData, setFormData] = useState({
         name: "",
@@ -17,26 +17,33 @@ export default function SignUpPage() {
     });
 
     useEffect(() => {
-        const initSession = async () => {
-            const supabase = await clientSupa();
-            const code = new URLSearchParams(window.location.search).get("code");
+        const raw = (window.location.search + window.location.hash).replace(/^[?#]+/, "");
+        const params = new URLSearchParams(raw);
+        const accessToken = params.get("access_token");
+        const refreshToken = params.get("refresh_token");
+        const type = params.get("type");
 
-            if (code) {
-                const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-                if (exchangeError) {
-                    setErrorMsg(exchangeError.message);
-                    return;
+        if (accessToken && refreshToken) {
+            establishInviteSession(accessToken, refreshToken)
+                .then((result) => {
+                    if (result.success) {
+                        setInviteReady(true);
+                    } else {
+                        setErrorMsg(result.message);
+                    }
+                });
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+        }
+
+        hasInviteSession()
+            .then((result) => {
+                if (result.success) {
+                    setInviteReady(true);
+                } else {
+                    setErrorMsg("Invalid or missing invite link");
                 }
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-
-            const { data, error } = await supabase.auth.getSession();
-            if (!data.session || error) {
-                if (error) setErrorMsg(error.message);
-                else if (!data.session) setErrorMsg("No active session found");
-            }
-        };
-        initSession();
+            });
     }, []);
 
     const handleSignup = async (e: React.FormEvent) => {
@@ -44,6 +51,12 @@ export default function SignUpPage() {
         setIsLoading(true);
         setErrorMsg("");
         setSuccessMsg("");
+
+        if (!inviteReady) {
+            setErrorMsg("Invalid or missing invite link");
+            setIsLoading(false);
+            return;
+        }
 
         const result = await finishRegistration(formData.name, formData.password);
 

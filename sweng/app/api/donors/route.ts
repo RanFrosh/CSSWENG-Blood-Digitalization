@@ -4,34 +4,33 @@ import { donor } from "@/db/models/donor";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-
     const {
-      firstName,
-      middleName,
-      lastName,
-      addressLine1,
-      addressLine2,
-      city,
-      province,
-      zipCode,
-      email,
-      mobileNumber,
+      first_name,
+      middle_name,
+      last_name,
+      blood,
       sex,
-      bloodType,
-    } = body;
+      city_id,
+      email,
+      mobile_no,
+      birthdate,
+      age,
+      height,
+      weight,
+      zip_code,
+      medicalNote,
+      assessment_status,
+      next_eligibility,
+    } = await request.json();
 
     if (
-      !firstName ||
-      !lastName ||
-      !addressLine1 ||
-      !city ||
-      !province ||
-      !zipCode ||
-      !email ||
-      !mobileNumber ||
+      !first_name ||
+      !last_name ||
+      !blood ||
       !sex ||
-      !bloodType
+      !city_id ||
+      !email ||
+      !mobile_no
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -42,17 +41,22 @@ export async function POST(request: Request) {
     const result = await orm
       .insert(donor)
       .values({
-        first_name: firstName,
-        middle_name: middleName,
-        last_name: lastName,
+        first_name,
+        middle_name: middle_name ?? null,
+        last_name,
         email,
-        mobile_no: mobileNumber,
-        street: `${addressLine1} ${addressLine2 ?? ""}`.trim(),
-        zip_code: zipCode,
+        mobile_no,
+        birthdate: birthdate ?? null,
+        age: age ?? null,
+        height: height ?? null,
+        weight: weight ?? null,
+        zip_code: zip_code ?? null,
         sex,
-        blood: bloodType,
-        city_id: BigInt(city),
-        photo_path: "placeholder.jpg",
+        blood,
+        city_id: BigInt(city_id),
+        medicalNote: medicalNote ?? null,
+        assessment_status: assessment_status ?? null,
+        next_eligibility: next_eligibility ?? null,
       })
       .returning();
 

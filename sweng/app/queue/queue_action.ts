@@ -103,17 +103,17 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
 
         if (assigned.data.length === 0) return { success: assigned.success, message: assigned.message, data: [] };
 
-        const currentUserAssigned = assigned.data.some(a => a.profiles_id === profile.data!.id);
+        const currentUserAssigned = assigned.data.some(a => a.staff_id === profile.data!.id);
         if (!currentUserAssigned) return { success: false, message: "Not assigned to this event", data: [] };
 
-        const profileIds = assigned.data.map(a => a.profiles_id);
+        const profileIds = assigned.data.map(a => a.staff_id);
         const profilesResult = await profilesController.invokeGetProfiles(profileIds);
         if (!profilesResult.success || !profilesResult.data) return { success: profilesResult.success, message: profilesResult.message }
         
         const profileMap = new Map(profilesResult.data.map(p => [p.id, p]));
         
         const sameRoleStaff = assigned
-            .data.map(a => profileMap.get(a.profiles_id))
+            .data.map(a => profileMap.get(a.staff_id))
             .filter((p): p is typeof profilesResult.data[number] => p?.role === profile.data!.role);
 
         if (sameRoleStaff.length === 0) return { success: true, message: "No same-role staff assigned", data: [] };
@@ -123,7 +123,7 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
         if (!busy.success || !busy.data) return { success: busy.success, message: busy.message };
 
         const busyByProfile = new Map(
-            busy.data.map(b => [b.profile_id, b])
+            busy.data.map(b => [b.staff_id, b])
         );
 
         const busyDonorIds = busy
