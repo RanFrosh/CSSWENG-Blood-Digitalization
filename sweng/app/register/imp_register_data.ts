@@ -5,6 +5,7 @@ import { adminSupa } from "@/db/supaadmin";
 import { AccessType } from "@/db/enums/access_level";
 import { authUsers, profiles } from "@/db/models/profiles";
 import { eq, sql } from "drizzle-orm";
+import { ReadProfile } from "@/types/profile_type";
 
 export class ImpRegisterModel implements RegisterData {
     private access: typeof orm;
@@ -101,16 +102,16 @@ export class ImpRegisterModel implements RegisterData {
         }      
     }
 
-    async isProfileComplete(id: string): Promise<ApiResponse<boolean>> {
+    async isProfileComplete(id: string): Promise<ApiResponse<ReadProfile>> {
         try {
             const [profile] = await this.access
-            .select({ active: profiles.active })
+            .select()
             .from(profiles)
             .where(eq(profiles.id, id))
             .limit(1);
 
-            if (!profile) return { success: true, message: "No profile", data: false };
-            return { success: true, message: "Profile checked", data: profile.active === true };
+            if (!profile) return { success: true, message: "No profile" };
+            return { success: true, message: "Profile checked", data: profile };
         } catch (err: any) {
             return { success: false, message: err.message };
         }
