@@ -71,6 +71,7 @@ export default function SAUsersPage() {
         { value: "lab_staff", label: "LS" },
         { value: "med_prof", label: "MP" },
         { value: "onsite_admin", label: "OA" },
+        { value: "donor", label: "DR" },
     ];
 
     const sortOptions: SortOption[] = [
