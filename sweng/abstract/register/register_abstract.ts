@@ -1,5 +1,6 @@
 import { AccessType } from "@/db/enums/access_level";
 import { ApiResponse } from "@/types/api_res_type";
+import { ReadProfile } from "@/types/profile_type";
 
 export interface RegisterData {
     createStaff(email: string, redirectTo: string): Promise<ApiResponse<string>>;
@@ -8,7 +9,7 @@ export interface RegisterData {
     finishProfile(id: string, name: string): Promise<ApiResponse>;
     deleteStaff(id: string): Promise<ApiResponse>;
     findStaffByEmail(email: string): Promise<ApiResponse<string | null>>;
-    isProfileComplete(id: string): Promise<ApiResponse<boolean>>;
+    isProfileComplete(id: string): Promise<ApiResponse<ReadProfile>>;
     toggleStaff(id: string): Promise<ApiResponse<boolean>>;
 }
 
@@ -19,6 +20,6 @@ export interface RegisterController {
     invokeFinishProfile(name: string): Promise<ApiResponse>;
     invokeDeleteStaff(id: string): Promise<ApiResponse>;
     invokeFindStaffByEmail(email: string): Promise<ApiResponse<string | null>>;
-    invokeIsProfileComplete(id: string): Promise<ApiResponse<boolean>>;
+    invokeIsProfileComplete(id: string): Promise<ApiResponse<ReadProfile>>;
     invokeToggleStaff(id: string): Promise<ApiResponse<boolean>>;
 }
