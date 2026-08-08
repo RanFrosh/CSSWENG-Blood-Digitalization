@@ -29,7 +29,7 @@ export default function SAUsersPage() {
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [togglingId, setTogglingId] = useState<string | null>(null);
-    const [toggleError, setToggleError] = useState("");
+    const [toggleError, setToggleError] = useState<{ userId: string; message: string } | null>(null);
 
     const [formEmail, setFormEmail] = useState("");
     const [formRole, setFormRole] = useState<AccessType>("super_admin");
@@ -193,11 +193,11 @@ export default function SAUsersPage() {
 
     const toggleStaff = async (user: StaffUser) => {
         setTogglingId(user.id);
-        setToggleError("");
+        setToggleError(null);
         const result = await staffToggler(user.id);
 
         if (!result.success) {
-            setToggleError(result.message);
+            setToggleError({ userId: user.id, message: result.message });
             setTogglingId(null);
             return;
         }
@@ -276,12 +276,6 @@ export default function SAUsersPage() {
                             </button>
                         </div>
                     </div>
-
-                    {toggleError !== "" && (
-                                <div className="bg-[#f5e4e4] border-2 border-[#a32626] rounded-[10px] px-[12px] py-[10px]">
-                                    <p className="text-[16px] font-semibold text-[#a32626]">{toggleError}</p>
-                                </div>
-                            )}
 
                     <div className="mt-[0.25in] border-2 border-[#c0cad0] rounded-[14px] p-[0.2in] bg-[#f9fdff]">
                         <h3 className="text-[20px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
@@ -391,6 +385,14 @@ export default function SAUsersPage() {
                                     </div>
 
                                     <div className="p-[0.35in]">
+                                        {toggleError?.userId === user.id && (
+                                            <div className="mb-[0.15in] bg-[#f5e4e4] border-2 border-[#a32626] rounded-[10px] px-[12px] py-[8px]">
+                                                <p className="text-[14px] font-semibold text-[#a32626]">
+                                                    {toggleError.message}
+                                                </p>
+                                            </div>
+                                        )}
+
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
                                             <p>
                                                 <span className="font-semibold text-[#002940]">
