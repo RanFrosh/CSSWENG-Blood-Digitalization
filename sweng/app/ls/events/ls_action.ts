@@ -99,6 +99,34 @@ export async function retrieveDonor (donorIdStr: string) {
     }
 }
 
+export async function checkExtractionAccessAction(eventIdStr: string, donorIdStr: string) {
+    
+    try {
+        if (!eventIdStr || !donorIdStr) {
+            return { authorized: false, message: "Invalid event or donor ID." };
+        }
+
+        const supabase = await serverSupa();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+            return { authorized: false, message: "Not authenticated" };
+        }
+
+        const controller = await getLabController();
+        const numericEventId = BigInt(eventIdStr);
+        const numericDonorId = BigInt(donorIdStr);
+
+        const res = await controller.invokeValidateExtractionAccess(user.id, numericEventId, numericDonorId);
+
+        return res;
+
+    } catch (err: any) {
+        console.error("Error validating extraction access:", err);
+        return { authorized: false, message: "An unexpected error occurred." };
+    }
+}
+
 export async function submitDonationRecordAction(rawPayload: any) {
 
     try {

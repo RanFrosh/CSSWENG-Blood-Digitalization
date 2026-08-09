@@ -128,8 +128,13 @@ export default function LSEventsPage() {
     if (errorMessage) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                <div className="flex-1 flex items-center justify-center">
-                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                <Header/>
+                <div className="flex-1 flex items-center justify-center p-[0.35in]">
+                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.5in] text-center shadow-sm max-w-lg w-full">
+                        <p className="text-[24px] font-bold text-red-500 font-['Montserrat']">
+                            {errorMessage || "Access Denied"}
+                        </p>
+                    </div>
                 </div>
             </main>
         );

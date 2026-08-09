@@ -19,7 +19,7 @@ export default async function OAEventsPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-        redirect("/login");
+        redirect("/landing");
     }
 
     const currentProfileId = user.id;

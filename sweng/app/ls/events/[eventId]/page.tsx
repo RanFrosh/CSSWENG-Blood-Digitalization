@@ -163,22 +163,13 @@ export default function LSEventPage() {
     if (errorMessage || !selectedEvent) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                <Header />
-                <div className="flex-1 p-[0.35in]">
-                    <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm flex flex-col items-start gap-[0.25in]">
-                        <h1 className="text-[36px] font-['Montserrat'] font-bold text-[#002940]">
-                            Access Denied
-                        </h1>
-                        <p className="text-[18px] text-red-500">
-                            {errorMessage}
+                <Header/>
+                <div className="flex-1 flex items-center justify-center p-[0.35in]">
+                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.5in] text-center shadow-sm max-w-lg w-full">
+                        <p className="text-[24px] font-bold text-red-500 font-['Montserrat']">
+                            {errorMessage || "Access Denied"}
                         </p>
-                        <button
-                            onClick={() => router.push("/ls/events")}
-                            className="px-[18px] py-[10px] rounded-[10px] bg-[#002940] text-white text-[18px] font-semibold cursor-pointer hover:bg-blue-900 transition"
-                        >
-                            Back to My Events
-                        </button>
-                    </section>
+                    </div>
                 </div>
             </main>
         );

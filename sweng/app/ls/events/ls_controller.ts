@@ -202,13 +202,23 @@ export class ImpLabStaffManager implements LabStaffController {
         return await this.labStaffModel.getSingleDonor(filter);        
     }
 
+    async invokeValidateExtractionAccess(staffId: string, eventId: bigint, donorId: bigint) {
+
+        const res = await helpGateKeep(this.profileReader, 'extraction');
+
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message };
+
+        return await this.labStaffModel.validateExtractionAccess(staffId, eventId, donorId);
+    }
+
     async invokeSubmitDonationRecord(payload: Omit<SubmitDonationPayload, 'staff_id'>) {
     
         if (payload.volume > 450) {
             return { success: false, message: "Invalid submission: Volume cannot exceed 450 mL." };
         }
 
-        const auth = await helpGateKeep(this.profileReader, 'updatequeue');
+        const auth = await helpGateKeep(this.profileReader, 'extraction');
         
         if (!auth.success || !auth.data) {
             return { success: false, message: auth.message };

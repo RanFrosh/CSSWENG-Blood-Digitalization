@@ -4,6 +4,7 @@ import { LabStaffData } from "@/abstract/ls/ls_abstract";
 import { donor } from "@/db/models/donor";
 import { event_log } from "@/db/models/event_log";
 import { event_queue } from "@/db/models/event_queue";
+import { donor_to_event } from "@/db/models/donor_to_event";
 import { profiles } from "@/db/models/profiles";
 import { blood_bag } from "@/db/models/blood_bag";
 import { assigned_staff } from "@/db/models/assigned_staff";
@@ -258,6 +259,63 @@ export class ImpLabStaffModel implements LabStaffData {
         } catch (err: any) {
             return { success: false, message: err.message };
         }
+    }
+
+    async validateExtractionAccess(staffId: string, eventId: bigint, donorId: bigint) {
+
+        const [staff] = await orm.select({ role: profiles.role })
+            .from(profiles)
+            .where(eq(profiles.id, staffId))
+            .limit(1);
+            
+        if (!staff || staff.role !== "lab_staff") {
+            return { authorized: false, message: "Not authenticated" };
+        }
+
+        const [assignment] = await orm.select()
+            .from(assigned_staff)
+            .where(
+                and(
+                    eq(assigned_staff.staff_id, staffId),
+                    eq(assigned_staff.event_log_id, eventId)
+                )
+            )
+            .limit(1);
+
+        if (!assignment) {
+            return { authorized: false, message: "Not assigned to this event." };
+        }
+
+        const [busy] = await orm.select()
+            .from(event_queue)
+            .where(
+                and(
+                    eq(event_queue.staff_id, staffId),
+                    eq(event_queue.event_log_id, eventId),
+                    ne(event_queue.donor_id, donorId)
+                )
+            )
+            .limit(1);
+
+        if (busy) {
+            return { authorized: false, message: "Currently busy with another donor." };
+        }
+
+        const [queueData] = await orm.select()
+            .from(event_queue)
+            .where(
+                and(
+                    eq(event_queue.donor_id, donorId),
+                    eq(event_queue.event_log_id, eventId)
+                )
+            )
+            .limit(1);
+
+        if (!queueData || queueData.station !== "lab_queue") {
+            return { authorized: false, message: "Donor not found in the active event queue." };
+        }
+
+        return { authorized: true };
     }
 
     async submitDonationRecord(payload: SubmitDonationPayload) {

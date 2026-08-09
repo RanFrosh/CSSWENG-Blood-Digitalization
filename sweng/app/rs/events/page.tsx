@@ -18,7 +18,7 @@ export default async function RSEventsPage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-        redirect("/login");
+        redirect("/landing");
     }
 
     // 2. Fetch Assigned Events from Drizzle

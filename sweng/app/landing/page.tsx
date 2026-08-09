@@ -102,7 +102,7 @@ export default function Home() {
         
         if (result.success) {
             // Instantly boot them back to the login page
-            router.push("/login");
+            router.push("/landing");
             // Optional: router.refresh() if Next.js caches the layout heavily
             router.refresh(); 
         } else {
