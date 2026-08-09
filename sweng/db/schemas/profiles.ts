@@ -10,7 +10,9 @@ export const authUsers = authSchema.table('users', {
 export const profiles = pgTable('profiles', {
     id: uuid('id').primaryKey().references(() => authUsers.id, { onDelete: 'no action', onUpdate: 'no action'}),
     name: text('name').notNull(),
+    email: text('email').notNull().unique(),
+    profile_image_url: text('profile_image_url'),
     role: access_level('role').notNull(),
-    created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-    active: boolean('active')
+    active: boolean('active'),
+    created_at: timestamp('created_at', { withTimezone: true }).defaultNow()
 });

@@ -1,26 +1,44 @@
-import HeaderLS from "@/components/HeaderLS";
+import Header from "@/components/HeaderLS";
 import StaffProfile from "@/components/StaffProfile";
-
-// 🏀 Eventually, this will be your real database fetch
-const fetchProfileData = async () => {
-    return {
-        id: "LS-001",
-        name: "John Doe",
-        email: "john.doe@redbank.com",
-        role: "Lab Staff",
-        profileImage: "/images/user.png",
-    };
-};
+import { getProfileAction } from "@/actions/profile_action";
 
 export default async function LabStaffProfilePage() {
-    const profileData = await fetchProfileData();
+    
+    const result = await getProfileAction();
+
+    if (!result.success || !result.data) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center p-[0.35in]">
+                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.5in] text-center shadow-sm max-w-lg w-full">
+                        <p className="text-[24px] font-bold text-red-500 font-['Montserrat']">
+                            Error Loading Events
+                        </p>
+                        <p className="mt-2 text-[18px] font-semibold text-[#002940]">
+                            {result.message || "Access Denied"}
+                        </p>
+                    </div>
+                </div>
+            </main>
+        );
+    }
+
+    const dbProfile = result.data;
+
+    const profileData = {
+        id: dbProfile?.id.toString(), 
+        name: `${dbProfile?.name || "Unknown User"}`,
+        email: dbProfile?.email || "No email provided",
+        role: dbProfile?.role || "Lab Staff",
+        profileImage: dbProfile?.profile_image_url || "/images/user.png",
+    };
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-            {/* The Specific Header for this specific role */}
-            <HeaderLS />
+
+            <Header />
             
-            {/* The Universal Profile Component */}
             <StaffProfile initialProfile={profileData} />
         </main>
     );

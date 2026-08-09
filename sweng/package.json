@@ -11,6 +11,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "seed:accounts": "tsx --env-file=.env.local scripts/seeds/seed-accounts.ts",
+    "seed:profiles": "tsx --env-file=.env.local scripts/seeds/seed-profiles.ts",
     "seed:donors": "tsx --env-file=.env.local scripts/seeds/seed-donors.ts",
     "seed:events": "tsx --env-file=.env.local scripts/seeds/seed-events.ts",
     "seed:donorToEvent": "tsx --env-file=.env.local scripts/seeds/seed-donor-to-event.ts",
