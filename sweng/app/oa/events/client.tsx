@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ViewEvents } from "@/types/event_type";
 import Header from "@/components/HeaderOA";
-import { checkAuthentication } from "./action";
 import StaffDetails from "@/components/StaffDetails";
 
 type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 type EventTab = EventStatus | "All";
 
-export type StaffDetails = {
+// Fixed Type Collision: Changed from 'StaffDetails' to 'StaffProfile'
+// so it doesn't clash with your imported <StaffDetails /> component!
+export type StaffProfile = {
     id: string;
     name: string;
     role: string;
@@ -27,54 +27,21 @@ export type AssignedEvent = {
 };
 
 export default function OAEventsClient({
-  assignedEvents,
-  staff,
+    assignedEvents,
+    staff, // Keeping this prop available in case you need to pass it into <StaffDetails /> later!
 }: {
-  assignedEvents: AssignedEvent[];
-  staff: StaffDetails | null;
+    assignedEvents: AssignedEvent[];
+    staff: StaffProfile | null;
 }) {
-    
     const router = useRouter();
     
-    // Set the initial active tab to "Ongoing"
+    // Tab State
     const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
-
-    // State for holding events from the backend
-    const [events, setEvents] = useState<ViewEvents[]>([]);
-
-    // Loading State
-    const [isLoading, setIsLoading] = useState(true);
-
-    // Error display
-    const [errorMessage, setErrorMessage] = useState("");
-    
-    // Status filters
     const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
 
-    useEffect(() => {
-        const loadEvents = async () => {
-
-            setIsLoading(true);
-            setErrorMessage("");
-
-            try {
-                const result = await checkAuthentication(
-                    activeTab !== "All" ? { status: activeTab } : {}
-                );
-
-                if (result.success && result.data) {
-                    setEvents(result.data);
-                } else {
-                    setErrorMessage(result.message);
-                }
-            } catch (error) {
-                setErrorMessage("Failed to connect to the database");
-            } finally {
-                setIsLoading(false); 
-            }
-        }
-        loadEvents();
-    }, [activeTab]);
+    // Restored Join Modal State!
+    const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+    const [eventCode, setEventCode] = useState("");
 
     const filteredEvents =
         activeTab === "All"
@@ -114,27 +81,10 @@ export default function OAEventsClient({
         );
     };
 
-    if (isLoading) {
-        return (
-            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                <Header />
-                <div className="flex-1 flex items-center justify-center">
-                    <p className="text-[24px] text-[#002940]">Loading events...</p>
-                </div>
-            </main>
-        );
-    }
-
-    if (errorMessage) {
-        return (
-            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                
-                <div className="flex-1 flex items-center justify-center">
-                    <p className="text-[24px] text-red-500">{errorMessage}</p>
-                </div>
-            </main>
-        );
-    }
+    const openJoinModal = () => {
+        setEventCode("");
+        setIsJoinModalOpen(true);
+    };
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -142,20 +92,21 @@ export default function OAEventsClient({
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
                 <section className="bg-[#f9fdff] p-[0.25in]">
-                    <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">
-                        My Events
-                    </h1>
-                </section>
+                <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">
+                    Welcome, {staff?.name || "Admin"}!
+                </h1>
+            </section>
 
+                {/* You might need to pass `staff` in here eventually if this component expects it: <StaffDetails staff={staff} /> */}
                 <StaffDetails />
 
                 <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
                     <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
                         <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
-                        Assigned Events
+                            Assigned Events
                         </h2>
 
-                        <div className="flex flex-row flex-wrap gap-[10px]">
+                        <div className="flex flex-row flex-wrap gap-[10px] items-center">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab}
@@ -165,6 +116,15 @@ export default function OAEventsClient({
                                     {tab}
                                 </button>
                             ))}
+
+                            {/* Restored Join Event Button */}
+                            <button
+                                type="button"
+                                onClick={openJoinModal}
+                                className="px-[20px] py-[10px] rounded-full bg-[#002940] border-2 border-[#002940] text-white font-bold text-[16px] cursor-pointer hover:bg-white hover:text-[#002940] transition"
+                            >
+                                + Join Event
+                            </button>
                         </div>
                     </div>
 
@@ -186,9 +146,9 @@ export default function OAEventsClient({
                                     </div>
 
                                     {createActionButton(event)}
-                                    </div>
+                                </div>
 
-                                    <div className="p-[0.35in]">
+                                <div className="p-[0.35in]">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
                                         <p>
                                         <span className="font-semibold text-[#002940]">
@@ -221,9 +181,61 @@ export default function OAEventsClient({
                                 </div>
                             </div>
                         ))}
+
+                        {filteredEvents.length === 0 && (
+                            <div className="p-10 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#c0cad0] rounded-[16px] bg-[#f9fdff]">
+                                <p className="text-[20px] font-semibold text-[#002940] mb-2">No events found</p>
+                            </div>
+                        )}
                     </div>
                 </section>
             </div>
+
+            {/* Restored Modal */}
+            {isJoinModalOpen && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-[0.35in] z-50">
+                    <div className="bg-white rounded-[16px] p-[0.35in] max-w-[4.5in] w-full shadow-lg">
+                        <h2 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                            Join Event
+                        </h2>
+
+                        <form className="mt-[0.2in] flex flex-col gap-[0.15in]">
+                            <div>
+                                <label className="block text-[14px] font-semibold text-[#002940] mb-1">
+                                    Event Code
+                                </label>
+                                <input
+                                    type="text"
+                                    value={eventCode}
+                                    onChange={(event) => setEventCode(event.target.value)}
+                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
+                                    placeholder="Enter code..."
+                                />
+                            </div>
+
+                            <div className="mt-[0.2in] flex flex-row justify-end gap-[10px]">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsJoinModalOpen(false)}
+                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        console.log("Joining with code:", eventCode);
+                                        setIsJoinModalOpen(false);
+                                    }}
+                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90"
+                                >
+                                    Join Event
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

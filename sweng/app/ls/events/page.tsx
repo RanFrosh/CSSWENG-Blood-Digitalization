@@ -8,16 +8,15 @@ import { ViewEvents } from "@/types/event_type";
 import { getLabStaffEvents } from "./ls_action";
 
 export default function LSEventsPage() {
-
     const router = useRouter();
 
     // Filters
     const [sortBy, setSortBy] = useState("Default");
-
     const [searchInput, setSearchInput] = useState("");
     const [activeSearch, setActiveSearch] = useState("");
-    // Set the initial active tab to "Ongoing"
-    const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
+    
+    // Set the initial active tab to "Ongoing" (Removed broken EventTab type)
+    const [activeTab, setActiveTab] = useState("Ongoing");
 
     // For join event popup
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
@@ -47,7 +46,6 @@ export default function LSEventsPage() {
 
     useEffect(() => {
         const loadEvents = async () => {
-
             setIsLoading(true);
             setErrorMessage("");
 
@@ -60,11 +58,10 @@ export default function LSEventsPage() {
                 });
 
                 if (result.success && result.data) {
-
                     if (city === "All Cities") {
                         const citiesList = Array.from(new Set(result.data.map((e: any) => e.city).filter(Boolean))) as string[];
                         setAvailableCities(citiesList);
-                        }
+                    }
                 
                     if (partner === "All Partners") {
                         const partnersList = Array.from(new Set(result.data.map((e: any) => e.partner).filter(Boolean))) as string[];
@@ -87,7 +84,6 @@ export default function LSEventsPage() {
     // Can only open events that are ongoing
     const openEvent = (event: ViewEvents) => {
         if (event.status === "Ongoing") {
-            // Navigate to the event details page for the selected event
             router.push(`/ls/events/${event.id}`);
         } else {
             return;
@@ -111,11 +107,8 @@ export default function LSEventsPage() {
     };
 
     const handlePageChange = (newPage: number) => {
-
         setCurrentPage(newPage);
-        
         const resultsSection = document.getElementById('results-top');
-
         if (resultsSection) {
             resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -135,7 +128,6 @@ export default function LSEventsPage() {
     if (errorMessage) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-
                 <div className="flex-1 flex items-center justify-center">
                     <p className="text-[24px] text-red-500">{errorMessage}</p>
                 </div>
@@ -153,13 +145,11 @@ export default function LSEventsPage() {
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
-
                 {/* Staff Details */}
                 <StaffDetails />
 
                 {/* Assigned Events */}
                 <section className="mt-5 bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-
                     <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
                         Assigned Events
                     </h2>
@@ -168,18 +158,13 @@ export default function LSEventsPage() {
                     <div className="mt-6 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5 flex flex-row items-end gap-5 flex-wrap">
                         
                         <div className="flex-1 flex flex-col gap-2 min-w-[250px]">
-                            
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Search by
                             </label>
 
-                            {/* Wrapper */}
+                            {/* Fixed Search Bar Wrapper */}
                             <div className="flex flex-row items-center w-full h-[54px] bg-white border-2 border-[#c0cad0] rounded-[10px] focus-within:border-[#002940] transition-colors overflow-hidden">
                                 
-                                {/* The Search Button */}
-                        {/* Tabs and Join Event */}
-                        <div className="flex flex-row flex-wrap gap-[10px]">
-                            {tabs.map((tab) => (
                                 <button
                                     type="button"
                                     onClick={() => setActiveSearch(searchInput)}
@@ -198,7 +183,6 @@ export default function LSEventsPage() {
                                     </svg>
                                 </button>
 
-                                {/* The Borderless Input */}
                                 <input
                                     type="text"
                                     value={searchInput}
@@ -210,7 +194,6 @@ export default function LSEventsPage() {
                                     className="flex-1 h-full pr-4 text-[18px] outline-none bg-transparent text-[#002940] placeholder-gray-400"
                                 />
                             </div>
-
                         </div>
 
                         <div className="flex flex-col gap-2">
@@ -249,7 +232,6 @@ export default function LSEventsPage() {
                             <label className="text-[18px] font-semibold text-[#002940]">
                                 Sort By
                             </label>
-                            
                             <select 
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value)}
@@ -262,27 +244,24 @@ export default function LSEventsPage() {
                                 <option value = "Partner (A-Z)">Partner (A-Z)</option>
                                 <option value = "Partner (Z-A)">Partner (Z-A)</option>
                             </select>
-                            ))}
-
-                            <button
-                                type="button"
-                                onClick={openJoinModal}
-                                className="px-[20px] py-[10px] rounded-full bg-[#002940] border-2 border-[#002940] text-white font-bold text-[16px] cursor-pointer hover:bg-white hover:text-[#002940] transition"
-                            >
-                                + Join Event
-                            </button>
                         </div>
+
+                        <button
+                            type="button"
+                            onClick={openJoinModal}
+                            className="px-[20px] py-[10px] rounded-full bg-[#002940] border-2 border-[#002940] text-white font-bold text-[16px] cursor-pointer hover:bg-white hover:text-[#002940] transition"
+                        >
+                            + Join Event
+                        </button>
                     </div>
 
                     {/* Divider & Result Count */}
                     <section id="results-top" className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
                         
                         <div className="flex flex-row items-center justify-between border-b-2 border-[#c0cad0] pb-4">
-                            
                             <h3 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
                                 Results
                             </h3>
-                            
                             <span className="bg-[#e2e8ec] text-[#002940] px-4 py-1 rounded-full text-[16px] font-semibold">
                                 Showing {events.length} {events.length === 1 ? 'event' : 'events'}
                             </span>
@@ -345,7 +324,6 @@ export default function LSEventsPage() {
                                 <label className="block text-[14px] font-semibold text-[#002940] mb-1">
                                     Event Code
                                 </label>
-
                                 <input
                                     type="text"
                                     value={eventCode}
@@ -362,7 +340,6 @@ export default function LSEventsPage() {
                                 >
                                     Cancel
                                 </button>
-
                                 <button
                                     type="button"
                                     onClick={() => setIsJoinModalOpen(false)}
