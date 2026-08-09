@@ -1,4 +1,4 @@
-import { hasPermission, getQueueStation, Actions } from "@/app/global/access/permissions";
+import { hasPermission, getQueueStation, Actions } from "@/utils/access/permissions";
 import { AccessType } from "@/db/enums/access_level";
 
 describe("hasPermission", () => {

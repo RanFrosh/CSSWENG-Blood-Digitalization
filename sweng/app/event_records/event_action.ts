@@ -5,10 +5,10 @@ import { ApiResponse } from "@/types/api_res_type";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 import { ImpEventModel } from "@/app/event_records/imp_event_data";
 import { ImpEventManager } from "@/app/event_records/imp_event_controller";
-import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
+import { ImpProfileGetter } from "@/queries/profile_query";
 import { orm } from "@/db/drizzle";
 import { serverSupa } from "@/db/supaserver";
-import { helpGateKeep } from "@/app/global/helper_bouncer/bouncer";
+import { helpGateKeep } from "@/utils/access/bouncer";
 
 export async function executeEventQueryStaff(data: ViewEventFilters): Promise<ApiResponse<ViewEvents[]>> {
     

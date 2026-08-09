@@ -1,5 +1,5 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { event_queue } from "@/db/models/event_queue";
+import { event_queue } from "@/db/schemas/event_queue";
 import { QueueStationType } from "@/db/enums/queue_station";
 import { ViewDonor } from "./donor_type";
 

@@ -3,7 +3,7 @@
 import { serverSupa } from "@/db/supaserver";
 import { getProfile } from "../fetch_profile/single_profile";
 import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
+import { donor } from "@/db/schemas/donor";
 import { eq, and, SQL, getTableColumns } from "drizzle-orm";
 import { InferSelectModel } from "drizzle-orm";
 

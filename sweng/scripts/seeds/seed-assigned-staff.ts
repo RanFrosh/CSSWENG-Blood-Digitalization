@@ -1,6 +1,6 @@
 import { orm } from "@/db/drizzle";
-import { assigned_staff } from "@/db/models/assigned_staff"; 
-import { event_log } from "@/db/models/event_log";
+import { assigned_staff } from "@/db/schemas/assigned_staff"; 
+import { event_log } from "@/db/schemas/event_log";
 import { inArray } from "drizzle-orm";
 
 const STAFF_IDS = [

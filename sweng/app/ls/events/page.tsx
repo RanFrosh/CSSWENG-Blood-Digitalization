@@ -5,7 +5,7 @@ import Header from "@/components/HeaderLS";
 import StaffDetails from "@/components/StaffDetails";
 import { EventCard } from "@/components/EventCard";
 import { ViewEvents } from "@/types/event_type";
-import { getLabStaffEvents } from "./ls_action";
+import { getLabStaffEvents } from "@/actions/ls_action";
 
 export default function LSEventsPage() {
     const router = useRouter();

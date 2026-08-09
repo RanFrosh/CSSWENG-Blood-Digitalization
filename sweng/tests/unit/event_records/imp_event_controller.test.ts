@@ -15,7 +15,7 @@ jest.mock("@/app/global/helper_bouncer/bouncer", () => ({
   helpGateKeep: jest.fn(),
 }));
 
-import { helpGateKeep } from "@/app/global/helper_bouncer/bouncer";
+import { helpGateKeep } from "@/utils/access/bouncer";
 
 // mock the data model so we don't hit a real database
 const mockEventModel: jest.Mocked<EventData> = {

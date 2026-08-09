@@ -1,7 +1,7 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { SQL, eq, and } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
-import { assigned_staff } from "@/db/models/assigned_staff";
+import { assigned_staff } from "@/db/schemas/assigned_staff";
 import { ViewAssignedStaff } from "@/types/assigned_staff_type";
 import { AssignedStaffData } from "@/abstract/assigned_staff/assigned_staff_abstract";
 

@@ -1,7 +1,7 @@
 "use server";
 import { serverSupa } from "@/db/supaserver";
 import { orm } from "@/db/drizzle";
-import { profiles } from "@/db/models/profiles";
+import { profiles } from "@/db/schemas/profiles";
 
 export type AppRole = 'onsite_admin' | 'med_prof' | 'director' | 'super_admin';
 

@@ -3,9 +3,9 @@
 import { eq } from "drizzle-orm";
 
 import { orm } from "@/db/drizzle";
-import { event_log } from "@/db/models/event_log";
-import { city } from "@/db/models/city";
-import { province } from "@/db/models/province";
+import { event_log } from "@/db/schemas/event_log";
+import { city } from "@/db/schemas/city";
+import { province } from "@/db/schemas/province";
 
 export type AssignedEvent = {
     id: string;

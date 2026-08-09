@@ -1,14 +1,14 @@
-import { orm } from "../../../db/drizzle";
+import { orm } from "@/db/drizzle";
 import { eq, SQL, and, isNull, ne, or, ilike, asc, desc } from "drizzle-orm";
 import { LabStaffData } from "@/abstract/ls/ls_abstract";
-import { donor } from "@/db/models/donor";
-import { event_log } from "@/db/models/event_log";
-import { event_queue } from "@/db/models/event_queue";
-import { donor_to_event } from "@/db/models/donor_to_event";
-import { profiles } from "@/db/models/profiles";
-import { blood_bag } from "@/db/models/blood_bag";
-import { assigned_staff } from "@/db/models/assigned_staff";
-import { city } from "@/db/models/city";
+import { donor } from "@/db/schemas/donor";
+import { event_log } from "@/db/schemas/event_log";
+import { event_queue } from "@/db/schemas/event_queue";
+import { donor_to_event } from "@/db/schemas/donor_to_event";
+import { profiles } from "@/db/schemas/profiles";
+import { blood_bag } from "@/db/schemas/blood_bag";
+import { assigned_staff } from "@/db/schemas/assigned_staff";
+import { city } from "@/db/schemas/city";
 import { ViewDonorPartial } from "@/types/donor_type";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
 

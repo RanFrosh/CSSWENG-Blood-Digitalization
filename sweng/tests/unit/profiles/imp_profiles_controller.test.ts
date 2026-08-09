@@ -1,7 +1,7 @@
 import { ImpProfilesManager } from "@/app/profiles/imp_profiles_controller";
 import { ProfilesData } from "@/abstract/profiles/profiles_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { helpGateKeep } from "@/app/global/helper_bouncer/bouncer";
+import { helpGateKeep } from "@/utils/access/bouncer";
 import { ReadProfile } from "@/types/profile_type";
 
 jest.mock("@/app/global/helper_bouncer/bouncer", () => ({

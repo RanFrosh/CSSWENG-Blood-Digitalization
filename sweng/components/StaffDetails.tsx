@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { fetch_profile } from "@/app/global/access/fetch_profile";
+import { getProfileAction } from "@/actions/profile_action";
 
 const roleNames: Record<string, string> = {
     onsite_admin: "Onsite Admin",
@@ -19,7 +19,7 @@ export default function StaffDetails() {
 
     useEffect(() => {
         const loadProfile = async () => {
-            const result = await fetch_profile();
+            const result = await getProfileAction();
             if (result.success && result.data) {
                 setProfile(result.data);
             }

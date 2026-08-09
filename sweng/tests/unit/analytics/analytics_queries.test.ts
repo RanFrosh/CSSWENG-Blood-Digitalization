@@ -1,6 +1,6 @@
 import { ImpAnalyticsData } from "@/app/rbd/analytics/rbd_queries";
 import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
+import { donor } from "@/db/schemas/donor";
 
 // Mock the ORM module so no real database connection is made
 // Only orm.select is stubbed

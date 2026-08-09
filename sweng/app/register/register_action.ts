@@ -3,7 +3,7 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { adminSupa } from "@/db/supaadmin";
 import { serverSupa } from "@/db/supaserver";
-import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
+import { ImpProfileGetter } from "@/queries/profile_query";
 import { ImpRegisterModel } from "./imp_register_data";
 import { ImpRegisterManager } from "./imp_register_controller";
 import { AccessType } from "@/db/enums/access_level";

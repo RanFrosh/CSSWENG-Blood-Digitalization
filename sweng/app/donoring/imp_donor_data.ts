@@ -3,7 +3,7 @@ import { SQL, eq, and, inArray } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
 import { DonorData } from "@/abstract/donor/donor_abstract";
 import { ViewDonorPartial, ViewDonor } from "@/types/donor_type";
-import { donor } from "@/db/models/donor";
+import { donor } from "@/db/schemas/donor";
 
 export class ImpDonorModel implements DonorData {
     private access: typeof orm;

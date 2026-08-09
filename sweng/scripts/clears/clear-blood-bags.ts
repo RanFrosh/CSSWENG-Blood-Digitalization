@@ -1,5 +1,5 @@
 import { orm } from "@/db/drizzle";
-import { blood_bag } from "@/db/models/blood_bag";
+import { blood_bag } from "@/db/schemas/blood_bag";
 import { sql } from "drizzle-orm";
 
 async function clearBags() {

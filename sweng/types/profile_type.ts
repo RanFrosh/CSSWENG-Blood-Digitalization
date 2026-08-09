@@ -1,4 +1,4 @@
-import { profiles } from "@/db/models/profiles";
+import { profiles } from "@/db/schemas/profiles";
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 
 export type ReadProfile = InferSelectModel<typeof profiles>;

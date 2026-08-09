@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { checkExtractionAccessAction } from "../../../ls_action"; // Adjust path if needed
+import { checkExtractionAccessAction } from "@/actions/ls_action";
 import RecordClient from "./client";
 import Header from "@/components/HeaderLS";
 

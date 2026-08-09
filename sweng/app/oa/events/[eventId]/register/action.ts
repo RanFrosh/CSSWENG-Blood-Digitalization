@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { eq, or } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
+import { donor } from "@/db/schemas/donor";
 
 type RegisterState = {
   error?: string;

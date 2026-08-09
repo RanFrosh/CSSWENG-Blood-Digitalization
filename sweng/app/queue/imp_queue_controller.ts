@@ -1,9 +1,9 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { helpGateKeep } from "../global/helper_bouncer/bouncer";
+import { helpGateKeep } from "../../utils/access/bouncer";
 import { QueueController, QueueData } from "@/abstract/queue/queue_abstract";
 import { ViewQueueFilters, ViewQueue, DeleteQueue, CreateQueue, UpdateQueue } from "@/types/queue_type";
-import { getQueueStation } from "../global/access/permissions";
+import { getQueueStation } from "../../utils/access/permissions";
 
 export class ImpQueueManager implements QueueController {
     private queueModel: QueueData

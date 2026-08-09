@@ -1,6 +1,6 @@
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
-import { helpGateKeep } from "@/app/global/helper_bouncer/bouncer";
-import { getQueueStation } from "@/app/global/access/permissions";
+import { helpGateKeep } from "@/utils/access/bouncer";
+import { getQueueStation } from "@/utils/access/permissions";
 import { QueueData } from "@/abstract/queue/queue_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { ViewQueueFilters, ViewQueue, DeleteQueue, CreateQueue, UpdateQueue } from "@/types/queue_type";

@@ -1,6 +1,6 @@
 import { serverSupa } from "@/db/supaserver";
-import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
-import { helpGateKeep } from "../helper_bouncer/bouncer";
+import { ImpProfileGetter } from "@/queries/profile_query";
+import { helpGateKeep } from "./bouncer";
 import { Actions } from "./permissions";
 import { ApiResponse } from "@/types/api_res_type";
 

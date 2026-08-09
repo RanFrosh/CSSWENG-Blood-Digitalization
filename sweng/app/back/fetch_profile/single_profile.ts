@@ -3,7 +3,7 @@
 import { orm } from "@/db/drizzle";
 import { eq } from "drizzle-orm";
 import { serverSupa } from "@/db/supaserver";
-import { profiles } from "@/db/models/profiles";
+import { profiles } from "@/db/schemas/profiles";
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export async function getProfile (client?: SupabaseClient) {  

@@ -3,7 +3,7 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { serverSupa } from "@/db/supaserver";
 import { orm } from "@/db/drizzle";
-import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
+import { ImpProfileGetter } from "@/queries/profile_query";
 import { ImpProfilesModel } from "@/app/profiles/imp_profiles_data";
 import { ImpProfilesManager } from "@/app/profiles/imp_profiles_controller";
 import { StaffUser, StaffUserRow } from "@/types/staff_type";

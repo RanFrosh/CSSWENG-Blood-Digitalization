@@ -1,5 +1,5 @@
 import { orm } from "@/db/drizzle";
-import { event_queue } from "@/db/models/event_queue"; // Adjust path if needed
+import { event_queue } from "@/db/schemas/event_queue"; // Adjust path if needed
 import { sql } from "drizzle-orm";
 
 async function clearEventQueue() {

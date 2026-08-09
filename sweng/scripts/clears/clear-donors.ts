@@ -1,5 +1,5 @@
 import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
+import { donor } from "@/db/schemas/donor";
 import { sql } from "drizzle-orm";
 
 async function clearDonors() {

@@ -3,9 +3,9 @@ import { inArray, eq } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
 import { ProfilesData } from "@/abstract/profiles/profiles_abstract";
 import { ReadProfile } from "@/types/profile_type";
-import { profiles } from "@/db/models/profiles";
+import { profiles } from "@/db/schemas/profiles";
 import { StaffUserRow } from "@/types/staff_type";
-import { authUsers } from "@/db/models/profiles";
+import { authUsers } from "@/db/schemas/profiles";
 
 export class ImpProfilesModel implements ProfilesData {
     private access: typeof orm;

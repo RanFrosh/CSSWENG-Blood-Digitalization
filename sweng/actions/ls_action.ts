@@ -1,11 +1,11 @@
 "use server"
 
 import { serverSupa } from "@/db/supaserver";
-import { ImpLabStaffManager } from "./ls_controller";
-import { ImpLabStaffModel } from "./ls.query";
-import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
+import { ImpLabStaffManager } from "@/controllers/ls_controller";
+import { ImpLabStaffModel } from "@/queries/ls.query";
+import { ImpProfileGetter } from "@/queries/profile_query";
 import { revalidatePath } from "next/cache";
-import { bigintToStr } from "@/app/global/serializer/serial";
+import { bigintToStr } from "@/utils/serialize/serial";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
 
 async function getLabController() {

@@ -1,5 +1,5 @@
 import { orm } from "@/db/drizzle";
-import { event_log } from "@/db/models/event_log";
+import { event_log } from "@/db/schemas/event_log";
 import { eq } from "drizzle-orm";
 
 const events = [

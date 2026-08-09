@@ -1,5 +1,5 @@
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { helpGateKeep } from "../../global/helper_bouncer/bouncer";
+import { helpGateKeep } from "@/utils/access/bouncer";
 import { LabStaffController, LabStaffData } from "@/abstract/ls/ls_abstract";
 import { ViewDonorPartial } from "@/types/donor_type";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";

@@ -1,6 +1,6 @@
 // scripts/clear-events-drizzle.ts
 import { orm } from "@/db/drizzle";
-import { event_log } from "@/db/models/event_log";
+import { event_log } from "@/db/schemas/event_log";
 import { sql } from "drizzle-orm";
 
 async function clearEvents() {

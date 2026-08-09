@@ -1,5 +1,5 @@
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { helpGateKeep } from "../../global/helper_bouncer/bouncer";
+import { helpGateKeep } from "../../../utils/access/bouncer";
 import { AnalyticsController, AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { ApiResponse } from "@/types/api_res_type";
 

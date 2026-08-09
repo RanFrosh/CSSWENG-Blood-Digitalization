@@ -1,7 +1,7 @@
 import { orm } from "@/db/drizzle";
-import { event_queue } from "@/db/models/event_queue"; 
-import { event_log } from "@/db/models/event_log";
-import { donor_to_event } from "@/db/models/donor_to_event";
+import { event_queue } from "@/db/schemas/event_queue"; 
+import { event_log } from "@/db/schemas/event_log";
+import { donor_to_event } from "@/db/schemas/donor_to_event";
 import { eq, and } from "drizzle-orm";
 
 // 1. Lock the staff IDs to their specific stations

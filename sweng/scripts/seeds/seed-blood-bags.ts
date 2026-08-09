@@ -1,8 +1,8 @@
 import { orm } from "@/db/drizzle";
-import { blood_bag } from "@/db/models/blood_bag"; 
-import { donor_to_event } from "@/db/models/donor_to_event";
-import { donor } from "@/db/models/donor";
-import { event_log } from "@/db/models/event_log";
+import { blood_bag } from "@/db/schemas/blood_bag"; 
+import { donor_to_event } from "@/db/schemas/donor_to_event";
+import { donor } from "@/db/schemas/donor";
+import { event_log } from "@/db/schemas/event_log";
 import { eq } from "drizzle-orm";
 
 const STAFF_IDS = [

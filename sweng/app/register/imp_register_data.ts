@@ -3,7 +3,7 @@ import { orm } from "@/db/drizzle";
 import { RegisterData } from "@/abstract/register/register_abstract";
 import { adminSupa } from "@/db/supaadmin";
 import { AccessType } from "@/db/enums/access_level";
-import { authUsers, profiles } from "@/db/models/profiles";
+import { authUsers, profiles } from "@/db/schemas/profiles";
 import { eq, sql } from "drizzle-orm";
 import { ReadProfile } from "@/types/profile_type";
 

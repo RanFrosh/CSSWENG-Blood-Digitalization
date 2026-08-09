@@ -1,5 +1,5 @@
 import { orm } from "@/db/drizzle";
-import { corrected_event } from "@/db/models/corrected_event";
+import { corrected_event } from "@/db/schemas/corrected_event";
 import { eq, and } from "drizzle-orm";
 
 const corrections = [

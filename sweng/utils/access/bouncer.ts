@@ -1,6 +1,6 @@
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { hasPermission } from "../access/permissions";
-import { Actions } from "../access/permissions";
+import { hasPermission } from "./permissions";
+import { Actions } from "./permissions";
 
 export async function helpGateKeep(checker: ProfileSessionProvider, action: Actions) {
 

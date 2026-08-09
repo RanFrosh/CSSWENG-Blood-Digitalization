@@ -1,6 +1,6 @@
 import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
-import { city } from "@/db/models/city";
+import { donor } from "@/db/schemas/donor";
+import { city } from "@/db/schemas/city";
 import { eq } from "drizzle-orm";
 
 async function seedDonors() {

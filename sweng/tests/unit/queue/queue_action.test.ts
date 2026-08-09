@@ -92,7 +92,7 @@ jest.mock("@/db/models/event_queue", () => ({
 }));
 
 import { serverSupa } from "@/db/supaserver";
-import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
+import { ImpProfileGetter } from "@/queries/profile_query";
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpDonorModel } from "@/app/donoring/imp_donor_data";

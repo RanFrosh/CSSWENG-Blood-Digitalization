@@ -1,8 +1,8 @@
 "use server"
 
-import { authenticate } from "@/app/global/access/authenticate";
+import { authenticate } from "@/utils/access/authenticate";
 import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
+import { donor } from "@/db/schemas/donor";
 import { ViewEventFilters } from "@/types/event_type";
 
 export async function checkAuthentication(data?: ViewEventFilters) {

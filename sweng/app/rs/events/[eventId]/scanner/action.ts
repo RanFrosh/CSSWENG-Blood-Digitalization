@@ -3,9 +3,9 @@
 import { eq, and, sql } from "drizzle-orm";
 
 import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
-import { event_log } from "@/db/models/event_log";
-import { donor_to_event } from "@/db/models/donor_to_event";
+import { donor } from "@/db/schemas/donor";
+import { event_log } from "@/db/schemas/event_log";
+import { donor_to_event } from "@/db/schemas/donor_to_event";
 
 export async function claimPerkAction(
     eventId: string,

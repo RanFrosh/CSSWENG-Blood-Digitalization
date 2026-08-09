@@ -4,7 +4,7 @@ import { ApiResponse } from "@/types/api_res_type";
 import { orm } from "@/db/drizzle";
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
-import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
+import { ImpProfileGetter } from "@/queries/profile_query";
 import { serverSupa } from "@/db/supaserver";
 
 export async function completeScreening(queueId: bigint): Promise<ApiResponse> {

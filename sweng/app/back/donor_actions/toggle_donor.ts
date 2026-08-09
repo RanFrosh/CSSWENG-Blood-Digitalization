@@ -4,7 +4,7 @@ import { orm } from "@/db/drizzle";
 import { inArray } from "drizzle-orm";
 import { serverSupa } from "@/db/supaserver";
 import { getProfile } from "../fetch_profile/single_profile";
-import { donor } from "@/db/models/donor";
+import { donor } from "@/db/schemas/donor";
 
 export type DeletionMode = 'soft' | 'hard' | 'reactivate';
 

@@ -2,7 +2,7 @@
 
 import { ImpAnalyticsManager } from "./rbd_controller";
 import { ImpAnalyticsData } from "./rbd_queries";
-import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
+import { ImpProfileGetter } from "@/queries/profile_query";
 import { serverSupa } from "@/db/supaserver";
 
 async function getAnalyticsController() {

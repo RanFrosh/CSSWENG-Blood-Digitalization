@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
-import { donor } from "@/db/models/donor";
+import { donor } from "@/db/schemas/donor";
 
 export async function softDeleteDonor({
   donorId,

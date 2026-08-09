@@ -1,11 +1,11 @@
 import { orm } from "../../../db/drizzle";
-import { donor } from "../../../db/models/donor";
+import { donor } from "../../../db/schemas/donor";
 import { eq, sql, or, and, ilike, isNull, isNotNull, lte, gt, gte, ne, sum, count, asc, desc } from "drizzle-orm";
 import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
-import { event_log } from "@/db/models/event_log";
-import { donor_to_event } from "@/db/models/donor_to_event";
-import { city } from "@/db/models/city";
-import { blood_bag } from "@/db/models/blood_bag";
+import { event_log } from "@/db/schemas/event_log";
+import { donor_to_event } from "@/db/schemas/donor_to_event";
+import { city } from "@/db/schemas/city";
+import { blood_bag } from "@/db/schemas/blood_bag";
 
 export class ImpAnalyticsData implements AnalyticsData {
 

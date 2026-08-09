@@ -1,5 +1,5 @@
 import { ImpAnalyticsManager } from "@/app/rbd/analytics/rbd_controller";
-import { helpGateKeep } from "@/app/global/helper_bouncer/bouncer";
+import { helpGateKeep } from "@/utils/access/bouncer";
 import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 

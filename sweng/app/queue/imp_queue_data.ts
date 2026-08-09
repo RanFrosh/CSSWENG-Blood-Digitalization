@@ -3,9 +3,9 @@ import { SQL, eq, asc, and, isNull } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
 import { QueueData } from "@/abstract/queue/queue_abstract";
 import { ViewQueueFilters, ViewQueue, DeleteQueue, CreateQueue, UpdateQueue } from "@/types/queue_type";
-import { event_queue } from "@/db/models/event_queue";
-import { event_log } from "@/db/models/event_log";
-import { assigned_staff } from "@/db/models/assigned_staff";
+import { event_queue } from "@/db/schemas/event_queue";
+import { event_log } from "@/db/schemas/event_log";
+import { assigned_staff } from "@/db/schemas/assigned_staff";
 
 export class ImpQueueModel implements QueueData {
     private access: typeof orm;

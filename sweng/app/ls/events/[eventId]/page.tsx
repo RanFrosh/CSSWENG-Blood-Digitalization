@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Header from "@/components/HeaderLS";
 import { EventDetailsPanel } from "@/components/EventDetailsPanel";
 import { ViewEvents } from "@/types/event_type";
-import { verifyLabStaffEventAccess, getLabStaffQueue, getStaffStatus, acceptDonor } from "../ls_action";
+import { verifyLabStaffEventAccess, getLabStaffQueue, getStaffStatus, acceptDonor } from "@/actions/ls_action";
 import { QueueEntryWithDonor, StaffWithStatus } from "@/types/queue_type";
 
 export default function LSEventPage() {

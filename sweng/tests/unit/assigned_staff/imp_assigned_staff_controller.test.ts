@@ -1,7 +1,7 @@
 import { ImpAssignedStaffManager } from "@/app/assigned_staff/imp_assigned_staff_controller";
 import { AssignedStaffData } from "@/abstract/assigned_staff/assigned_staff_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { helpGateKeep } from "@/app/global/helper_bouncer/bouncer";
+import { helpGateKeep } from "@/utils/access/bouncer";
 
 // mock helpGateKeep
 jest.mock("@/app/global/helper_bouncer/bouncer", () => ({

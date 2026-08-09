@@ -2,7 +2,7 @@
 
 import { ImpLoginProvider } from "./imp_login_provider";
 import { ImpLoginController } from "./imp_login_controller";
-import { ImpProfileGetter } from "../global/query_session.ts/query_user";
+import { ImpProfileGetter } from "../../queries/profile_query";
 import { serverSupa } from "@/db/supaserver";
 
 export async function executeLogin(email: string, pass: string) {

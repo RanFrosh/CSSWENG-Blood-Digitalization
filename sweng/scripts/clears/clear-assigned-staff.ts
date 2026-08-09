@@ -1,5 +1,5 @@
 import { orm } from "@/db/drizzle";
-import { assigned_staff } from "@/db/models/assigned_staff";
+import { assigned_staff } from "@/db/schemas/assigned_staff";
 import { sql } from "drizzle-orm";
 
 async function clearAssignedStaff() {

@@ -2,7 +2,7 @@
 // helpGateKeep checks who the user is, if they have a role, and if their role allows the action.
 // we mock ProfileSessionProvider to simulate a user session.
 
-import { helpGateKeep} from "@/app/global/helper_bouncer/bouncer";
+import { helpGateKeep} from "@/utils/access/bouncer";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 
 

@@ -1,6 +1,6 @@
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { orm } from "@/db/drizzle";
-import { event_queue } from "@/db/models/event_queue";
+import { event_queue } from "@/db/schemas/event_queue";
 import { ViewQueueFilters, DeleteQueue, CreateQueue, UpdateQueue } from "@/types/queue_type";
 
 // mock at the module level

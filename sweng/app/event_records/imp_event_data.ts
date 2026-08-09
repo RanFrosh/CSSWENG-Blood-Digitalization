@@ -3,12 +3,12 @@ import { ApiResponse } from "@/types/api_res_type";
 import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 import { SQL, eq, asc, desc, and, inArray, getTableColumns } from "drizzle-orm";
-import { event_log } from "@/db/models/event_log";
-import { corrected_event } from "@/db/models/corrected_event";
+import { event_log } from "@/db/schemas/event_log";
+import { corrected_event } from "@/db/schemas/corrected_event";
 import { orm } from "@/db/drizzle";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
-import { assigned_staff } from "@/db/models/assigned_staff";
-import { city } from "@/db/models/city";
+import { assigned_staff } from "@/db/schemas/assigned_staff";
+import { city } from "@/db/schemas/city";
 
 export class ImpEventModel implements EventData {
     private access: typeof orm;

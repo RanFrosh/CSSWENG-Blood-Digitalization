@@ -1,7 +1,7 @@
 import Header from "@/components/HeaderOA";
 import { orm } from "@/db/drizzle";
-import { city } from "@/db/models/city";
-import { province } from "@/db/models/province";
+import { city } from "@/db/schemas/city";
+import { province } from "@/db/schemas/province";
 import RegistrationForm from "./registration-form";
 import { checkAuthentication } from "../../action";
 

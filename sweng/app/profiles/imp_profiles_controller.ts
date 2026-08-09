@@ -1,6 +1,6 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { helpGateKeep } from "../global/helper_bouncer/bouncer";
+import { helpGateKeep } from "../../utils/access/bouncer";
 import { ProfilesController, ProfilesData } from "@/abstract/profiles/profiles_abstract";
 import { ReadProfile } from "@/types/profile_type";
 import { StaffUserRow } from "@/types/staff_type";
