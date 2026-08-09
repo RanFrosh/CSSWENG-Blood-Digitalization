@@ -30,9 +30,10 @@ export default function SAUsersPage() {
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
+    
+    // Accepted HEAD changes: We are using the Modal approach
     const [selectedUser, setSelectedUser] = useState<StaffUser | null>(null);
-    const [selectedUserAction, setSelectedUserAction] =
-        useState<UserAction | null>(null);
+    const [selectedUserAction, setSelectedUserAction] = useState<UserAction | null>(null);
 
     const [formEmail, setFormEmail] = useState("");
     const [formRole, setFormRole] = useState<AccessType>("super_admin");
@@ -201,6 +202,7 @@ export default function SAUsersPage() {
 
         setDeleteLoading(true);
         setDeleteError("");
+        
         try {
             if (selectedUserAction === "Delete") {
                 const result = await deleteStaffUser(selectedUser.id);
