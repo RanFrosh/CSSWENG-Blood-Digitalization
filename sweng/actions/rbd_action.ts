@@ -1,7 +1,7 @@
 "use server"
 
-import { ImpAnalyticsManager } from "./rbd_controller";
-import { ImpAnalyticsData } from "./rbd_queries";
+import { ImpAnalyticsManager } from "@/controllers/rbd_controller";
+import { ImpAnalyticsData } from "@/queries/rbd_queries";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { serverSupa } from "@/db/supaserver";
 

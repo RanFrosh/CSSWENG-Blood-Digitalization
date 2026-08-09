@@ -1,102 +1,48 @@
-"use client";
-
-import { useRouter, useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import Link from "next/link";
 import Header from "@/components/HeaderRBD";
-import { fetchEventAnalytics } from "../../rbd_action";
+import { fetchEventAnalytics } from "@/actions/rbd_action";
 import { EventDetailsPanel } from "@/components/EventDetailsPanel";
 
-export default function EventAnalyticsDetailsPage() {
+export default async function EventAnalyticsDetailsPage({
+    params,
+}: {
+    params: Promise<{ eventId: string }> | { eventId: string };
+}) {
+    const resolvedParams = await params;
+    const { eventId } = resolvedParams;
 
-    const router = useRouter();
-    const params = useParams();
+    const result = await fetchEventAnalytics(eventId);
 
-    const eventId = params.eventId as string;
-
-    const [selectedEvent, setSelectedEvent] = useState<any>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [errorMessage, setErrorMessage] = useState("");
-
-    useEffect(() => {
-        const loadEvent = async () => {
-
-            if (!eventId) 
-                return;
-            
-            setIsLoading(true);
-            setErrorMessage("");
-
-            try {
-                const result = await fetchEventAnalytics(eventId);
-                if (result.success && result.data) {
-                    setSelectedEvent(result.data);
-                } else {
-                    setSelectedEvent(undefined);
-                }
-            } catch (error) {
-                setSelectedEvent(undefined);
-                setErrorMessage("Failed to connect to the database");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        loadEvent();
-    }, [eventId]);
-
-    const goBack = () => {
-        router.push(`/rbd/analytics/events/`);
-    };
-
-    if (selectedEvent === undefined) {
+    if (!result?.success || !result?.data) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
                 <Header />
-
                 <div className="flex-1 p-[0.35in]">
                     <section className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
                         <h1 className="text-[36px] font-['Montserrat'] font-bold text-[#002940]">
                             Event Analytics Not Found
                         </h1>
-
                         <p className="mt-[10px] text-[18px] text-[#002940]">
-                            The selected event does not have available analytics.
+                            {result?.message || "The selected event does not have available analytics."}
                         </p>
 
-                        <button
-                            type="button"
-                            onClick={goBack}
-                            className="mt-[0.25in] px-[18px] py-[10px] rounded-[10px] bg-[#002940] text-white text-[18px] font-semibold cursor-pointer hover:bg-[#fd5448] transition"
+                        <Link
+                            href="/rbd/analytics/events"
+                            className="mt-[0.25in] inline-block px-[18px] py-[10px] rounded-[10px] bg-[#002940] text-white text-[18px] font-semibold hover:bg-[#fd5448] transition-colors"
                         >
                             Back to Event Analytics
-                        </button>
+                        </Link>
                     </section>
                 </div>
             </main>
         );
     }
 
-    if (isLoading) {
-        return (
-            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-                <Header />
-                <div className="flex-1 flex items-center justify-center">
-                    <p className="text-[24px] text-[#002940]">Loading Event Analytics...</p>
-                </div>
-            </main>
-        );
-    }
-
-    if (errorMessage) {
-        return (
-            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-
-                <div className="flex-1 flex items-center justify-center">
-                    <p className="text-[24px] text-red-500">{errorMessage}</p>
-                </div>
-            </main>
-        );
-    }
+    const selectedEvent = result.data;
+    
+    const progressPct = selectedEvent.extractionGoal > 0 
+        ? Math.min(((selectedEvent.totalBagsProduced / selectedEvent.extractionGoal) * 100), 100) 
+        : 0;
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -107,7 +53,6 @@ export default function EventAnalyticsDetailsPage() {
                     <p className="text-[18px] font-['Montserrat'] text-[#002940]">
                         Red Bank Director
                     </p>
-
                     <h1 className="text-[54px] font-['Montserrat'] font-bold text-[#002940]">
                         Event Analytics
                     </h1>
@@ -123,40 +68,28 @@ export default function EventAnalyticsDetailsPage() {
 
                     <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Total Donors
-                            </p>
-
+                            <p className="text-[18px] font-semibold text-[#002940]">Total Donors</p>
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
                                 {selectedEvent.totalDonors}
                             </p>
                         </div>
 
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Blood Donated
-                            </p>
-
+                            <p className="text-[18px] font-semibold text-[#002940]">Blood Donated</p>
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
                                 {selectedEvent.bloodDonated}
                             </p>
                         </div>
 
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Total Bags Produced
-                            </p>
-
+                            <p className="text-[18px] font-semibold text-[#002940]">Total Bags Produced</p>
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
                                 {selectedEvent.totalBagsProduced}
                             </p>
                         </div>
 
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">
-                                Extraction Success Rate
-                            </p>
-
+                            <p className="text-[18px] font-semibold text-[#002940]">Extraction Success Rate</p>
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
                                 {selectedEvent.successRate}
                             </p>
@@ -174,7 +107,7 @@ export default function EventAnalyticsDetailsPage() {
                             'Rh-null (or "Golden Blood")': '#EAB308'
                         };
                         
-                        const totalUnits = selectedEvent?.bloodTypes?.reduce((sum, item) => sum + (item?.count || 0), 0) || 0;
+                        const totalUnits = selectedEvent?.bloodTypes?.reduce((sum: number, item: any) => sum + (item?.count || 0), 0) || 0;
                         const mainRadius = 50;
                         const mainCircumference = 2 * Math.PI * mainRadius;
                         let accumulatedPercentage = 0;
@@ -192,7 +125,7 @@ export default function EventAnalyticsDetailsPage() {
                                         <svg viewBox="0 0 140 140" className="w-full h-full transform -rotate-90">
                                             <circle cx="70" cy="70" r={mainRadius} fill="transparent" stroke="#F3F4F6" strokeWidth="14" />
                                             
-                                            {selectedEvent?.bloodTypes?.map((bloodType) => {
+                                            {selectedEvent?.bloodTypes?.map((bloodType: any) => {
                                                 if (!bloodType || !bloodType.count) return null;
                                                 
                                                 const typeStr = bloodType?.bloodType || '';
@@ -200,8 +133,6 @@ export default function EventAnalyticsDetailsPage() {
 
                                                 const percentage = totalUnits > 0 ? (bloodType.count / totalUnits) * 100 : 0;
                                                 const strokeLength = (percentage / 100) * mainCircumference;
-                                                
-                                                // BUG FIX: Calculate exact gap and use a negative offset to push the slice forward
                                                 const strokeGap = mainCircumference - strokeLength;
                                                 const strokeOffset = -((accumulatedPercentage / 100) * mainCircumference);
                                                 
@@ -228,9 +159,9 @@ export default function EventAnalyticsDetailsPage() {
                                         </div>
                                     </div>
 
-                                    {/* Right Side: Grid of 9 Independent Distribution Cards */}
+                                    {/* Right Side: Grid of Independent Distribution Cards */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 flex-1 w-full">
-                                        {selectedEvent?.bloodTypes?.map((bloodType) => {
+                                        {selectedEvent?.bloodTypes?.map((bloodType: any) => {
                                             if (!bloodType) return null;
 
                                             const typeStr = bloodType?.bloodType || '';
@@ -287,7 +218,6 @@ export default function EventAnalyticsDetailsPage() {
                                             );
                                         })}
                                     </div>
-
                                 </div>
                             </div>
                         );
@@ -304,7 +234,6 @@ export default function EventAnalyticsDetailsPage() {
                                 <p className="text-[18px] font-semibold text-[#002940]">
                                     Target Bags
                                 </p>
-
                                 <p className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
                                     {selectedEvent.totalBagsProduced} / {selectedEvent.extractionGoal}
                                 </p>
@@ -313,19 +242,18 @@ export default function EventAnalyticsDetailsPage() {
                             <div className="mt-5 w-full h-[24px] bg-white border-2 border-[#c0cad0] rounded-full overflow-hidden">
                                 <div
                                     className="bg-[#fd5448] h-full transition-all duration-500 ease-out"
-                                    style={{ width: `${Math.min(((selectedEvent.totalBagsProduced / selectedEvent.extractionGoal) * 100), 100)}%` }}
+                                    style={{ width: `${progressPct}%` }}
                                 />
                             </div>
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={goBack}
-                        className="mt-[0.35in] bg-white text-[#002940] border-2 border-[#002940] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:bg-[#fd5448] hover:border-[#fd5448] hover:text-white transition"
+                    <Link
+                        href="/rbd/analytics/events"
+                        className="mt-[0.35in] inline-block bg-white text-[#002940] border-2 border-[#002940] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold hover:bg-[#fd5448] hover:border-[#fd5448] hover:text-white transition-colors"
                     >
                         Back to Event List
-                    </button>
+                    </Link>
                     
                 </section>
             </div>

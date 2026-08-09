@@ -1,5 +1,5 @@
-import { orm } from "../../../db/drizzle";
-import { donor } from "../../../db/schemas/donor";
+import { orm } from "@/db/drizzle";
+import { donor } from "@/db/schemas/donor";
 import { eq, sql, or, and, ilike, isNull, isNotNull, lte, gt, gte, ne, sum, count, asc, desc } from "drizzle-orm";
 import { AnalyticsData } from "@/abstract/analytics/analytics_abstract";
 import { event_log } from "@/db/schemas/event_log";

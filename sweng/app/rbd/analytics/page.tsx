@@ -1,25 +1,7 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-
+import Link from "next/link";
 import Header from "@/components/HeaderRBD";
 
 export default function AnalyticsPage() {
-    
-    const router = useRouter();
-
-    const goEvents = () => {
-        router.push(`/rbd/analytics/events`);
-    };
-
-    const goDonor = () => {
-        router.push(`/rbd/analytics/donors`);
-    };
-
-    const goOverall = () => {
-        router.push(`/rbd/analytics/overall`);
-    };
-
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
@@ -41,23 +23,17 @@ export default function AnalyticsPage() {
 
                         <div className="mt-[0.15in] flex flex-col gap-[5px] text-[18px]">
                             <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Name:
-                                </span>{" "}
+                                <span className="font-semibold text-[#002940]">Name:</span>{" "}
                                 Jillian Doe
                             </p>
 
                             <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Role:
-                                </span>{" "}
+                                <span className="font-semibold text-[#002940]">Role:</span>{" "}
                                 Red Bank Director
                             </p>
 
                             <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Staff ID:
-                                </span>{" "}
+                                <span className="font-semibold text-[#002940]">Staff ID:</span>{" "}
                                 RBD-001
                             </p>
                         </div>
@@ -71,44 +47,41 @@ export default function AnalyticsPage() {
                     </h2>
 
                     <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[0.25in]">
-                        <button
-                            onClick={goEvents}
-                            className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
+                        <Link
+                            href="/rbd/analytics/events"
+                            className="block bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition group"
                         >
                             <h3 className="text-[24px] font-['Montserrat'] font-bold">
                                 View Event Analytics
                             </h3>
-
                             <p className="mt-[8px] text-[16px]">
                                 View event-specific analytics.
                             </p>
-                        </button>
+                        </Link>
 
-                        <button
-                            onClick={goDonor}
-                            className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
+                        <Link
+                            href="/rbd/analytics/donors"
+                            className="block bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition group"
                         >
                             <h3 className="text-[24px] font-['Montserrat'] font-bold">
                                 View Donor Analytics
                             </h3>
-
                             <p className="mt-[8px] text-[16px]">
                                 View donor-specific analytics.
                             </p>
-                        </button>
+                        </Link>
 
-                        <button
-                            onClick={goOverall}
-                            className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
+                        <Link
+                            href="/rbd/analytics/overall"
+                            className="block bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition group"
                         >
                             <h3 className="text-[24px] font-['Montserrat'] font-bold">
                                 View Overall Analytics
                             </h3>
-
                             <p className="mt-[8px] text-[16px]">
                                 View overall analytics with filter settings.
                             </p>
-                        </button>
+                        </Link>
                     </div>
                 </section>
             </div>

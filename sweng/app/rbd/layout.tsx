@@ -1,12 +1,11 @@
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-
 import { orm } from "@/db/drizzle";
 import { serverSupa } from "@/db/supaserver";
 import { profiles } from "@/db/schemas/profiles";
 import AccessDenied from "@/components/AccessDenied";
 
-export default async function LabStaffLayout({
+export default async function DirectorLayout({
     children,
 }: {
     children: React.ReactNode;
@@ -26,8 +25,8 @@ export default async function LabStaffLayout({
 
     const staff = staffProfiles[0];
 
-    if (!staff || staff.role !== "lab_staff") {
-        return <AccessDenied requiredRole="Lab Staff" currentRole={staff?.role} />
+    if (!staff || staff.role !== "director") {
+        return <AccessDenied requiredRole="Directors" currentRole={staff?.role} />
     }
 
     return <>{children}</>;
