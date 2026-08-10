@@ -1,269 +1,160 @@
 "use client";
 import { useState } from "react";
-import {
-    UserPlus,
-    ClipboardCheck,
-    UserX,
-    Droplets,
-    Gift,
-    ChevronRight,
-} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import Header from "@/components/HeaderSA";
 
-type StaffType = "Onsite Admin" | "Medical Professional" | "Lab Staff" | "Recovery Staff";
+type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 
-type LogAction =
-    | "Registration"
-    | "Check-In"
-    | "Deferral"
-    | "Donation Outcome"
-    | "Perk Claiming";
-
-type DonationOutcome = "Successful" | "Incomplete";
-
-type OnsiteLog = {
+type BloodEvent = {
     id: string;
-    staffType: StaffType;
-    action: LogAction;
-    staff: string;
-    donor: string;
-    eventName: string;
-    timestamp: string;
-    donationOutcome?: DonationOutcome;
+    name: string;
+    partner: string;
+    city: string;
+    province: string;
+    date: string;
+    status: EventStatus;
+    targetBags: number;
+    collectedBags: number;
+    imageLink: string;
 };
 
-const initialLogs: OnsiteLog[] = [
+const initialEvents: BloodEvent[] = [
     {
-        id: "LOG-1001",
-        staffType: "Onsite Admin",
-        action: "Registration",
-        staff: "Maria Santos",
-        donor: "John Doe",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 8:45 AM",
+        id: "EVT-2026-001",
+        name: "Blood Donation Drive",
+        partner: "Manila Doctors Hospital",
+        city: "Manila",
+        province: "Metro Manila",
+        date: "2026-07-15",
+        status: "Ongoing",
+        targetBags: 100,
+        collectedBags: 72,
+        imageLink: "/images/event.png",
     },
     {
-        id: "LOG-1002",
-        staffType: "Onsite Admin",
-        action: "Check-In",
-        staff: "Maria Santos",
-        donor: "John Doe",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 9:02 AM",
+        id: "EVT-2026-002",
+        name: "Corporate CSR Bloodletting",
+        partner: "BPO Partner Inc.",
+        city: "Taguig",
+        province: "Metro Manila",
+        date: "2026-08-10",
+        status: "Upcoming",
+        targetBags: 150,
+        collectedBags: 0,
+        imageLink: "/images/event.png",
     },
     {
-        id: "LOG-1003",
-        staffType: "Medical Professional",
-        action: "Deferral",
-        staff: "Jane Doe",
-        donor: "Paolo Reyes",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 9:25 AM",
-    },
-    {
-        id: "LOG-1004",
-        staffType: "Lab Staff",
-        action: "Donation Outcome",
-        staff: "Jason Cruz",
-        donor: "John Doe",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 10:10 AM",
-        donationOutcome: "Successful",
-    },
-    {
-        id: "LOG-1005",
-        staffType: "Recovery Staff",
-        action: "Perk Claiming",
-        staff: "Liza Fernandez",
-        donor: "John Doe",
-        eventName: "DLSU Blood Donation Drive",
-        timestamp: "15/07/2026 - 10:28 AM",
-    },
-    {
-        id: "LOG-1006",
-        staffType: "Onsite Admin",
-        action: "Registration",
-        staff: "Carlo Reyes",
-        donor: "June Doe",
-        eventName: "Quezon City Blood Drive",
-        timestamp: "16/07/2026 - 8:35 AM",
-    },
-    {
-        id: "LOG-1007",
-        staffType: "Onsite Admin",
-        action: "Check-In",
-        staff: "Carlo Reyes",
-        donor: "June Doe",
-        eventName: "Quezon City Blood Drive",
-        timestamp: "16/07/2026 - 8:50 AM",
-    },
-    {
-        id: "LOG-1008",
-        staffType: "Lab Staff",
-        action: "Donation Outcome",
-        staff: "Jason Cruz",
-        donor: "June Doe",
-        eventName: "Quezon City Blood Drive",
-        timestamp: "16/07/2026 - 10:05 AM",
-        donationOutcome: "Incomplete",
-    },
-    {
-        id: "LOG-1009",
-        staffType: "Recovery Staff",
-        action: "Perk Claiming",
-        staff: "Liza Fernandez",
-        donor: "June Doe",
-        eventName: "Quezon City Blood Drive",
-        timestamp: "16/07/2026 - 10:20 AM",
+        id: "EVT-2026-003",
+        name: "Alumni Association Drive",
+        partner: "DLSU Alumni Chapter",
+        city: "Manila",
+        province: "Metro Manila",
+        date: "2026-05-20",
+        status: "Completed",
+        targetBags: 80,
+        collectedBags: 85,
+        imageLink: "/images/event.png",
     },
 ];
 
-type StaffTypeFilter = StaffType | "All Staff Types";
-type EventFilter = string;
-type ActionFilter = LogAction | "All Actions";
+type TabFilter = "All" | EventStatus;
 
-const staffTypeOptions: StaffTypeFilter[] = [
-    "All Staff Types",
-    "Onsite Admin",
-    "Medical Professional",
-    "Lab Staff",
-    "Recovery Staff",
-];
+type SortOption =
+    | "Default"
+    | "Date: Earliest"
+    | "Date: Latest"
+    | "Target Bags: High to Low"
+    | "Target Bags: Low to High"
+    | "Name: A-Z";
 
-const actionOptions: ActionFilter[] = [
-    "All Actions",
-    "Registration",
-    "Check-In",
-    "Deferral",
-    "Donation Outcome",
-    "Perk Claiming",
-];
+export default function SAEventLogsSearchPage() {
+    const router = useRouter();
 
-export default function SAOnsiteLogsPage() {
-    const [logs] = useState<OnsiteLog[]>(initialLogs);
+    const [events] = useState<BloodEvent[]>(initialEvents);
+    const [activeTab, setActiveTab] = useState<TabFilter>("All");
+    const [search, setSearch] = useState("");
+    const [sortBy, setSortBy] = useState<SortOption>("Default");
 
-    const [staffTypeFilter, setStaffTypeFilter] =
-        useState<StaffTypeFilter>("All Staff Types");
+    const tabs: TabFilter[] = ["All", "Ongoing", "Upcoming", "Completed"];
 
-    const [eventFilter, setEventFilter] = useState<EventFilter>("All Events");
-    const [actionFilter, setActionFilter] = useState<ActionFilter>("All Actions");
-
-    const [expandedId, setExpandedId] = useState<string | null>(null);
-
-    const eventOptions = [
-        "All Events",
-        ...Array.from(new Set(logs.map((log) => log.eventName))),
+    const sortOptions: SortOption[] = [
+        "Default",
+        "Date: Earliest",
+        "Date: Latest",
+        "Target Bags: High to Low",
+        "Target Bags: Low to High",
+        "Name: A-Z",
     ];
 
-    let filteredLogs = [...logs];
+    let filteredEvents = [...events];
 
-    if (staffTypeFilter !== "All Staff Types") {
-        filteredLogs = filteredLogs.filter(
-            (log) => log.staffType === staffTypeFilter
+    if (activeTab !== "All") {
+        filteredEvents = filteredEvents.filter(
+            (event) => event.status === activeTab
         );
     }
 
-    if (eventFilter !== "All Events") {
-        filteredLogs = filteredLogs.filter(
-            (log) => log.eventName === eventFilter
+    if (search.trim() !== "") {
+        const query = search.trim().toLowerCase();
+
+        filteredEvents = filteredEvents.filter(
+            (event) =>
+                event.name.toLowerCase().includes(query) ||
+                event.partner.toLowerCase().includes(query) ||
+                event.city.toLowerCase().includes(query) ||
+                event.province.toLowerCase().includes(query) ||
+                event.id.toLowerCase().includes(query)
         );
     }
 
-    if (actionFilter !== "All Actions") {
-        filteredLogs = filteredLogs.filter((log) => log.action === actionFilter);
-    }
+    filteredEvents.sort((a, b) => {
+        if (sortBy === "Date: Earliest") {
+            return a.date.localeCompare(b.date);
+        } else if (sortBy === "Date: Latest") {
+            return b.date.localeCompare(a.date);
+        } else if (sortBy === "Target Bags: High to Low") {
+            return b.targetBags - a.targetBags;
+        } else if (sortBy === "Target Bags: Low to High") {
+            return a.targetBags - b.targetBags;
+        } else if (sortBy === "Name: A-Z") {
+            return a.name.localeCompare(b.name);
+        }
 
-    const getActionIcon = (action: LogAction) => {
-        if (action === "Registration") {
-            return UserPlus;
-        } else if (action === "Check-In") {
-            return ClipboardCheck;
-        } else if (action === "Deferral") {
-            return UserX;
-        } else if (action === "Donation Outcome") {
-            return Droplets;
+        return 0;
+    });
+
+    const getTabClass = (tab: TabFilter) => {
+        let className =
+            "px-[20px] py-[10px] rounded-full border-2 font-['Montserrat'] text-[16px] cursor-pointer transition ";
+
+        if (activeTab === tab) {
+            className += "bg-[#002940] border-[#002940] text-white font-bold";
         } else {
-            return Gift;
+            className +=
+                "bg-white border-[#002940] text-[#002940] hover:bg-[#002940] hover:text-white";
         }
+
+        return className;
     };
 
-    const getIconColors = (log: OnsiteLog) => {
-        if (log.action === "Deferral") {
-            return "bg-[#f5e4e4] text-[#a32626]";
+    const getStatusPill = (status: EventStatus) => {
+        let className =
+            "px-[12px] py-[6px] rounded-full text-[14px] font-semibold ";
+
+        if (status === "Ongoing") {
+            className += "bg-[#e4f5ea] text-[#1a7a3f]";
+        } else if (status === "Upcoming") {
+            className += "bg-[#e4eff5] text-[#002940]";
+        } else {
+            className += "bg-[#f5e4e4] text-[#a32626]";
         }
 
-        if (
-            log.action === "Donation Outcome" &&
-            log.donationOutcome === "Incomplete"
-        ) {
-            return "bg-[#f7edda] text-[#9a6200]";
-        }
-
-        if (log.action === "Donation Outcome") {
-            return "bg-[#e4edf5] text-[#1a4d7a]";
-        }
-
-        return "bg-[#e4f5ea] text-[#1a7a3f]";
+        return className;
     };
 
-    const getSentence = (log: OnsiteLog) => {
-        const actor = <span className="font-bold">{log.staff}</span>;
-        const donor = <span className="font-bold">{log.donor}</span>;
-        const eventName = <span className="font-bold">{log.eventName}</span>;
-
-        if (log.action === "Registration") {
-            return (
-                <>
-                    {actor} registered donor {donor} at {eventName}
-                </>
-            );
-        }
-
-        if (log.action === "Check-In") {
-            return (
-                <>
-                    {actor} scanned and checked in donor {donor} at {eventName}
-                </>
-            );
-        }
-
-        if (log.action === "Deferral") {
-            return (
-                <>
-                    {actor} deferred donor {donor} after medical screening at{" "}
-                    {eventName}
-                </>
-            );
-        }
-
-        if (log.action === "Donation Outcome") {
-            return (
-                <>
-                    {actor} recorded donor {donor}&apos;s donation as{" "}
-                    <span className="font-bold">
-                        {log.donationOutcome || "Recorded"}
-                    </span>{" "}
-                    at {eventName}
-                </>
-            );
-        }
-
-        return (
-            <>
-                {actor} confirmed perk claim for donor {donor} at {eventName}
-            </>
-        );
-    };
-
-    const toggleExpanded = (id: string) => {
-        setExpandedId((prev) => {
-            if (prev === id) {
-                return null;
-            }
-
-            return id;
-        });
+    const viewEventLogs = (eventId: string) => {
+        router.push(`/sa/management/logs/events/${eventId}`);
     };
 
     return (
@@ -282,76 +173,64 @@ export default function SAOnsiteLogsPage() {
                 </section>
 
                 <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                    <div className="flex flex-row items-start justify-between flex-wrap gap-[0.25in]">
-                        <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
-                            Audit Log
-                        </h2>
+                    <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
+                        <div>
+                            <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
+                                Select Event
+                            </h2>
+                        </div>
+
+                        <div className="flex flex-row items-center flex-wrap gap-[10px]">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab}
+                                    type="button"
+                                    onClick={() => setActiveTab(tab)}
+                                    className={getTabClass(tab)}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Filters */}
                     <div className="mt-[0.25in] border-2 border-[#c0cad0] rounded-[14px] p-[0.2in] bg-[#f9fdff]">
                         <h3 className="text-[20px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
                             Filters
                         </h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[0.2in]">
-                            <div>
+                        <div className="flex flex-row items-center justify-between flex-wrap gap-[0.2in]">
+                            <div className="flex-1 min-w-[3in]">
                                 <label className="block text-[14px] font-semibold text-[#002940] mb-[6px]">
-                                    Filter by Event
+                                    Search by
                                 </label>
 
-                                <select
-                                    value={eventFilter}
+                                <input
+                                    type="text"
+                                    value={search}
                                     onChange={(event) =>
-                                        setEventFilter(event.target.value)
+                                        setSearch(event.target.value)
                                     }
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[14px] py-[10px] text-[16px] text-[#002940] bg-white cursor-pointer outline-none focus:border-[#002940]"
-                                >
-                                    {eventOptions.map((option) => (
-                                        <option key={option} value={option}>
-                                            {option}
-                                        </option>
-                                    ))}
-                                </select>
+                                    placeholder="Input event name, partner, city, province, or ID"
+                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[16px] py-[10px] text-[16px] outline-none bg-white focus:border-[#002940]"
+                                />
                             </div>
 
-                            <div>
+                            <div className="w-full sm:w-[3in]">
                                 <label className="block text-[14px] font-semibold text-[#002940] mb-[6px]">
-                                    Filter by Staff Type
+                                    Sort By
                                 </label>
 
                                 <select
-                                    value={staffTypeFilter}
+                                    value={sortBy}
                                     onChange={(event) =>
-                                        setStaffTypeFilter(
-                                            event.target.value as StaffTypeFilter
+                                        setSortBy(
+                                            event.target.value as SortOption
                                         )
                                     }
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[14px] py-[10px] text-[16px] text-[#002940] bg-white cursor-pointer outline-none focus:border-[#002940]"
+                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[16px] py-[10px] text-[16px] outline-none bg-white cursor-pointer focus:border-[#002940]"
                                 >
-                                    {staffTypeOptions.map((option) => (
-                                        <option key={option} value={option}>
-                                            {option}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label className="block text-[14px] font-semibold text-[#002940] mb-[6px]">
-                                    Filter by Action
-                                </label>
-
-                                <select
-                                    value={actionFilter}
-                                    onChange={(event) =>
-                                        setActionFilter(
-                                            event.target.value as ActionFilter
-                                        )
-                                    }
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[14px] py-[10px] text-[16px] text-[#002940] bg-white cursor-pointer outline-none focus:border-[#002940]"
-                                >
-                                    {actionOptions.map((option) => (
+                                    {sortOptions.map((option) => (
                                         <option key={option} value={option}>
                                             {option}
                                         </option>
@@ -362,115 +241,114 @@ export default function SAOnsiteLogsPage() {
                     </div>
 
                     <div className="mt-[0.25in] text-[16px]">
-                        <p>
-                            Showing {filteredLogs.length} result/s
-                        </p>
+                        <p>Showing {filteredEvents.length} result/s</p>
                     </div>
 
-                    <div className="mt-[0.3in] flex flex-col">
-                        {filteredLogs.length === 0 ? (
+                    <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
+                        {filteredEvents.length === 0 ? (
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] text-center">
                                 <p className="text-[18px] font-semibold text-[#002940]">
-                                    No logs found
+                                    No events found
                                 </p>
 
                                 <p className="mt-1 text-[16px] text-[#5c6b73]">
-                                    Try a different event, staff type, user, or action
-                                    filter.
+                                    Try a different search term, sort option, or
+                                    tab filter.
                                 </p>
                             </div>
                         ) : (
-                            filteredLogs.map((log) => {
-                                const Icon = getActionIcon(log.action);
-                                const isExpanded = expandedId === log.id;
+                            filteredEvents.map((event) => (
+                                <div
+                                    key={event.id}
+                                    className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
+                                >
+                                    <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between flex-wrap gap-[0.15in]">
+                                        <div className="flex flex-row items-center gap-[0.15in] flex-wrap">
+                                            <h2 className="text-[24px] font-['Montserrat'] font-bold">
+                                                {event.name}
+                                            </h2>
 
-                                return (
-                                    <div
-                                        key={log.id}
-                                        className="border-b border-[#e5eaee] last:border-b-0"
-                                    >
-                                        <button
-                                            onClick={() => toggleExpanded(log.id)}
-                                            className="w-full flex flex-row items-center gap-[16px] py-[16px] text-left cursor-pointer"
-                                        >
                                             <span
-                                                className={`flex items-center justify-center w-[40px] h-[40px] rounded-full shrink-0 ${getIconColors(
-                                                    log
-                                                )}`}
+                                                className={getStatusPill(
+                                                    event.status
+                                                )}
                                             >
-                                                <Icon size={20} />
+                                                {event.status}
                                             </span>
+                                        </div>
 
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-[16px] text-[#002940] truncate">
-                                                    {getSentence(log)}
-                                                </p>
-
-                                                <p className="mt-[2px] text-[13px] text-[#5c6b73]">
-                                                    {log.timestamp}
-                                                </p>
-                                            </div>
-
-                                            <ChevronRight
-                                                size={20}
-                                                className={`text-[#5c6b73] shrink-0 transition-transform ${
-                                                    isExpanded ? "rotate-90" : ""
-                                                }`}
-                                            />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                viewEventLogs(event.id)
+                                            }
+                                            className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:bg-[#f0f0f0]"
+                                        >
+                                            View Logs
                                         </button>
-
-                                        {isExpanded && (
-                                            <div className="pb-[16px] pl-[56px] pr-[10px]">
-                                                <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[12px] p-[16px] grid grid-cols-1 md:grid-cols-2 gap-x-[0.4in] gap-y-[8px] text-[15px] text-[#002940]">
-                                                    <p>
-                                                        <span className="font-semibold">
-                                                            Log ID:
-                                                        </span>{" "}
-                                                        {log.id}
-                                                    </p>
-
-                                                    <p>
-                                                        <span className="font-semibold">
-                                                            Action:
-                                                        </span>{" "}
-                                                        {log.action}
-                                                    </p>
-
-                                                    <p>
-                                                        <span className="font-semibold">
-                                                            User:
-                                                        </span>{" "}
-                                                        {log.staff}
-                                                    </p>
-
-                                                    <p>
-                                                        <span className="font-semibold">
-                                                            Donor:
-                                                        </span>{" "}
-                                                        {log.donor}
-                                                    </p>
-
-                                                    <p>
-                                                        <span className="font-semibold">
-                                                            Event:
-                                                        </span>{" "}
-                                                        {log.eventName}
-                                                    </p>
-
-                                                    {log.donationOutcome && (
-                                                        <p>
-                                                            <span className="font-semibold">
-                                                                Donation Outcome:
-                                                            </span>{" "}
-                                                            {log.donationOutcome}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
                                     </div>
-                                );
-                            })
+
+                                    <div className="p-[0.35in]">
+                                        <div className="grid grid-cols-1 xl:grid-cols-[1fr_2.6in] gap-[0.35in] items-start">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Event ID:
+                                                    </span>{" "}
+                                                    {event.id}
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Corporate Partner:
+                                                    </span>{" "}
+                                                    {event.partner}
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Location:
+                                                    </span>{" "}
+                                                    {event.city},{" "}
+                                                    {event.province}
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Scheduled Date:
+                                                    </span>{" "}
+                                                    {event.date}
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Target Collection:
+                                                    </span>{" "}
+                                                    {event.targetBags} Bags
+                                                </p>
+
+                                                <p>
+                                                    <span className="font-semibold text-[#002940]">
+                                                        Current Collected:
+                                                    </span>{" "}
+                                                    {event.collectedBags} Bags
+                                                </p>
+                                            </div>
+
+                                            <div className="w-full h-[1.6in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] overflow-hidden flex items-center justify-center">
+                                                <img
+                                                    src={
+                                                        event.imageLink ||
+                                                        "/images/event-placeholder.png"
+                                                    }
+                                                    alt={event.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
                         )}
                     </div>
 
@@ -482,9 +360,7 @@ export default function SAOnsiteLogsPage() {
                             Previous
                         </button>
 
-                        <p className="text-[18px] text-[#002940]">
-                            Page 1
-                        </p>
+                        <p className="text-[18px] text-[#002940]">Page 1</p>
 
                         <button
                             type="button"
