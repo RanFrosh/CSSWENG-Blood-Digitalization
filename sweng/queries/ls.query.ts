@@ -315,6 +315,10 @@ export class ImpLabStaffModel implements LabStaffData {
             return { authorized: false, message: "Donor not found in the active event queue." };
         }
 
+        if (queueData.staff_id !== staffId) {
+            return { authorized: false, message: "Not assigned to this donor." };
+        }
+
         return { authorized: true };
     }
 
