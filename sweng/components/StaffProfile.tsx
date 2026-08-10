@@ -2,48 +2,64 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { updateProfileAction } from "@/actions/profile_action";
 
 export type UserProfile = {
     id: string;
     name: string;
     email: string;
     role: string;
-    profileImage: string;
+    profile_image_url: string;
 };
 
 interface SharedProfileProps {
     initialProfile: UserProfile;
-    onSave?: (updatedData: { name: string; email: string }) => Promise<void>; 
 }
 
-export default function SharedProfile({ initialProfile, onSave }: SharedProfileProps) {
+export default function SharedProfile({ initialProfile }: SharedProfileProps) {
     const router = useRouter();
 
     // UI State
     const [isEditOpen, setEditModal] = useState(false);
-    
-    // Form State (to handle user edits)
+    const [errorMsg, setErrorMsg] = useState("");
+
     const [editForm, setEditForm] = useState({
         name: initialProfile.name,
         email: initialProfile.email,
+        profile_image_url: initialProfile.profile_image_url,
     });
     const [isSaving, setIsSaving] = useState(false);
 
     const openEditModal = () => setEditModal(true);
+    
     const closeEditModal = () => {
-        setEditForm({ name: initialProfile.name, email: initialProfile.email });
+        // Reset form on cancel
+        setEditForm({ 
+            name: initialProfile.name, 
+            email: initialProfile.email,
+            profile_image_url: initialProfile.profile_image_url
+        });
+        setErrorMsg("");
         setEditModal(false);
     };
 
     const handleSave = async () => {
+        setErrorMsg("");
         setIsSaving(true);
-        if (onSave) {
-            await onSave(editForm);
-        } else {
-            alert("Account details updated successfully! (Frontend only)");
-        }
+        
+        const result = await updateProfileAction({
+            name: editForm.name,
+            email: editForm.email,
+            profile_image_url: editForm.profile_image_url || null,
+        });
+
         setIsSaving(false);
-        setEditModal(false);
+        
+        if (result.success) {
+            setEditModal(false);
+        } else {
+            setErrorMsg(result.message);
+        }
     };
 
     const goBack = () => router.back();
@@ -58,13 +74,15 @@ export default function SharedProfile({ initialProfile, onSave }: SharedProfileP
 
             <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
                 <div className="mt-[0.35in] grid grid-cols-1 lg:grid-cols-[2.8in_1fr] gap-[0.35in]">
+                    
                     {/* Profile Image */}
                     <aside className="flex flex-col gap-[0.15in]">
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] flex flex-col items-center">
                             <img
-                                src={initialProfile.profileImage}
+                                src={initialProfile.profile_image_url}
                                 alt="Staff profile"
-                                className="w-full h-full object-cover rounded-xl shadow-sm"
+                                className="w-[2in] h-[2in] object-cover rounded-full shadow-sm border-2 border-[#002940]"
+                                onError={(e) => { (e.target as HTMLImageElement).src = "/images/user.png"; }}
                             />
                         </div>
                     </aside>
@@ -111,7 +129,7 @@ export default function SharedProfile({ initialProfile, onSave }: SharedProfileP
                                     <label className="text-[18px] font-semibold text-[#002940]">Role</label>
                                     <input
                                         type="text"
-                                        value={initialProfile.role}
+                                        value={initialProfile.role.replace('_', ' ').toUpperCase()}
                                         readOnly
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none bg-[#f9fdff] text-[#5c6b73]"
                                     />
@@ -139,7 +157,6 @@ export default function SharedProfile({ initialProfile, onSave }: SharedProfileP
                 </div>
             </section>
 
-            {/* Edit Popup */}
             {isEditOpen && (
                 <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-[0.35in] z-50">
                     <div className="bg-white rounded-[16px] p-[0.35in] max-w-[5in] w-full shadow-lg">
@@ -147,20 +164,41 @@ export default function SharedProfile({ initialProfile, onSave }: SharedProfileP
                             Edit Account
                         </h2>
 
+                        {errorMsg && (
+                            <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md text-sm border border-red-300">
+                                {errorMsg}
+                            </div>
+                        )}
+
                         <div className="mt-[0.25in] flex flex-col gap-5">
+                            
+                            {/* URL Image Input Section */}
                             <div>
                                 <label className="block text-[18px] font-semibold text-[#002940] mb-1">
-                                    Profile Picture
+                                    Profile Picture URL
                                 </label>
-                                <div className="flex flex-col items-center bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.25in]">
-                                    <img
-                                        src={initialProfile.profileImage}
-                                        className="w-[2in] h-[2in] object-cover rounded-full shadow-sm"
-                                        alt="Profile preview"
+                                <div className="flex flex-col gap-3">
+                                    {editForm.profile_image_url ? (
+                                        <img
+                                            src={editForm.profile_image_url}
+                                            className="w-[1.5in] h-[1.5in] object-cover rounded-full shadow-sm mx-auto border-2 border-[#c0cad0]"
+                                            alt="Profile preview"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = "/images/user.png"; 
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="w-[1.5in] h-[1.5in] rounded-full shadow-sm mx-auto border-2 border-[#c0cad0] bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
+                                            No Image
+                                        </div>
+                                    )}
+                                    <input
+                                        type="text"
+                                        placeholder="https://example.com/photo.jpg"
+                                        value={editForm.profile_image_url}
+                                        onChange={(e) => setEditForm({ ...editForm, profile_image_url: e.target.value })}
+                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                     />
-                                    <label className="mt-4 w-full bg-[#002940] text-white px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer text-center hover:bg-[#013a5a] transition-colors">
-                                        Upload Photo
-                                    </label>
                                 </div>
                             </div>
 
@@ -202,7 +240,7 @@ export default function SharedProfile({ initialProfile, onSave }: SharedProfileP
                                 type="button"
                                 onClick={handleSave}
                                 disabled={isSaving}
-                                className="px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold bg-[#002940] text-white cursor-pointer hover:bg-[#013a5a] transition-colors disabled:opacity-50 flex items-center justify-center"
+                                className="px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold bg-[#002940] text-white cursor-pointer hover:bg-[#013a5a] transition-colors disabled:opacity-50 flex items-center justify-center min-w-[150px]"
                             >
                                 {isSaving ? "Saving..." : "Save Changes"}
                             </button>

@@ -31,7 +31,7 @@ export default async function LabStaffProfilePage() {
         name: `${dbProfile?.name || "Unknown User"}`,
         email: dbProfile?.email || "No email provided",
         role: dbProfile?.role || "Lab Staff",
-        profileImage: dbProfile?.profile_image_url || "/images/user.png",
+        profile_image_url: dbProfile?.profile_image_url || "/images/user.png",
     };
 
     return (

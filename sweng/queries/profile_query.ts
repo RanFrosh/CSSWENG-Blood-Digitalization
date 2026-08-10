@@ -36,4 +36,28 @@ export class ImpProfileGetter implements ProfileSessionProvider {
             return { success: false, message: err.message }
         }
     }
+
+    async updateProfile(userId: string, data: { name: string; email: string; profile_image_url: string | null }) {
+        try {
+            await orm
+                .update(profiles)
+                .set({
+                    name: data.name,
+                    email: data.email,
+                    profile_image_url: data.profile_image_url,
+                })
+                .where(eq(profiles.id, userId));
+
+            return { 
+                success: true, 
+                message: "Profile successfully updated." 
+            };
+        } catch (err: any) {
+            console.error("Database error updating profile:", err);
+            return { 
+                success: false, 
+                message: "Database failed to update profile." 
+            };
+        }
+    }
 }
