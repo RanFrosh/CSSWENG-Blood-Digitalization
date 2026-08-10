@@ -232,4 +232,24 @@ export class ImpLabStaffManager implements LabStaffController {
         return await this.labStaffModel.submitDonationRecord(securePayload);
     }
 
+    async invokeGetEventDonors(eventId: string) {
+
+        const authRes = await this.profileReader.getCurrentUser();
+        
+        if (!authRes.success || !authRes.data) {
+            return { success: false, message: "Unauthorized. Please log in." };
+        }
+
+        if (!eventId) {
+            return { success: false, message: "Event ID is required to fetch donors." };
+        }
+
+        try {
+            return await this.labStaffModel.getEventDonors(eventId);
+        } catch (error: any) {
+            console.error("Controller Error (invokeGetEventDonors):", error);
+            return { success: false, message: error.message || "Failed to fetch event donors." };
+        }
+    }
+
 }

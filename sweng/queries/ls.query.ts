@@ -378,4 +378,41 @@ export class ImpLabStaffModel implements LabStaffData {
             return { success: false, message: "Failed to save donation record." };
         }
     }
+
+    async getEventDonors(eventId: string) {
+        try {
+            const res = await orm
+                .select({
+                    id: donor.id,
+                    name: profiles.name,
+                    sex: donor.sex,
+                    bloodType: donor.blood, 
+                    location: city.name,
+                    image: profiles.profile_image_url
+                })
+                .from(donor_to_event)
+                .innerJoin(donor, eq(donor_to_event.donor_id, donor.id))
+                .innerJoin(profiles, eq(donor.profile_id, profiles.id))
+                .leftJoin(city, eq(donor.city_id, city.id))
+                .where(eq(donor_to_event.event_id, BigInt(eventId)));
+
+            const formattedDonors = res.map(d => ({
+                id: String(d.id),
+                name: d.name || "Unknown Donor",
+                sex: d.sex || "N/A",
+                bloodType: d.bloodType || "N/A",
+                location: d.location || "N/A",
+                image: d.image || "/images/user.png"
+            }));
+
+            return { 
+                success: true, 
+                message: "Donors retrieved successfully.", 
+                data: formattedDonors 
+            };
+        } catch (err: any) {
+            console.error("Database error fetching event donors:", err);
+            return { success: false, message: err.message };
+        }
+    }
 }

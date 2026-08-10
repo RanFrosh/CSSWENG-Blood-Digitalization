@@ -15,16 +15,16 @@ const supabase = createClient(
 );
 
 async function clearUsers() {
-    console.log("Clearing Users\n");
+    console.log("Clearing Users and Donors\n");
 
     try {
-        console.log("Clearing Drizzle Profiles");
+        console.log("Clearing Drizzle Profiles and Donors...");
         
-        await orm.execute(sql`TRUNCATE TABLE profiles CASCADE;`);
+        await orm.execute(sql`TRUNCATE TABLE donor, profiles CASCADE;`);
         
-        console.log("Drizzle Profiles wiped clean.");
+        console.log("Drizzle Profiles and Donors wiped clean.");
     } catch (error: any) {
-        console.error("Failed to clear profiles:", error.message);
+        console.error("Failed to clear database tables:", error.message);
         process.exit(1);
     }
 
@@ -59,7 +59,7 @@ async function clearUsers() {
         process.exit(1);
     }
 
-    console.log("\nUsers Cleared");
+    console.log("\nUsers and Donors Cleared");
     process.exit(0);
 }
 

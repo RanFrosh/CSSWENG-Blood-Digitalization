@@ -147,3 +147,15 @@ export async function submitDonationRecordAction(rawPayload: any) {
         return { success: false, message: "Failed to process submission." };
     }
 }
+
+export async function getEventDonorsAction(eventId: string) {
+    try {
+
+        const controller = await getLabController();
+        
+        return await controller.invokeGetEventDonors(eventId);
+    } catch (err: any) {
+        console.error("Action Error (getEventDonorsAction):", err);
+        return { success: false, message: "Server error occurred while fetching donors." };
+    }
+}

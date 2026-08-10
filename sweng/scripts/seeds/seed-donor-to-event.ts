@@ -5,13 +5,15 @@ import { donor_to_event } from "@/db/schemas/donor_to_event";
 import { eq } from "drizzle-orm";
 
 async function seedDonorToEvent() {
-  console.log("📋 Seeding Donor-to-Event (Queue & History)...\n");
+  console.log("Seeding Donor-to-Event...\n");
 
   try {
-    // 1. Fetch all our 15 donors and order them so we can consistently slice them
+    // 1. Fetch our 10 newly minted donors and order them
     const allDonors = await orm.select({ id: donor.id }).from(donor).orderBy(donor.id);
-    if (allDonors.length < 15) {
-      throw new Error("❌ Not enough donors found! Please run seed:donors first.");
+    
+    // Updated check: We only have 10 donors in the new roster
+    if (allDonors.length < 10) {
+      throw new Error(`❌ Found only ${allDonors.length} donors. Need at least 10! Please run master seed first.`);
     }
 
     // 2. Fetch our 3 specific target events
@@ -25,22 +27,18 @@ async function seedDonorToEvent() {
 
     const recordsToInsert = [];
 
-    // --- PAST EVENT 1: Baguio (Jan 20, 2026) ---
-    // Donors 0 to 9 attended.
-    for (let i = 0; i < 10; i++) {
-      const isSuccess = i < 9; // 9 succeeded, 1 rejected
+    for (let i = 0; i < 5; i++) {
+      const isSuccess = i < 4; 
       recordsToInsert.push({
         donor_id: allDonors[i].id,
         event_id: baguioEvent[0].id,
         is_success: isSuccess,
         blood_amount: isSuccess ? 450 : null, // 450ml is standard bag size
-        perk_claimed: isSuccess, // Usually only successful donors get the good perks
+        perk_claimed: isSuccess, 
       });
     }
 
-    // --- PAST EVENT 2: Pasig (June 15, 2026) ---
-    // Donors 10 to 14 attended.
-    for (let i = 10; i < 15; i++) {
+    for (let i = 5; i < 10; i++) {
       recordsToInsert.push({
         donor_id: allDonors[i].id,
         event_id: pasigEvent[0].id,
@@ -50,8 +48,6 @@ async function seedDonorToEvent() {
       });
     }
 
-    // --- ACTIVE QUEUE: Manila (Aug 3, 2026) ---
-    // Donors 0 to 4 (who donated way back in Jan and are eligible) are in the waiting room today!
     for (let i = 0; i < 5; i++) {
       recordsToInsert.push({
         donor_id: allDonors[i].id,
@@ -62,12 +58,11 @@ async function seedDonorToEvent() {
       });
     }
 
-    // 3. Insert everything
-    for (const record of recordsToInsert) {
-      await orm.insert(donor_to_event).values(record);
+    if (recordsToInsert.length > 0) {
+        await orm.insert(donor_to_event).values(recordsToInsert);
     }
 
-    console.log(`✅ Seeded 10 past records for Baguio (9 successful bags to generate)`);
+    console.log(`✅ Seeded 5 past records for Baguio (4 successful bags to generate)`);
     console.log(`✅ Seeded 5 past records for Pasig (5 successful bags to generate)`);
     console.log(`✅ Seeded 5 active queue records for Manila (0 bags to generate yet)`);
     console.log("\n✅ Donor-to-Event seeding complete.");

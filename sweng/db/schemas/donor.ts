@@ -14,11 +14,14 @@ import { city } from "./city";
 import { biological_sex } from "../enums/biological_sex";
 import { blood_type } from "../enums/blood_type";
 import { assessment_status } from "../enums/assessment_status";
+import { profiles } from "./profiles";
 
 export const donor = pgTable("donor", {
   
   // Primary key
   id: bigserial("id", { mode: "bigint" }).primaryKey(),
+
+  profile_id: uuid("profile_id").references(() => profiles.id, { onDelete: 'cascade' }),
 
   // Personal information
   first_name: text("first_name").notNull(),

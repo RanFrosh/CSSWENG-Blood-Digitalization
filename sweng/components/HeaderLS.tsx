@@ -27,13 +27,13 @@ export default function HeaderLS() {
         if (eventId && donorId) router.push(`/ls/events/${eventId}/record/${donorId}`);
     };
 
-    const goLogout = () => {
-        router.push("/landing");
+    const goSearch = () => {
+        if (eventId) {
+            router.push(`/ls/events/${eventId}/search`);
+        }
     };
 
-    const navLinks = [];
-
-    navLinks.push(
+    const navLinks = [
         {
             name: "Home",
             path: "/ls/events",
@@ -44,13 +44,19 @@ export default function HeaderLS() {
             path: "/ls/profile",
             onClick: goMyProfile,
         },
-    );
+    ];
 
     if (eventId) {
         navLinks.push({
             name: "Event Home",
             path: `/ls/events/${eventId}`,
             onClick: goEventHome,
+        });
+
+        navLinks.push({
+            name: "Record Search",
+            path: `/ls/events/${eventId}/search`,
+            onClick: goSearch,
         });
 
         if (donorId) {
