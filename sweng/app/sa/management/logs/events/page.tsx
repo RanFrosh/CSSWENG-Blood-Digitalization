@@ -290,7 +290,7 @@ export default function SAEventLogsSearchPage() {
                                             type="button"
                                             onClick={() =>
                                                 viewEventLogs(
-                                                    formatEventId(event)
+                                                    event.id.toString()
                                                 )
                                             }
                                             className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:bg-[#f0f0f0]"

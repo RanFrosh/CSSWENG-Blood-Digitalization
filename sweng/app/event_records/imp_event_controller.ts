@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/types/api_res_type";
-import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
+import { CreateCorrections, CreateEventRecords, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 import { EventController, EventData } from "@/abstract/events/event_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
@@ -110,5 +110,23 @@ export class ImpEventManager implements EventController {
         const res = await helpGateKeep(this.profileReader, 'view_event');
         if (!res.success || !res.data) return { success: false, message: res.message };
         return await this.eventModel.isStaffOnOngoingEvent(staff_id);        
+    }
+
+    async invokeLogEvent(data: Omit<CreateEventRecords, "staff_id">): Promise<ApiResponse> {
+        const res = await helpGateKeep(this.profileReader, 'log_event');
+        if (!res.success || !res.data)
+            return { success: false, message: res.message }
+
+        const appendedData: CreateEventRecords = {
+            ...data,
+            staff_id: res.data.id
+        }
+        return await this.eventModel.logEvent(appendedData);        
+    }
+
+    async invokeQueryEventRecords(event_log_id: bigint): Promise<ApiResponse<ViewEventRecords[]>> {
+        const res = await helpGateKeep(this.profileReader, 'view_log');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.eventModel.queryEventRecords(event_log_id);        
     }
 }
