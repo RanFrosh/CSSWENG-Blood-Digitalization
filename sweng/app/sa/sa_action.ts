@@ -3,8 +3,8 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { ReadProfile } from "@/types/profile_type";
 import { serverSupa } from "@/db/supaserver";
-import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
-import { helpGateKeep } from "@/app/global/helper_bouncer/bouncer";
+import { ImpProfileGetter } from "@/queries/profile_query";
+import { helpGateKeep } from "@/utils/access/bouncer";
 
 export async function fetchSACurrentUser(): Promise<ApiResponse<ReadProfile>> {
     const database = await serverSupa();
