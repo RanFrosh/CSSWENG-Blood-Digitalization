@@ -232,8 +232,8 @@ export class ImpLabStaffManager implements LabStaffController {
         return await this.labStaffModel.submitDonationRecord(securePayload);
     }
 
-    async invokeGetEventDonors(eventId: string) {
-
+    async invokeGetEventDonors(eventId: string, filters?: any) { 
+        
         const authRes = await this.profileReader.getCurrentUser();
         
         if (!authRes.success || !authRes.data) {
@@ -245,7 +245,7 @@ export class ImpLabStaffManager implements LabStaffController {
         }
 
         try {
-            return await this.labStaffModel.getEventDonors(eventId);
+            return await this.labStaffModel.getEventDonors(eventId, filters);
         } catch (error: any) {
             console.error("Controller Error (invokeGetEventDonors):", error);
             return { success: false, message: error.message || "Failed to fetch event donors." };

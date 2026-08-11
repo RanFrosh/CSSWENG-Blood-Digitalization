@@ -29,9 +29,6 @@ export default function LSEventsClient({
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [message, setMessage] = useState("");
-
     // Local UI states only
     const [searchInput, setSearchInput] = useState(currentSearch);
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
@@ -58,23 +55,21 @@ export default function LSEventsClient({
     };
 
     const openEvent = (event: ViewEvents) => {
-        if (event.status === "Ongoing") {
-            router.push(`/ls/events/${event.id}`);
-        }
+
+        router.push(`/ls/events/${event.id}`);
     };
 
     const createActionButton = (event: ViewEvents) => {
-        if (event.status === "Ongoing") {
-            return (
-                <button
-                    onClick={() => openEvent(event)}
-                    className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:underline"
-                >
-                    Open Event
-                </button>
-            );
-        }
-        return null;
+
+        return (
+            <button
+                onClick={() => openEvent(event)}
+                className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#002940] cursor-pointer hover:underline"
+            >
+                Open Event
+            </button>
+        );
+  
     };
 
     const handlePageChange = (newPage: number) => {

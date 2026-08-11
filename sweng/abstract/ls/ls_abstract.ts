@@ -29,7 +29,7 @@ export interface LabStaffData {
     getSingleDonor(filter: ViewDonorPartial): Promise<any>;
     validateExtractionAccess(staffId: string, eventId: bigint, donorId: bigint): Promise<any>;
     submitDonationRecord(payload: SubmitDonationPayload): Promise<any>;
-    getEventDonors(eventId: string): Promise<any>;
+    getEventDonors(eventId: string, filters?: any): Promise<any>;
     joinEvent(eventId: string, staffId: string): Promise<any>;
 }
 
@@ -48,6 +48,6 @@ export interface LabStaffController {
     invokeGetSingleDonor(filter: ViewDonorPartial): Promise<ApiResponse<any>>;
     invokeValidateExtractionAccess(staffId: string, eventId: bigint, donorId: bigint): Promise<ApiResponse<any>>;
     invokeSubmitDonationRecord(payload: SubmitDonationPayload): Promise<ApiResponse<any>>;
-    invokeGetEventDonors(eventId: string): Promise<ApiResponse<any>>;
+    invokeGetEventDonors(eventId: string, filters?: any): Promise<ApiResponse<any>>;
     invokeJoinEvent(eventId: string): Promise<ApiResponse<any>>;
 }

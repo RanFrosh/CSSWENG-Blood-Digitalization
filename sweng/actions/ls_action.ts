@@ -148,12 +148,11 @@ export async function submitDonationRecordAction(rawPayload: any) {
     }
 }
 
-export async function getEventDonorsAction(eventId: string) {
+export async function getEventDonorsAction(eventId: string, filters?: any) {
     try {
-
         const controller = await getLabController();
         
-        return await controller.invokeGetEventDonors(eventId);
+        return await controller.invokeGetEventDonors(eventId, filters);
     } catch (err: any) {
         console.error("Action Error (getEventDonorsAction):", err);
         return { success: false, message: "Server error occurred while fetching donors." };

@@ -1,5 +1,5 @@
 import { orm } from "@/db/drizzle";
-import { eq, SQL, and, isNull, ne, or, ilike, asc, desc } from "drizzle-orm";
+import { eq, sql, SQL, and, isNull, ne, or, ilike, asc, desc } from "drizzle-orm";
 import { LabStaffData } from "@/abstract/ls/ls_abstract";
 import { donor } from "@/db/schemas/donor";
 import { event_log } from "@/db/schemas/event_log";
@@ -11,6 +11,14 @@ import { assigned_staff } from "@/db/schemas/assigned_staff";
 import { city } from "@/db/schemas/city";
 import { ViewDonorPartial } from "@/types/donor_type";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
+
+export type DonorFilters = {
+    search?: string;
+    bloodFilter?: string;
+    sexFilter?: string;
+    eligibilityFilter?: string;
+    sortBy?: string;
+};
 
 export class ImpLabStaffModel implements LabStaffData {
 
@@ -30,7 +38,6 @@ export class ImpLabStaffModel implements LabStaffData {
         
         const conditions: SQL[] = [
             eq(assigned_staff.staff_id, staffId),
-            eq(event_log.status, "Ongoing") 
         ];
     
         // Partner Filter
@@ -379,8 +386,66 @@ export class ImpLabStaffModel implements LabStaffData {
         }
     }
 
-    async getEventDonors(eventId: string) {
+    async getEventDonors(eventId: string, filters?: DonorFilters) {
         try {
+            const conditions: (SQL | undefined)[] = [
+                eq(donor_to_event.event_id, BigInt(eventId))
+            ];
+
+            if (filters) {
+                if (filters.search) {
+                    const searchString = `%${filters.search}%`;
+                    conditions.push(
+                        or(
+                            ilike(profiles.name, searchString),
+                            sql`${donor.id}::text ILIKE ${searchString}` 
+                        )
+                    );
+                }
+
+                if (filters.bloodFilter && filters.bloodFilter !== "All") {
+                    conditions.push(eq(donor.blood, filters.bloodFilter as any));
+                }
+
+                if (filters.sexFilter && filters.sexFilter !== "All") {
+                    conditions.push(eq(donor.sex, filters.sexFilter as any));
+                }
+
+                if (filters.eligibilityFilter && filters.eligibilityFilter !== "All") {
+
+                    const today = new Date().toISOString().split('T')[0]; 
+                    
+                    if (filters.eligibilityFilter === "Eligible") {
+                        conditions.push(
+                            or(
+                                sql`${donor.next_eligibility} IS NULL`,
+                                sql`${donor.next_eligibility} <= ${today}::date`
+                            )
+                        );
+                    } else if (filters.eligibilityFilter === "Recovery") {
+                        conditions.push(
+                            sql`${donor.next_eligibility} > ${today}::date`
+                        );
+                    }
+                }
+            }
+
+            let orderClause = [asc(donor.id)];
+            
+            if (filters?.sortBy) {
+                switch (filters.sortBy) {
+                    case "ID (Descending)":
+                        orderClause = [desc(donor.id)];
+                        break;
+                    case "Age (Youngest)":
+                        orderClause = [asc(donor.age)];
+                        break;
+                    case "Age (Oldest)":
+                        orderClause = [desc(donor.age)];
+                        break;
+                }
+            }
+
             const res = await orm
                 .select({
                     id: donor.id,
@@ -388,21 +453,27 @@ export class ImpLabStaffModel implements LabStaffData {
                     sex: donor.sex,
                     bloodType: donor.blood, 
                     location: city.name,
-                    image: profiles.profile_image_url
+                    image: profiles.profile_image_url,
+                    age: donor.age,
+                    next_eligibility: donor.next_eligibility 
                 })
                 .from(donor_to_event)
                 .innerJoin(donor, eq(donor_to_event.donor_id, donor.id))
                 .innerJoin(profiles, eq(donor.profile_id, profiles.id))
                 .leftJoin(city, eq(donor.city_id, city.id))
-                .where(eq(donor_to_event.event_id, BigInt(eventId)));
+                .where(and(...conditions))
+                .orderBy(...orderClause);
 
-            const formattedDonors = res.map(d => ({
+            // 5. Map the results for the frontend
+            const formattedDonors = res.map((d: any) => ({
                 id: String(d.id),
                 name: d.name || "Unknown Donor",
                 sex: d.sex || "N/A",
                 bloodType: d.bloodType || "N/A",
                 location: d.location || "N/A",
-                image: d.image || "/images/user.png"
+                image: d.image || "/images/user.png",
+                age: d.age || 0,
+                next_eligibility: d.next_eligibility ? String(d.next_eligibility) : null 
             }));
 
             return { 
