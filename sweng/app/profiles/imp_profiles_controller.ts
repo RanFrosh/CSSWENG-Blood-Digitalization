@@ -8,7 +8,6 @@ import { StaffUserRow } from "@/types/staff_type";
 export class ImpProfilesManager implements ProfilesController {
     private profilesModel: ProfilesData
     private profileReader: ProfileSessionProvider
-
     constructor(injectProfilesModel: ProfilesData, injectProfileReader: ProfileSessionProvider) {
         this.profilesModel = injectProfilesModel;
         this.profileReader = injectProfileReader;
@@ -30,6 +29,18 @@ export class ImpProfilesManager implements ProfilesController {
         const res = await helpGateKeep(this.profileReader, 'viewprofiles');
         if (!res.success || !res.data) return { success: false, message: res.message };
         return await this.profilesModel.getStaffUsers();        
+    }
+
+    async invokeEditProfileName(id: string, name: string): Promise<ApiResponse> {
+        const res = await helpGateKeep(this.profileReader, 'edit_profile');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.profilesModel.editProfileName(id, name);
+    }
+
+    async invokeEditProfileEmail(id: string, email: string): Promise<ApiResponse> {
+        const res = await helpGateKeep(this.profileReader, 'edit_profile');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.profilesModel.editProfileEmail(id, email);
     }
     
 }

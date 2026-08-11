@@ -6,12 +6,15 @@ import { ReadProfile } from "@/types/profile_type";
 import { profiles } from "@/db/models/profiles";
 import { StaffUserRow } from "@/types/staff_type";
 import { authUsers } from "@/db/models/profiles";
+import { adminSupa } from "@/db/supaadmin";
 
 export class ImpProfilesModel implements ProfilesData {
     private access: typeof orm;
+    private admin: typeof adminSupa;
 
-    constructor(injectAccess: typeof orm) {
+    constructor(injectAccess: typeof orm, injectAdmin: typeof adminSupa) {
         this.access = injectAccess;
+        this.admin = injectAdmin;
     }
 
     async getProfiles(ids: string[]): Promise<ApiResponse<ReadProfile[]>> {
@@ -56,5 +59,25 @@ export class ImpProfilesModel implements ProfilesData {
         } catch (err: any) {
             return { success: false, message: err.message };
         }       
+    }
+
+    async editProfileName(id: string, name: string): Promise<ApiResponse> {
+        try {
+            await this.access.update(profiles).set({ name }).where(eq(profiles.id, id));
+            return { success: true, message: "Profile name updated" };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }        
+    }
+
+    async editProfileEmail(id: string, email: string): Promise<ApiResponse> {
+        try {
+            const { error } = await this.admin.auth.admin.updateUserById(id, { email });
+            if (error) return { success: false, message: error.message };
+            await this.access.update(profiles).set({ email }).where(eq(profiles.id, id));
+            return { success: true, message: "Profile email updated" };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }        
     }
 }

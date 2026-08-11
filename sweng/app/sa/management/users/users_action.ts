@@ -2,6 +2,7 @@
 
 import { ApiResponse } from "@/types/api_res_type";
 import { serverSupa } from "@/db/supaserver";
+import { adminSupa } from "@/db/supaadmin";
 import { orm } from "@/db/drizzle";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { ImpProfilesModel } from "@/app/profiles/imp_profiles_data";
@@ -10,7 +11,7 @@ import { StaffUser, StaffUserRow } from "@/types/staff_type";
 
 export async function getUsers(): Promise<ApiResponse<StaffUser[]>> {
     const database = await serverSupa();
-    const model = new ImpProfilesModel(orm);
+    const model = new ImpProfilesModel(orm, adminSupa);
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpProfilesManager(model, profiler);
 

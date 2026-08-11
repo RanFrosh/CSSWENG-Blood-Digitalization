@@ -5,11 +5,15 @@ import { StaffUserRow } from "@/types/staff_type";
 export interface ProfilesData {
     getProfiles(ids: string[]): Promise<ApiResponse<ReadProfile[]>>;
     getAllProfiles(): Promise<ApiResponse<ReadProfile[]>>;
-    getStaffUsers(): Promise<ApiResponse<StaffUserRow[]>>; 
+    getStaffUsers(): Promise<ApiResponse<StaffUserRow[]>>;
+    editProfileName(id: string, name: string): Promise<ApiResponse>;
+    editProfileEmail(id: string, email: string): Promise<ApiResponse>; 
 }
 
 export interface ProfilesController {
     invokeGetProfiles(ids: string[]): Promise<ApiResponse<ReadProfile[]>>;
     invokeGetAllProfiles(): Promise<ApiResponse<ReadProfile[]>>;
     invokeGetStaffUsers(): Promise<ApiResponse<StaffUserRow[]>>;
+    invokeEditProfileName(id: string, name: string): Promise<ApiResponse>;
+    invokeEditProfileEmail(id: string, email: string): Promise<ApiResponse>;
 }

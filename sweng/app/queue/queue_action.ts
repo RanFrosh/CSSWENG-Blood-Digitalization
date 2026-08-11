@@ -8,6 +8,7 @@ import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpProfileGetter } from "@/app/global/query_session.ts/query_user";
 import { serverSupa } from "@/db/supaserver";
+import { adminSupa } from "@/db/supaadmin";
 import { bigintToStr } from "../global/serializer/serial";
 import { StaffWithStatus } from "@/types/queue_type";
 import { ImpDonorModel } from "../donoring/imp_donor_data";
@@ -87,7 +88,7 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
         const database = await serverSupa();
         const profiler = new ImpProfileGetter(database);
         const profile = await profiler.getCurrentUser();
-        const profilesModel = new ImpProfilesModel(orm);
+        const profilesModel = new ImpProfilesModel(orm, adminSupa);
         const profilesController = new ImpProfilesManager(profilesModel, profiler);
         const staffModel = new ImpAssignedStaffModel(orm);
         const staffController = new ImpAssignedStaffManager(staffModel, profiler);

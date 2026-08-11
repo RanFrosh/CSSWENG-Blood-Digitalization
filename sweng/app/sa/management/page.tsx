@@ -1,24 +1,36 @@
 "use client";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 import Header from "@/components/HeaderSA";
+import { fetchSACurrentUser } from "@/app/sa/sa_action";
+import { ReadProfile } from "@/types/profile_type";
 
-// Sample user structure
-type User = {
-    id: string;
-    name: string;
-    role: string;
-}
-
-// Sample SA user
-const SAUser: User = {
-    id: "SA-001",
-    name: "Jordan Doe",
-    role: "Super Admin",
-}
+const roleNames: Record<string, string> = {
+    super_admin: "Super Admin",
+};
 
 export default function AnalyticsPage() {
     const router = useRouter();
+
+    const [profile, setProfile] = useState<ReadProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            setIsLoading(true);
+            setErrorMessage("");
+            const result = await fetchSACurrentUser();
+            if (result.success && result.data) {
+                setProfile(result.data);
+            } else {
+                setErrorMessage(result.message);
+            }
+            setIsLoading(false);
+        };
+        loadProfile();
+    }, []);
 
     const goEventMng = () => {
         router.push(`/sa/management/events`);
@@ -36,6 +48,31 @@ export default function AnalyticsPage() {
         router.push("/sa/management/requests");
     };
 
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading profile...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage || !profile) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage || "Profile not found"}</p>
+                </div>
+            </main>
+        );
+    }
+
+    const staffId = `${profile.role.toUpperCase()}-${profile.id.substring(0, 4).toUpperCase()}`;
+    const displayRole = roleNames[profile.role] || profile.role;
+
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
@@ -44,7 +81,7 @@ export default function AnalyticsPage() {
                 {/* Title */}
                 <section className="bg-[#f9fdff] p-[0.25in]">
                     <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">
-                        Welcome, {SAUser.name}!
+                        Welcome, {profile.name}!
                     </h1>
                 </section>
 
@@ -60,21 +97,21 @@ export default function AnalyticsPage() {
                                 <span className="font-semibold text-[#002940]">
                                     Name:
                                 </span>{" "}
-                                {SAUser.name}
+                                {profile.name}
                             </p>
 
                             <p>
                                 <span className="font-semibold text-[#002940]">
                                     Role:
                                 </span>{" "}
-                                {SAUser.role}
+                                {displayRole}
                             </p>
 
                             <p>
                                 <span className="font-semibold text-[#002940]">
                                     Staff ID:
                                 </span>{" "}
-                                {SAUser.id}
+                                {staffId}
                             </p>
                         </div>
                     </div>
