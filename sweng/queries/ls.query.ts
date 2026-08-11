@@ -464,7 +464,6 @@ export class ImpLabStaffModel implements LabStaffData {
                 .where(and(...conditions))
                 .orderBy(...orderClause);
 
-            // 5. Map the results for the frontend
             const formattedDonors = res.map((d: any) => ({
                 id: String(d.id),
                 name: d.name || "Unknown Donor",
@@ -504,6 +503,57 @@ export class ImpLabStaffModel implements LabStaffData {
                 return { success: false, message: "You have already joined this event." };
             }
             return { success: false, message: "Failed to join event." };
+        }
+    }
+
+    async getDonorEventRecord(eventId: string, donorId: string) {
+        try {
+            const res = await orm
+                .select({
+                    id: donor.id,
+                    name: profiles.name,
+                    sex: donor.sex,
+                    bloodType: donor.blood, 
+                    bloodBagId: blood_bag.serial_number,
+                    volumeCollected: blood_bag.volume_ml,
+                    completionTime: blood_bag.created_at,
+                    outcome: blood_bag.outcome,
+                    quality: blood_bag.quality,
+                    observations: blood_bag.observations
+                })
+                .from(donor_to_event)
+                .innerJoin(donor, eq(donor_to_event.donor_id, donor.id))
+                .innerJoin(profiles, eq(donor.profile_id, profiles.id))
+                .innerJoin(
+                    blood_bag, 
+                    and(
+                        eq(blood_bag.donor_id, donor.id),
+                        eq(blood_bag.event_id, BigInt(eventId))
+                    )
+                )
+                .where(
+                    and(
+                        eq(donor_to_event.event_id, BigInt(eventId)),
+                        eq(donor_to_event.donor_id, BigInt(donorId))
+                    )
+                )
+                .limit(1);
+
+            if (!res.length) return { success: false, message: "Record not found or no blood bag assigned yet." };
+
+            return { 
+                success: true, 
+                data: {
+                    ...res[0],
+                    id: String(res[0].id),
+                    completionTime: res[0].completionTime 
+                        ? new Date(res[0].completionTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+                        : null
+                } 
+            };
+        } catch (err: any) {
+            console.error("Database error fetching donor record:", err);
+            return { success: false, message: "Failed to fetch record." };
         }
     }
 }

@@ -170,3 +170,15 @@ export async function joinEventAction(eventId: string) {
         return { success: false, message: "Server error occurred." };
     }
 }
+
+export async function getDonorEventRecord(eventId: string, donorId: string) {
+    try {
+
+        const controller = await getLabController();
+        
+        return await controller.invokeGetDonorRecord(eventId, donorId);
+    } catch (err: any) {
+        console.error("Action Error (joinEventAction):", err);
+        return { success: false, message: "Server error occurred." };
+    }
+}
