@@ -7,7 +7,8 @@ import { ViewCorrections,
     ViewEventFilters,
     CreateEvents, 
     CreateCorrections,
-    CreateEventRecords} from "@/types/event_type";
+    CreateEventRecords,
+    ViewEventRecords} from "@/types/event_type";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 
 export interface EventData {
@@ -15,6 +16,7 @@ export interface EventData {
     queryAllEvents(): Promise<ApiResponse<ViewEventsWithProvince[]>>
     createEvent(data: CreateEvents): Promise<ApiResponse>
     logEvent(data: CreateEventRecords): Promise<ApiResponse>
+    queryEventRecords(event_log_id: bigint): Promise<ApiResponse<ViewEventRecords[]>>
     queryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>>
 
     queryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
@@ -29,6 +31,7 @@ export interface EventController {
     invokeQueryAllEvents(): Promise<ApiResponse<ViewEventsWithProvince[]>>
     invokeCreateEvent(data: CreateEvents): Promise<ApiResponse>
     invokeLogEvent(data: Omit<CreateEventRecords, 'staff_id'>): Promise<ApiResponse>
+    invokeQueryEventRecords(event_log_id: bigint): Promise<ApiResponse<ViewEventRecords[]>>
     invokeQueryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>>
 
     invokeQueryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
