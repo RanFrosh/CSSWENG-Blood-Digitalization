@@ -159,7 +159,7 @@ export default function AnalyticsPage() {
                             </h3>
 
                             <p className="mt-[8px] text-[16px]">
-                                View real-time event updates.
+                                View event updates.
                             </p>
                         </button>
 
