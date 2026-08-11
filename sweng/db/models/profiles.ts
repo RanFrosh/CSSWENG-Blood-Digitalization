@@ -12,5 +12,7 @@ export const profiles = pgTable('profiles', {
     name: text('name').notNull(),
     role: access_level('role').notNull(),
     created_at: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-    active: boolean('active')
+    active: boolean('active'),
+    profile_image_url: text('profile_image_url'),
+    email: text('email').notNull().unique()
 });

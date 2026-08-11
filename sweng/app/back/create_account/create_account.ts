@@ -23,7 +23,8 @@ export async function create_account(name: string, email: string, role: AppRole,
         await orm.insert(profiles).values({
             id: data.user.id,
             name: name,
-            role: role
+            role: role,
+            email: email
         });
     } catch (dbError: any) {
         console.error("FULL DB ERROR:", dbError); 

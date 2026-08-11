@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  process.env.SUPABASE_SECRET_KEY!,
   {
     auth: {
       autoRefreshToken: false,
@@ -95,7 +95,7 @@ async function seedAccounts() {
 
     const { error: profileError } = await supabase
       .from("profiles")
-      .upsert({ id: userId, name: user.name, role: user.role });
+      .upsert({ id: userId, name: user.name, role: user.role, email: user.email });
 
     if (profileError) {
       console.error(`Failed to upsert profile: ${user.email}`, profileError.message);
