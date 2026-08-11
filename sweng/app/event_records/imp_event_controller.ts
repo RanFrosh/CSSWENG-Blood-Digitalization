@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/types/api_res_type";
-import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents } from "@/types/event_type";
+import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 import { EventController, EventData } from "@/abstract/events/event_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
@@ -23,6 +23,18 @@ export class ImpEventManager implements EventController {
             return { success: false, message: res.message }
 
         const events = await this.eventModel.queryEvent(data, sort);
+
+        return events;
+    }
+
+    async invokeQueryAllEvents(): Promise<ApiResponse<ViewEventsWithProvince[]>> {
+
+        const res = await helpGateKeep(this.profileReader, 'view_event');
+
+        if (!res.success || !res.data) 
+            return { success: false, message: res.message }
+
+        const events = await this.eventModel.queryAllEvents();
 
         return events;
     }
