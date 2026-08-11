@@ -252,4 +252,19 @@ export class ImpLabStaffManager implements LabStaffController {
         }
     }
 
+    async invokeJoinEvent(eventId: string) {
+
+        const authRes = await this.profileReader.getCurrentUser();
+        
+        if (!authRes.success || !authRes.data) {
+            return { success: false, message: "Unauthorized. Please log in." };
+        }
+
+        if (!eventId) {
+            return { success: false, message: "Event ID is required." };
+        }
+
+        return await this.labStaffModel.joinEvent(eventId, authRes.data.id);
+    }
+
 }

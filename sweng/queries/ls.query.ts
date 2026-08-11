@@ -415,4 +415,24 @@ export class ImpLabStaffModel implements LabStaffData {
             return { success: false, message: err.message };
         }
     }
+
+    async joinEvent(eventId: string, staffId: string) {
+        try {
+            await orm.insert(assigned_staff).values({
+                event_log_id: BigInt(eventId),
+                staff_id: staffId, 
+            });
+
+            return { 
+                success: true, 
+                message: "Successfully joined the event team!" 
+            };
+        } catch (err: any) {
+            console.error("Database error joining event:", err);
+            if (err.code === '23505') { 
+                return { success: false, message: "You have already joined this event." };
+            }
+            return { success: false, message: "Failed to join event." };
+        }
+    }
 }

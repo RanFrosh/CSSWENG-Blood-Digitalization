@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EventCard } from "@/components/EventCard";
 import { ViewEvents } from "@/types/event_type";
+import JoinEventButton from "@/components/JoinEventButton";
 
 interface LSEventsClientProps {
     initialEvents: ViewEvents[];
@@ -24,8 +25,12 @@ export default function LSEventsClient({
     currentCity,
     currentSort,
 }: LSEventsClientProps) {
+
     const router = useRouter();
     const searchParams = useSearchParams();
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState("");
 
     // Local UI states only
     const [searchInput, setSearchInput] = useState(currentSearch);
@@ -249,21 +254,27 @@ export default function LSEventsClient({
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
                                 />
                             </div>
-                            <div className="mt-[0.2in] flex flex-row justify-end gap-[10px]">
+                            
+                            <div className="mt-[0.2in] flex flex-row justify-end gap-[10px] w-full items-start">
                                 <button
                                     type="button"
-                                    onClick={() => setIsJoinModalOpen(false)}
-                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white"
+                                    onClick={() => {
+                                        setIsJoinModalOpen(false);
+                                        setEventCode("");
+                                    }}
+                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white shrink-0"
                                 >
                                     Cancel
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setIsJoinModalOpen(false)}
-                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90"
-                                >
-                                    Join Event
-                                </button>
+
+                                <JoinEventButton 
+                                    eventId={eventCode} 
+                                    onSuccess={() => {
+                                        setIsJoinModalOpen(false);
+                                        setEventCode("");
+                                    }} 
+                                />
+
                             </div>
                         </form>
                     </div>

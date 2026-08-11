@@ -159,3 +159,15 @@ export async function getEventDonorsAction(eventId: string) {
         return { success: false, message: "Server error occurred while fetching donors." };
     }
 }
+
+export async function joinEventAction(eventId: string) {
+    try {
+
+        const controller = await getLabController();
+        
+        return await controller.invokeJoinEvent(eventId);
+    } catch (err: any) {
+        console.error("Action Error (joinEventAction):", err);
+        return { success: false, message: "Server error occurred." };
+    }
+}
