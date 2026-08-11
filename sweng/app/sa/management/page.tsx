@@ -32,10 +32,6 @@ export default function AnalyticsPage() {
         router.push(`/sa/management/logs/events`);
     };
 
-    const goDataLog = () => {
-        router.push(`/sa/management/logs/data`);
-    };
-
     const goRequests = () => {
         router.push("/sa/management/requests");
     };
@@ -90,7 +86,7 @@ export default function AnalyticsPage() {
                         Event Actions
                     </h2>
 
-                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-[0.25in]">
+                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
                         <button
                             onClick={goEventMng}
                             className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
@@ -127,19 +123,6 @@ export default function AnalyticsPage() {
 
                             <p className="mt-[8px] text-[16px]">
                                 View real-time event updates.
-                            </p>
-                        </button>
-
-                        <button
-                            onClick={goDataLog}
-                            className="bg-white border-2 border-[#002940] rounded-[16px] p-[0.25in] text-left cursor-pointer hover:bg-[#002940] hover:text-white transition"
-                        >
-                            <h3 className="text-[20px] font-['Montserrat'] font-bold">
-                                View Database Logs
-                            </h3>
-
-                            <p className="mt-[8px] text-[16px]">
-                                View real-time database updates.
                             </p>
                         </button>
 
