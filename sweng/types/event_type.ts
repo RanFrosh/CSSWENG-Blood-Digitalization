@@ -27,5 +27,5 @@ type ViewEventRecords = {
     donor_first_name: string;
     donor_last_name: string;
     action: EventRecordAction;
-    time: string;  // "HH:MM:SS"
+    time: string;
 };
