@@ -7,7 +7,7 @@ export type StaffUserRow = {
     name: string,
     email: string | null,
     role: AccessType,
-    dateJoined: Date,
+    dateJoined: Date | null,
     active: boolean | null
 }
 
