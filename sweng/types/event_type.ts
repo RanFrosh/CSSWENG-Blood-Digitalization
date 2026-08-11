@@ -10,6 +10,9 @@ export type CreateCorrections = InferInsertModel<typeof corrected_event>;
 export type ViewEvents = InferSelectModel<typeof event_log> & {
     city: string;
 };
+export type ViewEventsWithProvince = ViewEvents & {
+    province: string;
+};
 export type ViewEventFilters = Partial<ViewEvents>;
 
 export type CreateEvents = InferInsertModel<typeof event_log>;

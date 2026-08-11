@@ -1,6 +1,6 @@
 import { EventData } from "@/abstract/events/event_abstract";
 import { ApiResponse } from "@/types/api_res_type";
-import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents } from "@/types/event_type";
+import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 import { SQL, eq, asc, desc, and, inArray, getTableColumns } from "drizzle-orm";
 import { event_log } from "@/db/schemas/event_log";
@@ -9,6 +9,7 @@ import { orm } from "@/db/drizzle";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 import { assigned_staff } from "@/db/schemas/assigned_staff";
 import { city } from "@/db/schemas/city";
+import { province } from "@/db/schemas/province";
 
 export class ImpEventModel implements EventData {
     private access: typeof orm;
@@ -41,6 +42,20 @@ export class ImpEventModel implements EventData {
             .innerJoin(city, eq(event_log.city_id, city.id))
             .where(and(...filtersEvent))
             .orderBy(...sortersEvent)
+            return { success: true, message: "Events retrieved", data: events }
+
+        } catch (err: any) {
+            return {success: false, message: err.message, data: undefined};
+        }
+    }
+
+    async queryAllEvents(): Promise<ApiResponse<ViewEventsWithProvince[]>> {
+        try {
+            const events = await this.access
+            .select({ ...getTableColumns(event_log), city: city.name, province: province.name })
+            .from(event_log)
+            .innerJoin(city, eq(event_log.city_id, city.id))
+            .innerJoin(province, eq(city.province_id, province.id))
             return { success: true, message: "Events retrieved", data: events }
 
         } catch (err: any) {

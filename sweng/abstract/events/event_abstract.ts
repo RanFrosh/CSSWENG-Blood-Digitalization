@@ -3,6 +3,7 @@ import { Sorter } from "@/types/sort_type";
 import { ViewCorrections,
     ViewCorrectionFilters,
     ViewEvents,
+    ViewEventsWithProvince,
     ViewEventFilters,
     CreateEvents, 
     CreateCorrections} from "@/types/event_type";
@@ -10,6 +11,7 @@ import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 
 export interface EventData {
     queryEvent(data: ViewEventFilters, sort: Sorter<ViewEvents>): Promise<ApiResponse<ViewEvents[]>>
+    queryAllEvents(): Promise<ApiResponse<ViewEventsWithProvince[]>>
     createEvent(data: CreateEvents): Promise<ApiResponse>
     queryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>>
 
@@ -22,6 +24,7 @@ export interface EventData {
 
 export interface EventController {
     invokeQueryEvent(data: ViewEventFilters, sort: Sorter<ViewEvents>): Promise<ApiResponse<ViewEvents[]>>
+    invokeQueryAllEvents(): Promise<ApiResponse<ViewEventsWithProvince[]>>
     invokeCreateEvent(data: CreateEvents): Promise<ApiResponse>
     invokeQueryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>>
 

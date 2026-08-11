@@ -1,6 +1,6 @@
 "use server"
 
-import { ViewEventFilters, ViewEvents } from "@/types/event_type";
+import { ViewEventFilters, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { ApiResponse } from "@/types/api_res_type";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 import { ImpEventModel } from "@/app/event_records/imp_event_data";
@@ -33,6 +33,15 @@ export async function executeEventQueryStaff(data: ViewEventFilters): Promise<Ap
     const controller = new ImpEventManager(model, profiler);
 
     return controller.invokeQueryEventStaff(data, staff);
+}
+
+export async function executeQueryAllEvents(): Promise<ApiResponse<ViewEventsWithProvince[]>> {
+    const database = await serverSupa();
+    const model = new ImpEventModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpEventManager(model, profiler);
+
+    return controller.invokeQueryAllEvents();
 }
 
 export async function verifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>> {
