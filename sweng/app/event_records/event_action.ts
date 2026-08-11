@@ -9,6 +9,7 @@ import { ImpProfileGetter } from "@/queries/profile_query";
 import { orm } from "@/db/drizzle";
 import { serverSupa } from "@/db/supaserver";
 import { helpGateKeep } from "@/utils/access/bouncer";
+import { CreateEventRecords, ViewEventRecords } from "@/types/event_type";
 
 export async function executeEventQueryStaff(data: ViewEventFilters): Promise<ApiResponse<ViewEvents[]>> {
     
@@ -51,4 +52,24 @@ export async function verifyEventAccess(event_log_id: bigint): Promise<ApiRespon
     const controller = new ImpEventManager(model, profiler);
 
     return controller.invokeVerifyEventAccess(event_log_id);
+}
+
+export async function executeLogEvent(
+    data: Omit<CreateEventRecords, "staff_id">
+): Promise<ApiResponse> {
+    const database = await serverSupa();
+    const model = new ImpEventModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpEventManager(model, profiler);
+    return controller.invokeLogEvent(data);
+}
+
+export async function executeQueryEventRecords(
+    event_log_id: bigint
+): Promise<ApiResponse<ViewEventRecords[]>> {
+    const database = await serverSupa();
+    const model = new ImpEventModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpEventManager(model, profiler);
+    return controller.invokeQueryEventRecords(event_log_id);
 }

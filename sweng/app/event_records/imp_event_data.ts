@@ -1,6 +1,6 @@
 import { EventData } from "@/abstract/events/event_abstract";
 import { ApiResponse } from "@/types/api_res_type";
-import { CreateCorrections, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
+import { CreateCorrections, CreateEventRecords, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 import { SQL, eq, asc, desc, and, inArray, getTableColumns } from "drizzle-orm";
 import { event_log } from "@/db/schemas/event_log";
@@ -10,6 +10,9 @@ import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 import { assigned_staff } from "@/db/schemas/assigned_staff";
 import { city } from "@/db/schemas/city";
 import { province } from "@/db/schemas/province";
+import { event_record } from "@/db/schemas/event_record";
+import { profiles } from "@/db/schemas/profiles";
+import { donor } from "@/db/schemas/donor";
 
 export class ImpEventModel implements EventData {
     private access: typeof orm;
@@ -182,6 +185,43 @@ export class ImpEventModel implements EventData {
             .where(and(inArray(event_log.id, eventIds), eq(event_log.status, "Ongoing")));
 
         return { success: true, message: "Ongoing event check completed", data: ongoing.length > 0 };
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };
+        }        
+    }
+
+    async logEvent(data: CreateEventRecords): Promise<ApiResponse> {
+        try {
+            await this.access
+            .insert(event_record)
+            .values({...data})
+            return { success: true, message: "Event record created" }
+        } catch (err: any) {
+            return { success: false, message: err.message }
+        }        
+    }
+
+    async queryEventRecords(event_log_id: bigint): Promise<ApiResponse<ViewEventRecords[]>> {
+        try {
+            const records = await this.access
+            .select({
+                event_log_id: event_record.event_log_id,
+                event_name: event_log.name,
+                staff_name: profiles.name,
+                staff_role: profiles.role,
+                donor_first_name: donor.first_name,
+                donor_last_name: donor.last_name,
+                action: event_record.action,
+                time: event_record.time,
+            })
+            .from(event_record)
+            .innerJoin(event_log, eq(event_record.event_log_id, event_log.id))
+            .innerJoin(profiles, eq(event_record.staff_id, profiles.id))
+            .innerJoin(donor, eq(event_record.donor_id, donor.id))
+            .where(eq(event_record.event_log_id, event_log_id))
+            .orderBy(asc(event_record.time));
+            
+            return { success: true, message: "Event records retrieved", data: records };
         } catch (err: any) {
             return { success: false, message: err.message, data: undefined };
         }        
