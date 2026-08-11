@@ -31,16 +31,16 @@ export class ImpProfilesManager implements ProfilesController {
         return await this.profilesModel.getStaffUsers();        
     }
 
-    async invokeEditProfileName(id: string, name: string): Promise<ApiResponse> {
+    async invokeEditProfileName(name: string): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'edit_profile');
         if (!res.success || !res.data) return { success: false, message: res.message };
-        return await this.profilesModel.editProfileName(id, name);
+        return await this.profilesModel.editProfileName(res.data.id, name);
     }
 
-    async invokeEditProfileEmail(id: string, email: string): Promise<ApiResponse> {
+    async invokeEditProfileEmail(email: string): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'edit_profile');
         if (!res.success || !res.data) return { success: false, message: res.message };
-        return await this.profilesModel.editProfileEmail(id, email);
+        return await this.profilesModel.editProfileEmail(res.data.id, email);
     }
     
 }

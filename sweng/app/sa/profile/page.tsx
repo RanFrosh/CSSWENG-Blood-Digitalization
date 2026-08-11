@@ -1,46 +1,109 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import Header from "@/components/HeaderSA";
+import { fetchSACurrentUser, editSACurrentUser } from "@/app/sa/sa_action";
+import { ReadProfile } from "@/types/profile_type";
 
-type StaffProfile = {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    profileImage: string;
-};
-
-const sampleStaffProfile: StaffProfile = {
-    id: "SA-001",
-    name: "John Doe",
-    email: "john.doe@redbank.com",
-    role: "Super Admin",
-    profileImage: "/images/user.png",
+const roleNames: Record<string, string> = {
+    super_admin: "Super Admin",
 };
 
 export default function StaffProfilePage() {
     const router = useRouter();
 
+    const [profile, setProfile] = useState<ReadProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
+
     const [isEditOpen, setEditModal] = useState(false);
+    const [nameInput, setNameInput] = useState("");
+    const [emailInput, setEmailInput] = useState("");
+    const [feedback, setFeedback] = useState<{ success: boolean; message: string } | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            setIsLoading(true);
+            setErrorMessage("");
+            const result = await fetchSACurrentUser();
+            if (result.success && result.data) {
+                setProfile(result.data);
+            } else {
+                setErrorMessage(result.message);
+            }
+            setIsLoading(false);
+        };
+        loadProfile();
+    }, []);
 
     const openEditModal = () => {
+        if (!profile) return;
+        setNameInput(profile.name);
+        setEmailInput(profile.email);
+        setFeedback(null);
         setEditModal(true);
     };
 
     const closeEditModal = () => {
         setEditModal(false);
+        setFeedback(null);
     };
 
-    const saveAccount = () => {
-        setEditModal(false);
-        alert("Account details updated successfully!");
+    const saveAccount = async () => {
+        if (!profile) return;
+        const name = nameInput.trim();
+        const email = emailInput.trim();
+
+        if (!name && !email) {
+            setFeedback({ success: false, message: "Please input at least one of the fields" });
+            return;
+        }
+
+        setIsSaving(true);
+        setFeedback(null);
+
+        const result = await editSACurrentUser({ name: name || undefined, email: email || undefined });
+
+        if (result.success) {
+            setProfile({ ...profile, name: name || profile.name, email: email || profile.email });
+            setFeedback({ success: true, message: "Account details updated successfully!" });
+        } else {
+            setFeedback({ success: false, message: result.message });
+        }
+
+        setIsSaving(false);
     };
 
     const goBack = () => {
         router.back();
     };
+
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading profile...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (errorMessage || !profile) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage || "Profile not found"}</p>
+                </div>
+            </main>
+        );
+    }
+
+    const staffId = `${profile.role.toUpperCase()}-${profile.id.substring(0, 4).toUpperCase()}`;
+    const displayRole = roleNames[profile.role] || profile.role;
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -61,7 +124,7 @@ export default function StaffProfilePage() {
                         <aside className="flex flex-col gap-[0.15in]">
                             <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] flex flex-col items-center">
                                 <img
-                                    src={sampleStaffProfile.profileImage}
+                                    src={profile.profile_image_url ?? "/images/user.png"}
                                     alt="Staff profile"
                                     className="w-full h-full object-cover"
                                 />
@@ -83,7 +146,7 @@ export default function StaffProfilePage() {
 
                                         <input
                                             type="text"
-                                            value={sampleStaffProfile.id}
+                                            value={staffId}
                                             readOnly
                                             className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none bg-[#f9fdff] text-[#5c6b73]"
                                         />
@@ -96,7 +159,7 @@ export default function StaffProfilePage() {
 
                                         <input
                                             type="text"
-                                            value={sampleStaffProfile.name}
+                                            value={profile.name}
                                             readOnly
                                             className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none bg-[#f9fdff] text-[#5c6b73]"
                                         />
@@ -109,7 +172,7 @@ export default function StaffProfilePage() {
 
                                         <input
                                             type="email"
-                                            value={sampleStaffProfile.email}
+                                            value={profile.email}
                                             readOnly
                                             className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none bg-[#f9fdff] text-[#5c6b73]"
                                         />
@@ -122,7 +185,7 @@ export default function StaffProfilePage() {
 
                                         <input
                                             type="text"
-                                            value={sampleStaffProfile.role}
+                                            value={displayRole}
                                             readOnly
                                             className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none bg-[#f9fdff] text-[#5c6b73]"
                                         />
@@ -168,7 +231,7 @@ export default function StaffProfilePage() {
 
                                 <div className="flex flex-col items-center bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.25in]">
                                     <img
-                                        src={sampleStaffProfile.profileImage}
+                                        src={profile.profile_image_url ?? "/images/user.png"}
                                         className="w-[2in] h-[2in] object-cover"
                                     />
 
@@ -185,7 +248,8 @@ export default function StaffProfilePage() {
 
                                 <input
                                     type="text"
-                                    placeholder={sampleStaffProfile.name}
+                                    value={nameInput}
+                                    onChange={(e) => setNameInput(e.target.value)}
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
@@ -197,10 +261,21 @@ export default function StaffProfilePage() {
 
                                 <input
                                     type="email"
-                                    placeholder={sampleStaffProfile.email}
+                                    value={emailInput}
+                                    onChange={(e) => setEmailInput(e.target.value)}
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                                 />
                             </div>
+
+                            {feedback && (
+                                <p
+                                    className={`text-[16px] font-semibold ${
+                                        feedback.success ? "text-green-600" : "text-red-500"
+                                    }`}
+                                >
+                                    {feedback.message}
+                                </p>
+                            )}
                         </div>
 
                         <div className="mt-[0.35in] flex flex-row justify-end gap-[10px]">
@@ -215,9 +290,10 @@ export default function StaffProfilePage() {
                             <button
                                 type="button"
                                 onClick={saveAccount}
-                                className="px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold bg-[#002940] text-white cursor-pointer hover:underline"
+                                disabled={isSaving}
+                                className="px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold bg-[#002940] text-white cursor-pointer hover:underline disabled:opacity-50"
                             >
-                                Save Changes
+                                {isSaving ? "Saving..." : "Save Changes"}
                             </button>
                         </div>
                     </div>

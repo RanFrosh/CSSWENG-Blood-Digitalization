@@ -14,6 +14,6 @@ export interface ProfilesController {
     invokeGetProfiles(ids: string[]): Promise<ApiResponse<ReadProfile[]>>;
     invokeGetAllProfiles(): Promise<ApiResponse<ReadProfile[]>>;
     invokeGetStaffUsers(): Promise<ApiResponse<StaffUserRow[]>>;
-    invokeEditProfileName(id: string, name: string): Promise<ApiResponse>;
-    invokeEditProfileEmail(id: string, email: string): Promise<ApiResponse>;
+    invokeEditProfileName(name: string): Promise<ApiResponse>;
+    invokeEditProfileEmail(email: string): Promise<ApiResponse>;
 }
