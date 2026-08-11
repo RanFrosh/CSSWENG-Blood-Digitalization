@@ -109,9 +109,9 @@ export default function SAUsersPage() {
         if (sortBy === "Name: A-Z") {
             return a.name.localeCompare(b.name);
         } else if (sortBy === "Date Joined: Earliest") {
-            return a.dateJoined.getTime() - b.dateJoined.getTime();
+            return (a.dateJoined?.getTime() ?? 0) - (b.dateJoined?.getTime() ?? 0);
         } else if (sortBy === "Date Joined: Latest") {
-            return b.dateJoined.getTime() - a.dateJoined.getTime();
+            return (b.dateJoined?.getTime() ?? 0) - (a.dateJoined?.getTime() ?? 0);
         } else if (sortBy === "Role: A-Z") {
             return a.role.localeCompare(b.role);
         } else if (sortBy === "Status") {
@@ -467,7 +467,7 @@ export default function SAUsersPage() {
                                                 <span className="font-semibold text-[#002940]">
                                                     Date Joined:
                                                 </span>{" "}
-                                                {user.dateJoined.toLocaleDateString()}
+                                                {user.dateJoined?.toLocaleDateString() ?? "-"}
                                             </p>
 
                                             <p className="flex items-center gap-[10px]">
