@@ -49,10 +49,8 @@ export async function register_new_donor(formData: any) {
             blood: formData.blood,
             email: formData.email,
             mobile_no: formData.mobile,
-            street: formData.address,
             zip_code: formData.zip,
             city_id: BigInt(3),
-            photo_path: "user.png",
             active: true, 
             verifiedBlood: false 
         }).returning({ id: donor.id });
