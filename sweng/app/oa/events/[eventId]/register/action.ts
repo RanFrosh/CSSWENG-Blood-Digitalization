@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { eq, or } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
 import { donor } from "@/db/schemas/donor";
+import { executeLogEvent } from "@/app/event_records/event_action";
 
 type RegisterState = {
   error?: string;
@@ -157,6 +158,12 @@ try {
 
   console.log("New donor:", newDonor);
   console.log("QR Token:", newDonor.qr_token);
+  await executeLogEvent({
+    event_log_id: BigInt(eventId),
+    donor_id: newDonor.id,
+    action: "register",
+    time: new Date().toTimeString().slice(0, 8)
+  });
 } catch (error) {
   console.error("DONOR INSERT ERROR:", error);
   throw error;
