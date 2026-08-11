@@ -1,6 +1,7 @@
 import { corrected_event } from "@/db/schemas/corrected_event";
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
 import { event_log } from "@/db/schemas/event_log";
+import { event_record } from "@/db/schemas/event_record";
 import { AccessType } from "@/db/enums/access_level";
 import { EventRecordAction } from "@/db/enums/event_action";
 
@@ -18,6 +19,8 @@ export type ViewEventsWithProvince = ViewEvents & {
 export type ViewEventFilters = Partial<ViewEvents>;
 
 export type CreateEvents = InferInsertModel<typeof event_log>;
+
+export type CreateEventRecords = InferInsertModel<typeof event_record>;
 
 export type ViewEventRecords = {
     event_log_id: bigint;

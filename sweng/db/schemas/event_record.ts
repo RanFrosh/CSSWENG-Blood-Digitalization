@@ -10,6 +10,6 @@ export const event_record = pgTable("event_record", {
   donor_id: bigint("donor_id", { mode: "bigint" }).references(() => donor.id, { onDelete: 'cascade', onUpdate: 'cascade' }).notNull(),
   action: event_record_action("action").notNull(),
   time: time("time").notNull(),
-  profile_id: uuid("profile_id").references(() => profiles.id, { onDelete: 'cascade', onUpdate: 'cascade' }).notNull()
+  staff_id: uuid("staff_id").references(() => profiles.id, { onDelete: 'cascade', onUpdate: 'cascade' }).notNull()
 });
 
