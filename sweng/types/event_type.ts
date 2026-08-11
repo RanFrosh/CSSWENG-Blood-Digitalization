@@ -19,7 +19,7 @@ export type ViewEventFilters = Partial<ViewEvents>;
 
 export type CreateEvents = InferInsertModel<typeof event_log>;
 
-type ViewEventRecords = {
+export type ViewEventRecords = {
     event_log_id: bigint;
     event_name: string;
     staff_name: string;
