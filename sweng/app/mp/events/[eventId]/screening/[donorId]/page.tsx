@@ -56,7 +56,7 @@ export default function ScreeningPage() {
                 }
                 router.push(`/mp/events/${eventId}`);
             } else if (eligibility === "unfit") {
-                const res = await failScreening(BigInt(queueId!));
+                const res = await failScreening(BigInt(queueId!), BigInt(donorId), BigInt(eventId));
                 alert(res.message);
                 router.push(`/mp/events/${eventId}`);
             } else {
