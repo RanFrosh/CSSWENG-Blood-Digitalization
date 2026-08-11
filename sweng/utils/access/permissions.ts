@@ -25,7 +25,8 @@ const permissions = {
     'view_assigned_staff': ['med_prof', 'lab_staff'] as AccessType[],
     'extraction': ['lab_staff'] as AccessType[],
     'register_user': [] as AccessType[],
-    'finish_registration': ['director', 'lab_staff', 'med_prof', 'onsite_admin', 'recov_staff'] as AccessType[]
+    'finish_registration': ['director', 'lab_staff', 'med_prof', 'onsite_admin', 'recov_staff'] as AccessType[],
+    'edit_profile': ['director', 'lab_staff', 'med_prof', 'onsite_admin', 'recov_staff'] as AccessType[]
 } satisfies Record<string, AccessType[]>;
 
 const queueMapping = {

@@ -38,10 +38,6 @@ export default function HeaderSA() {
         router.push("/sa/management/logs/events");
     };
 
-    const goDataLog = () => {
-        router.push("/sa/management/logs/data");
-    };
-
     const goRequests = () => {
         router.push("/sa/management/requests");
     };
@@ -83,11 +79,6 @@ export default function HeaderSA() {
                   onClick: goEventLog,
               },
               {
-                  name: "Database Logs",
-                  path: "/sa/management/logs/data",
-                  onClick: goDataLog,
-              },
-              {
                   name: "Requests",
                   path: "/sa/management/requests",
                   onClick: goRequests,
@@ -118,11 +109,6 @@ export default function HeaderSA() {
                   name: "Event Logs",
                   path: "/sa/management/logs/events",
                   onClick: goEventLog,
-              },
-              {
-                  name: "Database Logs",
-                  path: "/sa/management/logs/data",
-                  onClick: goDataLog,
               },
               {
                   name: "Requests",

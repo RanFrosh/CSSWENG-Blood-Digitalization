@@ -8,6 +8,7 @@ import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { serverSupa } from "@/db/supaserver";
+import { adminSupa } from "@/db/supaadmin";
 import { bigintToStr } from "../../utils/serialize/serial";
 import { StaffWithStatus } from "@/types/queue_type";
 import { ImpDonorModel } from "../donoring/imp_donor_data";
@@ -87,7 +88,7 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
         const database = await serverSupa();
         const profiler = new ImpProfileGetter(database);
         const profile = await profiler.getCurrentUser();
-        const profilesModel = new ImpProfilesModel(orm);
+        const profilesModel = new ImpProfilesModel(orm, adminSupa);
         const profilesController = new ImpProfilesManager(profilesModel, profiler);
         const staffModel = new ImpAssignedStaffModel(orm);
         const staffController = new ImpAssignedStaffManager(staffModel, profiler);
@@ -146,8 +147,8 @@ export async function viewStaffStatus(event_guy: bigint): Promise<ApiResponse<St
                 name: p.name,
                 role: p.role,
                 isBusy,
-                queueEntryId: isBusy ? busyEntry.id : null,
-                currentDonorId: isBusy ? busyEntry.donor_id ?? null : null,
+                queueEntryId: isBusy ? Number(busyEntry.id) : null,
+                currentDonorId: isBusy && busyEntry.donor_id !== null ? Number(busyEntry.donor_id) : null,
                 currentDonorName: isBusy && busyEntry.donor_id
                     ? donorNameMap.get(busyEntry.donor_id) ?? null
                     : null,

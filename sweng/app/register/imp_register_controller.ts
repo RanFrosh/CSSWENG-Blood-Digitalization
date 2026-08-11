@@ -20,10 +20,10 @@ export class ImpRegisterManager implements RegisterController {
         return await this.registerModel.createStaff(email, redirectTo);        
     }
 
-    async invokeCreateProfile(id: string, role: AccessType): Promise<ApiResponse> {
+    async invokeCreateProfile(id: string, role: AccessType, email: string): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'register_user');        
         if (!res.success) return { success: false, message: res.message };
-        return await this.registerModel.createProfile(id, role);        
+        return await this.registerModel.createProfile(id, role, email);        
     }
 
     async invokeSetPassword(password: string): Promise<ApiResponse> {

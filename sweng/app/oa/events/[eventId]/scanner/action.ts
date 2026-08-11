@@ -86,7 +86,7 @@ export async function checkInDonorAction(
         const queueResult = await controller.invokeAddToQueue({
             donor_id: foundDonor[0].id,
             event_log_id: BigInt(eventId),
-            profile_id: null,
+            staff_id: null,
         });
 
         if (!queueResult.success) {

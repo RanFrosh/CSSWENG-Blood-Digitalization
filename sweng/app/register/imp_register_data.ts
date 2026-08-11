@@ -39,12 +39,13 @@ export class ImpRegisterModel implements RegisterData {
         }
     }
 
-    async createProfile(id: string, role: AccessType): Promise<ApiResponse> {
+    async createProfile(id: string, role: AccessType, email: string): Promise<ApiResponse> {
         try {
             await this.access.insert(profiles).values({
                 id,
                 name: '',
                 role,
+                email,
                 active: false
             });
             return { success: true, message: "Profile created" };

@@ -61,13 +61,7 @@ export class ImpQueueManager implements QueueController {
         if (!res.success || !res.data) 
             return { success: false, message: res.message }
 
-        const appendedQueueTarget: UpdateQueue = {
-            ...queueTarget,
-            profiles_id: res.data.id
-        }
-
-        const outcome = await this.queueModel.updateQueueStation(appendedQueueTarget);
-        return outcome; 
+        return await this.queueModel.updateQueueStation(queueTarget);
     }
 
     async invokePickNextQueue(event_guy: bigint): Promise<ApiResponse<ViewQueue>> {
@@ -99,7 +93,7 @@ export class ImpQueueManager implements QueueController {
         const updateResult = await this.queueModel.updateQueueStation({
         id: nextDonor.id,
         station: null,
-        profiles_id: res.data.id
+        staff_id: res.data.id
             });
 
         if (!updateResult.success) {
