@@ -26,6 +26,7 @@ export interface EventData {
     isStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
     getProvince(provinceName: string): Promise<ApiResponse<bigint>>;
     getCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>>;
+    deleteEvent(id: bigint): Promise<ApiResponse>;
 }
 
 export interface EventController {
@@ -43,4 +44,5 @@ export interface EventController {
     invokeIsStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
     invokeGetProvince(provinceName: string): Promise<ApiResponse<bigint>>;
     invokeGetCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>>;
+    invokeDeleteEvent(id: bigint): Promise<ApiResponse>;
 }

@@ -5,6 +5,8 @@ import { ApiResponse } from "@/types/api_res_type";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 import { ImpEventModel } from "@/app/event_records/imp_event_data";
 import { ImpEventManager } from "@/app/event_records/imp_event_controller";
+import { ImpAssignedStaffModel } from "@/app/assigned_staff/imp_assigned_staff_data";
+import { ImpAssignedStaffManager } from "@/app/assigned_staff/imp_assigned_staff_controller";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { orm } from "@/db/drizzle";
 import { serverSupa } from "@/db/supaserver";
@@ -126,4 +128,28 @@ export async function executeQueryEventRecords(
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpEventManager(model, profiler);
     return controller.invokeQueryEventRecords(event_log_id);
+}
+
+export async function executeDeleteEvent(eventId: bigint): Promise<ApiResponse> {
+    const database = await serverSupa();
+    const model = new ImpEventModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpEventManager(model, profiler);
+
+    const eventRes = await controller.invokeVerifyEventAccess(eventId);
+    if (!eventRes.success || !eventRes.data) {
+        return { success: false, message: eventRes.message };
+    }
+    if (eventRes.data.status !== "Upcoming") {
+        return { success: false, message: "Only upcoming events can be deleted." };
+    }
+
+    const staffModel = new ImpAssignedStaffModel(orm);
+    const staffController = new ImpAssignedStaffManager(staffModel, profiler);
+    const staffRes = await staffController.invokeGetStaff(eventId);
+    if (staffRes.success && staffRes.data && staffRes.data.length > 0) {
+        return { success: false, message: "Cannot delete: staff are assigned to this event." };
+    }
+
+    return await controller.invokeDeleteEvent(eventId);
 }

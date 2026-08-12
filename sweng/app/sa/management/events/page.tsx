@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderSA";
-import { executeQueryAllEvents, executeCreateEvent } from "@/app/event_records/event_action";
+import { executeQueryAllEvents, executeCreateEvent, executeDeleteEvent } from "@/app/event_records/event_action";
 import { ViewEventsWithProvince } from "@/types/event_type";
 
 const formatEventId = (event: ViewEventsWithProvince): string => {
@@ -51,6 +51,10 @@ export function SAEventsPage() {
     // Save state for the create modal
     const [saveLoading, setSaveLoading] = useState(false);
     const [saveError, setSaveError] = useState("");
+
+    // State for the delete modal
+    const [deleteLoading, setDeleteLoading] = useState(false);
+    const [deleteError, setDeleteError] = useState("");
 
     // Modal States
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -208,10 +212,21 @@ export function SAEventsPage() {
         }
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
         if (!eventToDelete) return;
-        setEvents((prev) => prev.filter((item) => item.id !== eventToDelete.id));
-        setEventToDelete(null);
+        setDeleteLoading(true);
+        setDeleteError("");
+        try {
+            const result = await executeDeleteEvent(eventToDelete.id);
+            if (!result.success) {
+                setDeleteError(result.message);
+                return;
+            }
+            setEventToDelete(null);
+            loadEvents();
+        } finally {
+            setDeleteLoading(false);
+        }
     };
 
     const getTabClass = (tab: TabFilter) => {
@@ -627,6 +642,15 @@ export function SAEventsPage() {
                             Are you sure you want to delete <span className="font-semibold">{eventToDelete.name}</span>? 
                             This action is permanent and cannot be undone.
                         </p>
+
+                        {deleteError !== "" && (
+                            <div className="mt-[0.15in] bg-[#f5e4e4] border-2 border-[#a32626] rounded-[10px] px-[12px] py-[10px]">
+                                <p className="text-[16px] font-semibold text-[#a32626]">
+                                    {deleteError}
+                                </p>
+                            </div>
+                        )}
+
                         <div className="mt-[0.35in] flex flex-row justify-end gap-[10px]">
                             <button
                                 onClick={() => setEventToDelete(null)}
@@ -636,9 +660,10 @@ export function SAEventsPage() {
                             </button>
                             <button
                                 onClick={confirmDelete}
-                                className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#a32626] text-white cursor-pointer hover:opacity-90"
+                                disabled={deleteLoading}
+                                className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#a32626] text-white cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Delete Event
+                                {deleteLoading ? "Deleting..." : "Delete Event"}
                             </button>
                         </div>
                     </div>
