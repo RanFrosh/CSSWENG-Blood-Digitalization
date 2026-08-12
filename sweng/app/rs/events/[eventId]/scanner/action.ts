@@ -6,6 +6,7 @@ import { orm } from "@/db/drizzle";
 import { donor } from "@/db/schemas/donor";
 import { event_log } from "@/db/schemas/event_log";
 import { donor_to_event } from "@/db/schemas/donor_to_event";
+import { executeLogEvent } from "@/app/event_records/event_action";
 
 export async function claimPerkAction(
     eventId: string,
@@ -89,6 +90,13 @@ export async function claimPerkAction(
                     perk_claims: sql`${event_log.perk_claims} + 1`,
                 })
                 .where(eq(event_log.id, BigInt(eventId)));
+        });
+
+        await executeLogEvent({
+            event_log_id: BigInt(eventId),
+            donor_id: foundDonor[0].id,
+            action: "perk_claim",
+            time: new Date().toTimeString().slice(0, 8),
         });
 
         return {
