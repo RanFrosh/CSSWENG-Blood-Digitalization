@@ -69,4 +69,6 @@ export const event_log = pgTable("event_log", {
     })
         .defaultNow()
         .notNull(),
+
+    img_url: text("img_url")
 });
