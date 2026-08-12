@@ -149,14 +149,14 @@ export function SAEventsPage() {
 
         if (eventToEdit) {
             if (
-                !formName.trim() ||
-                !formPartner.trim() ||
-                !formProvince.trim() ||
-                !formCity.trim() ||
-                !formDate ||
+                !formName.trim() &&
+                !formPartner.trim() &&
+                !formProvince.trim() &&
+                !formCity.trim() &&
+                !formDate &&
                 !formImageLink.trim()
             ) {
-                setSaveError("All fields are required.");
+                setSaveError("Fill up at least one field");
                 return;
             }
 
