@@ -174,6 +174,7 @@ export function SAEventsPage() {
                 created_at: new Date(),
                 city: formCity,
                 province: formProvince,
+                img_url: null
             };
             setEvents([newEvent, ...events]);
         }

@@ -52,6 +52,7 @@ export async function executeCreateEvent(data: {
     cityName: string;
     eventDate: string;
     targetBags: string;
+    imgUrl?: string | null;
 }): Promise<ApiResponse> {
     const database = await serverSupa();
     const model = new ImpEventModel(orm);
@@ -96,6 +97,7 @@ export async function executeCreateEvent(data: {
         perk_claims: BigInt(0),
         target_blood: BigInt(parseInt(data.targetBags, 10) || 100),
         created_at: new Date(),
+        img_url: data.imgUrl?.trim() || null,
     };
 
     // 5. Persist (invokeCreateEvent re-gates with 'create_event')
