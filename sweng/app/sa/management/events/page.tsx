@@ -19,6 +19,15 @@ type SortOption =
     | "Target Bags: Low to High"
     | "Name: A-Z";
 
+const cityOptions = [
+    "Manila",
+    "Quezon City",
+    "Taguig",
+    "Makati",
+    "Pasig",
+    "Pasay",
+];
+
 export function SAEventsPage() {
     const router = useRouter();
 
@@ -69,6 +78,12 @@ export function SAEventsPage() {
     const [formDate, setFormDate] = useState("");
     const [formTargetBags, setFormTargetBags] = useState("100");
     const [formImageLink, setFormImageLink] = useState("");
+
+    // City Dropdown
+    const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+    const filteredCityOptions = cityOptions.filter((city) =>
+        city.toLowerCase().includes(formCity.toLowerCase())
+    );
 
     const tabs: TabFilter[] = ["All", "Ongoing", "Upcoming", "Completed"];
     const sortOptions: SortOption[] = [
@@ -555,33 +570,57 @@ export function SAEventsPage() {
                                     className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
                                 />
                             </div>
-                            <div className="grid grid-cols-2 gap-[10px]">
-                                <div>
-                                    <label className="block text-[14px] font-semibold text-[#002940] mb-1">
-                                        City
-                                    </label>
+                            <div className="relative">
+                                <label className="block text-[14px] font-semibold text-[#002940] mb-1">
+                                    City
+                                </label>
+
+                                <div className="relative">
                                     <input
                                         type="text"
                                         required
                                         value={formCity}
-                                        onChange={(e) => setFormCity(e.target.value)}
-                                        placeholder="City"
-                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
+                                        onChange={(e) => {
+                                            setFormCity(e.target.value);
+                                            setIsCityDropdownOpen(true);
+                                        }}
+                                        onFocus={() => setIsCityDropdownOpen(true)}
+                                        placeholder="Select or type city"
+                                        className="w-full border-2 border-[#002940] rounded-[16px] px-[16px] py-[12px] pr-[50px] text-[16px] outline-none"
                                     />
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
+                                        className="absolute right-[14px] top-1/2 -translate-y-1/2 text-[#002940] text-[18px] font-bold"
+                                    >
+                                        ▼
+                                    </button>
                                 </div>
-                                <div>
-                                    <label className="block text-[14px] font-semibold text-[#002940] mb-1">
-                                        Province
-                                    </label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={formProvince}
-                                        onChange={(e) => setFormProvince(e.target.value)}
-                                        placeholder="Province"
-                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
-                                    />
-                                </div>
+
+                                {isCityDropdownOpen && (
+                                    <div className="absolute z-50 mt-2 w-full max-h-[220px] overflow-y-auto rounded-[12px] border border-[#c0cad0] bg-white shadow-md">
+                                        {filteredCityOptions.length > 0 ? (
+                                            filteredCityOptions.map((city) => (
+                                                <button
+                                                    key={city}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFormCity(city);
+                                                        setIsCityDropdownOpen(false);
+                                                    }}
+                                                    className="w-full px-4 py-3 text-left text-[16px] text-[#002940] hover:bg-[#f2f6f8]"
+                                                >
+                                                    {city}
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-3 text-[16px] text-gray-500">
+                                                No matching city found
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                             <div className="grid grid-cols-2 gap-[10px]">
                                 <div>
