@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import Header from "@/components/HeaderSA";
-import { fetchSACurrentUser, editSACurrentUser } from "@/app/sa/sa_action";
+import { fetchSACurrentUser, editSACurrentUser } from "@/actions/sa_action";
 import { ReadProfile } from "@/types/profile_type";
 
 const roleNames: Record<string, string> = {

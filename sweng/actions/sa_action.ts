@@ -5,12 +5,25 @@ import { ReadProfile } from "@/types/profile_type";
 import { serverSupa } from "@/db/supaserver";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { helpGateKeep } from "@/utils/access/bouncer";
-import { ImpProfilesModel } from "../profiles/imp_profiles_data";
-import { ImpProfilesManager } from "../profiles/imp_profiles_controller";
+import { ImpProfilesModel } from "../app/profiles/imp_profiles_data";
+import { ImpProfilesManager } from "../app/profiles/imp_profiles_controller";
 import { orm } from "@/db/drizzle";
 import { adminSupa } from "@/db/supaadmin";
+import { ImpSuperAdminModel } from "@/queries/sa_query";
+import { ImpSuperAdminManager } from "@/controllers/sa_controller";
+import { revalidatePath } from "next/cache";
+
+async function getSAController() {
+
+    const database = await serverSupa();
+    const model = new ImpSuperAdminModel();
+    const profiler = new ImpProfileGetter(database);
+
+    return new ImpSuperAdminManager(model, profiler);
+}
 
 export async function fetchSACurrentUser(): Promise<ApiResponse<ReadProfile>> {
+    
     const database = await serverSupa();
     const profiler = new ImpProfileGetter(database);
 
@@ -80,4 +93,59 @@ export async function editSACurrentUser(input: {
     }
 
     return { success: false, message: "Please input at least one of the fields" };
+}
+
+export async function getEventSummaryAction(eventId: string) {
+
+    try {
+        const controller = await getSAController();
+        return await controller.invokeFetchEventSummary(eventId);
+    } catch (err: any) {
+        console.error("Server Action Error:", err);
+        return { success: false, message: "Internal server error" };
+    }
+}
+
+
+export async function getEventStaffAction(eventId: string) {
+
+    try {
+        const controller = await getSAController();
+        return await controller.invokeFetchEventStaffLists(eventId);
+    } catch (err: any) {
+        console.error("Server Action Error:", err);
+        return { success: false, message: "Internal server error" };
+    }
+}
+
+export async function assignStaffAction(eventId: string, staffIds: string[]) {
+    try {
+        const controller = await getSAController();
+        const response = await controller.invokeAssignStaffToEvent(eventId, staffIds);
+
+        if (response.success) {
+            revalidatePath(`/sa/management/events/${eventId}/staff`); 
+        }
+        
+        return response;
+    } catch (err: any) {
+        console.error("Server Action Error (assignStaff):", err);
+        return { success: false, message: "Internal server error" };
+    }
+}
+
+export async function removeStaffAction(eventId: string, staffIds: string[]) {
+    try {
+        const controller = await getSAController();
+        const response = await controller.invokeRemoveStaffFromEvent(eventId, staffIds);
+        
+        if (response.success) {
+            revalidatePath(`/sa/management/events/${eventId}/staff`);
+        }
+        
+        return response;
+    } catch (err: any) {
+        console.error("Server Action Error (removeStaff):", err);
+        return { success: false, message: "Internal server error" };
+    }
 }
