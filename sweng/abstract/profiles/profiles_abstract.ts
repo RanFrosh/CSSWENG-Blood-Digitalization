@@ -8,6 +8,7 @@ export interface ProfilesData {
     getStaffUsers(): Promise<ApiResponse<StaffUserRow[]>>;
     editProfileName(id: string, name: string): Promise<ApiResponse>;
     editProfileEmail(id: string, email: string): Promise<ApiResponse>; 
+    editProfileImage(id: string, profileImageUrl: string | null): Promise<ApiResponse>;
 }
 
 export interface ProfilesController {
@@ -16,4 +17,5 @@ export interface ProfilesController {
     invokeGetStaffUsers(): Promise<ApiResponse<StaffUserRow[]>>;
     invokeEditProfileName(name: string): Promise<ApiResponse>;
     invokeEditProfileEmail(email: string): Promise<ApiResponse>;
+    invokeEditProfileImage(profileImageUrl: string | null): Promise<ApiResponse>;
 }

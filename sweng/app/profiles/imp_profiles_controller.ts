@@ -42,5 +42,11 @@ export class ImpProfilesManager implements ProfilesController {
         if (!res.success || !res.data) return { success: false, message: res.message };
         return await this.profilesModel.editProfileEmail(res.data.id, email);
     }
+
+    async invokeEditProfileImage(profileImageUrl: string | null): Promise<ApiResponse> {
+        const res = await helpGateKeep(this.profileReader, 'edit_profile');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.profilesModel.editProfileImage(res.data.id, profileImageUrl);
+    }
     
 }

@@ -80,4 +80,13 @@ export class ImpProfilesModel implements ProfilesData {
             return { success: false, message: err.message };
         }        
     }
+
+    async editProfileImage(id: string, profileImageUrl: string | null): Promise<ApiResponse> {
+        try {
+            await this.access.update(profiles).set({ profile_image_url: profileImageUrl }).where(eq(profiles.id, id));
+            return { success: true, message: "Profile image updated" };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }        
+    }
 }

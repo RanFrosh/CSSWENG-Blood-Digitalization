@@ -20,6 +20,7 @@ export default function StaffProfilePage() {
     const [isEditOpen, setEditModal] = useState(false);
     const [nameInput, setNameInput] = useState("");
     const [emailInput, setEmailInput] = useState("");
+    const [profileImageInput, setProfileImageInput] = useState("");
     const [feedback, setFeedback] = useState<{ success: boolean; message: string } | null>(null);
     const [isSaving, setIsSaving] = useState(false);
 
@@ -42,6 +43,7 @@ export default function StaffProfilePage() {
         if (!profile) return;
         setNameInput(profile.name);
         setEmailInput(profile.email);
+        setProfileImageInput(profile.profile_image_url ?? "");
         setFeedback(null);
         setEditModal(true);
     };
@@ -55,8 +57,9 @@ export default function StaffProfilePage() {
         if (!profile) return;
         const name = nameInput.trim();
         const email = emailInput.trim();
+        const profile_image_url = profileImageInput.trim();
 
-        if (!name && !email) {
+        if (!name && !email && !profile_image_url) {
             setFeedback({ success: false, message: "Please input at least one of the fields" });
             return;
         }
@@ -64,10 +67,19 @@ export default function StaffProfilePage() {
         setIsSaving(true);
         setFeedback(null);
 
-        const result = await editSACurrentUser({ name: name || undefined, email: email || undefined });
+        const result = await editSACurrentUser({
+            name: name || undefined,
+            email: email || undefined,
+            profile_image_url,
+        });
 
         if (result.success) {
-            setProfile({ ...profile, name: name || profile.name, email: email || profile.email });
+            setProfile({
+                ...profile,
+                name: name || profile.name,
+                email: email || profile.email,
+                profile_image_url: profile_image_url || null,
+            });
             setFeedback({ success: true, message: "Account details updated successfully!" });
         } else {
             setFeedback({ success: false, message: result.message });
@@ -127,6 +139,7 @@ export default function StaffProfilePage() {
                                     src={profile.profile_image_url ?? "/images/user.png"}
                                     alt="Staff profile"
                                     className="w-full h-full object-cover"
+                                    onError={(e) => { (e.target as HTMLImageElement).src = "/images/user.png"; }}
                                 />
                             </div>
                         </aside>
@@ -226,18 +239,29 @@ export default function StaffProfilePage() {
                         <div className="mt-[0.25in] flex flex-col gap-5">
                             <div>
                                 <label className="block text-[18px] font-semibold text-[#002940] mb-1">
-                                    Profile Picture
+                                    Profile Picture URL
                                 </label>
 
-                                <div className="flex flex-col items-center bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.25in]">
-                                    <img
-                                        src={profile.profile_image_url ?? "/images/user.png"}
-                                        className="w-[2in] h-[2in] object-cover"
-                                    />
+                                <div className="flex flex-col items-center gap-3 bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.25in]">
+                                    {profileImageInput ? (
+                                        <img
+                                            src={profileImageInput}
+                                            className="w-[2in] h-[2in] object-cover rounded-full shadow-sm border-2 border-[#002940]"
+                                            onError={(e) => { (e.target as HTMLImageElement).src = "/images/user.png"; }}
+                                        />
+                                    ) : (
+                                        <div className="w-[2in] h-[2in] rounded-full bg-gray-100 border-2 border-[#c0cad0] flex items-center justify-center text-gray-400 text-sm">
+                                            No Image
+                                        </div>
+                                    )}
 
-                                    <label className="mt-4 w-full bg-[#002940] text-white px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer text-center hover:underline">
-                                        Upload Photo
-                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="https://example.com/photo.jpg"
+                                        value={profileImageInput}
+                                        onChange={(e) => setProfileImageInput(e.target.value)}
+                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
+                                    />
                                 </div>
                             </div>
 
