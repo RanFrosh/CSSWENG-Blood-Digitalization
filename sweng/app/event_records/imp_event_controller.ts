@@ -112,6 +112,18 @@ export class ImpEventManager implements EventController {
         return await this.eventModel.isStaffOnOngoingEvent(staff_id);        
     }
 
+    async invokeGetProvince(provinceName: string): Promise<ApiResponse<bigint>> {
+        const res = await helpGateKeep(this.profileReader, 'create_event');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.eventModel.getProvince(provinceName);
+    }
+
+    async invokeGetCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>> {
+        const res = await helpGateKeep(this.profileReader, 'create_event');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.eventModel.getCity(cityName, provinceId);
+    }
+
     async invokeLogEvent(data: Omit<CreateEventRecords, "staff_id">): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'log_event');
         if (!res.success || !res.data)

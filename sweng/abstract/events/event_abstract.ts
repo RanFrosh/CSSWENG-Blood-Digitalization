@@ -24,6 +24,8 @@ export interface EventData {
 
     queryEventById(id: bigint): Promise<ApiResponse<ViewEvents>>
     isStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
+    getProvince(provinceName: string): Promise<ApiResponse<bigint>>;
+    getCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>>;
 }
 
 export interface EventController {
@@ -39,4 +41,6 @@ export interface EventController {
 
     invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>>
     invokeIsStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
+    invokeGetProvince(provinceName: string): Promise<ApiResponse<bigint>>;
+    invokeGetCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>>;
 }

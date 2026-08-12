@@ -2,7 +2,7 @@ import { EventData } from "@/abstract/events/event_abstract";
 import { ApiResponse } from "@/types/api_res_type";
 import { CreateCorrections, CreateEventRecords, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
-import { SQL, eq, asc, desc, and, inArray, getTableColumns } from "drizzle-orm";
+import { SQL, eq, asc, desc, and, inArray, ilike, getTableColumns } from "drizzle-orm";
 import { event_log } from "@/db/schemas/event_log";
 import { corrected_event } from "@/db/schemas/corrected_event";
 import { orm } from "@/db/drizzle";
@@ -188,6 +188,45 @@ export class ImpEventModel implements EventData {
         } catch (err: any) {
             return { success: false, message: err.message, data: undefined };
         }        
+    }
+
+    async getProvince(provinceName: string): Promise<ApiResponse<bigint>> {
+        try {
+            const [result] = await this.access
+                .select({ id: province.id })
+                .from(province)
+                .where(ilike(province.name, provinceName.trim()))
+                .limit(1);
+
+            if (!result) {
+                return { success: false, message: "Province not found", data: undefined };
+            }
+            return { success: true, message: "Province found", data: result.id };
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };
+        }
+    }
+
+    async getCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>> {
+        try {
+            const [result] = await this.access
+                .select({ id: city.id })
+                .from(city)
+                .where(
+                    and(
+                        ilike(city.name, cityName.trim()),
+                        eq(city.province_id, provinceId)
+                    )
+                )
+                .limit(1);
+
+            if (!result) {
+                return { success: false, message: "City not found", data: undefined };
+            }
+            return { success: true, message: "City found", data: result.id };
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };
+        }
     }
 
     async logEvent(data: CreateEventRecords): Promise<ApiResponse> {
