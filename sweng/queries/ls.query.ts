@@ -377,6 +377,37 @@ export class ImpLabStaffModel implements LabStaffData {
                         })
                         .where(eq(donor.id, payload.donor_id));
                 }
+
+                const existingRecord = await tx
+                    .select({ id: donor_to_event.id })
+                    .from(donor_to_event)
+                    .where(
+                        and(
+                            eq(donor_to_event.donor_id, payload.donor_id),
+                            eq(donor_to_event.event_id, payload.event_id)
+                        )
+                    )
+                    .limit(1);
+
+                if (existingRecord.length > 0) {
+                    await tx
+                        .update(donor_to_event)
+                        .set({
+                            is_success: payload.outcome === 'Successful',
+                            blood_amount: payload.volume,
+                            updated_at: new Date(),
+                        })
+                        .where(eq(donor_to_event.id, existingRecord[0].id));
+                } else {
+                    await tx
+                        .insert(donor_to_event)
+                        .values({
+                            donor_id: payload.donor_id,
+                            event_id: payload.event_id,
+                            is_success: payload.outcome === 'Successful',
+                            blood_amount: payload.volume,
+                        });
+                }
             });
 
             return { success: true, message: "Donation record saved successfully." };
