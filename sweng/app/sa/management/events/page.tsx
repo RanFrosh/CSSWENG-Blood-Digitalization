@@ -420,7 +420,7 @@ export function SAEventsPage() {
                                                     <span className="font-semibold text-[#002940]">
                                                         Event ID:
                                                     </span>{" "}
-                                                    {evt.id}
+                                                    {formatEventId(evt)}
                                                 </p>
 
                                                 <p>
