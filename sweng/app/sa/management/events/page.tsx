@@ -169,15 +169,15 @@ export function SAEventsPage() {
             return;
         }
 
-        // CREATE: validate then delegate to the orchestrator server action.
         if (
             !formName.trim() ||
             !formPartner.trim() ||
             !formProvince.trim() ||
             !formCity.trim() ||
-            !formDate
+            !formDate ||
+            !formImageLink
         ) {
-            setSaveError("All fields except the image are required.");
+            setSaveError("All fields are required.");
             return;
         }
 
