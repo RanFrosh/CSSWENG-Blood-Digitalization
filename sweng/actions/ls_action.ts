@@ -192,3 +192,18 @@ export async function getDonorEventRecord(eventId: string, donorId: string) {
         return { success: false, message: "Server error occurred." };
     }
 }
+
+export async function submitEditRequestAction(params: {
+    blood_bag_serial: string;
+    donor_id: string;
+    event_id: string;
+    payload: any;
+}) {
+    try {
+        const controller = await getLabController();
+        return await controller.invokeSubmitEditRequest(params);
+    } catch (err: any) {
+        console.error("Action Error (submitEditRequestAction):", err);
+        return { success: false, message: "Server error occurred while submitting." };
+    }
+}

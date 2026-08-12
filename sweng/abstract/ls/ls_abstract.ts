@@ -32,6 +32,12 @@ export interface LabStaffData {
     getEventDonors(eventId: string, filters?: any): Promise<any>;
     joinEvent(eventId: string, staffId: string): Promise<any>;
     getDonorEventRecord(eventId: string, donorId: string): Promise<any>;
+    submitEditRequest(params: {
+        blood_bag_serial: string;
+        donor_id: string;
+        event_id: string;
+        payload: any;
+    }, staffId: string): Promise<any>;
 }
 
 export interface LabStaffController {
@@ -52,4 +58,10 @@ export interface LabStaffController {
     invokeGetEventDonors(eventId: string, filters?: any): Promise<ApiResponse<any>>;
     invokeJoinEvent(eventId: string): Promise<ApiResponse<any>>;
     invokeGetDonorRecord(eventId: string, donorId: string): Promise<ApiResponse<any>>;
+    invokeSubmitEditRequest(params: {
+        blood_bag_serial: string;
+        donor_id: string;
+        event_id: string;
+        payload: any;
+    }): Promise<ApiResponse<any>>;
 }

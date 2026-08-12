@@ -282,4 +282,31 @@ export class ImpLabStaffManager implements LabStaffController {
         return await this.labStaffModel.getDonorEventRecord(eventId, donorId);
     }
 
+    async invokeSubmitEditRequest(params: {
+        blood_bag_serial: string;
+        donor_id: string;
+        event_id: string;
+        payload: any;
+    }) {
+
+        const authRes = await this.profileReader.getCurrentUser();
+        
+        if (!authRes.success || !authRes.data) {
+            return { success: false, message: "Unauthorized. Please log in." };
+        }
+
+        const staffId = authRes.data.id;
+
+        if (!params.blood_bag_serial || !params.event_id || !params.donor_id) {
+            return { success: false, message: "Missing required tracking IDs." };
+        }
+
+        try {
+            return await this.labStaffModel.submitEditRequest(params, staffId);
+        } catch (error: any) {
+            console.error("Controller Error (invokeSubmitEditRequest):", error);
+            return { success: false, message: "Failed to process edit request." };
+        }
+    }
+
 }

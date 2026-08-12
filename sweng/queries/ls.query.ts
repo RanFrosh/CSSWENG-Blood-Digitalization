@@ -9,6 +9,7 @@ import { profiles } from "@/db/schemas/profiles";
 import { blood_bag } from "@/db/schemas/blood_bag";
 import { assigned_staff } from "@/db/schemas/assigned_staff";
 import { city } from "@/db/schemas/city";
+import { edit_requests } from "@/db/schemas/event_request";
 import { ViewDonorPartial } from "@/types/donor_type";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
 
@@ -542,9 +543,7 @@ export class ImpLabStaffModel implements LabStaffData {
             const res = await orm
                 .select({
                     id: donor.id,
-                    name: profiles.name,
-                    sex: donor.sex,
-                    bloodType: donor.blood, 
+                    bloodType: blood_bag.blood_type,
                     bloodBagId: blood_bag.serial_number,
                     volumeCollected: blood_bag.volume_ml,
                     completionTime: blood_bag.created_at,
@@ -554,7 +553,6 @@ export class ImpLabStaffModel implements LabStaffData {
                 })
                 .from(donor_to_event)
                 .innerJoin(donor, eq(donor_to_event.donor_id, donor.id))
-                .innerJoin(profiles, eq(donor.profile_id, profiles.id))
                 .innerJoin(
                     blood_bag, 
                     and(
@@ -585,6 +583,32 @@ export class ImpLabStaffModel implements LabStaffData {
         } catch (err: any) {
             console.error("Database error fetching donor record:", err);
             return { success: false, message: "Failed to fetch record." };
+        }
+    }
+
+    async submitEditRequest(params: {
+        blood_bag_serial: string;
+        donor_id: string;
+        event_id: string;
+        payload: any;
+    }, staffId: string) {
+        try {
+            await orm.insert(edit_requests).values({
+                blood_bag_serial: params.blood_bag_serial,
+                donor_id: BigInt(params.donor_id),
+                event_id: BigInt(params.event_id),
+                staff_id: staffId,
+                payload: params.payload,
+                status: 'pending'
+            });
+
+            return { 
+                success: true, 
+                message: "Edit request successfully submitted for review." 
+            };
+        } catch (err: any) {
+            console.error("Database error submitting edit request:", err);
+            return { success: false, message: "Failed to save request to the database." };
         }
     }
 }
