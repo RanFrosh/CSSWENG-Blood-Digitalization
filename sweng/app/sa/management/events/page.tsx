@@ -586,20 +586,20 @@ export function SAEventsPage() {
                                         }}
                                         onFocus={() => setIsCityDropdownOpen(true)}
                                         placeholder="Select or type city"
-                                        className="w-full border-2 border-[#002940] rounded-[16px] px-[16px] py-[12px] pr-[50px] text-[16px] outline-none"
+                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] pr-[42px] text-[16px] outline-none focus:border-[#002940]"
                                     />
 
                                     <button
                                         type="button"
                                         onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-                                        className="absolute right-[14px] top-1/2 -translate-y-1/2 text-[#002940] text-[18px] font-bold"
+                                        className="absolute right-[12px] top-1/2 -translate-y-1/2 text-[#002940] text-[16px] cursor-pointer"
                                     >
                                         ▼
                                     </button>
                                 </div>
 
                                 {isCityDropdownOpen && (
-                                    <div className="absolute z-50 mt-2 w-full max-h-[220px] overflow-y-auto rounded-[12px] border border-[#c0cad0] bg-white shadow-md">
+                                    <div className="absolute z-50 mt-[6px] w-full max-h-[2.2in] overflow-y-auto bg-white border-2 border-[#c0cad0] rounded-[10px] shadow-lg">
                                         {filteredCityOptions.length > 0 ? (
                                             filteredCityOptions.map((city) => (
                                                 <button
@@ -615,7 +615,7 @@ export function SAEventsPage() {
                                                 </button>
                                             ))
                                         ) : (
-                                            <div className="px-4 py-3 text-[16px] text-gray-500">
+                                            <div className="px-[12px] py-[10px] text-[16px] text-[#5c6b73]">
                                                 No matching city found
                                             </div>
                                         )}
