@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderSA";
-import { executeQueryAllEvents } from "@/app/event_records/event_action";
+import { executeQueryAllEvents, executeCreateEvent } from "@/app/event_records/event_action";
 import { ViewEventsWithProvince } from "@/types/event_type";
 
 const formatEventId = (event: ViewEventsWithProvince): string => {
@@ -30,22 +30,27 @@ export function SAEventsPage() {
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState<SortOption>("Default");
 
-    // Fetch real events from the DB on mount (same pattern as logs/events).
-    useEffect(() => {
-        const loadEvents = async () => {
-            setEventsLoading(true);
-            setEventsError("");
-            const result = await executeQueryAllEvents();
-            if (result.success && result.data) {
-                setEvents(result.data);
-            } else {
-                setEventsError(result.message);
-                setEvents([]);
-            }
-            setEventsLoading(false);
-        };
-        loadEvents();
+    // Refetch the event list from the DB (mirrors sa/management/users loadUsers pattern).
+    const loadEvents = useCallback(async () => {
+        setEventsLoading(true);
+        setEventsError("");
+        const result = await executeQueryAllEvents();
+        if (result.success && result.data) {
+            setEvents(result.data);
+        } else {
+            setEventsError(result.message);
+            setEvents([]);
+        }
+        setEventsLoading(false);
     }, []);
+
+    useEffect(() => {
+        loadEvents();
+    }, [loadEvents]);
+
+    // Save state for the create modal
+    const [saveLoading, setSaveLoading] = useState(false);
+    const [saveError, setSaveError] = useState("");
 
     // Modal States
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -126,8 +131,9 @@ export function SAEventsPage() {
         setIsCreateModalOpen(true);
     };
 
-    const handleSaveEvent = (e: React.FormEvent) => {
+    const handleSaveEvent = async (e: React.FormEvent) => {
         e.preventDefault();
+        setSaveError("");
 
         const today = new Date().toISOString().split("T")[0];
         let calculatedStatus: ViewEventsWithProvince["status"] = "Upcoming";
@@ -138,6 +144,7 @@ export function SAEventsPage() {
         }
 
         if (eventToEdit) {
+            // EDIT: no backend update method exists yet, so keep existing local-only behavior.
             setEvents((prev) =>
                 prev.map((item) =>
                     item.id === eventToEdit.id
@@ -154,31 +161,51 @@ export function SAEventsPage() {
                         : item
                 )
             );
-        } else {
-            const newEvent: ViewEventsWithProvince = {
-                id: BigInt(events.length + 1),
-                name: formName,
-                partner: formPartner,
-                street: null,
-                zip_code: null,
-                city_id: BigInt(1),
-                event_date: formDate,
-                start_time: "00:00:00",
-                end_time: null,
-                status: calculatedStatus,
-                visitors: BigInt(0),
-                extractions: BigInt(0),
-                produced_bags: BigInt(0),
-                target_blood: BigInt(parseInt(formTargetBags) || 100),
-                perk_claims: BigInt(0),
-                created_at: new Date(),
-                city: formCity,
-                province: formProvince,
-                img_url: null
-            };
-            setEvents([newEvent, ...events]);
+            setIsCreateModalOpen(false);
+            return;
         }
-        setIsCreateModalOpen(false);
+
+        // CREATE: validate then delegate to the orchestrator server action.
+        if (
+            !formName.trim() ||
+            !formPartner.trim() ||
+            !formProvince.trim() ||
+            !formCity.trim() ||
+            !formDate
+        ) {
+            setSaveError("All fields except the image are required.");
+            return;
+        }
+
+        setSaveLoading(true);
+        try {
+            const result = await executeCreateEvent({
+                name: formName.trim(),
+                partner: formPartner.trim(),
+                provinceName: formProvince.trim(),
+                cityName: formCity.trim(),
+                eventDate: formDate,
+                targetBags: formTargetBags || "100",
+                imgUrl: formImageLink.trim() ? formImageLink.trim() : null,
+            });
+
+            if (!result.success) {
+                setSaveError(result.message);
+                return;
+            }
+
+            setIsCreateModalOpen(false);
+            setFormName("");
+            setFormPartner("");
+            setFormCity("");
+            setFormProvince("");
+            setFormDate("");
+            setFormTargetBags("100");
+            setFormImageLink("");
+            loadEvents();
+        } finally {
+            setSaveLoading(false);
+        }
     };
 
     const confirmDelete = () => {
@@ -555,6 +582,14 @@ export function SAEventsPage() {
                                 </div>
                             </div>
 
+                            {saveError !== "" && (
+                                <div className="mt-[0.1in] bg-[#f5e4e4] border-2 border-[#a32626] rounded-[10px] px-[12px] py-[10px]">
+                                    <p className="text-[16px] font-semibold text-[#a32626]">
+                                        {saveError}
+                                    </p>
+                                </div>
+                            )}
+
                             <div className="mt-[0.2in] flex flex-row justify-end gap-[10px]">
                                 <button
                                     type="button"
@@ -565,9 +600,14 @@ export function SAEventsPage() {
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90"
+                                    disabled={saveLoading}
+                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {eventToEdit ? "Save Changes" : "Deploy Event"}
+                                    {saveLoading
+                                        ? "Creating..."
+                                        : eventToEdit
+                                        ? "Save Changes"
+                                        : "Deploy Event"}
                                 </button>
                             </div>
                         </form>
