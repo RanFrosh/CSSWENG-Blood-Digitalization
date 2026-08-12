@@ -7,6 +7,7 @@ import { ImpProfileGetter } from "@/queries/profile_query";
 import { revalidatePath } from "next/cache";
 import { bigintToStr } from "@/utils/serialize/serial";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
+import { executeLogEvent } from "@/app/event_records/event_action";
 
 async function getLabController() {
 
@@ -139,6 +140,15 @@ export async function submitDonationRecordAction(rawPayload: any) {
         };
 
         const res = await controller.invokeSubmitDonationRecord(formattedPayload);
+
+        if (res.success) {
+            await executeLogEvent({
+                event_log_id: formattedPayload.event_id,
+                donor_id: formattedPayload.donor_id,
+                action: formattedPayload.outcome === "Successful" ? "donate_success" : "donate_fail",
+                time: new Date().toTimeString().slice(0, 8),
+            });
+        }
 
         return bigintToStr(res);
 
