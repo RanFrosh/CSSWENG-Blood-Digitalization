@@ -175,7 +175,7 @@ export function SAEventsPage() {
             !formProvince.trim() ||
             !formCity.trim() ||
             !formDate ||
-            !formImageLink
+            !formImageLink.trim()
         ) {
             setSaveError("All fields are required.");
             return;
