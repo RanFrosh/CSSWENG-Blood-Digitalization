@@ -148,6 +148,18 @@ export function SAEventsPage() {
         }
 
         if (eventToEdit) {
+            if (
+                !formName.trim() ||
+                !formPartner.trim() ||
+                !formProvince.trim() ||
+                !formCity.trim() ||
+                !formDate ||
+                !formImageLink.trim()
+            ) {
+                setSaveError("All fields are required.");
+                return;
+            }
+
             // EDIT: no backend update method exists yet, so keep existing local-only behavior.
             setEvents((prev) =>
                 prev.map((item) =>
