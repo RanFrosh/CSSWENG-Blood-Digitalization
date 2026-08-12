@@ -1,83 +1,56 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderSA";
+import { executeQueryAllEvents } from "@/app/event_records/event_action";
+import { ViewEventsWithProvince } from "@/types/event_type";
 
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-
-type BloodEvent = {
-    id: string;
-    name: string;
-    partner: string;
-    city: string;
-    province: string;
-    date: string;
-    status: EventStatus;
-    targetBags: number;
-    collectedBags: number;
-    imageLink: string;
+const formatEventId = (event: ViewEventsWithProvince): string => {
+    const year = event.event_date.split("-")[0];
+    return `EVT-${year}-${event.id}`;
 };
 
-const initialEvents: BloodEvent[] = [
-    {
-        id: "EVT-2026-001",
-        name: "Blood Donation Drive",
-        partner: "Manila Doctors Hospital",
-        city: "Manila",
-        province: "Metro Manila",
-        date: "2026-07-15",
-        status: "Ongoing",
-        targetBags: 100,
-        collectedBags: 72,
-        imageLink: "/images/event.png",
-    },
-    {
-        id: "EVT-2026-002",
-        name: "Corporate CSR Bloodletting",
-        partner: "BPO Partner Inc.",
-        city: "Taguig",
-        province: "Metro Manila",
-        date: "2026-08-10",
-        status: "Upcoming",
-        targetBags: 150,
-        collectedBags: 0,
-        imageLink: "/images/event.png",
-    },
-    {
-        id: "EVT-2026-003",
-        name: "Alumni Association Drive",
-        partner: "DLSU Alumni Chapter",
-        city: "Manila",
-        province: "Metro Manila",
-        date: "2026-05-20",
-        status: "Completed",
-        targetBags: 80,
-        collectedBags: 85,
-        imageLink: "/images/event.png",
-    },
-];
-
-type TabFilter = "All" | EventStatus;
-type SortOption = 
-    | "Default" 
-    | "Date: Earliest" 
-    | "Date: Latest" 
-    | "Target Bags: High to Low" 
-    | "Target Bags: Low to High" 
+type TabFilter = "All" | ViewEventsWithProvince["status"];
+type SortOption =
+    | "Default"
+    | "Date: Earliest"
+    | "Date: Latest"
+    | "Target Bags: High to Low"
+    | "Target Bags: Low to High"
     | "Name: A-Z";
 
 export function SAEventsPage() {
     const router = useRouter();
 
-    const [events, setEvents] = useState<BloodEvent[]>(initialEvents);
+    const [events, setEvents] = useState<ViewEventsWithProvince[]>([]);
+    const [eventsLoading, setEventsLoading] = useState(true);
+    const [eventsError, setEventsError] = useState("");
+
     const [activeTab, setActiveTab] = useState<TabFilter>("All");
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState<SortOption>("Default");
 
+    // Fetch real events from the DB on mount (same pattern as logs/events).
+    useEffect(() => {
+        const loadEvents = async () => {
+            setEventsLoading(true);
+            setEventsError("");
+            const result = await executeQueryAllEvents();
+            if (result.success && result.data) {
+                setEvents(result.data);
+            } else {
+                setEventsError(result.message);
+                setEvents([]);
+            }
+            setEventsLoading(false);
+        };
+        loadEvents();
+    }, []);
+
     // Modal States
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [eventToEdit, setEventToEdit] = useState<BloodEvent | null>(null);
-    const [eventToDelete, setEventToDelete] = useState<BloodEvent | null>(null);
+    const [eventToEdit, setEventToEdit] = useState<ViewEventsWithProvince | null>(null);
+    const [eventToDelete, setEventToDelete] = useState<ViewEventsWithProvince | null>(null);
 
     // Form Fields State
     const [formName, setFormName] = useState("");
@@ -109,20 +82,21 @@ export function SAEventsPage() {
                 evt.name.toLowerCase().includes(query) ||
                 evt.partner.toLowerCase().includes(query) ||
                 evt.city.toLowerCase().includes(query) ||
-                evt.id.toLowerCase().includes(query)
+                evt.province.toLowerCase().includes(query) ||
+                formatEventId(evt).toLowerCase().includes(query)
         );
     }
 
     // Sorting logic
     filteredEvents.sort((a, b) => {
         if (sortBy === "Date: Earliest") {
-            return a.date.localeCompare(b.date);
+            return a.event_date.localeCompare(b.event_date);
         } else if (sortBy === "Date: Latest") {
-            return b.date.localeCompare(a.date);
+            return b.event_date.localeCompare(a.event_date);
         } else if (sortBy === "Target Bags: High to Low") {
-            return b.targetBags - a.targetBags;
+            return Number(b.target_blood) - Number(a.target_blood);
         } else if (sortBy === "Target Bags: Low to High") {
-            return a.targetBags - b.targetBags;
+            return Number(a.target_blood) - Number(b.target_blood);
         } else if (sortBy === "Name: A-Z") {
             return a.name.localeCompare(b.name);
         }
@@ -141,23 +115,22 @@ export function SAEventsPage() {
         setIsCreateModalOpen(true);
     };
 
-    const openEditModal = (evt: BloodEvent) => {
+    const openEditModal = (evt: ViewEventsWithProvince) => {
         setEventToEdit(evt);
         setFormName(evt.name);
         setFormPartner(evt.partner);
         setFormCity(evt.city);
         setFormProvince(evt.province);
-        setFormDate(evt.date);
-        setFormTargetBags(evt.targetBags.toString());
-        setFormImageLink(evt.imageLink);
+        setFormDate(evt.event_date);
+        setFormTargetBags(evt.target_blood.toString());
         setIsCreateModalOpen(true);
     };
 
     const handleSaveEvent = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         const today = new Date().toISOString().split("T")[0];
-        let calculatedStatus: EventStatus = "Upcoming";
+        let calculatedStatus: ViewEventsWithProvince["status"] = "Upcoming";
         if (formDate === today) {
             calculatedStatus = "Ongoing";
         } else if (formDate < today) {
@@ -174,26 +147,33 @@ export function SAEventsPage() {
                               partner: formPartner,
                               city: formCity,
                               province: formProvince,
-                              date: formDate,
+                              event_date: formDate,
                               status: calculatedStatus,
-                              targetBags: parseInt(formTargetBags) || 100,
-                              imageLink: formImageLink,
+                              target_blood: BigInt(parseInt(formTargetBags) || 100),
                           }
                         : item
                 )
             );
         } else {
-            const newEvent: BloodEvent = {
-                id: `EVT-2026-00${events.length + 1}`,
+            const newEvent: ViewEventsWithProvince = {
+                id: BigInt(events.length + 1),
                 name: formName,
                 partner: formPartner,
+                street: null,
+                zip_code: null,
+                city_id: BigInt(1),
+                event_date: formDate,
+                start_time: "00:00:00",
+                end_time: null,
+                status: calculatedStatus,
+                visitors: BigInt(0),
+                extractions: BigInt(0),
+                produced_bags: BigInt(0),
+                target_blood: BigInt(parseInt(formTargetBags) || 100),
+                perk_claims: BigInt(0),
+                created_at: new Date(),
                 city: formCity,
                 province: formProvince,
-                date: formDate,
-                status: calculatedStatus,
-                targetBags: parseInt(formTargetBags) || 100,
-                collectedBags: 0,
-                imageLink: formImageLink,
             };
             setEvents([newEvent, ...events]);
         }
@@ -217,7 +197,7 @@ export function SAEventsPage() {
         return className;
     };
 
-    const getStatusPill = (status: EventStatus) => {
+    const getStatusPill = (status: ViewEventsWithProvince["status"]) => {
         let className = "px-[12px] py-[6px] rounded-full text-[14px] font-semibold ";
         if (status === "Ongoing") {
             className += "bg-[#e4f5ea] text-[#1a7a3f]";
@@ -229,9 +209,31 @@ export function SAEventsPage() {
         return className;
     };
 
-    const manageStaff = (evt: BloodEvent) => {
+    const manageStaff = (evt: ViewEventsWithProvince) => {
         router.push(`/sa/management/events/${evt.id}/staff`);
     };
+
+    if (eventsLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading events...</p>
+                </div>
+            </main>
+        );
+    }
+
+    if (eventsError) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{eventsError}</p>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
@@ -396,27 +398,27 @@ export function SAEventsPage() {
                                                     <span className="font-semibold text-[#002940]">
                                                         Scheduled Date:
                                                     </span>{" "}
-                                                    {evt.date}
+                                                    {evt.event_date}
                                                 </p>
 
                                                 <p>
                                                     <span className="font-semibold text-[#002940]">
                                                         Target Collection:
                                                     </span>{" "}
-                                                    {evt.targetBags} Bags
+                                                    {Number(evt.target_blood)} Bags
                                                 </p>
 
                                                 <p>
                                                     <span className="font-semibold text-[#002940]">
                                                         Current Collected:
                                                     </span>{" "}
-                                                    {evt.collectedBags} Bags
+                                                    {Number(evt.produced_bags)} Bags
                                                 </p>
                                             </div>
 
                                             <div className="w-full h-[1.6in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] overflow-hidden flex items-center justify-center">
                                                 <img
-                                                    src={evt.imageLink || "/images/event-placeholder.png"}
+                                                    src="/images/event-placeholder.png"
                                                     alt={evt.name}
                                                     className="w-full h-full object-cover"
                                                 />
