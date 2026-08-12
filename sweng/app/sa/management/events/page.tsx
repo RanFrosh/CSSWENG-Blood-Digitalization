@@ -461,10 +461,10 @@ export function SAEventsPage() {
 
                                             <div className="w-full h-[1.6in] bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] overflow-hidden flex items-center justify-center">
                                                 <img
-                                                    src={evt.img_url ?? "/images/event-placeholder.png"}
+                                                    src={evt.img_url ?? "/images/event.png"}
                                                     alt={evt.name}
                                                     className="w-full h-full object-cover"
-                                                    onError={(e) => { (e.target as HTMLImageElement).src = "/images/event-placeholder.png"; }}
+                                                    onError={(e) => { (e.target as HTMLImageElement).src = "/images/event.png"; }}
                                                 />
                                             </div>
                                         </div>
