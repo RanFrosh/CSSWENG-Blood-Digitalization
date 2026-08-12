@@ -162,17 +162,7 @@ export default function LSEventsClient({
                             <option value="Partner (Z-A)">Partner (Z-A)</option>
                         </select>
                     </div>
-
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setEventCode("");
-                            setIsJoinModalOpen(true);
-                        }}
-                        className="px-[20px] py-[10px] rounded-full bg-[#002940] border-2 border-[#002940] text-white font-bold text-[16px] cursor-pointer hover:bg-white hover:text-[#002940] transition"
-                    >
-                        + Join Event
-                    </button>
+                    
                 </div>
 
                 {/* Divider & Result Count */}
