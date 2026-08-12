@@ -229,6 +229,17 @@ export class ImpEventModel implements EventData {
         }
     }
 
+    async deleteEvent(id: bigint): Promise<ApiResponse> {
+        try {
+            await this.access
+                .delete(event_log)
+                .where(eq(event_log.id, id));
+            return { success: true, message: "Event deleted" };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }
+    }
+
     async logEvent(data: CreateEventRecords): Promise<ApiResponse> {
         try {
             await this.access
