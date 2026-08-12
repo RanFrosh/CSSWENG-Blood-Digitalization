@@ -7,15 +7,15 @@ export const assigned_staff = pgTable("assigned_staff", {
 
     staff_id: uuid("staff_id")
         .references(() => profiles.id, {
-            onDelete: "no action",
-            onUpdate: "no action",
+            onDelete: 'cascade',
+            onUpdate: 'cascade',
         })
         .notNull(),
 
     event_log_id: bigint("event_log_id", { mode: "bigint" })
         .references(() => event_log.id, {
-            onDelete: "no action",
-            onUpdate: "no action",
+            onDelete: 'cascade',
+            onUpdate: 'cascade',
         })
         .notNull(),
 });
