@@ -14,11 +14,17 @@ export const donor_to_event = pgTable("donor_to_event", {
   id: bigserial("id", { mode: "bigint" }).primaryKey(),
 
   donor_id: bigint("donor_id", { mode: "bigint" })
-    .references(() => donor.id)
+    .references(() => donor.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade'
+    })
     .notNull(),
 
   event_id: bigint("event_id", { mode: "bigint" })
-    .references(() => event_log.id)
+    .references(() => event_log.id, {
+      onDelete: 'cascade',
+      onUpdate: 'cascade'
+    })
     .notNull(),
 
   is_success: boolean("is_success").default(false).notNull(),

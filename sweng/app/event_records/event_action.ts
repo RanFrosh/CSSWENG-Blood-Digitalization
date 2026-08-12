@@ -59,19 +59,16 @@ export async function executeCreateEvent(data: {
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpEventManager(model, profiler);
 
-    // 1. Resolve province name → province id
     const provinceRes = await controller.invokeGetProvince(data.provinceName);
     if (!provinceRes.success || !provinceRes.data) {
         return { success: false, message: provinceRes.message || "Province not found" };
     }
 
-    // 2. Resolve city name (+ province id) → city id
     const cityRes = await controller.invokeGetCity(data.cityName, provinceRes.data);
     if (!cityRes.success || !cityRes.data) {
         return { success: false, message: cityRes.message || "City not found" };
     }
 
-    // 3. Date-derived status
     const today = new Date().toISOString().split("T")[0];
     let status: ViewEvents["status"] = "Upcoming";
     if (data.eventDate < today) {
@@ -80,7 +77,6 @@ export async function executeCreateEvent(data: {
         status = "Ongoing";
     }
 
-    // 4. Build CreateEvents
     const event: CreateEvents = {
         name: data.name,
         partner: data.partner,
@@ -88,8 +84,8 @@ export async function executeCreateEvent(data: {
         zip_code: null,
         city_id: cityRes.data,
         event_date: data.eventDate,
-        start_time: "09:00:00",   // 9AM
-        end_time: "21:00:00",     // 9PM
+        start_time: "09:00:00",   
+        end_time: "21:00:00",    
         status,
         visitors: BigInt(0),
         extractions: BigInt(0),
@@ -100,7 +96,6 @@ export async function executeCreateEvent(data: {
         img_url: data.imgUrl?.trim() || null,
     };
 
-    // 5. Persist (invokeCreateEvent re-gates with 'create_event')
     return await controller.invokeCreateEvent(event);
 }
 
