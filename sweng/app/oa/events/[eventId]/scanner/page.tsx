@@ -6,7 +6,7 @@ import { Html5Qrcode } from "html5-qrcode";
 
 import Header from "@/components/HeaderOA";
 
-import { verifyDonorAction } from "@/app/actions/donor_verification";
+import { verifyDonorAction } from "@/utils/donor_verification";
 import { checkInDonorAction } from "@/app/oa/events/[eventId]/scanner/action";
 
 export default function ScannerPage() {

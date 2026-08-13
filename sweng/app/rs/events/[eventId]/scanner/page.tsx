@@ -6,7 +6,7 @@ import { Html5Qrcode } from "html5-qrcode";
 
 import Header from "@/components/HeaderRS";
 
-import { verifyDonorAction } from "@/app/actions/donor_verification";
+import { verifyDonorAction } from "@/utils/donor_verification";
 import { claimPerkAction } from "@/app/rs/events/[eventId]/scanner/action";
 
 export default function RSScannerPage() {
