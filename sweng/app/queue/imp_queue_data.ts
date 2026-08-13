@@ -16,22 +16,24 @@ export class ImpQueueModel implements QueueData {
 
     async queryQueue(filterer: ViewQueueFilters): Promise<ApiResponse<ViewQueue[]>> {
         try {
-            if (!filterer.staff_id || !filterer.event_log_id) {
-                return { success: false, message: "Missing profile or event", data: undefined };
+            if (!filterer.event_log_id) {
+                return { success: false, message: "Missing event", data: undefined };
             }
 
-            const assignment = await this.access
-            .select()
-            .from(assigned_staff)
-            .where(
-                and(
-                    eq(assigned_staff.staff_id, filterer.staff_id),
-                    eq(assigned_staff.event_log_id, filterer.event_log_id)
+            if (filterer.staff_id) {
+                const assignment = await this.access
+                .select()
+                .from(assigned_staff)
+                .where(
+                    and(
+                        eq(assigned_staff.staff_id, filterer.staff_id),
+                        eq(assigned_staff.event_log_id, filterer.event_log_id)
+                    )
                 )
-            )
-            .limit(1);
+                .limit(1);
 
-            if (assignment.length === 0) return { success: false, message: "Not assigned to this event", data: undefined }
+                if (assignment.length === 0) return { success: false, message: "Not assigned to this event", data: undefined }
+            }
             
             const event = await this.access
             .select()
@@ -50,6 +52,9 @@ export class ImpQueueModel implements QueueData {
             if (event[0].status === 'Upcoming') return { success: false, message: "Event has not yet started", data: undefined }
 
             const conditions: SQL[] = [eq(event_queue.event_log_id, filterer.event_log_id)];
+            if (filterer.donor_id !== undefined && filterer.donor_id !== null) {
+                conditions.push(eq(event_queue.donor_id, filterer.donor_id));
+            }
             if (filterer.station !== undefined) {
                 if (filterer.station === null) {
                     conditions.push(isNull(event_queue.station));
