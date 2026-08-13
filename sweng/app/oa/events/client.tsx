@@ -1,50 +1,32 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderOA";
 import StaffDetails from "@/components/StaffDetails";
+import { ViewEventsWithProvince } from "@/types/event_type";
+import { EventStatusType } from "@/db/enums/event_status";
+import { ReadProfile } from "@/types/profile_type";
 
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-type EventTab = EventStatus | "All";
+type EventTab = EventStatusType | "All";
 
-// Fixed Type Collision: Changed from 'StaffDetails' to 'StaffProfile'
-// so it doesn't clash with your imported <StaffDetails /> component!
-export type StaffProfile = {
-    id: string;
-    name: string;
-    role: string;
-};
-
-export type AssignedEvent = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatus;
+type Props = {
+    assignedEvents: ViewEventsWithProvince[];
+    staff: ReadProfile | null;
+    activeTab: EventTab;
+    onTabChange: (tab: EventTab) => void;
 };
 
 export default function OAEventsClient({
     assignedEvents,
-    staff, // Keeping this prop available in case you need to pass it into <StaffDetails /> later!
-}: {
-    assignedEvents: AssignedEvent[];
-    staff: StaffProfile | null;
-}) {
+    staff,
+    activeTab,
+    onTabChange,
+}: Props) {
     const router = useRouter();
-    
-    // Tab State
-    const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
+
     const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
 
-    const filteredEvents =
-        activeTab === "All"
-        ? assignedEvents
-        : assignedEvents.filter((event) => event.status === activeTab);
-
-    const openEvent = (event: AssignedEvent) => {
+    const openEvent = (event: ViewEventsWithProvince) => {
         if (event.status === "Ongoing") {
             router.push(`/oa/events/${event.id}`);
         }
@@ -62,7 +44,7 @@ export default function OAEventsClient({
         return className;
     };
 
-    const createActionButton = (event: AssignedEvent) => {
+    const createActionButton = (event: ViewEventsWithProvince) => {
         if (event.status !== "Ongoing") {
             return null;
         }
@@ -88,7 +70,6 @@ export default function OAEventsClient({
                 </h1>
             </section>
 
-                {/* You might need to pass `staff` in here eventually if this component expects it: <StaffDetails staff={staff} /> */}
                 <StaffDetails />
 
                 <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
@@ -101,7 +82,7 @@ export default function OAEventsClient({
                             {tabs.map((tab) => (
                                 <button
                                     key={tab}
-                                    onClick={() => setActiveTab(tab)}
+                                    onClick={() => onTabChange(tab)}
                                     className={getTab(tab)}
                                     >
                                     {tab}
@@ -111,7 +92,7 @@ export default function OAEventsClient({
                     </div>
 
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {filteredEvents.map((event) => (
+                        {assignedEvents.map((event) => (
                             <div
                                 key={event.id}
                                 className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
@@ -143,28 +124,28 @@ export default function OAEventsClient({
                                         <span className="font-semibold text-[#002940]">
                                             Location:
                                         </span>{" "}
-                                        {event.location}
+                                        {event.city}, {event.province}
                                         </p>
 
                                         <p>
                                         <span className="font-semibold text-[#002940]">
                                             Date:
                                         </span>{" "}
-                                        {event.date}
+                                        {event.event_date}
                                         </p>
 
                                         <p>
                                         <span className="font-semibold text-[#002940]">
                                             Time:
                                         </span>{" "}
-                                        {event.time}
+                                        {event.start_time && event.end_time ? `${event.start_time} - ${event.end_time}` : "—"}
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         ))}
 
-                        {filteredEvents.length === 0 && (
+                        {assignedEvents.length === 0 && (
                             <div className="p-10 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#c0cad0] rounded-[16px] bg-[#f9fdff]">
                                 <p className="text-[20px] font-semibold text-[#002940] mb-2">No events found</p>
                             </div>

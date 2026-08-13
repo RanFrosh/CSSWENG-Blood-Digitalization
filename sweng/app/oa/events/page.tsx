@@ -1,63 +1,82 @@
-import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
+"use client";
+import { useState, useEffect } from "react";
+import { EventStatusType } from "@/db/enums/event_status";
+import { ViewEventsWithProvince } from "@/types/event_type";
+import { ReadProfile } from "@/types/profile_type";
+import Header from "@/components/HeaderOA";
+import OAEventsClient from "./client";
+import { executeEventQueryStaff } from "../../event_records/event_action";
+import { fetchOACurrentUser } from "../oa_action";
 
-import { orm } from "@/db/drizzle";
-import { serverSupa } from "@/db/supaserver";
+type EventTab = EventStatusType | "All";
 
-import { event_log } from "@/db/schemas/event_log";
-import { profiles } from "@/db/schemas/profiles";
-import { assigned_staff } from "@/db/schemas/assigned_staff";
+export default function OAEventsPage() {
+    const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
 
-import OAEventsClient, { AssignedEvent, StaffProfile } from "./client";
+    const [events, setEvents] = useState<ViewEventsWithProvince[]>([]);
+    const [staff, setStaff] = useState<ReadProfile | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
 
-export default async function OAEventsPage() {
-    // 1. Authenticate
-    const supabase = await serverSupa();
+    useEffect(() => {
+        const loadData = async () => {
+            setIsLoading(true);
+            setErrorMessage("");
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+            try {
+                const [eventsRes, profileRes] = await Promise.all([
+                    executeEventQueryStaff(
+                        activeTab !== "All" ? { status: activeTab } : {}
+                    ),
+                    fetchOACurrentUser(),
+                ]);
 
-    if (!user) {
-        redirect("/landing");
+                if (eventsRes.success && eventsRes.data) {
+                    setEvents(eventsRes.data);
+                } else {
+                    setErrorMessage(eventsRes.message);
+                }
+
+                if (profileRes.success && profileRes.data) {
+                    setStaff(profileRes.data);
+                }
+            } catch (error) {
+                setErrorMessage("Failed to connect to the database");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadData();
+    }, [activeTab]);
+
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading events...</p>
+                </div>
+            </main>
+        );
     }
 
-    const currentProfileId = user.id;
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
 
-    // 2. Fetch Staff Details
-    const staffFromDb = await orm
-        .select()
-        .from(profiles)
-        .where(eq(profiles.id, currentProfileId))
-        .limit(1);
-
-    const staff: StaffProfile | null = staffFromDb[0]
-        ? {
-            id: staffFromDb[0].id,
-            name: staffFromDb[0].name,
-            role: staffFromDb[0].role,
-          }
-        : null;
-
-    // 3. Fetch Assigned Events
-    const eventsFromDb = await orm
-        .select()
-        .from(assigned_staff)
-        .innerJoin(event_log, eq(assigned_staff.event_log_id, event_log.id))
-        .where(eq(assigned_staff.staff_id, currentProfileId));
-
-    // 4. Map to Client Props
-    const assignedEvents: AssignedEvent[] = eventsFromDb.map((row) => ({
-        id: row.event_log.id.toString(),
-        name: row.event_log.name,
-        location: `${row.event_log.street}, ${row.event_log.zip_code}`,
-        date: row.event_log.event_date ?? "No date",
-        time: `${row.event_log.start_time} - ${row.event_log.end_time ?? ""}`,
-        partner: row.event_log.partner,
-        // Safety cast for strict client types
-        status: row.event_log.status as "Ongoing" | "Upcoming" | "Completed",
-    }));
-
-    // 5. Render Client Component
-    return <OAEventsClient assignedEvents={assignedEvents} staff={staff} />;
+    return (
+        <OAEventsClient
+            assignedEvents={events}
+            staff={staff}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+        />
+    );
 }
