@@ -102,7 +102,7 @@ export default function RequestsClient({
         if (res.success) {
             setNotification({ 
                 type: "success", 
-                message: `Request ${selectedRequest.id} ${modalAction.toLowerCase()}d successfully!` 
+                message: `Request ${selectedRequest.id} ${modalAction.toLowerCase()} successfully!` 
             });
             setSelectedRequest(null);
             setModalAction(null);
