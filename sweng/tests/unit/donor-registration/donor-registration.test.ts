@@ -27,14 +27,6 @@ jest.mock("@/db/models/donor", () => ({
     donor: "donor_table_mock",
 }));
 
-function birthdateForAge(age: number): string {
-    const today = new Date();
-    const year = today.getFullYear() - age;
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-}
-
 const VALID_AGE = 25;
 const VALID_FIELDS = {
     eventId: "event-123",
@@ -42,7 +34,6 @@ const VALID_FIELDS = {
     middleName: "Santos",
     lastName: "Dela Cruz",
     age: String(VALID_AGE),
-    birthdate: birthdateForAge(VALID_AGE),
     sex: "male",
     bloodType: "O+",
     email: "juan@example.com",
@@ -220,43 +211,6 @@ describe("registerDonorAction", () => {
         });
     });
 
-    describe("age validation", () => {
-        it("returns an error when the provided age does not match the birthdate", async () => {
-            mockNoExistingDonor();
-            const formData = buildFormData({
-                age: String(VALID_AGE + 5),
-                birthdate: birthdateForAge(VALID_AGE),
-            });
-
-            const result = await registerDonorAction(null, formData);
-
-            expect(result).toEqual({
-                error: "Age does not match the selected birth date.",
-            });
-        });
-
-        it("does not attempt an insert when age validation fails", async () => {
-            mockNoExistingDonor();
-            const formData = buildFormData({
-                age: String(VALID_AGE + 1),
-            });
-
-            await registerDonorAction(null, formData);
-
-            expect(mockInsert).not.toHaveBeenCalled();
-        });
-
-        it("accepts a matching age and birthdate", async () => {
-            mockNoExistingDonor();
-            mockInsertSuccess();
-            const formData = buildFormData();
-
-            await expect(registerDonorAction(null, formData)).rejects.toThrow(
-                "NEXT_REDIRECT"
-            );
-        });
-    });
-
     describe("success cases", () => {
         it("inserts a donor with the correctly mapped fields", async () => {
             mockNoExistingDonor();
@@ -276,7 +230,6 @@ describe("registerDonorAction", () => {
                     email: VALID_FIELDS.email,
                     mobile_no: VALID_FIELDS.mobileNumber,
                     age: VALID_AGE,
-                    birthdate: VALID_FIELDS.birthdate,
                     street: VALID_FIELDS.address,
                     zip_code: VALID_FIELDS.zipCode,
                     sex: VALID_FIELDS.sex,

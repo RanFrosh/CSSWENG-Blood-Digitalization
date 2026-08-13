@@ -123,22 +123,6 @@ export default function RegistrationForm({
                         />
                     </div>
 
-                    <div className="flex flex-col gap-[5px]">
-                        <label
-                            htmlFor="birthdate"
-                            className="text-[18px] font-semibold text-[#002940]"
-                        >
-                            Birth Date
-                        </label>
-                        <input
-                            id="birthdate"
-                            name="birthdate"
-                            type="date"
-                            className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                            required
-                        />
-                    </div>
-
                     <div className="flex flex-col gap-[10px]">
                         <p className="text-[18px] font-semibold text-[#002940]">
                             Sex

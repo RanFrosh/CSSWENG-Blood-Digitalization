@@ -31,7 +31,6 @@ export async function registerDonorAction(
   const lastName = formData.get("lastName") as string;
 
   const age = formData.get("age") as string;
-  const birthdate = formData.get("birthdate") as string;
 
   const sex = formData.get("sex") as string;
   const bloodType = formData.get("bloodType") as string;
@@ -111,24 +110,6 @@ export async function registerDonorAction(
     }
   }
 
-  // Calculate the age based on the provided birthdate and compare it with the provided age
-  const birthDateValue = new Date(birthdate);
-  const today = new Date();
-
-  let calculatedAge = today.getFullYear() - birthDateValue.getFullYear();
-  const monthDifference = today.getMonth() - birthDateValue.getMonth();
-
-  if (
-    monthDifference < 0 ||
-    (monthDifference === 0 && today.getDate() < birthDateValue.getDate())
-  ) {
-    calculatedAge--;
-  }
-
-  if (Number(age) !== calculatedAge) {
-    return { error: "Age does not match the selected birth date." };
-  }
-
   // Insert the new donor record into the database
 try {
   const [newDonor] = await orm
@@ -140,7 +121,6 @@ try {
       email,
       mobile_no: mobileNumber,
       age: Number(age),
-      birthdate: birthdate || null,
       street: address.trim(),
       zip_code: zipCode,
       sex,
