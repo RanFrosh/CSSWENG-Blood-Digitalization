@@ -647,7 +647,7 @@ export function SAEventsPage() {
                                     className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {saveLoading
-                                        ? "Creating..."
+                                        ? "Processing..."
                                         : eventToEdit
                                         ? "Save Changes"
                                         : "Deploy Event"}
