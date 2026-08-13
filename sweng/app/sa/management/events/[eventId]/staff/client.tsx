@@ -35,6 +35,8 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
     
     const router = useRouter();
 
+    const goBack = () => router.push("/sa/management/events");
+    
     const [activeStaffTab, setActiveStaffTab] = useState<StaffTab>("Assigned Staff");
     const [staffSearch, setStaffSearch] = useState("");
     const [staffTypeFilter, setStaffTypeFilter] = useState<StaffTypeFilter>("All Staff Types");
@@ -192,9 +194,23 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
     return (
         <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
             {/* Header Titles */}
-            <section className="bg-[#f9fdff] p-[0.25in]">
-                <p className="text-[18px] font-['Montserrat'] text-[#002940]">Super Admin</p>
-                <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">Event Staff Management</h1>
+            <section className="bg-[#f9fdff] p-[0.25in] flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
+                <div>
+                    <p className="text-[18px] font-['Montserrat'] text-[#002940]">
+                        Super Admin
+                    </p>
+                    <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">
+                        Event Staff Management
+                    </h1>
+                </div>
+
+                <button
+                    type="button"
+                    onClick={goBack}
+                    className="px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer transition hover:bg-[#002940] hover:text-white"
+                >
+                    Back to Events
+                </button>
             </section>
 
             {notification && (
