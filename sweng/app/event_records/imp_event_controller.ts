@@ -142,6 +142,10 @@ export class ImpEventManager implements EventController {
         return await this.eventModel.deleteEvent(id);
     }
 
+    async invokeUpdateEventStatuses(): Promise<ApiResponse<number>> {
+        return await this.eventModel.updateEventStatuses();
+    }
+
     async invokeLogEvent(data: Omit<CreateEventRecords, "staff_id">): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'log_event');
         if (!res.success || !res.data)
