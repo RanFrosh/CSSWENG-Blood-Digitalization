@@ -1,45 +1,65 @@
-import { eq } from "drizzle-orm";
-import { redirect } from "next/navigation";
+"use client";
+import { useState, useEffect } from "react";
+import { EventStatusType } from "@/db/enums/event_status";
+import { ViewEventsWithProvince } from "@/types/event_type";
+import Header from "@/components/HeaderRS";
+import StaffDetails from "@/components/StaffDetails";
+import RSClient from "./client";
+import { executeEventQueryStaff } from "../../event_records/event_action";
 
-import { orm } from "@/db/drizzle";
-import { serverSupa } from "@/db/supaserver";
+type EventTab = EventStatusType | "All";
 
-import { event_log } from "@/db/schemas/event_log";
-import { assigned_staff } from "@/db/schemas/assigned_staff";
+export default function RSEventsPage() {
+    const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
 
-import RSClient, { AssignedEvent } from "./client";
+    const [events, setEvents] = useState<ViewEventsWithProvince[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [errorMessage, setErrorMessage] = useState("");
 
-export default async function RSEventsPage() {
-    // 1. Authenticate the User
-    const supabase = await serverSupa();
+    useEffect(() => {
+        const loadEvents = async () => {
+            setIsLoading(true);
+            setErrorMessage("");
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+            try {
+                const result = await executeEventQueryStaff(
+                    activeTab !== "All" ? { status: activeTab } : {}
+                );
+                if (result.success && result.data) {
+                    setEvents(result.data);
+                } else {
+                    setErrorMessage(result.message);
+                }
+            } catch (error) {
+                setErrorMessage("Failed to connect to the database");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadEvents();
+    }, [activeTab]);
 
-    if (!user) {
-        redirect("/landing");
+    if (isLoading) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-[#002940]">Loading events...</p>
+                </div>
+            </main>
+        );
     }
 
-    // 2. Fetch Assigned Events from Drizzle
-    const eventsFromDb = await orm
-        .select()
-        .from(assigned_staff)
-        .innerJoin(event_log, eq(assigned_staff.event_log_id, event_log.id))
-        .where(eq(assigned_staff.staff_id, user.id));
+    if (errorMessage) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">{errorMessage}</p>
+                </div>
+            </main>
+        );
+    }
 
-    // 3. Map Database Types to Client Props
-    const assignedEvents: AssignedEvent[] = eventsFromDb.map((row) => ({
-        id: row.event_log.id.toString(),
-        name: row.event_log.name,
-        location: `${row.event_log.street}, ${row.event_log.zip_code}`,
-        date: row.event_log.event_date ?? "No date",
-        time: `${row.event_log.start_time} - ${row.event_log.end_time ?? ""}`,
-        partner: row.event_log.partner,
-        // Cast the status to match the strict type in your Client component
-        status: row.event_log.status as "Ongoing" | "Upcoming" | "Completed",
-    }));
-
-    // 4. Pass the data to the Client Component
-    return <RSClient assignedEvents={assignedEvents} />;
+    return <RSClient assignedEvents={events} activeTab={activeTab} onTabChange={setActiveTab} />;
 }

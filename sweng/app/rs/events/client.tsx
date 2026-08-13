@@ -5,43 +5,31 @@ import { useRouter } from "next/navigation";
 
 import Header from "@/components/HeaderRS";
 import StaffDetails from "@/components/StaffDetails";
+import { ViewEventsWithProvince } from "@/types/event_type";
+import { EventStatusType } from "@/db/enums/event_status";
 
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-type EventTab = EventStatus | "All";
-
-export type AssignedEvent = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatus;
-};
+type EventTab = EventStatusType | "All";
 
 type Props = {
-    assignedEvents: AssignedEvent[];
+    assignedEvents: ViewEventsWithProvince[];
+    activeTab: EventTab;
+    onTabChange: (tab: EventTab) => void;
 };
 
 export default function RSClient({
     assignedEvents,
+    activeTab,
+    onTabChange,
 }: Props) {
     const router = useRouter();
 
-    // Tab State
-    const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
     const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
 
     // Modal State (Ported over from the Anals' broken file!)
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
     const [eventCode, setEventCode] = useState("");
 
-    const filteredEvents =
-        activeTab === "All"
-            ? assignedEvents
-            : assignedEvents.filter((event) => event.status === activeTab);
-
-    const openEvent = (event: AssignedEvent) => {
+    const openEvent = (event: ViewEventsWithProvince) => {
         if (event.status === "Ongoing") {
             router.push(`/rs/events/${event.id}`);
         }
@@ -60,7 +48,7 @@ export default function RSClient({
         return className;
     };
 
-    const createActionButton = (event: AssignedEvent) => {
+    const createActionButton = (event: ViewEventsWithProvince) => {
         if (event.status !== "Ongoing") {
             return null;
         }
@@ -109,7 +97,7 @@ export default function RSClient({
                             {tabs.map((tab) => (
                                 <button
                                     key={tab}
-                                    onClick={() => setActiveTab(tab)}
+                                    onClick={() => onTabChange(tab)}
                                     className={getTab(tab)}
                                 >
                                     {tab}
@@ -129,7 +117,7 @@ export default function RSClient({
 
                     {/* Event Cards */}
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {filteredEvents.map((event) => (
+                        {assignedEvents.map((event) => (
                             <div
                                 key={event.id}
                                 className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
@@ -163,28 +151,28 @@ export default function RSClient({
                                             <span className="font-semibold text-[#002940]">
                                                 Location:
                                             </span>{" "}
-                                            {event.location}
+                                            {event.city}, {event.province}
                                         </p>
 
                                         <p>
                                             <span className="font-semibold text-[#002940]">
                                                 Date:
                                             </span>{" "}
-                                            {event.date}
+                                            {event.event_date}
                                         </p>
 
                                         <p>
                                             <span className="font-semibold text-[#002940]">
                                                 Time:
                                             </span>{" "}
-                                            {event.time}
+                                            {event.start_time && event.end_time ? `${event.start_time} - ${event.end_time}` : "—"}
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         ))}
                         
-                        {filteredEvents.length === 0 && (
+                        {assignedEvents.length === 0 && (
                             <div className="p-10 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#c0cad0] rounded-[16px] bg-[#f9fdff]">
                                 <p className="text-[20px] font-semibold text-[#002940] mb-2">No events found</p>
                             </div>

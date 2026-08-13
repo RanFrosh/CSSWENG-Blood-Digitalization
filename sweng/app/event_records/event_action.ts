@@ -19,7 +19,7 @@ export async function executeEventQueryStaff(data: ViewEventFilters): Promise<Ap
 
     const profiler = new ImpProfileGetter(database);
 
-    const auth = await helpGateKeep(profiler, "access_mp_page")
+    const auth = await helpGateKeep(profiler, "view_event")
 
     if (!auth.success || !auth.data) {
         return { success: false, message: auth.message };
