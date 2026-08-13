@@ -182,7 +182,7 @@ export class ImpMPManager implements MPController {
 
             const queueId = activeQueue[0].id;
 
-            const result = await this.invokeDeleteQueue(queueId);
+            const result = await this.invokeDeleteQueue({ id: queueId });
 
             if (result.success) {
                 await executeLogEvent({

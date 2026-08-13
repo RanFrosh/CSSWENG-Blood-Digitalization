@@ -20,7 +20,7 @@ export interface MPData {
     getEventQueueWithDonors(eventId: bigint, stationFilter?: string | null): Promise<any>;
     verifyAccess(staffId: string, eventId: bigint): Promise<any>;
     getStaffStatusForEvent(eventId: bigint, staffId: string): Promise<any>;
-    getActiveQueueByDonorAndEvent(donorId: bigint, eventId: bigint, station: string): Promise<any>;
+    getActiveQueueByDonorAndEvent(donorId: bigint, eventId: bigint, station: string): Promise<{ id: bigint }[]>;
     updateQueueStation(queueTarget: UpdateQueue): Promise<any>;
     deleteQueue(donorTarget: DeleteQueue): Promise<any>;
 }
