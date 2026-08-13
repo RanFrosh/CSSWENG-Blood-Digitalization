@@ -23,10 +23,6 @@ export default function HeaderMP() {
         if (eventId) router.push(`/mp/events/${eventId}`);
     };
 
-    const goQueue = () => {
-        if (eventId) router.push(`/mp/events/${eventId}/queue`);
-    };
-
     const goScreening = () => {
         if (eventId && donorId) router.push(`/mp/events/${eventId}/screening/${donorId}`);
     };
@@ -55,12 +51,6 @@ export default function HeaderMP() {
             name: "Event Home",
             path: `/mp/events/${eventId}`,
             onClick: goEventHome,
-        });
-
-        navLinks.push({
-            name: "Screening Queue",
-            path: `/mp/events/${eventId}/queue`,
-            onClick: goQueue,
         });
 
         if (donorId) {

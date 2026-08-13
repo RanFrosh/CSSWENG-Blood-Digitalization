@@ -3,52 +3,39 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { ReadProfile } from "@/types/profile_type";
 import { orm } from "@/db/drizzle";
-import { ImpQueueModel } from "@/app/queue/imp_queue_data";
-import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { serverSupa } from "@/db/supaserver";
 import { adminSupa } from "@/db/supaadmin";
 import { helpGateKeep } from "@/utils/access/bouncer";
 import { ImpProfilesModel } from "@/app/profiles/imp_profiles_data";
 import { ImpProfilesManager } from "@/app/profiles/imp_profiles_controller";
-import { executeLogEvent } from "@/app/event_records/event_action";
+import { ImpMPManager } from "@/controllers/mp_controller";
+import { ImpMPModel } from "@/queries/mp_query";
 
-export async function completeScreening(queueId: bigint): Promise<ApiResponse> {
+async function getMPController() {
+
+    const database = await serverSupa();
+    const model = new ImpMPModel();
+    const profiler = new ImpProfileGetter(database);
+
+    return new ImpMPManager(model, profiler);
+}
+
+export async function completeScreening(donorId: bigint, eventId: bigint): Promise<ApiResponse> {
     try {
-        const database = await serverSupa();
-        const model = new ImpQueueModel(orm);
-        const profiler = new ImpProfileGetter(database);
-        const controller = new ImpQueueManager(model, profiler);
+        const controller = await getMPController();
 
-        const result = await controller.invokeUpdateQueueStation({
-            id: queueId,
-            station: 'lab_queue',
-            staff_id: null,
-        });
-
-        return result;
+        return await controller.invokeCompleteScreening(donorId, eventId);
     } catch (err: any) {
         return { success: false, message: err.message };
     }
 }
 
-export async function failScreening(queueId: bigint, donorId: bigint, eventId: bigint): Promise<ApiResponse> {
+export async function failScreening(donorId: bigint, eventId: bigint): Promise<ApiResponse> {
     try {
-        const database = await serverSupa();
-        const model = new ImpQueueModel(orm);
-        const profiler = new ImpProfileGetter(database);
-        const controller = new ImpQueueManager(model, profiler);
+        const controller = await getMPController();
 
-        const result = await controller.invokeDeleteQueue({ id: queueId });
-        if (result.success) {
-            await executeLogEvent({
-                event_log_id: eventId,
-                donor_id: donorId,
-                action: "deferral",
-                time: new Date().toTimeString().slice(0, 8),
-            });           
-        }
-        return result;
+        return await controller.invokeFailScreening(donorId, eventId);
     } catch (err: any) {
         return { success: false, message: err.message };
     }
@@ -124,4 +111,37 @@ export async function editMPCurrentUser(input: {
     }
 
     return { success: false, message: "Please input at least one of the fields" };
+}
+
+export async function verifyMPEventAccess(eventIdStr: string) {
+    
+    try {
+        const controller = await getMPController();
+        return await controller.invokeVerifyEventAccess(eventIdStr);
+    } catch (err: any) {
+        console.error("Server Action Error:", err);
+        return { success: false, message: "Invalid Event ID format" };
+    }
+}
+
+export async function getMPQueue(eventIdStr: string) {
+
+    try {
+        const controller = await getMPController();
+        return await controller.invokeGetQueue(eventIdStr, "med_queue");
+    } catch (err: any) {
+        console.error("Queue Fetch Error:", err);
+        return { success: false, message: "Failed to fetch donor queue" };
+    }
+}
+
+export async function getStaffStatus(eventIdStr: string) {
+
+    try {
+        const controller = await getMPController();
+        return await controller.invokeGetStaffStatus(eventIdStr);
+    } catch (err: any) {
+        console.error("Staff Status Fetch Error:", err);
+        return { success: false, message: "Failed to fetch staff status" };
+    }
 }

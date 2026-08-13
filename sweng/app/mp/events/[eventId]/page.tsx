@@ -1,33 +1,28 @@
 import Header from "@/components/HeaderMP";
-import StaffDetails from "@/components/StaffDetails";
-import { executeEventQueryStaff } from "@/app/event_records/event_action";
-import MPEventsClient from "./client";
-import { EventStatusType } from "@/db/enums/event_status";
+import { getMPQueue, verifyMPEventAccess, getStaffStatus } from "@/actions/mp_action";
+import MPEventClient from "./client";
 
-export default async function MPEventsPage({
-    searchParams,
+export default async function MPEventPage({
+    params,
 }: {
-    searchParams: Promise<{ [key: string]: string | undefined }>;
+    params: Promise<{ eventId: string }> | { eventId: string };
 }) {
+    const resolvedParams = await params;
+    const { eventId } = resolvedParams;
 
-    const resolvedParams = await searchParams;
-    const tab = (resolvedParams.tab || "Ongoing") as EventStatusType | "All";
+    const eventRes = await verifyMPEventAccess(eventId);
 
-    const res = await executeEventQueryStaff(
-        tab !== "All" ? { status: tab } : {}
-    );
-
-    if (!res.success) {
+    if (!eventRes.success || !eventRes.data) {
         return (
             <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
                 <Header />
                 <div className="flex-1 flex items-center justify-center p-[0.35in]">
                     <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.5in] text-center shadow-sm max-w-lg w-full">
                         <p className="text-[24px] font-bold text-red-500 font-['Montserrat']">
-                            Error Loading Events
+                            Access Denied
                         </p>
                         <p className="mt-2 text-[18px] font-semibold text-[#002940]">
-                            {res.message || "Access Denied"}
+                            {eventRes.message || "Event not found or not assigned to you."}
                         </p>
                     </div>
                 </div>
@@ -35,16 +30,20 @@ export default async function MPEventsPage({
         );
     }
 
+    const [queueRes, staffRes] = await Promise.all([
+        getMPQueue(eventId),
+        getStaffStatus(eventId)
+    ]);
+
+    const waitlist = queueRes.success && queueRes.data ? queueRes.data.queue : [];
+    const myStation = staffRes.success && staffRes.data ? staffRes.data : null;
+
     return (
-        <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
-            <Header />
-            <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
-                <StaffDetails />
-                <MPEventsClient 
-                    initialEvents={res.data || []}
-                    currentTab={tab}
-                />
-            </div>
-        </main>
+        <MPEventClient 
+            eventId={eventId}
+            selectedEvent={eventRes.data}
+            initialWaitlist={waitlist}
+            initialStation={myStation}
+        />
     );
 }

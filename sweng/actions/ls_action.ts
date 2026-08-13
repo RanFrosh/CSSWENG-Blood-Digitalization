@@ -2,7 +2,7 @@
 
 import { serverSupa } from "@/db/supaserver";
 import { ImpLabStaffManager } from "@/controllers/ls_controller";
-import { ImpLabStaffModel } from "@/queries/ls.query";
+import { ImpLabStaffModel } from "@/queries/ls_query";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { revalidatePath } from "next/cache";
 import { bigintToStr } from "@/utils/serialize/serial";
