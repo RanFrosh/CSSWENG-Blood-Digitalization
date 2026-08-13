@@ -3,21 +3,10 @@
 import { useRouter } from "next/navigation";
 
 import Header from "@/components/HeaderRS";
-
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
-
-export type AssignedEvent = {
-    id: string;
-    name: string;
-    location: string;
-    date: string;
-    time: string;
-    partner: string;
-    status: EventStatus;
-};
+import { ViewEventsWithProvince } from "@/types/event_type";
 
 type Props = {
-    event: AssignedEvent | null;
+    event: ViewEventsWithProvince | null;
     eventId: string;
 };
 
@@ -97,21 +86,21 @@ export default function RSEventClient({
                             <span className="font-semibold text-[#002940]">
                                 Location:
                             </span>{" "}
-                            {event.location}
+                            {event.city}, {event.province}
                         </p>
 
                         <p>
                             <span className="font-semibold text-[#002940]">
                                 Date:
                             </span>{" "}
-                            {event.date}
+                            {event.event_date}
                         </p>
 
                         <p>
                             <span className="font-semibold text-[#002940]">
                                 Time:
                             </span>{" "}
-                            {event.time}
+                            {event.start_time && event.end_time ? `${event.start_time} - ${event.end_time}` : "—"}
                         </p>
                     </div>
                 </section>

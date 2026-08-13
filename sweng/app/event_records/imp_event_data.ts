@@ -164,12 +164,13 @@ export class ImpEventModel implements EventData {
         }
     }
 
-    async queryEventById(id: bigint): Promise<ApiResponse<ViewEvents>> {
+    async queryEventById(id: bigint): Promise<ApiResponse<ViewEventsWithProvince>> {
         try {
             const [event] = await this.access
-            .select({ ...getTableColumns(event_log), city: city.name })
+            .select({ ...getTableColumns(event_log), city: city.name, province: province.name })
             .from(event_log)
             .innerJoin(city, eq(event_log.city_id, city.id))
+            .innerJoin(province, eq(city.province_id, province.id))
             .where(eq(event_log.id, id))
             .limit(1);
 

@@ -4,10 +4,10 @@ import { useRouter } from "next/navigation";
 
 import Header from "@/components/HeaderOA";
 
-import type { AssignedEvent } from "@/app/actions/event";
+import { ViewEventsWithProvince } from "@/types/event_type";
 
 type Props = {
-    event: AssignedEvent | null;
+    event: ViewEventsWithProvince | null;
     eventId: string;
 };
 
@@ -91,21 +91,21 @@ export default function OAEventClient({
                             <span className="font-semibold text-[#002940]">
                                 Location:
                             </span>{" "}
-                            {event.location}
+                            {event.city}, {event.province}
                         </p>
 
                         <p>
                             <span className="font-semibold text-[#002940]">
                                 Date:
                             </span>{" "}
-                            {event.date}
+                            {event.event_date}
                         </p>
 
                         <p>
                             <span className="font-semibold text-[#002940]">
                                 Time:
                             </span>{" "}
-                            {event.time}
+                            {event.start_time && event.end_time ? `${event.start_time} - ${event.end_time}` : "—"}
                         </p>
                     </div>
                 </section>

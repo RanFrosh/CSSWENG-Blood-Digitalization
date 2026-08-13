@@ -1,7 +1,5 @@
-import { getAssignedEvent } from "@/app/actions/event";
+import { verifyEventAccess } from "@/app/event_records/event_action";
 import OAEventClient from "./client";
-
-type EventStatus = "Ongoing" | "Upcoming" | "Completed";
 
 export default async function Page({
     params,
@@ -10,7 +8,9 @@ export default async function Page({
 }) {
     const { eventId } = await params;
 
-    const event = await getAssignedEvent(eventId);
+    const result = await verifyEventAccess(BigInt(eventId));
+
+    const event = result.success && result.data ? result.data : null;
 
     return (
         <OAEventClient
