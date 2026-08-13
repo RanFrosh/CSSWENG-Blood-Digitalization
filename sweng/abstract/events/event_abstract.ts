@@ -24,7 +24,7 @@ export interface EventData {
     queryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
     createCorrection(data: CreateCorrections): Promise<ApiResponse>
 
-    queryEventById(id: bigint): Promise<ApiResponse<ViewEvents>>
+    queryEventById(id: bigint): Promise<ApiResponse<ViewEventsWithProvince>>
     isStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
     getProvince(provinceName: string): Promise<ApiResponse<bigint>>;
     getCity(cityName: string): Promise<ApiResponse<bigint>>;
@@ -45,7 +45,7 @@ export interface EventController {
     invokeQueryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
     invokeCreateCorrection(data: Omit<CreateCorrections, 'ref_profile_id'>): Promise<ApiResponse>
 
-    invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>>
+    invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEventsWithProvince>>
     invokeIsStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
     invokeGetProvince(provinceName: string): Promise<ApiResponse<bigint>>;
     invokeGetCity(cityName: string): Promise<ApiResponse<bigint>>;

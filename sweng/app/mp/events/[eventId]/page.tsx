@@ -1,7 +1,7 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ViewEvents } from "@/types/event_type";
+import { ViewEventsWithProvince } from "@/types/event_type";
 import { verifyEventAccess } from "../../../event_records/event_action";
 import Header from "@/components/HeaderMP";
 import { pickNextDonor, retrieveDonor, peekNextDonor } from "@/app/queue/queue_action";
@@ -9,7 +9,7 @@ import { pickNextDonor, retrieveDonor, peekNextDonor } from "@/app/queue/queue_a
 export default function MPEventPage() {
     const router = useRouter();
     const params = useParams();
-    const [event, setEvent] = useState<ViewEvents | null>(null);
+    const [event, setEvent] = useState<ViewEventsWithProvince | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState("");
     const [actionError, setActionError] = useState("");
@@ -140,10 +140,10 @@ export default function MPEventPage() {
                             </p>
 
                             <p>
-                                <span className="font-semibold text-[#002940]">
-                                    Location:
-                                </span>{" "}
-                                {event.street}
+                                        <span className="font-semibold text-[#002940]">
+                                            Location:
+                                        </span>{" "}
+                                        {event.city}, {event.province}
                             </p>
 
                             <p>

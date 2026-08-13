@@ -91,7 +91,7 @@ export class ImpEventManager implements EventController {
         return events;
     }
 
-    async invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>> {
+    async invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEventsWithProvince>> {
 
         const res = await helpGateKeep(this.profileReader, 'view_event');
         

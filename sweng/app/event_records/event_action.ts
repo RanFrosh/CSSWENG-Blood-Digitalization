@@ -162,7 +162,7 @@ export async function executeUpdateEvent(data: {
     return await controller.invokeUpdateEvent(data.eventId, update);
 }
 
-export async function verifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>> {
+export async function verifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEventsWithProvince>> {
     const database = await serverSupa();
     const model = new ImpEventModel(orm);
     const profiler = new ImpProfileGetter(database);
