@@ -41,7 +41,6 @@ export async function registerDonorAction(
 
   const address = formData.get("address") as string;
   const city = formData.get("city") as string;
-  const province = formData.get("province") as string;
   const zipCode = formData.get("zipCode") as string;
   
   console.log("FORM VALUES:", {
@@ -49,7 +48,6 @@ export async function registerDonorAction(
     lastName,
     address,
     city,
-    province,
     zipCode,
     email,
     mobileNumber,
@@ -63,7 +61,6 @@ export async function registerDonorAction(
     !lastName ||
     !address ||
     !city ||
-    !province ||
     !zipCode ||
     !email ||
     !mobileNumber ||

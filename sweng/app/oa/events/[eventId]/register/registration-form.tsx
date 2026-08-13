@@ -7,24 +7,16 @@ type RegisterState = {
     error?: string;
 } | null;
 
-type Province = {
-    id: bigint;
-    name: string | null;
-};
-
 type City = {
     id: bigint;
     name: string | null;
-    province_id: bigint | null;
 };
 
 export default function RegistrationForm({
     eventId,
-    provinces,
     cities,
 }: {
     eventId: string;
-    provinces: Province[];
     cities: City[];
 }) {
     const [state, formAction] = useActionState<RegisterState, FormData>(
@@ -32,26 +24,13 @@ export default function RegistrationForm({
         null
     );
     
-    const [selectedProvince, setSelectedProvince] = useState("");
     const [selectedCity, setSelectedCity] = useState("");
 
-    const [provinceSearch, setProvinceSearch] = useState("");
     const [citySearch, setCitySearch] = useState("");
 
-    const [isProvinceDropdownOpen, setIsProvinceDropdownOpen] = useState(false);
     const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
 
-    const filteredProvinces = provinces.filter((province) =>
-        (province.name ?? "")
-            .toLowerCase()
-            .includes(provinceSearch.trim().toLowerCase())
-    );
-
-    const filteredCities = cities.filter(
-        (city) => city.province_id?.toString() === selectedProvince
-    );
-
-    const filteredCityOptions = filteredCities.filter((city) =>
+    const filteredCityOptions = cities.filter((city) =>
         (city.name ?? "")
             .toLowerCase()
             .includes(citySearch.trim().toLowerCase())
@@ -363,87 +342,7 @@ export default function RegistrationForm({
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-[0.25in]">
-                        <div className="flex flex-col gap-[5px] relative">
-                            <label
-                                htmlFor="provinceSearch"
-                                className="text-[18px] font-semibold text-[#002940]"
-                            >
-                                Province
-                            </label>
-
-                            <input type="hidden" name="province" value={selectedProvince} />
-
-                            <div className="relative">
-                                <input
-                                    id="provinceSearch"
-                                    type="text"
-                                    required
-                                    value={provinceSearch}
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-
-                                        setProvinceSearch(value);
-                                        setIsProvinceDropdownOpen(true);
-
-                                        const matchedProvince = provinces.find(
-                                            (province) =>
-                                                (province.name ?? "").toLowerCase() ===
-                                                value.trim().toLowerCase()
-                                        );
-
-                                        if (matchedProvince) {
-                                            setSelectedProvince(matchedProvince.id.toString());
-                                        } else {
-                                            setSelectedProvince("");
-                                            setSelectedCity("");
-                                            setCitySearch("");
-                                        }
-                                    }}
-                                    onFocus={() => setIsProvinceDropdownOpen(true)}
-                                    placeholder="Select or type province"
-                                    className="w-full h-[46px] border-2 border-[#c0cad0] rounded-[10px] px-[12px] pr-[42px] text-[18px] outline-none focus:border-[#002940]"
-                                />
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setIsProvinceDropdownOpen(!isProvinceDropdownOpen)
-                                    }
-                                    className="absolute right-[14px] top-1/2 -translate-y-1/2 text-[#002940] text-[18px] font-bold"
-                                >
-                                    ▼
-                                </button>
-                            </div>
-
-                            {isProvinceDropdownOpen && (
-                                <div className="absolute z-50 top-full mt-[6px] w-full max-h-[2.2in] overflow-y-auto bg-white border-2 border-[#c0cad0] rounded-[10px] shadow-lg">
-                                    {filteredProvinces.length > 0 ? (
-                                        filteredProvinces.map((province) => (
-                                            <button
-                                                key={province.id.toString()}
-                                                type="button"
-                                                onClick={() => {
-                                                    setSelectedProvince(province.id.toString());
-                                                    setProvinceSearch(province.name ?? "");
-                                                    setSelectedCity("");
-                                                    setCitySearch("");
-                                                    setIsProvinceDropdownOpen(false);
-                                                }}
-                                                className="w-full px-4 py-3 text-left text-[18px] text-[#002940] hover:bg-[#f2f6f8]"
-                                            >
-                                                {province.name}
-                                            </button>
-                                        ))
-                                    ) : (
-                                        <div className="px-4 py-3 text-[18px] text-gray-500">
-                                            No matching province found
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.25in]">
                         <div className="flex flex-col gap-[5px] relative">
                             <label
                                 htmlFor="citySearch"
@@ -466,7 +365,7 @@ export default function RegistrationForm({
                                         setCitySearch(value);
                                         setIsCityDropdownOpen(true);
 
-                                        const matchedCity = filteredCities.find(
+                                        const matchedCity = cities.find(
                                             (city) =>
                                                 (city.name ?? "").toLowerCase() ===
                                                 value.trim().toLowerCase()
@@ -478,34 +377,21 @@ export default function RegistrationForm({
                                             setSelectedCity("");
                                         }
                                     }}
-                                    onFocus={() => {
-                                        if (selectedProvince) {
-                                            setIsCityDropdownOpen(true);
-                                        }
-                                    }}
-                                    placeholder={
-                                        selectedProvince
-                                            ? "Select or type city"
-                                            : "Select province first"
-                                    }
-                                    disabled={!selectedProvince}
-                                    className="w-full h-[46px] border-2 border-[#c0cad0] rounded-[10px] px-[12px] pr-[42px] text-[18px] outline-none focus:border-[#002940] disabled:bg-[#f0f0f0] disabled:cursor-not-allowed"
+                                    onFocus={() => setIsCityDropdownOpen(true)}
+                                    placeholder="Select or type city"
+                                    className="w-full h-[46px] border-2 border-[#c0cad0] rounded-[10px] px-[12px] pr-[42px] text-[18px] outline-none focus:border-[#002940]"
                                 />
 
                                 <button
                                     type="button"
-                                    onClick={() => {
-                                        if (selectedProvince) {
-                                            setIsCityDropdownOpen(!isCityDropdownOpen);
-                                        }
-                                    }}
+                                    onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
                                     className="absolute right-[14px] top-1/2 -translate-y-1/2 text-[#002940] text-[18px] font-bold"
                                 >
                                     ▼
                                 </button>
                             </div>
 
-                            {isCityDropdownOpen && selectedProvince && (
+                            {isCityDropdownOpen && (
                                 <div className="absolute z-50 top-full mt-[6px] w-full max-h-[2.2in] overflow-y-auto bg-white border-2 border-[#c0cad0] rounded-[10px] shadow-lg">
                                     {filteredCityOptions.length > 0 ? (
                                         filteredCityOptions.map((city) => (

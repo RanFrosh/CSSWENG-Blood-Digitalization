@@ -1,7 +1,5 @@
 import Header from "@/components/HeaderOA";
-import { orm } from "@/db/drizzle";
-import { city } from "@/db/schemas/city";
-import { province } from "@/db/schemas/province";
+import { executeGetAllCities } from "@/app/event_records/event_action";
 import RegistrationForm from "./registration-form";
 import { checkAuthentication } from "../../action";
 
@@ -26,8 +24,22 @@ export default async function RegisterPage({
         );
     }
 
-    const provinces = await orm.select().from(province);
-    const cities = await orm.select().from(city);
+    const citiesRes = await executeGetAllCities();
+
+    if (!citiesRes.success || !citiesRes.data) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-[24px] text-red-500">
+                        {citiesRes.message}
+                    </p>
+                </div>
+            </main>
+        );
+    }
+
+    const cities = citiesRes.data;
 
     const { eventId } = await params;
     
@@ -54,7 +66,6 @@ export default async function RegisterPage({
 
                 <RegistrationForm
                     eventId={eventId}
-                    provinces={provinces}
                     cities={cities}
                 />
                     

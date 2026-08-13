@@ -49,7 +49,6 @@ const VALID_FIELDS = {
     mobileNumber: "09171234567",
     address: "123 Rizal St.",
     city: "1",
-    province: "Metro Manila",
     zipCode: "1000",
 };
 
@@ -89,7 +88,6 @@ describe("registerDonorAction", () => {
             "lastName",
             "address",
             "city",
-            "province",
             "zipCode",
             "email",
             "mobileNumber",

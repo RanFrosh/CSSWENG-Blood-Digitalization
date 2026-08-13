@@ -39,10 +39,6 @@ export default function OAEventsClient({
     const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
     const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
 
-    // Restored Join Modal State!
-    const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
-    const [eventCode, setEventCode] = useState("");
-
     const filteredEvents =
         activeTab === "All"
         ? assignedEvents
@@ -81,11 +77,6 @@ export default function OAEventsClient({
         );
     };
 
-    const openJoinModal = () => {
-        setEventCode("");
-        setIsJoinModalOpen(true);
-    };
-
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
@@ -116,15 +107,6 @@ export default function OAEventsClient({
                                     {tab}
                                 </button>
                             ))}
-
-                            {/* Restored Join Event Button */}
-                            <button
-                                type="button"
-                                onClick={openJoinModal}
-                                className="px-[20px] py-[10px] rounded-full bg-[#002940] border-2 border-[#002940] text-white font-bold text-[16px] cursor-pointer hover:bg-white hover:text-[#002940] transition"
-                            >
-                                + Join Event
-                            </button>
                         </div>
                     </div>
 
@@ -191,51 +173,6 @@ export default function OAEventsClient({
                 </section>
             </div>
 
-            {/* Restored Modal */}
-            {isJoinModalOpen && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-[0.35in] z-50">
-                    <div className="bg-white rounded-[16px] p-[0.35in] max-w-[4.5in] w-full shadow-lg">
-                        <h2 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                            Join Event
-                        </h2>
-
-                        <form className="mt-[0.2in] flex flex-col gap-[0.15in]">
-                            <div>
-                                <label className="block text-[14px] font-semibold text-[#002940] mb-1">
-                                    Event Code
-                                </label>
-                                <input
-                                    type="text"
-                                    value={eventCode}
-                                    onChange={(event) => setEventCode(event.target.value)}
-                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"
-                                    placeholder="Enter code..."
-                                />
-                            </div>
-
-                            <div className="mt-[0.2in] flex flex-row justify-end gap-[10px]">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsJoinModalOpen(false)}
-                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        console.log("Joining with code:", eventCode);
-                                        setIsJoinModalOpen(false);
-                                    }}
-                                    className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90"
-                                >
-                                    Join Event
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </main>
     );
 }
