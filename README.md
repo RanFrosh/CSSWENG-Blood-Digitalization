@@ -44,11 +44,9 @@
     * Drizzle ORM provides type-safe communication between the application and the database.
     * Supabase PostgreSQL stores and manages the system's persistent data.
     * The system records relevant activities and transactions in event/system logs to support monitoring and accountability.
-
-5. Project Structure
     
 
-7. Installation & Setup
+5. Installation & Setup
     **Prerequisites**
     Before running the Blood Drive Management System, make sure the following are installed:
     * Node.js
@@ -85,10 +83,8 @@
     Then start the production server:
     npm start
 
-8. Environment Variables
 
-
-9. Database
+6. Database
     The Blood Drive Management System uses PostgreSQL through Supabase as its primary database, with Drizzle ORM for type-safe database operations.
 
     The database stores information related to donors, blood drive events, staff assignments, donations, blood bags, locations, and system activity.
@@ -105,77 +101,6 @@
 
     The database uses primary keys, foreign keys, constraints, and relationships to maintain data integrity and ensure that records remain properly associated with their respective donors, events, and staff members.
 
-10. Business Rules
-    The system implements business rules to ensure that blood drive transactions are valid and that donors cannot perform restricted actions.
 
-    **Donor Eligibility**
-    * A donor must meet the system's eligibility requirements before participating in a blood drive.
-    * After a donor successfully completes a donation, their next_eligibility date is calculated based on the event date.
-    * The next eligibility date is calculated by adding three months to the date of the successful blood donation.
-    * When a donor attempts to participate in another event, the system checks whether the event date is on or after the donor's next_eligibility date.
-    
-    **Event Participation**
-    * A donor cannot successfully donate multiple times for the same event.
-    * A donor who has already completed the donation process for an event cannot re-enter the onsite queue.
-    * Donor participation is tracked through the donor-to-event relationship.
-    
-    **Perk Redemption**
-    * A donor can only claim the perk associated with a successful donation once.
-    * The backend verifies the donor's participation and donation status before allowing a perk to be claimed.
-    * Duplicate QR scans for perk redemption are rejected.
-    
-    **QR Code Verification**
-    * QR codes are used to identify donors during onsite processes.
-    * The backend validates the donor associated with the scanned QR code before processing the requested action.
-    * Scanning a QR code does not automatically authorize an action; the appropriate business rules and permissions must still be satisfied.
-
-    **Blood Collection**
-    * Blood collection records are associated with the appropriate donor and event.
-    * Blood bag information is recorded after collection, including blood type, volume, quality, outcome, and observations.
-
-11. Security
-    Security is implemented through authentication, authorization, server-side validation, and controlled database access.
-
-    **Authentication**
-    * Users must authenticate before accessing protected system functionality.
-    * Authentication is handled through Supabase Auth.
-    * User sessions are used to determine whether a request comes from an authenticated user.
-
-    **Role-Based Authorization**
-    The system restricts functionality based on the user's assigned role.
-    * Donors can access donor-specific functionality.
-    * Onsite Admins can perform onsite event operations.
-    * Recovery Staff can perform recovery and perk-related operations.
-    * Laboratory Staff can manage blood collection information.
-    * Super Admins have access to administrative management and monitoring functions.
-
-    Authorization checks are performed on the backend rather than relying solely on frontend restrictions.
-
-    **Server-Side Validation**
-    Important operations are processed through Next.js Server Actions, allowing validation and business rules to be enforced on the server.
-
-    This prevents users from bypassing frontend restrictions by directly manipulating requests or client-side state.
-
-    **Transaction Protection**
-    The backend verifies the current database state before performing sensitive operations, such as:
-    * Donor check-in
-    * Donation completion
-    * Perk redemption
-    * Queue entry
-    * Eligibility verification
-
-    This helps prevent duplicate transactions and unauthorized state changes.
-
-    **Sensitive Information**
-    * Database credentials and API keys are stored in environment variables.
-    * Secrets must not be committed to the repository.
-    * Sensitive operations should not expose unnecessary donor or administrative information to the client.
-
-    **Auditability** 
-    Important system and event activities are logged to provide traceability and support administrative monitoring.
-
-12. Testing/QA
-
-
-13. Contributors
+7. Contributors
 
