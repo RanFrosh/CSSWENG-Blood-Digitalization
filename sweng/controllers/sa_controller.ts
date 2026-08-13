@@ -14,10 +14,13 @@ export class ImpSuperAdminManager implements SuperAdminController {
 
     async invokeFetchEventSummary(eventId: string) {
         try {
-            if (!eventId) return { success: false, message: "Event ID is required." };
+            if (!eventId) 
+                return { success: false, message: "Event ID is required." };
 
             const res = await this.saModel.getEventById(eventId);
-            if (!res.length) return { success: false, message: "Event not found." };
+            
+            if (!res.length) 
+                return { success: false, message: "Event not found." };
 
             const event = res[0];
             return {
@@ -26,8 +29,10 @@ export class ImpSuperAdminManager implements SuperAdminController {
                     id: String(event.id),
                     name: event.name,
                     partner: event.partner,
-                    city: event.city_name,
-                    date: event.event_date,
+                    city: event.city_name || "Unknown",
+                    event_date: event.event_date || "",
+                    start_time: event.start_time || null, 
+                    end_time: event.end_time || null
                 },
                 message: "Event summary retrieved",
             };

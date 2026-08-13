@@ -16,6 +16,8 @@ export class ImpSuperAdminModel implements SuperAdminData{
                 partner: event_log.partner,
                 event_date: event_log.event_date,
                 city_name: city.name,
+                start_time: event_log.start_time,
+                end_time: event_log.end_time
             })
             .from(event_log)
             .leftJoin(city, eq(event_log.city_id, city.id))
@@ -34,10 +36,10 @@ export class ImpSuperAdminModel implements SuperAdminData{
             .from(profiles)
             .where(
                 inArray(profiles.role, [
-                    "Onsite Admin", 
-                    "Medical Professional", 
-                    "Lab Staff", 
-                    "Recovery Staff"
+                    "onsite_admin", 
+                    "med_prof", 
+                    "lab_staff", 
+                    "recov_staff"
                 ] as any)
             );
     }
@@ -53,7 +55,7 @@ export class ImpSuperAdminModel implements SuperAdminData{
 
     async insertEventStaff(eventId: string, staffIds: string[]) {
         const insertPayload = staffIds.map(staffId => ({
-            event_id: BigInt(eventId),
+            event_log_id: BigInt(eventId),
             staff_id: staffId
         }));
         await orm.insert(assigned_staff).values(insertPayload as any);

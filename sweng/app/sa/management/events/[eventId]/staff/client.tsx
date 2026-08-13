@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { assignStaffAction, removeStaffAction } from "@/actions/sa_action";
+import { EventDetailsPanel } from "@/components/EventDetailsPanel";
+import { ViewEvents } from "@/types/event_type";
 
-export type StaffType = "Onsite Admin" | "Medical Professional" | "Lab Staff" | "Recovery Staff";
+export type StaffType = "onsite_admin" | "med_prof" | "lab_staff" | "recov_staff"
 type StaffTypeFilter = StaffType | "All Staff Types";
 type StaffTab = "Assigned Staff" | "Available Staff";
 
@@ -19,12 +22,11 @@ export type EventSummary = {
     name: string;
     partner: string;
     city: string;
-    province: string;
     date: string;
 };
 
 type EventStaffClientProps = {
-    event: EventSummary;
+    event: ViewEvents;
     assignedStaff: StaffMember[];
     availableStaff: StaffMember[];
 };
@@ -40,13 +42,16 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
     const [selectedAssignedStaffIds, setSelectedAssignedStaffIds] = useState<string[]>([]);
     const [selectedAvailableStaffIds, setSelectedAvailableStaffIds] = useState<string[]>([]);
     
+    const [assignedPage, setAssignedPage] = useState(1);
+    const [availablePage, setAvailablePage] = useState(1);
     const resultsPerPage = 5;
+
     const staffTypeOptions: StaffTypeFilter[] = [
         "All Staff Types",
-        "Onsite Admin",
-        "Medical Professional",
-        "Lab Staff",
-        "Recovery Staff",
+        "onsite_admin", 
+        "med_prof", 
+        "lab_staff", 
+        "recov_staff"
     ];
     const staffTabs: StaffTab[] = ["Assigned Staff", "Available Staff"];
 
@@ -73,14 +78,28 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
     const filteredAssignedStaff = filterStaffList(assignedStaff);
     const filteredAvailableStaff = filterStaffList(availableStaff);
 
-    const assignedStaffToDisplay = filteredAssignedStaff.slice(0, resultsPerPage);
-    const availableStaffToDisplay = filteredAvailableStaff.slice(0, resultsPerPage);
+    const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    const assignedTotalPages = Math.max(1, Math.ceil(filteredAssignedStaff.length / resultsPerPage));
+    const availableTotalPages = Math.max(1, Math.ceil(filteredAvailableStaff.length / resultsPerPage));
+
+    const safeAssignedPage = Math.min(assignedPage, assignedTotalPages);
+    const safeAvailablePage = Math.min(availablePage, availableTotalPages);
+
+    const assignedStaffToDisplay = filteredAssignedStaff.slice(
+        (safeAssignedPage - 1) * resultsPerPage, 
+        safeAssignedPage * resultsPerPage
+    );
+    
+    const availableStaffToDisplay = filteredAvailableStaff.slice(
+        (safeAvailablePage - 1) * resultsPerPage, 
+        safeAvailablePage * resultsPerPage
+    );
 
     const countByStaffType = (staffType: StaffType) => {
         return assignedStaff.filter((staff) => staff.staffType === staffType).length;
     };
-
-    const goBack = () => router.push("/sa/management/events");
 
     const switchStaffTab = (tab: StaffTab) => {
         setActiveStaffTab(tab);
@@ -88,6 +107,8 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
         setStaffTypeFilter("All Staff Types");
         setSelectedAssignedStaffIds([]);
         setSelectedAvailableStaffIds([]);
+        setAssignedPage(1);
+        setAvailablePage(1);
     };
 
     const toggleAssignedStaffSelection = (staffId: string) => {
@@ -102,40 +123,68 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
         );
     };
 
-    // --- Server Action Placeholders ---
     const assignSelectedStaff = async () => {
         if (selectedAvailableStaffIds.length === 0) {
-            alert("Please select at least one staff member.");
+            setNotification({ type: "error", message: "Please select at least one staff member." });
             return;
         }
-        // TODO: Call Server Action to INSERT into event_staff table here!
-        alert(`Simulated: ${selectedAvailableStaffIds.length} staff assigned to the event.`);
-        setSelectedAvailableStaffIds([]);
+
+        setIsProcessing(true);
+        setNotification(null); // Clear previous
+
+        const res = await assignStaffAction(String(event.id), selectedAvailableStaffIds);
+
+        if (res.success) {
+            setNotification({ type: "success", message: `Successfully assigned ${selectedAvailableStaffIds.length} staff to the event!` });
+            setSelectedAvailableStaffIds([]); // Clear selection
+        } else {
+            setNotification({ type: "error", message: res.message || "Failed to assign staff." });
+        }
+        setIsProcessing(false);
     };
 
     const removeSelectedStaff = async () => {
         if (selectedAssignedStaffIds.length === 0) {
-            alert("Please select at least one assigned staff member.");
+            setNotification({ type: "error", message: "Please select at least one assigned staff member." });
             return;
         }
-        // TODO: Call Server Action to DELETE from event_staff table here!
-        alert(`Simulated: ${selectedAssignedStaffIds.length} staff removed from the event.`);
-        setSelectedAssignedStaffIds([]);
+
+        setIsProcessing(true);
+        setNotification(null);
+
+        const res = await removeStaffAction(String(event.id), selectedAssignedStaffIds);
+
+        if (res.success) {
+            setNotification({ type: "success", message: `Successfully removed ${selectedAssignedStaffIds.length} staff from the event.` });
+            setSelectedAssignedStaffIds([]); // Clear selection
+        } else {
+            setNotification({ type: "error", message: res.message || "Failed to remove staff." });
+        }
+        setIsProcessing(false);
     };
 
     const getStaffTypePill = (staffType: StaffType) => {
         let className = "px-[10px] py-[4px] rounded-full text-[13px] font-semibold ";
-        if (staffType === "Onsite Admin") 
+        if (staffType === "onsite_admin") 
             className += "bg-[#e4eff5] text-[#002940]";
-        else if (staffType === "Medical Professional") className += "bg-[#e4f5ea] text-[#1a7a3f]";
-        else if (staffType === "Lab Staff") className += "bg-[#f7edda] text-[#9a6200]";
+
+        else if (staffType === "med_prof") 
+            className += "bg-[#e4f5ea] text-[#1a7a3f]";
+
+        else if (staffType === "lab_staff") 
+            className += "bg-[#f7edda] text-[#9a6200]";
+
         else className += "bg-[#f5e4e4] text-[#a32626]";
+
         return className;
     };
 
     const getStaffTabClass = (tab: StaffTab) => {
         let className = "px-[20px] py-[10px] rounded-full border-2 font-['Montserrat'] text-[16px] cursor-pointer transition ";
-        if (activeStaffTab === tab) className += "bg-[#002940] border-[#002940] text-white font-bold";
+
+        if (activeStaffTab === tab) 
+            className += "bg-[#002940] border-[#002940] text-white font-bold";
+
         else className += "bg-white border-[#002940] text-[#002940] hover:bg-[#002940] hover:text-white";
         return className;
     };
@@ -148,27 +197,20 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
                 <h1 className="text-[50px] font-['Montserrat'] font-bold text-[#002940]">Event Staff Management</h1>
             </section>
 
-            {/* Event Summary Card */}
-            <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-                <div className="flex flex-row items-center justify-between flex-wrap gap-[0.25in]">
-                    <div>
-                        <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">{event.name}</h2>
-                        <div className="mt-[0.15in] grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.1in] text-[18px] text-black">
-                            <p><span className="font-semibold">Event ID:</span> {event.id}</p>
-                            <p><span className="font-semibold">Partner:</span> {event.partner}</p>
-                            <p><span className="font-semibold">Location:</span> {event.city}, {event.province}</p>
-                            <p><span className="font-semibold">Date:</span> {event.date}</p>
-                        </div>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={goBack}
-                        className="px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white"
-                    >
-                        Back
+            {notification && (
+                <div className={`mt-[0.25in] px-[16px] py-[12px] rounded-[10px] border-2 font-semibold text-[16px] flex items-center justify-between ${
+                    notification.type === "success" 
+                        ? "bg-[#e4f5ea] border-[#1a7a3f] text-[#1a7a3f]" 
+                        : "bg-[#f5e4e4] border-[#a32626] text-[#a32626]"
+                }`}>
+                    <p>{notification.message}</p>
+                    <button onClick={() => setNotification(null)} className="text-[20px] leading-none hover:opacity-70">
+                        &times;
                     </button>
                 </div>
-            </section>
+            )}
+            
+            <EventDetailsPanel event={event}/>
 
             {/* Staff Management Section */}
             <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
@@ -193,10 +235,10 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
                     <>
                         <div className="mt-[0.25in] flex flex-row flex-wrap text-[16px] text-[#002940] gap-x-[0.25in] gap-y-[8px]">
                             <p><span className="font-semibold">Total Assigned:</span> {assignedStaff.length}</p>
-                            <p><span className="font-semibold">Onsite Admin:</span> {countByStaffType("Onsite Admin")}</p>
-                            <p><span className="font-semibold">Medical Professional:</span> {countByStaffType("Medical Professional")}</p>
-                            <p><span className="font-semibold">Lab Staff:</span> {countByStaffType("Lab Staff")}</p>
-                            <p><span className="font-semibold">Recovery Staff:</span> {countByStaffType("Recovery Staff")}</p>
+                            <p><span className="font-semibold">Onsite Admin:</span> {countByStaffType("onsite_admin")}</p>
+                            <p><span className="font-semibold">Medical Professional:</span> {countByStaffType("med_prof")}</p>
+                            <p><span className="font-semibold">Lab Staff:</span> {countByStaffType("lab_staff")}</p>
+                            <p><span className="font-semibold">Recovery Staff:</span> {countByStaffType("recov_staff")}</p>
                         </div>
 
                         {/* Filters */}
@@ -277,6 +319,38 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
                                     </label>
                                 ))
                             )}
+                        </div>
+
+                        <div className="mt-5 flex flex-row items-center justify-between gap-5">
+                            <button
+                                type="button"
+                                onClick={() => setAssignedPage((prev) => Math.max(1, prev - 1))}
+                                disabled={safeAssignedPage === 1}
+                                className={`px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[18px] font-semibold transition ${
+                                    safeAssignedPage === 1 
+                                        ? "text-[#c0cad0] cursor-not-allowed" 
+                                        : "text-[#002940] cursor-pointer hover:underline hover:text-[#fd5448]"
+                                }`}
+                            >
+                                Previous
+                            </button>
+
+                            <p className="text-[18px] text-[#002940] font-semibold">
+                                Page {safeAssignedPage} of {assignedTotalPages}
+                            </p>
+
+                            <button
+                                type="button"
+                                onClick={() => setAssignedPage((prev) => Math.min(assignedTotalPages, prev + 1))}
+                                disabled={safeAssignedPage === assignedTotalPages}
+                                className={`px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[18px] font-semibold transition ${
+                                    safeAssignedPage === assignedTotalPages 
+                                        ? "text-[#c0cad0] cursor-not-allowed" 
+                                        : "text-[#002940] cursor-pointer hover:underline hover:text-[#fd5448]"
+                                }`}
+                            >
+                                Next
+                            </button>
                         </div>
                     </>
                 )}
@@ -362,6 +436,38 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
                                     </label>
                                 ))
                             )}
+                        </div>
+
+                        <div className="mt-5 flex flex-row items-center justify-between gap-5">
+                            <button
+                                type="button"
+                                onClick={() => setAvailablePage((prev) => Math.max(1, prev - 1))}
+                                disabled={safeAvailablePage === 1}
+                                className={`px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[18px] font-semibold transition ${
+                                    safeAvailablePage === 1 
+                                        ? "text-[#c0cad0] cursor-not-allowed" 
+                                        : "text-[#002940] cursor-pointer hover:underline hover:text-[#fd5448]"
+                                }`}
+                            >
+                                Previous
+                            </button>
+
+                            <p className="text-[18px] text-[#002940] font-semibold">
+                                Page {safeAvailablePage} of {availableTotalPages}
+                            </p>
+
+                            <button
+                                type="button"
+                                onClick={() => setAvailablePage((prev) => Math.min(availableTotalPages, prev + 1))}
+                                disabled={safeAvailablePage === availableTotalPages}
+                                className={`px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[18px] font-semibold transition ${
+                                    safeAvailablePage === availableTotalPages 
+                                        ? "text-[#c0cad0] cursor-not-allowed" 
+                                        : "text-[#002940] cursor-pointer hover:underline hover:text-[#fd5448]"
+                                }`}
+                            >
+                                Next
+                            </button>
                         </div>
                     </>
                 )}
