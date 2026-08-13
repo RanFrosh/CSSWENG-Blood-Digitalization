@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import Header from "@/components/HeaderMP";
-import { fetchMPCurrentUser, editMPCurrentUser } from "@/app/mp/events/mp_action";
+import { fetchMPCurrentUser, editMPCurrentUser } from "@/actions/mp_action";
 import { ReadProfile } from "@/types/profile_type";
 
 const roleNames: Record<string, string> = {

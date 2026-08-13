@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { retrieveDonor } from "@/app/queue/queue_action";
 import { ViewDonor } from "@/types/donor_type";
 import Header from "@/components/HeaderMP";
-import { completeScreening, failScreening } from "../../../mp_action";
+import { completeScreening, failScreening } from "../../../../../../actions/mp_action";
 
 export default function ScreeningPage() {
     const router = useRouter();
