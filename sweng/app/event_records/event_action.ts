@@ -1,6 +1,6 @@
 "use server"
 
-import { ViewEventFilters, ViewEvents, ViewEventsWithProvince, CreateEvents } from "@/types/event_type";
+import { ViewEventFilters, ViewEvents, ViewEventsWithProvince, ViewCities, CreateEvents, UpdateEvents } from "@/types/event_type";
 import { ApiResponse } from "@/types/api_res_type";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 import { ImpEventModel } from "@/app/event_records/imp_event_data";
@@ -47,10 +47,28 @@ export async function executeQueryAllEvents(): Promise<ApiResponse<ViewEventsWit
     return controller.invokeQueryAllEvents();
 }
 
+export async function executeGetAllCities(): Promise<ApiResponse<ViewCities[]>> {
+    const database = await serverSupa();
+    const model = new ImpEventModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpEventManager(model, profiler);
+
+    return controller.invokeGetAllCities();
+}
+
+function computeEventStatus(eventDate: string): ViewEvents["status"] {
+    const today = new Date().toISOString().split("T")[0];
+    if (eventDate < today) {
+        return "Completed";
+    } else if (eventDate === today) {
+        return "Ongoing";
+    }
+    return "Upcoming";
+}
+
 export async function executeCreateEvent(data: {
     name: string;
     partner: string;
-    provinceName: string;
     cityName: string;
     eventDate: string;
     targetBags: string;
@@ -61,22 +79,9 @@ export async function executeCreateEvent(data: {
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpEventManager(model, profiler);
 
-    const provinceRes = await controller.invokeGetProvince(data.provinceName);
-    if (!provinceRes.success || !provinceRes.data) {
-        return { success: false, message: provinceRes.message || "Province not found" };
-    }
-
-    const cityRes = await controller.invokeGetCity(data.cityName, provinceRes.data);
+    const cityRes = await controller.invokeGetCity(data.cityName);
     if (!cityRes.success || !cityRes.data) {
         return { success: false, message: cityRes.message || "City not found" };
-    }
-
-    const today = new Date().toISOString().split("T")[0];
-    let status: ViewEvents["status"] = "Upcoming";
-    if (data.eventDate < today) {
-        status = "Completed";
-    } else if (data.eventDate === today) {
-        status = "Ongoing";
     }
 
     const event: CreateEvents = {
@@ -88,7 +93,7 @@ export async function executeCreateEvent(data: {
         event_date: data.eventDate,
         start_time: "09:00:00",   
         end_time: "21:00:00",    
-        status,
+        status: computeEventStatus(data.eventDate),
         visitors: BigInt(0),
         extractions: BigInt(0),
         produced_bags: BigInt(0),
@@ -99,6 +104,43 @@ export async function executeCreateEvent(data: {
     };
 
     return await controller.invokeCreateEvent(event);
+}
+
+export async function executeUpdateEvent(data: {
+    eventId: bigint;
+    name: string;
+    partner: string;
+    cityName: string;
+    eventDate: string;
+    targetBags: string;
+    imgUrl?: string | null;
+}): Promise<ApiResponse> {
+    const database = await serverSupa();
+    const model = new ImpEventModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpEventManager(model, profiler);
+
+    const accessRes = await controller.invokeVerifyEventAccess(data.eventId);
+    if (!accessRes.success) {
+        return { success: false, message: accessRes.message };
+    }
+
+    const cityRes = await controller.invokeGetCity(data.cityName);
+    if (!cityRes.success || !cityRes.data) {
+        return { success: false, message: cityRes.message || "City not found" };
+    }
+
+    const update: UpdateEvents = {
+        name: data.name,
+        partner: data.partner,
+        city_id: cityRes.data,
+        event_date: data.eventDate,
+        status: computeEventStatus(data.eventDate),
+        target_blood: BigInt(parseInt(data.targetBags, 10) || 100),
+        img_url: data.imgUrl?.trim() || null,
+    };
+
+    return await controller.invokeUpdateEvent(data.eventId, update);
 }
 
 export async function verifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>> {
