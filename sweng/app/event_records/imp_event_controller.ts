@@ -74,7 +74,7 @@ export class ImpEventManager implements EventController {
         return creation;
     }
 
-    async invokeQueryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>> {
+    async invokeQueryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEventsWithProvince[]>> {
         
         const res = await helpGateKeep(this.profileReader, 'view_event');
         

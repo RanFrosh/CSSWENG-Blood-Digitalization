@@ -116,7 +116,7 @@ export class ImpEventModel implements EventData {
         }
     }
 
-    async queryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>> {
+    async queryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEventsWithProvince[]>> {
         try {
 
             if (!staff.staff_id) {
@@ -138,9 +138,10 @@ export class ImpEventModel implements EventData {
             if (data.status) filters.push(eq(event_log.status, data.status));
 
             const events = await this.access
-            .select({ ...getTableColumns(event_log), city: city.name })
+            .select({ ...getTableColumns(event_log), city: city.name, province: province.name })
             .from(event_log)
             .innerJoin(city, eq(event_log.city_id, city.id))
+            .innerJoin(province, eq(city.province_id, province.id))
             .where(and(...filters));
 
             return { success: true, message: "Events retrieved", data: events };

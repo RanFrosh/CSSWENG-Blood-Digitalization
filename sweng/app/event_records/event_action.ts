@@ -13,7 +13,7 @@ import { serverSupa } from "@/db/supaserver";
 import { helpGateKeep } from "@/utils/access/bouncer";
 import { CreateEventRecords, ViewEventRecords } from "@/types/event_type";
 
-export async function executeEventQueryStaff(data: ViewEventFilters): Promise<ApiResponse<ViewEvents[]>> {
+export async function executeEventQueryStaff(data: ViewEventFilters): Promise<ApiResponse<ViewEventsWithProvince[]>> {
     
     const database = await serverSupa();
 

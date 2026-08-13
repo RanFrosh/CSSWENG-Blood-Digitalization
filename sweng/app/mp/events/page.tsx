@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { EventStatusType } from "@/db/enums/event_status";
-import { ViewEvents } from "@/types/event_type";
+import { ViewEventsWithProvince } from "@/types/event_type";
 import Header from "@/components/HeaderMP";
 import StaffDetails from "@/components/StaffDetails";
 import { executeEventQueryStaff } from "../../event_records/event_action";
@@ -16,7 +16,7 @@ export default function MPEventsPage() {
     const [activeTab, setActiveTab] = useState<EventTab>("Ongoing");
 
     // State for holding events from the backend
-    const [events, setEvents] = useState<ViewEvents[]>([]);
+    const [events, setEvents] = useState<ViewEventsWithProvince[]>([]);
 
     // Loading State
     const [isLoading, setIsLoading] = useState(true);
@@ -52,7 +52,7 @@ export default function MPEventsPage() {
     }, [activeTab]);
 
     // Can only open events that are ongoing
-    const openEvent = (event: ViewEvents) => {
+    const openEvent = (event: ViewEventsWithProvince) => {
         if (event.status === "Ongoing") {
             // Navigate to the event details page for the selected event
             router.push(`/mp/events/${event.id}`);
@@ -78,7 +78,7 @@ export default function MPEventsPage() {
     };
     
     // Create button to open event if it is ongoing
-    const createActionButton = (event: ViewEvents) => {
+    const createActionButton = (event: ViewEventsWithProvince) => {
         if (event.status === "Ongoing") {
             return (
                 <button
@@ -190,9 +190,9 @@ export default function MPEventsPage() {
 
                                         <p>
                                             <span className="font-semibold text-[#002940]">
-                                                Street:
+                                                Location:
                                             </span>{" "}
-                                            {event.street}
+                                            {event.city}, {event.province}
                                         </p>
 
                                         <p>

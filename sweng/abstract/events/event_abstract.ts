@@ -19,7 +19,7 @@ export interface EventData {
     createEvent(data: CreateEvents): Promise<ApiResponse>
     logEvent(data: CreateEventRecords): Promise<ApiResponse>
     queryEventRecords(event_log_id: bigint): Promise<ApiResponse<ViewEventRecords[]>>
-    queryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>>
+    queryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEventsWithProvince[]>>
 
     queryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
     createCorrection(data: CreateCorrections): Promise<ApiResponse>
@@ -40,7 +40,7 @@ export interface EventController {
     invokeCreateEvent(data: CreateEvents): Promise<ApiResponse>
     invokeLogEvent(data: Omit<CreateEventRecords, 'staff_id'>): Promise<ApiResponse>
     invokeQueryEventRecords(event_log_id: bigint): Promise<ApiResponse<ViewEventRecords[]>>
-    invokeQueryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEvents[]>>
+    invokeQueryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise<ApiResponse<ViewEventsWithProvince[]>>
 
     invokeQueryCorrection(data: ViewCorrectionFilters, sort: Sorter<ViewCorrections>): Promise<ApiResponse<ViewCorrections[]>>
     invokeCreateCorrection(data: Omit<CreateCorrections, 'ref_profile_id'>): Promise<ApiResponse>
