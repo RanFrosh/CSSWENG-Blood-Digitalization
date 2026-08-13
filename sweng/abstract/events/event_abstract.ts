@@ -9,7 +9,8 @@ import { ViewCorrections,
     CreateCorrections,
     CreateEventRecords,
     ViewEventRecords,
-    ViewCities} from "@/types/event_type";
+    ViewCities,
+    UpdateEvents} from "@/types/event_type";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 
 export interface EventData {
@@ -28,6 +29,7 @@ export interface EventData {
     getProvince(provinceName: string): Promise<ApiResponse<bigint>>;
     getCity(cityName: string): Promise<ApiResponse<bigint>>;
     getAllCities(): Promise<ApiResponse<ViewCities[]>>;
+    updateEvent(id: bigint, data: UpdateEvents): Promise<ApiResponse>;
     deleteEvent(id: bigint): Promise<ApiResponse>;
 }
 
@@ -47,5 +49,6 @@ export interface EventController {
     invokeGetProvince(provinceName: string): Promise<ApiResponse<bigint>>;
     invokeGetCity(cityName: string): Promise<ApiResponse<bigint>>;
     invokeGetAllCities(): Promise<ApiResponse<ViewCities[]>>;
+    invokeUpdateEvent(id: bigint, data: UpdateEvents): Promise<ApiResponse>;
     invokeDeleteEvent(id: bigint): Promise<ApiResponse>;
 }

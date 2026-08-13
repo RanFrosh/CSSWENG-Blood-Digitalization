@@ -1,6 +1,6 @@
 import { EventData } from "@/abstract/events/event_abstract";
 import { ApiResponse } from "@/types/api_res_type";
-import { CreateCorrections, CreateEventRecords, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewCities, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
+import { CreateCorrections, CreateEventRecords, CreateEvents, UpdateEvents, ViewCorrectionFilters, ViewCorrections, ViewCities, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 import { SQL, eq, asc, desc, and, inArray, ilike, getTableColumns } from "drizzle-orm";
 import { event_log } from "@/db/schemas/event_log";
@@ -234,6 +234,18 @@ export class ImpEventModel implements EventData {
             return { success: true, message: "Cities retrieved", data: cities };
         } catch (err: any) {
             return { success: false, message: err.message, data: undefined };
+        }
+    }
+
+    async updateEvent(id: bigint, data: UpdateEvents): Promise<ApiResponse> {
+        try {
+            await this.access
+                .update(event_log)
+                .set({ ...data })
+                .where(eq(event_log.id, id));
+            return { success: true, message: "Event updated" };
+        } catch (err: any) {
+            return { success: false, message: err.message };
         }
     }
 

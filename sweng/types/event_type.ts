@@ -21,6 +21,8 @@ export type ViewEventFilters = Partial<ViewEvents>;
 
 export type CreateEvents = InferInsertModel<typeof event_log>;
 
+export type UpdateEvents = Partial<Pick<CreateEvents, "name" | "partner" | "city_id" | "event_date" | "status" | "target_blood" | "img_url">>;
+
 export type CreateEventRecords = InferInsertModel<typeof event_record>;
 
 export type ViewCities = InferSelectModel<typeof city>;

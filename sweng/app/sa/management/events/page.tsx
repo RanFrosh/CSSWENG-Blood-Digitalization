@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderSA";
-import { executeQueryAllEvents, executeCreateEvent, executeDeleteEvent, executeGetAllCities } from "@/app/event_records/event_action";
+import { executeQueryAllEvents, executeCreateEvent, executeDeleteEvent, executeGetAllCities, executeUpdateEvent } from "@/app/event_records/event_action";
 import { ViewEventsWithProvince } from "@/types/event_type";
 
 const formatEventId = (event: ViewEventsWithProvince): string => {
@@ -154,46 +154,6 @@ export function SAEventsPage() {
         e.preventDefault();
         setSaveError("");
 
-        const today = new Date().toISOString().split("T")[0];
-        let calculatedStatus: ViewEventsWithProvince["status"] = "Upcoming";
-        if (formDate === today) {
-            calculatedStatus = "Ongoing";
-        } else if (formDate < today) {
-            calculatedStatus = "Completed";
-        }
-
-        if (eventToEdit) {
-            if (
-                !formName.trim() &&
-                !formPartner.trim() &&
-                !formCity.trim() &&
-                !formDate &&
-                !formImageLink.trim()
-            ) {
-                setSaveError("Fill up at least one field");
-                return;
-            }
-
-            // EDIT: no backend update method exists yet, so keep existing local-only behavior.
-            setEvents((prev) =>
-                prev.map((item) =>
-                    item.id === eventToEdit.id
-                        ? {
-                              ...item,
-                              name: formName,
-                              partner: formPartner,
-                              city: formCity,
-                              event_date: formDate,
-                              status: calculatedStatus,
-                              target_blood: BigInt(parseInt(formTargetBags) || 100),
-                          }
-                        : item
-                )
-            );
-            setIsCreateModalOpen(false);
-            return;
-        }
-
         if (
             !formName.trim() ||
             !formPartner.trim() ||
@@ -207,6 +167,27 @@ export function SAEventsPage() {
 
         setSaveLoading(true);
         try {
+            if (eventToEdit) {
+                const result = await executeUpdateEvent({
+                    eventId: eventToEdit.id,
+                    name: formName.trim(),
+                    partner: formPartner.trim(),
+                    cityName: formCity.trim(),
+                    eventDate: formDate,
+                    targetBags: formTargetBags || "100",
+                    imgUrl: formImageLink.trim() ? formImageLink.trim() : null,
+                });
+
+                if (!result.success) {
+                    setSaveError(result.message);
+                    return;
+                }
+
+                setIsCreateModalOpen(false);
+                loadEvents();
+                return;
+            }
+
             const result = await executeCreateEvent({
                 name: formName.trim(),
                 partner: formPartner.trim(),

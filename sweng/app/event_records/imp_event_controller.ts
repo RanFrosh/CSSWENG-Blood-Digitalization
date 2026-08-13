@@ -1,5 +1,5 @@
 import { ApiResponse } from "@/types/api_res_type";
-import { CreateCorrections, CreateEventRecords, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewCities, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
+import { CreateCorrections, CreateEventRecords, CreateEvents, UpdateEvents, ViewCorrectionFilters, ViewCorrections, ViewCities, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 import { EventController, EventData } from "@/abstract/events/event_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
@@ -128,6 +128,12 @@ export class ImpEventManager implements EventController {
         const res = await helpGateKeep(this.profileReader, 'create_event');
         if (!res.success || !res.data) return { success: false, message: res.message };
         return await this.eventModel.getAllCities();
+    }
+
+    async invokeUpdateEvent(id: bigint, data: UpdateEvents): Promise<ApiResponse> {
+        const res = await helpGateKeep(this.profileReader, 'update_event');
+        if (!res.success || !res.data) return { success: false, message: res.message };
+        return await this.eventModel.updateEvent(id, data);
     }
 
     async invokeDeleteEvent(id: bigint): Promise<ApiResponse> {
