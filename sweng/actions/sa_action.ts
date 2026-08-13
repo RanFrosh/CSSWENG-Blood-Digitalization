@@ -149,3 +149,43 @@ export async function removeStaffAction(eventId: string, staffIds: string[]) {
         return { success: false, message: "Internal server error" };
     }
 }
+
+export async function getEditRequestsAction() {
+    try {
+        const controller = await getSAController();
+        return await controller.invokeFetchEditRequests();
+    } catch (err: any) {
+        console.error("Server Action Error (getPendingEditRequests):", err);
+        return { success: false, message: "Internal server error" };
+    }
+}
+
+export async function rejectRequestAction(requestId: string, adminId: string, remarks: string) {
+    try {
+        const controller = await getSAController();
+        const response = await controller.invokeRejectEditRequest(requestId, adminId, remarks);
+        
+        if (response.success) {
+            revalidatePath(`/sa/management/requests`); // Refresh the UI queue
+        }
+        return response;
+    } catch (err) {
+        console.error("Server Action Error (Reject):", err);
+        return { success: false, message: "Internal server error" };
+    }
+}
+
+export async function approveRequestAction(requestId: string, adminId: string, remarks?: string) {
+    try {
+        const controller = await getSAController();
+        const response = await controller.invokeApproveEditRequest(requestId, adminId, remarks);
+        
+        if (response.success) {
+            revalidatePath(`/sa/management/requests`); // Refresh the UI queue
+        }
+        return response;
+    } catch (err) {
+        console.error("Server Action Error (Approve):", err);
+        return { success: false, message: "Internal server error" };
+    }
+}

@@ -2,8 +2,10 @@ import { orm } from "@/db/drizzle";
 import { event_log } from "@/db/schemas/event_log";
 import { profiles } from "@/db/schemas/profiles";
 import { assigned_staff } from "@/db/schemas/assigned_staff";
+import { edit_requests } from "@/db/schemas/event_request";
 import { city } from "@/db/schemas/city";
-import { eq, and, inArray } from "drizzle-orm";
+import { blood_bag } from "@/db/schemas/blood_bag";
+import { eq, and, inArray, desc } from "drizzle-orm";
 import { SuperAdminData } from "@/abstract/sa/sa_abstract";
 
 export class ImpSuperAdminModel implements SuperAdminData{
@@ -70,5 +72,61 @@ export class ImpSuperAdminModel implements SuperAdminData{
                     inArray(assigned_staff.staff_id, staffIds)
                 )
             );
+    }
+
+    async getEditRequests() {
+        return await orm
+            .select({
+                id: edit_requests.id,
+                blood_bag_serial: edit_requests.blood_bag_serial,
+                donor_id: edit_requests.donor_id,
+                event_id: edit_requests.event_id,
+                staff_id: edit_requests.staff_id,
+                staff_name: profiles.name, 
+                status: edit_requests.status,
+                payload: edit_requests.payload,
+                created_at: edit_requests.created_at,
+                admin_remarks: edit_requests.admin_remarks
+            })
+            .from(edit_requests)
+            .leftJoin(profiles, eq(edit_requests.staff_id, profiles.id))
+            .orderBy(desc(edit_requests.created_at));
+    }
+
+    async getEditRequestById(requestId: string) {
+        return await orm.select()
+            .from(edit_requests)
+            .where(eq(edit_requests.id, BigInt(requestId)))
+            .limit(1);
+    }
+
+    async rejectEditRequest(requestId: string, adminId: string, remarks: string) {
+        return await orm.update(edit_requests)
+            .set({
+                status: 'rejected',
+                admin_id: adminId,
+                admin_remarks: remarks,
+                updated_at: new Date()
+            })
+            .where(eq(edit_requests.id, BigInt(requestId)));
+    }
+
+    async approveEditRequest(requestId: string, adminId: string, bloodBagSerial: string, payload: any, remarks?: string) {
+
+        return await orm.transaction(async (tx) => {
+            
+            await tx.update(blood_bag)
+                .set(payload)
+                .where(eq(blood_bag.serial_number, bloodBagSerial));
+
+            await tx.update(edit_requests)
+                .set({
+                    status: 'approved',
+                    admin_id: adminId,
+                    admin_remarks: remarks || null,
+                    updated_at: new Date()
+                })
+                .where(eq(edit_requests.id, BigInt(requestId)));
+        });
     }
 }
