@@ -31,6 +31,7 @@ export interface EventData {
     getAllCities(): Promise<ApiResponse<ViewCities[]>>;
     updateEvent(id: bigint, data: UpdateEvents): Promise<ApiResponse>;
     deleteEvent(id: bigint): Promise<ApiResponse>;
+    updateEventStatuses(): Promise<ApiResponse<number>>;
 }
 
 export interface EventController {
@@ -51,4 +52,5 @@ export interface EventController {
     invokeGetAllCities(): Promise<ApiResponse<ViewCities[]>>;
     invokeUpdateEvent(id: bigint, data: UpdateEvents): Promise<ApiResponse>;
     invokeDeleteEvent(id: bigint): Promise<ApiResponse>;
+    invokeUpdateEventStatuses(): Promise<ApiResponse<number>>;
 }

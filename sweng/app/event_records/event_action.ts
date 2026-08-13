@@ -56,6 +56,15 @@ export async function executeGetAllCities(): Promise<ApiResponse<ViewCities[]>> 
     return controller.invokeGetAllCities();
 }
 
+export async function executeUpdateEventStatuses(): Promise<ApiResponse<number>> {
+    const database = await serverSupa();
+    const model = new ImpEventModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpEventManager(model, profiler);
+
+    return controller.invokeUpdateEventStatuses();
+}
+
 function computeEventStatus(eventDate: string): ViewEvents["status"] {
     const today = new Date().toISOString().split("T")[0];
     if (eventDate < today) {

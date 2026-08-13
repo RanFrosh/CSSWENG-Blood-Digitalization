@@ -2,7 +2,7 @@ import { EventData } from "@/abstract/events/event_abstract";
 import { ApiResponse } from "@/types/api_res_type";
 import { CreateCorrections, CreateEventRecords, CreateEvents, UpdateEvents, ViewCorrectionFilters, ViewCorrections, ViewCities, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
-import { SQL, eq, asc, desc, and, inArray, ilike, getTableColumns } from "drizzle-orm";
+import { SQL, eq, asc, desc, and, inArray, ilike, getTableColumns, sql } from "drizzle-orm";
 import { event_log } from "@/db/schemas/event_log";
 import { corrected_event } from "@/db/schemas/corrected_event";
 import { orm } from "@/db/drizzle";
@@ -257,6 +257,28 @@ export class ImpEventModel implements EventData {
             return { success: true, message: "Event deleted" };
         } catch (err: any) {
             return { success: false, message: err.message };
+        }
+    }
+
+    async updateEventStatuses(): Promise<ApiResponse<number>> {
+        try {
+            const statusCase = sql`
+                CASE
+                    WHEN ${event_log.event_date} < CURRENT_DATE THEN 'Completed'::event_status
+                    WHEN ${event_log.event_date} = CURRENT_DATE THEN 'Ongoing'::event_status
+                    ELSE 'Upcoming'::event_status
+                END
+            `;
+
+            const result = await this.access
+                .update(event_log)
+                .set({ status: statusCase })
+                .where(sql`${event_log.status} IS DISTINCT FROM ${statusCase}`)
+                .returning({ id: event_log.id });
+
+            return { success: true, message: "Event statuses reconciled", data: result.length };
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };
         }
     }
 
