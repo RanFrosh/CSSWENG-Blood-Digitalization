@@ -14,10 +14,13 @@ export class ImpSuperAdminManager implements SuperAdminController {
 
     async invokeFetchEventSummary(eventId: string) {
         try {
-            if (!eventId) return { success: false, message: "Event ID is required." };
+            if (!eventId) 
+                return { success: false, message: "Event ID is required." };
 
             const res = await this.saModel.getEventById(eventId);
-            if (!res.length) return { success: false, message: "Event not found." };
+            
+            if (!res.length) 
+                return { success: false, message: "Event not found." };
 
             const event = res[0];
             return {
@@ -26,8 +29,10 @@ export class ImpSuperAdminManager implements SuperAdminController {
                     id: String(event.id),
                     name: event.name,
                     partner: event.partner,
-                    city: event.city_name,
-                    date: event.event_date,
+                    city: event.city_name || "Unknown",
+                    event_date: event.event_date || "",
+                    start_time: event.start_time || null, 
+                    end_time: event.end_time || null
                 },
                 message: "Event summary retrieved",
             };
@@ -76,6 +81,72 @@ export class ImpSuperAdminManager implements SuperAdminController {
         } catch (error) {
             console.error("Controller Error (removeStaffFromEvent):", error);
             return { success: false, message: "Failed to remove staff." };
+        }
+    }
+
+    async invokeFetchEditRequests() {
+        try {
+            const rawRequests = await this.saModel.getEditRequests();
+
+            const formattedRequests = rawRequests.map(req => ({
+                id: String(req.id),
+                bloodBagSerial: req.blood_bag_serial,
+                donorId: req.donor_id ? String(req.donor_id) : null,
+                eventId: req.event_id ? String(req.event_id) : null,
+                staffId: req.staff_id,
+                staffName: `${req.staff_name || 'Unknown'}`.trim(),
+                payload: req.payload,
+                createdAt: req.created_at ?? new Date(),
+                status: req.status, 
+                admin_remarks: req.admin_remarks || undefined,
+            }));
+
+            return { 
+                success: true, 
+                data: formattedRequests,
+                message: "Edit requests fetched"
+            };
+        } catch (error) {
+            console.error("Controller Error (fetchEditRequests):", error);
+            return { success: false, message: "Failed to fetch edit requests." };
+        }
+    }
+
+    async invokeRejectEditRequest(requestId: string, adminId: string, remarks: string) {
+        
+        try {
+            if (!requestId || !adminId || !remarks) return { success: false, message: "Missing required fields." };
+            
+            await this.saModel.rejectEditRequest(requestId, adminId, remarks);
+            return { success: true, message: "Edit request rejected successfully." };
+        } catch (error) {
+            console.error("Controller Error (rejectRequest):", error);
+            return { success: false, message: "Failed to reject request." };
+        }
+    }
+
+    async invokeApproveEditRequest(requestId: string, adminId: string, remarks?: string) {
+        
+        try {
+            if (!requestId || !adminId) return { success: false, message: "Missing required fields." };
+            
+            const reqData = await this.saModel.getEditRequestById(requestId);
+            if (!reqData.length) return { success: false, message: "Request not found." };
+            
+            const targetRequest = reqData[0];
+            
+            await this.saModel.approveEditRequest(
+                requestId, 
+                adminId, 
+                targetRequest.blood_bag_serial, 
+                targetRequest.payload, 
+                remarks
+            );
+
+            return { success: true, message: "Edit request approved and applied to database." };
+        } catch (error) {
+            console.error("Controller Error (approveRequest):", error);
+            return { success: false, message: "Failed to apply edit request. Check payload format." };
         }
     }
 }

@@ -4,7 +4,7 @@ import Header from "@/components/HeaderSA";
 import { prepareStaff, deleteStaffUser, staffToggler } from "@/app/register/register_action";
 import { AccessType } from "@/db/enums/access_level";
 import { StaffUser, StaffStatus } from "@/types/staff_type";
-import { getUsers } from "./users_action";
+import { getUsers } from "@/actions/users_action";
 
 type TabFilter = "All" | AccessType
 type SortOption =
@@ -366,26 +366,24 @@ export default function SAUsersPage() {
 
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
                         {usersLoading ? (
-                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] text-center">
-                                <p className="text-[18px] font-semibold text-[#002940]">
+                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] py-[0.5in] text-center">
+                                <p className="text-[18px] font-semibold text-[#002940] animate-pulse">
                                     Loading users...
                                 </p>
                             </div>
                         ) : usersError !== "" ? (
-                            <div className="bg-[#f5e4e4] border-2 border-[#a32626] rounded-[16px] p-[0.35in] text-center">
+                            <div className="bg-[#f5e4e4] border-2 border-[#a32626] rounded-[16px] py-[0.5in] text-center">
                                 <p className="text-[16px] font-semibold text-[#a32626]">
                                     {usersError}
                                 </p>
                             </div>
                         ) : filteredUsers.length === 0 ? (
-                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] text-center">
+                            <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[16px] py-[0.5in] text-center">
                                 <p className="text-[18px] font-semibold text-[#002940]">
                                     No users found
                                 </p>
-
-                                <p className="mt-1 text-[16px] text-[#5c6b73]">
-                                    Try a different search term, sort option, or
-                                    tab filter.
+                                <p className="mt-2 text-[16px] text-[#5c6b73]">
+                                    Try a different search term, sort option, or tab filter.
                                 </p>
                             </div>
                         ) : (
@@ -394,96 +392,68 @@ export default function SAUsersPage() {
                                     key={user.id}
                                     className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
                                 >
-                                    <div className="bg-[#002940] text-white px-[0.35in] py-[0.15in] flex flex-row items-center justify-between flex-wrap gap-[0.15in]">
+                                    <div className="bg-[#002940] text-white px-[0.25in] py-[0.15in] flex flex-row items-center justify-between flex-wrap gap-[0.15in]">
+                                        
                                         <div className="flex flex-row items-center gap-[0.15in] flex-wrap">
-                                            <h2 className="text-[24px] font-['Montserrat'] font-bold">
+                                            <h2 className="text-[22px] font-['Montserrat'] font-bold">
                                                 {user.name}
                                             </h2>
-
-                                            <span className="px-[12px] py-[6px] rounded-full text-[14px] font-semibold bg-white text-[#002940]">
+                                            <span className="px-[12px] py-[4px] rounded-full text-[13px] font-bold tracking-wide uppercase bg-white text-[#002940]">
                                                 {roleShortLabels[user.role]}
                                             </span>
                                         </div>
 
-                                        <div className="flex flex-row gap-[10px] flex-wrap">
+                                        <div className="flex flex-row gap-[10px] flex-wrap w-full sm:w-auto">
                                             {user.status === "Active" ? (
                                                 <button
-                                                    onClick={() =>
-                                                        openUserActionModal(
-                                                            user,
-                                                            "Deactivate"
-                                                        )
-                                                    }
-                                                    className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#a32626] cursor-pointer hover:bg-[#fef2f2]"
+                                                    onClick={() => openUserActionModal(user, "Deactivate")}
+                                                    className="w-full sm:w-auto px-[16px] py-[8px] rounded-[10px] text-[15px] font-semibold bg-white text-[#002940] hover:bg-gray-100 transition-colors cursor-pointer"
                                                 >
                                                     Deactivate User
                                                 </button>
                                             ) : (
-                                                <>
-                                                    <button
-                                                        onClick={() =>
-                                                            openUserActionModal(
-                                                                user,
-                                                                "Reactivate"
-                                                            )
-                                                        }
-                                                        className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#1a7a3f] cursor-pointer hover:bg-[#e4f5ea]"
-                                                    >
-                                                        Reactivate User
-                                                    </button>
-
-                                                    <button
-                                                        onClick={() =>
-                                                            openUserActionModal(
-                                                                user,
-                                                                "Delete"
-                                                            )
-                                                        }
-                                                        className="px-[16px] py-[8px] rounded-[10px] text-[16px] font-semibold bg-white text-[#a32626] cursor-pointer hover:bg-[#fef2f2]"
-                                                    >
-                                                        Delete User
-                                                    </button>
-                                                </>
+                                                <button
+                                                    onClick={() => openUserActionModal(user, "Reactivate")}
+                                                    className="w-full sm:w-auto px-[16px] py-[8px] rounded-[10px] text-[15px] font-semibold bg-white text-[#1a7a3f] hover:bg-[#e4f5ea] transition-colors cursor-pointer"
+                                                >
+                                                    Reactivate User
+                                                </button>
                                             )}
+                                            
+                                            <button
+                                                onClick={() => openUserActionModal(user, "Delete")}
+                                                className="w-full sm:w-auto px-[16px] py-[8px] rounded-[10px] text-[15px] font-semibold bg-white text-[#a32626] hover:bg-[#fef2f2] transition-colors cursor-pointer"
+                                            >
+                                                Delete User
+                                            </button>
                                         </div>
+                                    </div>
 
-                                    <div className="p-[0.35in]">
+                                    <div className = "p-[0.35in]">
+
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-[0.5in] gap-y-[0.15in] text-[18px]">
+                                            
                                             <p>
-                                                <span className="font-semibold text-[#002940]">
-                                                    User ID:
-                                                </span>{" "}
+                                                <span className="font-semibold text-[#002940]">User ID: </span>
                                                 {user.id}
                                             </p>
 
                                             <p>
-                                                <span className="font-semibold text-[#002940]">
-                                                    Email:
-                                                </span>{" "}
+                                                <span className="font-semibold text-[#002940]">Email: </span> 
                                                 {user.email ?? "-"}
                                             </p>
 
                                             <p>
-                                                <span className="font-semibold text-[#002940]">
-                                                    Date Joined:
-                                                </span>{" "}
+                                                <span className="font-semibold text-[#002940]">Date Joined: </span>
                                                 {user.dateJoined?.toLocaleDateString() ?? "-"}
                                             </p>
 
-                                            <p className="flex items-center gap-[10px]">
-                                                <span className="font-semibold text-[#002940]">
-                                                    Status:
-                                                </span>{" "}
-                                                <span
-                                                    className={getStatusPill(
-                                                        user.status
-                                                    )}
-                                                >
-                                                    {user.status}
-                                                </span>
+                                            <p>
+                                                <span className="font-semibold text-[#002940]">Status: </span>
+                                                <span className={getStatusPill(user.status)}>{user.status}</span>
                                             </p>
+
                                         </div>
-                                    </div>
                                     </div>
                                 </div>
                             ))

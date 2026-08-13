@@ -1,8 +1,8 @@
 import { EventData } from "@/abstract/events/event_abstract";
 import { ApiResponse } from "@/types/api_res_type";
-import { CreateCorrections, CreateEventRecords, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
+import { CreateCorrections, CreateEventRecords, CreateEvents, UpdateEvents, ViewCorrectionFilters, ViewCorrections, ViewCities, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
-import { SQL, eq, asc, desc, and, inArray, ilike, getTableColumns } from "drizzle-orm";
+import { SQL, eq, asc, desc, and, inArray, ilike, getTableColumns, sql } from "drizzle-orm";
 import { event_log } from "@/db/schemas/event_log";
 import { corrected_event } from "@/db/schemas/corrected_event";
 import { orm } from "@/db/drizzle";
@@ -207,17 +207,12 @@ export class ImpEventModel implements EventData {
         }
     }
 
-    async getCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>> {
+    async getCity(cityName: string): Promise<ApiResponse<bigint>> {
         try {
             const [result] = await this.access
                 .select({ id: city.id })
                 .from(city)
-                .where(
-                    and(
-                        ilike(city.name, cityName.trim()),
-                        eq(city.province_id, provinceId)
-                    )
-                )
+                .where(ilike(city.name, cityName.trim()))
                 .limit(1);
 
             if (!result) {
@@ -229,6 +224,31 @@ export class ImpEventModel implements EventData {
         }
     }
 
+    async getAllCities(): Promise<ApiResponse<ViewCities[]>> {
+        try {
+            const cities = await this.access
+                .select({ id: city.id, name: city.name, province_id: city.province_id })
+                .from(city)
+                .orderBy(asc(city.name));
+
+            return { success: true, message: "Cities retrieved", data: cities };
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };
+        }
+    }
+
+    async updateEvent(id: bigint, data: UpdateEvents): Promise<ApiResponse> {
+        try {
+            await this.access
+                .update(event_log)
+                .set({ ...data })
+                .where(eq(event_log.id, id));
+            return { success: true, message: "Event updated" };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }
+    }
+
     async deleteEvent(id: bigint): Promise<ApiResponse> {
         try {
             await this.access
@@ -237,6 +257,28 @@ export class ImpEventModel implements EventData {
             return { success: true, message: "Event deleted" };
         } catch (err: any) {
             return { success: false, message: err.message };
+        }
+    }
+
+    async updateEventStatuses(): Promise<ApiResponse<number>> {
+        try {
+            const statusCase = sql`
+                CASE
+                    WHEN ${event_log.event_date} < CURRENT_DATE THEN 'Completed'::event_status
+                    WHEN ${event_log.event_date} = CURRENT_DATE THEN 'Ongoing'::event_status
+                    ELSE 'Upcoming'::event_status
+                END
+            `;
+
+            const result = await this.access
+                .update(event_log)
+                .set({ status: statusCase })
+                .where(sql`${event_log.status} IS DISTINCT FROM ${statusCase}`)
+                .returning({ id: event_log.id });
+
+            return { success: true, message: "Event statuses reconciled", data: result.length };
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };
         }
     }
 

@@ -14,6 +14,10 @@ export interface SuperAdminData {
     getAssignedStaffIdsForEvent(eventId: string): Promise<any>;
     insertEventStaff(eventId: string, staffIds: string[]): Promise<any>;
     deleteEventStaff(eventId: string, staffIds: string[]): Promise<any>;
+    getEditRequests(): Promise<any>;
+    getEditRequestById(requestId: string): Promise<any>;
+    rejectEditRequest(requestId: string, adminId: string, remarks: string): Promise<any>;
+    approveEditRequest(requestId: string, adminId: string, bloodBagSerial: string, payload: any, remarks?: string): Promise<any>;
 }
 
 export interface SuperAdminController {
@@ -27,4 +31,8 @@ export interface SuperAdminController {
     invokeFetchEventStaffLists(eventId: string): Promise<ApiResponse<any>>;
     invokeAssignStaffToEvent(eventId: string, staffIds: string[]): Promise<ApiResponse<any>>;
     invokeRemoveStaffFromEvent(eventId: string, staffIds: string[]): Promise<ApiResponse<any>>;
+    invokeFetchEditRequests(): Promise<ApiResponse<any>>;
+    invokeRejectEditRequest(requestId: string, adminId: string, remarks: string): Promise<ApiResponse<any>>;
+    invokeApproveEditRequest(requestId: string, adminId: string, remarks?: string): Promise<ApiResponse<any>>;
+    
 }
