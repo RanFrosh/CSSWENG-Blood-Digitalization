@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/HeaderSA";
-import { executeQueryAllEvents, executeCreateEvent, executeDeleteEvent } from "@/app/event_records/event_action";
+import { executeQueryAllEvents, executeCreateEvent, executeDeleteEvent, executeGetAllCities } from "@/app/event_records/event_action";
 import { ViewEventsWithProvince } from "@/types/event_type";
 
 const formatEventId = (event: ViewEventsWithProvince): string => {
@@ -18,15 +18,6 @@ type SortOption =
     | "Target Bags: High to Low"
     | "Target Bags: Low to High"
     | "Name: A-Z";
-
-const cityOptions = [
-    "Manila",
-    "Quezon City",
-    "Taguig",
-    "Makati",
-    "Pasig",
-    "Pasay",
-];
 
 export function SAEventsPage() {
     const router = useRouter();
@@ -53,9 +44,20 @@ export function SAEventsPage() {
         setEventsLoading(false);
     }, []);
 
+    // Pull all cities from the DB for the create/edit modal dropdown.
+    const loadCities = useCallback(async () => {
+        const result = await executeGetAllCities();
+        if (result.success && result.data) {
+            setCityOptions(result.data.map((c) => c.name));
+        } else {
+            setCityOptions([]);
+        }
+    }, []);
+
     useEffect(() => {
         loadEvents();
-    }, [loadEvents]);
+        loadCities();
+    }, [loadEvents, loadCities]);
 
     // Save state for the create modal
     const [saveLoading, setSaveLoading] = useState(false);
@@ -74,12 +76,12 @@ export function SAEventsPage() {
     const [formName, setFormName] = useState("");
     const [formPartner, setFormPartner] = useState("");
     const [formCity, setFormCity] = useState("");
-    const [formProvince, setFormProvince] = useState("");
     const [formDate, setFormDate] = useState("");
     const [formTargetBags, setFormTargetBags] = useState("100");
     const [formImageLink, setFormImageLink] = useState("");
 
     // City Dropdown
+    const [cityOptions, setCityOptions] = useState<string[]>([]);
     const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
     const filteredCityOptions = cityOptions.filter((city) =>
         city.toLowerCase().includes(formCity.toLowerCase())
@@ -131,7 +133,6 @@ export function SAEventsPage() {
         setFormName("");
         setFormPartner("");
         setFormCity("");
-        setFormProvince("");
         setFormDate("");
         setFormTargetBags("100");
         setFormImageLink("");
@@ -144,7 +145,6 @@ export function SAEventsPage() {
         setFormName(evt.name);
         setFormPartner(evt.partner);
         setFormCity(evt.city);
-        setFormProvince(evt.province);
         setFormDate(evt.event_date);
         setFormTargetBags(evt.target_blood.toString());
         setIsCreateModalOpen(true);
@@ -166,7 +166,6 @@ export function SAEventsPage() {
             if (
                 !formName.trim() &&
                 !formPartner.trim() &&
-                !formProvince.trim() &&
                 !formCity.trim() &&
                 !formDate &&
                 !formImageLink.trim()
@@ -184,7 +183,6 @@ export function SAEventsPage() {
                               name: formName,
                               partner: formPartner,
                               city: formCity,
-                              province: formProvince,
                               event_date: formDate,
                               status: calculatedStatus,
                               target_blood: BigInt(parseInt(formTargetBags) || 100),
@@ -199,7 +197,6 @@ export function SAEventsPage() {
         if (
             !formName.trim() ||
             !formPartner.trim() ||
-            !formProvince.trim() ||
             !formCity.trim() ||
             !formDate ||
             !formImageLink.trim()
@@ -213,7 +210,6 @@ export function SAEventsPage() {
             const result = await executeCreateEvent({
                 name: formName.trim(),
                 partner: formPartner.trim(),
-                provinceName: formProvince.trim(),
                 cityName: formCity.trim(),
                 eventDate: formDate,
                 targetBags: formTargetBags || "100",
@@ -229,7 +225,6 @@ export function SAEventsPage() {
             setFormName("");
             setFormPartner("");
             setFormCity("");
-            setFormProvince("");
             setFormDate("");
             setFormTargetBags("100");
             setFormImageLink("");

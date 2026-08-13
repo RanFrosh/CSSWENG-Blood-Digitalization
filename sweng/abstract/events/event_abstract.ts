@@ -8,7 +8,8 @@ import { ViewCorrections,
     CreateEvents, 
     CreateCorrections,
     CreateEventRecords,
-    ViewEventRecords} from "@/types/event_type";
+    ViewEventRecords,
+    ViewCities} from "@/types/event_type";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 
 export interface EventData {
@@ -25,7 +26,8 @@ export interface EventData {
     queryEventById(id: bigint): Promise<ApiResponse<ViewEvents>>
     isStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
     getProvince(provinceName: string): Promise<ApiResponse<bigint>>;
-    getCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>>;
+    getCity(cityName: string): Promise<ApiResponse<bigint>>;
+    getAllCities(): Promise<ApiResponse<ViewCities[]>>;
     deleteEvent(id: bigint): Promise<ApiResponse>;
 }
 
@@ -43,6 +45,7 @@ export interface EventController {
     invokeVerifyEventAccess(event_log_id: bigint): Promise<ApiResponse<ViewEvents>>
     invokeIsStaffOnOngoingEvent(staff_id: string): Promise<ApiResponse<boolean>>;
     invokeGetProvince(provinceName: string): Promise<ApiResponse<bigint>>;
-    invokeGetCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>>;
+    invokeGetCity(cityName: string): Promise<ApiResponse<bigint>>;
+    invokeGetAllCities(): Promise<ApiResponse<ViewCities[]>>;
     invokeDeleteEvent(id: bigint): Promise<ApiResponse>;
 }

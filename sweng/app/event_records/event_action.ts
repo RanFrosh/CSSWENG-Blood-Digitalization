@@ -1,6 +1,6 @@
 "use server"
 
-import { ViewEventFilters, ViewEvents, ViewEventsWithProvince, CreateEvents } from "@/types/event_type";
+import { ViewEventFilters, ViewEvents, ViewEventsWithProvince, ViewCities, CreateEvents } from "@/types/event_type";
 import { ApiResponse } from "@/types/api_res_type";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 import { ImpEventModel } from "@/app/event_records/imp_event_data";
@@ -47,10 +47,18 @@ export async function executeQueryAllEvents(): Promise<ApiResponse<ViewEventsWit
     return controller.invokeQueryAllEvents();
 }
 
+export async function executeGetAllCities(): Promise<ApiResponse<ViewCities[]>> {
+    const database = await serverSupa();
+    const model = new ImpEventModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpEventManager(model, profiler);
+
+    return controller.invokeGetAllCities();
+}
+
 export async function executeCreateEvent(data: {
     name: string;
     partner: string;
-    provinceName: string;
     cityName: string;
     eventDate: string;
     targetBags: string;
@@ -61,12 +69,7 @@ export async function executeCreateEvent(data: {
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpEventManager(model, profiler);
 
-    const provinceRes = await controller.invokeGetProvince(data.provinceName);
-    if (!provinceRes.success || !provinceRes.data) {
-        return { success: false, message: provinceRes.message || "Province not found" };
-    }
-
-    const cityRes = await controller.invokeGetCity(data.cityName, provinceRes.data);
+    const cityRes = await controller.invokeGetCity(data.cityName);
     if (!cityRes.success || !cityRes.data) {
         return { success: false, message: cityRes.message || "City not found" };
     }

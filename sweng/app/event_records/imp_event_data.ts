@@ -1,6 +1,6 @@
 import { EventData } from "@/abstract/events/event_abstract";
 import { ApiResponse } from "@/types/api_res_type";
-import { CreateCorrections, CreateEventRecords, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
+import { CreateCorrections, CreateEventRecords, CreateEvents, ViewCorrectionFilters, ViewCorrections, ViewCities, ViewEventFilters, ViewEventRecords, ViewEvents, ViewEventsWithProvince } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 import { SQL, eq, asc, desc, and, inArray, ilike, getTableColumns } from "drizzle-orm";
 import { event_log } from "@/db/schemas/event_log";
@@ -207,23 +207,31 @@ export class ImpEventModel implements EventData {
         }
     }
 
-    async getCity(cityName: string, provinceId: bigint): Promise<ApiResponse<bigint>> {
+    async getCity(cityName: string): Promise<ApiResponse<bigint>> {
         try {
             const [result] = await this.access
                 .select({ id: city.id })
                 .from(city)
-                .where(
-                    and(
-                        ilike(city.name, cityName.trim()),
-                        eq(city.province_id, provinceId)
-                    )
-                )
+                .where(ilike(city.name, cityName.trim()))
                 .limit(1);
 
             if (!result) {
                 return { success: false, message: "City not found", data: undefined };
             }
             return { success: true, message: "City found", data: result.id };
+        } catch (err: any) {
+            return { success: false, message: err.message, data: undefined };
+        }
+    }
+
+    async getAllCities(): Promise<ApiResponse<ViewCities[]>> {
+        try {
+            const cities = await this.access
+                .select({ id: city.id, name: city.name, province_id: city.province_id })
+                .from(city)
+                .orderBy(asc(city.name));
+
+            return { success: true, message: "Cities retrieved", data: cities };
         } catch (err: any) {
             return { success: false, message: err.message, data: undefined };
         }
