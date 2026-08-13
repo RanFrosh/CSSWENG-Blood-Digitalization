@@ -147,6 +147,7 @@ export function SAEventsPage() {
         setFormCity(evt.city);
         setFormDate(evt.event_date);
         setFormTargetBags(evt.target_blood.toString());
+        setFormImageLink(evt.img_url ?? "");
         setIsCreateModalOpen(true);
     };
 
@@ -158,8 +159,7 @@ export function SAEventsPage() {
             !formName.trim() ||
             !formPartner.trim() ||
             !formCity.trim() ||
-            !formDate ||
-            !formImageLink.trim()
+            !formDate
         ) {
             setSaveError("All fields are required.");
             return;
