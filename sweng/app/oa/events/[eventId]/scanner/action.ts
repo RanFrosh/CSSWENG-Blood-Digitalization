@@ -68,14 +68,6 @@ export async function checkInDonorAction(
             };
         }
 
-        // Increment visitors
-        await orm
-            .update(event_log)
-            .set({
-                visitors: sql`${event_log.visitors} + 1`,
-            })
-            .where(eq(event_log.id, BigInt(eventId)));
-
         // Add donor to queue
         const database = await serverSupa();
 
@@ -95,6 +87,15 @@ export async function checkInDonorAction(
                 message: queueResult.message,
             };
         }
+
+        // Increment visitors after a successful enqueue
+        await orm
+            .update(event_log)
+            .set({
+                visitors: sql`${event_log.visitors} + 1`,
+            })
+            .where(eq(event_log.id, BigInt(eventId)));
+
         await executeLogEvent({
             event_log_id: BigInt(eventId),
             donor_id: foundDonor[0].id,

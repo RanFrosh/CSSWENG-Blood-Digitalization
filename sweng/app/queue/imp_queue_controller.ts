@@ -51,8 +51,20 @@ export class ImpQueueManager implements QueueController {
         if (!res.success || !res.data) 
             return { success: false, message: res.message }
 
-        const outcome = await this.queueModel.addToQueue(queueTarget);
-        return outcome;
+        const presence = await this.queueModel.queryQueue({
+            event_log_id: queueTarget.event_log_id,
+            donor_id: queueTarget.donor_id,
+        });
+
+        if (!presence.success) {
+            return { success: false, message: presence.message };
+        }
+
+        if (presence.data && presence.data.length > 0) {
+            return { success: false, message: "Donor is already in the queue for this event." };
+        }
+
+        return await this.queueModel.addToQueue(queueTarget);
     }
 
     async invokeUpdateQueueStation(queueTarget: UpdateQueue): Promise<ApiResponse> {
