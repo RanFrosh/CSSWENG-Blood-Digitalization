@@ -16,6 +16,7 @@ import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 export interface EventData {
     queryEvent(data: ViewEventFilters, sort: Sorter<ViewEvents>): Promise<ApiResponse<ViewEvents[]>>
     queryAllEvents(): Promise<ApiResponse<ViewEventsWithProvince[]>>
+    getLandingPageEvents(): Promise<any>;
     createEvent(data: CreateEvents): Promise<ApiResponse>
     logEvent(data: CreateEventRecords): Promise<ApiResponse>
     queryEventRecords(event_log_id: bigint): Promise<ApiResponse<ViewEventRecords[]>>
@@ -37,6 +38,7 @@ export interface EventData {
 export interface EventController {
     invokeQueryEvent(data: ViewEventFilters, sort: Sorter<ViewEvents>): Promise<ApiResponse<ViewEvents[]>>
     invokeQueryAllEvents(): Promise<ApiResponse<ViewEventsWithProvince[]>>
+    invokeFetchLandingEvents(): Promise<ApiResponse<any>>
     invokeCreateEvent(data: CreateEvents): Promise<ApiResponse>
     invokeLogEvent(data: Omit<CreateEventRecords, 'staff_id'>): Promise<ApiResponse>
     invokeQueryEventRecords(event_log_id: bigint): Promise<ApiResponse<ViewEventRecords[]>>

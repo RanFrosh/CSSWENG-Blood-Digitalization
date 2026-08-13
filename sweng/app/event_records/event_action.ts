@@ -47,6 +47,15 @@ export async function executeQueryAllEvents(): Promise<ApiResponse<ViewEventsWit
     return controller.invokeQueryAllEvents();
 }
 
+export async function fetchLandingEventsAction() {
+    const database = await serverSupa();
+    const model = new ImpEventModel(orm);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpEventManager(model, profiler);
+
+    return controller.invokeFetchLandingEvents();
+}
+
 export async function executeGetAllCities(): Promise<ApiResponse<ViewCities[]>> {
     const database = await serverSupa();
     const model = new ImpEventModel(orm);

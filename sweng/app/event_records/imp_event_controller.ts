@@ -39,6 +39,36 @@ export class ImpEventManager implements EventController {
         return events;
     }
 
+    async invokeFetchLandingEvents(): Promise<ApiResponse<any>> {
+        try {
+            const rawEvents = await this.eventModel.getLandingPageEvents();
+
+            const formattedEvents = rawEvents.map((event: {
+                id: bigint | number; 
+                name: string | null;
+                description: string | null;
+                image_url: string | null;
+            }) => ({
+                id: String(event.id),
+                title: event.name || "Blood Drive Event",
+                details: event.description || "Join us for our upcoming blood donation drive. Your contribution saves lives.",
+                image: event.image_url || "/images/event.png", 
+            }));
+
+            return {
+                success: true,
+                message: "Landing events fetched successfully",
+                data: formattedEvents
+            };
+        } catch (error) {
+            console.error("Controller Error (fetchLandingEvents):", error);
+            return { 
+                success: false, 
+                message: "Failed to fetch events for landing page." 
+            };
+        }
+    }
+
     async invokeCreateEvent(data: CreateEvents): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'create_event');
 

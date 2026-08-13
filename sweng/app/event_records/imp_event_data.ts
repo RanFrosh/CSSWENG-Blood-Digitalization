@@ -66,6 +66,19 @@ export class ImpEventModel implements EventData {
         }
     }
 
+    async getLandingPageEvents() {
+        return await orm
+            .select({
+                id: event_log.id,
+                name: event_log.name,
+                image_url: event_log.img_url,
+                date: event_log.event_date,
+            })
+            .from(event_log)
+            .orderBy(desc(event_log.event_date))
+            .limit(5);
+    }
+
     async createEvent(data: CreateEvents): Promise<ApiResponse> {
         try {
             await this.access
