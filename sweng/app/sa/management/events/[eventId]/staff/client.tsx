@@ -48,13 +48,14 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
     const [availablePage, setAvailablePage] = useState(1);
     const resultsPerPage = 5;
 
-    const staffTypeOptions: StaffTypeFilter[] = [
-        "All Staff Types",
-        "onsite_admin", 
-        "med_prof", 
-        "lab_staff", 
-        "recov_staff"
+    const staffTypeOptions: { value: StaffTypeFilter; label: string }[] = [
+        { value: "All Staff Types", label: "All Staff Types" },
+        { value: "onsite_admin", label: "Onsite Admin" },
+        { value: "med_prof", label: "Medical Professional" },
+        { value: "lab_staff", label: "Lab Staff" },
+        { value: "recov_staff", label: "Recovery Staff" }
     ];
+
     const staffTabs: StaffTab[] = ["Assigned Staff", "Available Staff"];
 
     const filterStaffList = (list: StaffMember[]) => {
@@ -272,14 +273,18 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-[14px] font-semibold text-[#002940] mb-[6px]">Filter by Staff Type</label>
+                                    <label className="block text-[14px] font-semibold text-[#002940] mb-[6px]">
+                                        Filter by Staff Type
+                                    </label>
                                     <select
                                         value={staffTypeFilter}
                                         onChange={(e) => setStaffTypeFilter(e.target.value as StaffTypeFilter)}
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[16px] py-[10px] text-[16px] outline-none bg-white cursor-pointer focus:border-[#002940]"
                                     >
                                         {staffTypeOptions.map((option) => (
-                                            <option key={option} value={option}>{option}</option>
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
@@ -396,7 +401,9 @@ export default function EventStaffClient({ event, assignedStaff, availableStaff 
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[16px] py-[10px] text-[16px] outline-none bg-white cursor-pointer focus:border-[#002940]"
                                     >
                                         {staffTypeOptions.map((option) => (
-                                            <option key={option} value={option}>{option}</option>
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
