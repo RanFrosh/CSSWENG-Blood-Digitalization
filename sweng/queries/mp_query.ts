@@ -5,7 +5,6 @@ import { event_log } from "@/db/schemas/event_log";
 import { profiles } from "@/db/schemas/profiles";
 import { assigned_staff } from "@/db/schemas/assigned_staff";
 import { city } from "@/db/schemas/city";
-import { ViewDonorPartial } from "@/types/donor_type";
 import { MPData } from "@/abstract/mp/mp_abstract";
 import { event_queue } from "@/db/schemas/event_queue";
 import { UpdateQueue } from "@/types/queue_type";
@@ -20,99 +19,6 @@ export type DonorFilters = {
 };
 
 export class ImpMPModel implements MPData {
-
-    async getStaffEvents (staffId: string, filters: { 
-        search?: string;
-        partner?: string;
-        selectedCity?: string;
-        sortBy?: string;
-    } = {}) {
-
-        const { 
-            search = "", 
-            partner = "All Partners", 
-            selectedCity = "All Cities", 
-            sortBy = "Date" 
-        } = filters;
-        
-        const conditions: SQL[] = [
-            eq(assigned_staff.staff_id, staffId),
-        ];
-    
-        // Partner Filter
-        if (partner && partner !== "All Partners") {
-            conditions.push(eq(event_log.partner, partner));
-        }
-
-        // City Filter
-        if (selectedCity && selectedCity !== "All Cities") {
-            conditions.push(eq(city.name, selectedCity));
-        }
-
-        // Search Filter
-        if (search && search.trim() !== "") {
-            const searchPattern = `%${search}%`;
-            conditions.push(
-                or(
-                    ilike(event_log.name, searchPattern),
-                    ilike(event_log.partner, searchPattern),
-                    ilike(city.name, searchPattern)
-                ) as SQL
-            );
-        }
-
-        // Sort Logic
-        let orderLogic: any = desc(event_log.event_date);
-
-        switch (sortBy) {
-            case "ID (Descending)":
-                orderLogic = desc(event_log.id);
-                break;
-            case "Date (Earliest)":
-                orderLogic = desc(event_log.event_date);
-                break;
-            case "Date (Oldest)":
-                orderLogic = asc(event_log.event_date);
-                break;
-            case "Partner (A-Z)":
-                orderLogic = asc(event_log.partner);
-                break;
-            case "Partner (Z-A)":
-                orderLogic = desc(event_log.partner);
-                break;
-            case "City (A-Z)":
-                orderLogic = asc(city.name);
-                break;
-            case "City (Z-A)":
-                orderLogic = desc(city.name);
-                break;
-            case "ID (Ascending)":
-            default:
-                orderLogic = asc(event_log.id);
-                break;
-        }
-
-        const events = await orm
-            .select({
-                id: event_log.id,
-                name: event_log.name,
-                partner: event_log.partner,
-                status: event_log.status,
-                event_date: event_log.event_date,
-                start_time: event_log.start_time,
-                end_time: event_log.end_time,
-                street: event_log.street,
-                target_blood: event_log.target_blood,
-                city: city.name
-            })
-            .from(event_log)
-            .innerJoin(assigned_staff, eq(event_log.id, assigned_staff.event_log_id))
-            .leftJoin(city, eq(event_log.city_id, city.id))
-            .where(and(...conditions))
-            .orderBy(orderLogic);
-
-        return events;
-    }
 
     async verifyAccess(staffId: string, eventId: bigint) {
 
@@ -192,79 +98,6 @@ export class ImpMPModel implements MPData {
             );
 
         return rawStaffStatus;
-    }
-
-    async acceptDonor(queueId: bigint, staffProfileId: string) {
-
-        const updatedQueueRow = await orm
-            .update(event_queue)
-            .set({ 
-                staff_id: staffProfileId 
-            })
-            .where(
-                and(
-                    eq(event_queue.id, queueId),
-                    isNull(event_queue.staff_id) 
-                )
-            )
-            .returning();
-
-        return updatedQueueRow;
-    }
-
-    async getSingleDonor(filter: ViewDonorPartial) {
-
-        try {
-
-            if (Object.keys(filter).length === 0) {
-                return { success: false, message: "No search filters provided." };
-            }
-
-            const filtersDonor: SQL[] = [];
-            
-            if (filter.id) 
-                filtersDonor.push(eq(donor.id, filter.id));
-
-            if (filter.sex) 
-                filtersDonor.push(eq(donor.sex, filter.sex));
-
-            if (filter.email) 
-                filtersDonor.push(eq(donor.email, filter.email));
-
-            if (filter.first_name) 
-                filtersDonor.push(eq(donor.first_name, filter.first_name));
-
-            if (filter.last_name) 
-                filtersDonor.push(eq(donor.last_name, filter.last_name));
-
-            if (filter.middle_name) 
-                filtersDonor.push(eq(donor.middle_name, filter.middle_name));
-
-            if (filter.mobile_no) 
-                filtersDonor.push(eq(donor.mobile_no, filter.mobile_no));
-
-            if (filter.blood) 
-                filtersDonor.push(eq(donor.blood, filter.blood));
-
-            if (filter.city_id) 
-                filtersDonor.push(eq(donor.city_id, filter.city_id));
-
-            filtersDonor.push(eq(donor.active, true));
-            filtersDonor.push(isNull(donor.delete_datetime));
-
-            const [result] = await orm
-                .select()
-                .from(donor)
-                .where(and(...filtersDonor))
-                .limit(1);
-
-            if (!result) 
-                return { success: false, message: "Donor not found." };
-            
-            return { success: true, message: "Donor retrieved", data: result };    
-        } catch (err: any) {
-            return { success: false, message: err.message };
-        }
     }
 
     async validateExtractionAccess(staffId: string, eventId: bigint, donorId: bigint) {

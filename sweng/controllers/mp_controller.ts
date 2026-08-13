@@ -16,33 +16,6 @@ export class ImpMPManager implements MPController {
         this.profileReader = injectProfileReader;
     }
 
-    async invokeGetStaffEvents(filters: { 
-        search?: string;
-        partner?: string;
-        selectedCity?: string;
-        sortBy?: string;
-    } = {}) {
-
-        const authRes = await helpGateKeep(this.profileReader, 'view_event');
-        
-        if (!authRes.success || !authRes.data) {
-            return { success: false, message: authRes.message };
-        }
-
-        try {
-
-            const events = await this.mpModel.getStaffEvents(authRes.data.id, filters);
-            
-            return {
-                success: true,
-                message: "Events retrieved",
-                data: events
-            };
-        } catch (error: any) {
-            return { success: false, message: error.message };
-        }
-    }
-
     async invokeVerifyEventAccess(eventIdStr: string) {
 
         const authRes = await helpGateKeep(this.profileReader, 'view_event');
@@ -157,61 +130,6 @@ export class ImpMPManager implements MPController {
         } catch (error: any) {
             return { success: false, message: error.message, data: null };
         }
-    }
-
-    async invokeAcceptDonor(queueIdStr: string, eventIdStr: string) {
-
-        const authRes = await helpGateKeep(this.profileReader, 'viewqueue'); 
-        
-        if (!authRes.success || !authRes.data) {
-            return { success: false, message: authRes.message };
-        }
-
-        try {
-            const numericQueueId = BigInt(queueIdStr);
-            const numericEventId = BigInt(eventIdStr.replace(/\D/g, ''));
-            const staffId = authRes.data.id;
-
-            const event = await this.mpModel.verifyAccess(staffId, numericEventId);
-
-            if (!event) 
-                return { success: false, message: "Not assigned to this event." };
-
-            const claimed = await this.mpModel.acceptDonor(numericQueueId, staffId);
-            
-            if (claimed.length === 0) {
-                return { 
-                    success: false, 
-                    message: "Someone else just claimed this donor! Please close and refresh the queue." 
-                };
-            }
-
-            return { success: true, message: "Donor claimed successfully", data: claimed[0] };
-
-        } catch (error: any) {
-            console.error("Claim Donor Error:", error);
-            return { success: false, message: "An error occurred while claiming the donor." };
-        }
-    }
-
-    async invokeGetSingleDonor(filter: ViewDonorPartial) {
-
-        const res = await helpGateKeep(this.profileReader, 'viewdonor');
-
-        if (!res.success || !res.data) 
-            return { success: false, message: res.message };
-        
-        return await this.mpModel.getSingleDonor(filter);        
-    }
-
-    async invokeValidateExtractionAccess(staffId: string, eventId: bigint, donorId: bigint) {
-
-        const res = await helpGateKeep(this.profileReader, 'extraction');
-
-        if (!res.success || !res.data) 
-            return { success: false, message: res.message };
-
-        return await this.mpModel.validateExtractionAccess(staffId, eventId, donorId);
     }
 
     async invokeUpdateQueueStation(queueTarget: UpdateQueue) {

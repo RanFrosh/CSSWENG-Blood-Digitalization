@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ViewDonor } from "@/types/donor_type";
 import { completeScreening, failScreening } from "@/actions/mp_action";
+import DonorDetails from "@/components/DonorDetails";
 
 interface ScreeningClientProps {
     donor: ViewDonor;
@@ -60,48 +61,23 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
                 </h1>
             </section>
 
-            <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                <div className="flex flex-row items-center justify-between gap-5 flex-wrap">
-                    <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                        Basic Donor Information
-                    </h2>
-                    <div>
-                        <span className="bg-[#002940] text-white border-2 border-[#002940] px-5 py-3 rounded-full text-[18px] font-semibold">
-                            Donor ID: {donor.id}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-4 gap-[0.25in]">
-                    <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                        <p className="text-[18px] font-semibold text-[#002940]">Name</p>
-                        <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                            {donor.first_name} {donor.last_name}
-                        </p>
-                    </div>
-
-                    <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                        <p className="text-[18px] font-semibold text-[#002940]">Age</p>
-                        <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                            {donor.age}
-                        </p>
-                    </div>
-
-                    <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                        <p className="text-[18px] font-semibold text-[#002940]">Sex</p>
-                        <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                            {donor.sex}
-                        </p>
-                    </div>
-
-                    <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                        <p className="text-[18px] font-semibold text-[#002940]">Blood Type</p>
-                        <p className="mt-2 text-[24px] font-['Montserrat'] font-bold text-[#002940]">
-                            {donor.blood}
-                        </p>
-                    </div>
-                </div>
-            </section>
+            <DonorDetails
+                donor={{
+                    id: String(donor.id),
+                    name: `${donor.first_name} ${donor.last_name}`,
+                    sex: donor.sex || "N/A",
+                    bloodType: donor.blood || "N/A",
+                    age: donor.age || 0,
+                    email: (donor as any).email || "", 
+                    mobile_no: (donor as any).mobile_no || "",
+                    location: (donor as any).location || "",
+                    verifiedBlood: (donor as any).verifiedBlood || false,
+                    active: (donor as any).active ?? true,
+                    height: (donor as any).height || 0,
+                    weight: (donor as any).weight || 0,
+                    assessment_status: (donor as any).assessment_status || "",
+                }} 
+            />
 
             <form className="mt-[0.35in] flex flex-col gap-[0.35in]">
                 {/* Vital Signs Section */}
@@ -109,10 +85,10 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
                     <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
                         Vital Signs
                     </h2>
-                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[0.25in]">
+                    <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-[0.25in]">
                         <div className="flex flex-col gap-[5px]">
                             <label className="text-[18px] font-semibold text-[#002940]">
-                                Body Temperature (°C) <span className="text-[#c0392b]">*</span>
+                                Body Temperature (°C) <span className="text-[#c0392b]"></span>
                             </label>
                             <input
                                 type="text"
@@ -122,21 +98,11 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
                         </div>
                         <div className="flex flex-col gap-[5px]">
                             <label className="text-[18px] font-semibold text-[#002940]">
-                                Blood Pressure (mmHg) <span className="text-[#c0392b]">*</span>
+                                Blood Pressure (mmHg) <span className="text-[#c0392b]"></span>
                             </label>
                             <input
                                 type="text"
                                 placeholder="e.g. 120/80"
-                                className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
-                            />
-                        </div>
-                        <div className="flex flex-col gap-[5px]">
-                            <label className="text-[18px] font-semibold text-[#002940]">
-                                Body Weight (kg) <span className="text-[#c0392b]">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="e.g. 60"
                                 className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940]"
                             />
                         </div>
@@ -182,7 +148,7 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
                                         {index + 1}
                                     </span>
                                     <p className="text-[18px] font-semibold text-[#002940]">
-                                        {item.question} <span className="text-[#c0392b]">*</span>
+                                        {item.question}
                                     </p>
                                 </div>
                                 <div className="flex flex-row gap-6 text-[18px] text-[#002940] shrink-0">
