@@ -165,6 +165,11 @@ export function SAEventsPage() {
             return;
         }
 
+        if (Number(formTargetBags) < 0) {
+            setSaveError("Target bags cannot be negative.");
+            return;
+        }
+
         setSaveLoading(true);
         try {
             if (eventToEdit) {
@@ -618,6 +623,7 @@ export function SAEventsPage() {
                                     <input
                                         type="number"
                                         required
+                                        min="0"
                                         value={formTargetBags}
                                         onChange={(e) => setFormTargetBags(e.target.value)}
                                         className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[16px] outline-none focus:border-[#002940]"

@@ -93,6 +93,11 @@ export async function executeCreateEvent(data: {
         return { success: false, message: cityRes.message || "City not found" };
     }
 
+    const targetBags = BigInt(parseInt(data.targetBags, 10) || 100);
+    if (targetBags < BigInt(0)) {
+        return { success: false, message: "Target bags cannot be negative." };
+    }
+
     const event: CreateEvents = {
         name: data.name,
         partner: data.partner,
@@ -107,7 +112,7 @@ export async function executeCreateEvent(data: {
         extractions: BigInt(0),
         produced_bags: BigInt(0),
         perk_claims: BigInt(0),
-        target_blood: BigInt(parseInt(data.targetBags, 10) || 100),
+        target_blood: targetBags,
         created_at: new Date(),
         img_url: data.imgUrl?.trim() || null,
     };
@@ -139,13 +144,18 @@ export async function executeUpdateEvent(data: {
         return { success: false, message: cityRes.message || "City not found" };
     }
 
+    const targetBags = BigInt(parseInt(data.targetBags, 10) || 100);
+    if (targetBags < BigInt(0)) {
+        return { success: false, message: "Target bags cannot be negative." };
+    }
+
     const update: UpdateEvents = {
         name: data.name,
         partner: data.partner,
         city_id: cityRes.data,
         event_date: data.eventDate,
         status: computeEventStatus(data.eventDate),
-        target_blood: BigInt(parseInt(data.targetBags, 10) || 100),
+        target_blood: targetBags,
         img_url: data.imgUrl?.trim() || null,
     };
 
