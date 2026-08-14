@@ -62,7 +62,7 @@
     npm install
 
     **Configure Environment Variables**
-    Create a .env.local file in the root directory and add the required Supabase credentials:
+    Create a .env.local file in the root directory and add the required Supabase credentials
 
     **Setup the Database**
     Configure the PostgreSQL database through Supabase and ensure that the required database tables, relationships, and constraints are created.
