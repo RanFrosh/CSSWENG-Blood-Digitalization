@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import Header from "@/components/HeaderOA";
-import { fetchOACurrentUser, editOACurrentUser } from "@/app/oa/oa_action";
+import { fetchOACurrentUser, editOACurrentUser } from "@/actions/oa_action";
 import { ReadProfile } from "@/types/profile_type";
 
 const roleNames: Record<string, string> = {

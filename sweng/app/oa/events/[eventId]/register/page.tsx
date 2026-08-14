@@ -57,19 +57,11 @@ export default async function RegisterPage({
                     </h1>
                 </section>
 
-                <section className="mt-[0.15in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.35in] shadow-sm">
-                    <div>
-                        <h2 className="text-[30px] font-['Montserrat'] font-bold text-[#002940]">
-                            Donor Information
-                        </h2>
-                    </div>
-
                 <RegistrationForm
                     eventId={eventId}
                     cities={cities}
                 />
-                    
-                </section>
+  
             </div>
         </main>
     );
