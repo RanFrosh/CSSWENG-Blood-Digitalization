@@ -19,7 +19,7 @@ type SortOption =
     | "Target Bags: Low to High"
     | "Name: A-Z";
 
-export function SAEventsPage() {
+function SAEventsPage() {
     const router = useRouter();
 
     const [events, setEvents] = useState<ViewEventsWithProvince[]>([]);

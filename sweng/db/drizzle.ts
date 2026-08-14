@@ -12,8 +12,6 @@ const client = globalForDb.dbClient ?? postgres(connectionString, {
     idle_timeout: 20,
 });
 
-if (process.env.NODE_ENV !== "production") {
-    globalForDb.dbClient = client;
-}
+globalForDb.dbClient = client;
 
 export const orm = drizzle(client);

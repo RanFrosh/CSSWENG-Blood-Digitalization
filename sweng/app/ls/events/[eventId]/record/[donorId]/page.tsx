@@ -6,7 +6,7 @@ import Header from "@/components/headers/HeaderLS";
 export default async function RecordPage({
     params,
 }: {
-    params: { eventId: string; donorId: string };
+    params: Promise<{ eventId: string; donorId: string }>;
 }) {
     const resolvedParams = await params;
     const { eventId, donorId } = resolvedParams;

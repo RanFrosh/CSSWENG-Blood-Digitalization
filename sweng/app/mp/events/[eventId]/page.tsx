@@ -5,7 +5,7 @@ import MPEventClient from "./client";
 export default async function MPEventPage({
     params,
 }: {
-    params: Promise<{ eventId: string }> | { eventId: string };
+    params: Promise<{ eventId: string }>;
 }) {
     const resolvedParams = await params;
     const { eventId } = resolvedParams;

@@ -6,7 +6,7 @@ import { EventDetailsPanel } from "@/components/panels/EventDetailsPanel";
 export default async function EventAnalyticsDetailsPage({
     params,
 }: {
-    params: Promise<{ eventId: string }> | { eventId: string };
+    params: Promise<{ eventId: string }>;
 }) {
     const resolvedParams = await params;
     const { eventId } = resolvedParams;

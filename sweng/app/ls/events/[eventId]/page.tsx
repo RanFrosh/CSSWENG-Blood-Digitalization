@@ -5,7 +5,7 @@ import LSEventClient from "./client";
 export default async function LSEventPage({
     params,
 }: {
-    params: Promise<{ eventId: string }> | { eventId: string };
+    params: Promise<{ eventId: string }>;
 }) {
     const resolvedParams = await params;
     const { eventId } = resolvedParams;

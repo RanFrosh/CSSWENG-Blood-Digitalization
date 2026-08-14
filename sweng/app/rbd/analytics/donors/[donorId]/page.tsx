@@ -6,7 +6,7 @@ import DonorAnalyticsClient from "./client";
 export default async function DonorAnalyticsDetailsPage({
     params,
 }: {
-    params: Promise<{ donorId: string }> | { donorId: string };
+    params: Promise<{ donorId: string }>;
 }) {
     const resolvedParams = await params;
     const { donorId } = resolvedParams;
