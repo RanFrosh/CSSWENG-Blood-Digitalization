@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { executeUpdateEventStatuses } from "@/app/event_records/event_action";
+import { executeUpdateEventStatuses } from "@/actions/event_action";
 
 export async function GET(request: Request) {
     if (

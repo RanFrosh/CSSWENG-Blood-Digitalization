@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import Header from "@/components/HeaderSA";
-import { executeQueryEventRecords } from "@/app/event_records/event_action";
+import { executeQueryEventRecords } from "@/actions/event_action";
 import { ViewEventRecords } from "@/types/event_type";
 import { AccessType } from "@/db/enums/access_level";
 import { EventRecordAction } from "@/db/enums/event_action";

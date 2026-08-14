@@ -1,5 +1,5 @@
 import LandingClient, { LandingEvent } from "./client";
-import { fetchLandingEventsAction } from "../event_records/event_action";
+import { fetchLandingEventsAction } from "../../actions/event_action";
 
 export default async function Home() {
     

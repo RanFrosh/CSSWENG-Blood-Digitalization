@@ -3,10 +3,10 @@
 import { ViewEventFilters, ViewEvents, ViewEventsWithProvince, ViewCities, CreateEvents, UpdateEvents } from "@/types/event_type";
 import { ApiResponse } from "@/types/api_res_type";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
-import { ImpEventModel } from "@/app/event_records/imp_event_data";
-import { ImpEventManager } from "@/app/event_records/imp_event_controller";
-import { ImpAssignedStaffModel } from "@/app/assigned_staff/imp_assigned_staff_data";
-import { ImpAssignedStaffManager } from "@/app/assigned_staff/imp_assigned_staff_controller";
+import { ImpEventModel } from "@/queries/event_query";
+import { ImpEventManager } from "@/controllers/event_controller";
+import { ImpAssignedStaffModel } from "@/queries/assigned_staff_query";
+import { ImpAssignedStaffManager } from "@/controllers/assigned_staff_controller";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { orm } from "@/db/drizzle";
 import { serverSupa } from "@/db/supaserver";

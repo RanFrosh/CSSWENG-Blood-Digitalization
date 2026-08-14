@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { eq, or } from "drizzle-orm";
 import { orm } from "@/db/drizzle";
 import { donor } from "@/db/schemas/donor";
-import { executeLogEvent } from "@/app/event_records/event_action";
+import { executeLogEvent } from "@/actions/event_action";
 
 type RegisterState = {
   error?: string;

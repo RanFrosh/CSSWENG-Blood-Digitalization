@@ -1,6 +1,6 @@
 import { ApiResponse } from "@/types/api_res_type";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { helpGateKeep } from "../../utils/access/bouncer";
+import { helpGateKeep } from "@/utils/access/bouncer";
 import { DonorController, DonorData } from "@/abstract/donor/donor_abstract";
 import { ViewDonorPartial, ViewDonor } from "@/types/donor_type";
 

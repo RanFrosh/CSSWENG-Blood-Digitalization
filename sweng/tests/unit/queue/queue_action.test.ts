@@ -95,12 +95,12 @@ import { serverSupa } from "@/db/supaserver";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
-import { ImpDonorModel } from "@/app/donoring/imp_donor_data";
-import { ImpDonorManager } from "@/app/donoring/imp_donor_controller";
+import { ImpDonorModel } from "@/queries/donor_query";
+import { ImpDonorManager } from "@/controllers/donor_controller";
 import { ImpProfilesModel } from "@/app/profiles/imp_profiles_data";
 import { ImpProfilesManager } from "@/app/profiles/imp_profiles_controller";
-import { ImpAssignedStaffModel } from "@/app/assigned_staff/imp_assigned_staff_data";
-import { ImpAssignedStaffManager } from "@/app/assigned_staff/imp_assigned_staff_controller";
+import { ImpAssignedStaffModel } from "@/queries/assigned_staff_query";
+import { ImpAssignedStaffManager } from "@/controllers/assigned_staff_controller";
 
 const DONOR_ID = BigInt(99);
 const EVENT_LOG_ID = BigInt(10);

@@ -7,7 +7,7 @@ import { ImpProfileGetter } from "@/queries/profile_query";
 import { revalidatePath } from "next/cache";
 import { bigintToStr } from "@/utils/serialize/serial";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
-import { executeLogEvent } from "@/app/event_records/event_action";
+import { executeLogEvent } from "@/actions/event_action";
 
 async function getLabController() {
 

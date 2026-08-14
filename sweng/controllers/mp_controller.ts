@@ -4,7 +4,7 @@ import { MPController, MPData } from "@/abstract/mp/mp_abstract";
 import { ViewDonorPartial } from "@/types/donor_type";
 import { UpdateQueue } from "@/types/queue_type";
 import { DeleteQueue } from "@/types/queue_type";
-import { executeLogEvent } from "@/app/event_records/event_action";
+import { executeLogEvent } from "@/actions/event_action";
 
 export class ImpMPManager implements MPController {
     
