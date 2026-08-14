@@ -18,6 +18,8 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
     const [eligibility, setEligibility] = useState<"fit" | "unfit" | null>(null);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
     const [toast, setToast] = useState({ visible: false, message: "", type: "error" });
 
     const showToast = (message: string, type: "success" | "error" = "error") => {
@@ -44,8 +46,10 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
                     setIsProcessing(false);
                     setIsConfirmModalOpen(false);
                 } else {
-                    showToast("Donor screened successfully!", "success");
-                    setTimeout(() => router.push(`/mp/events/${eventId}`), 1000);
+                    setIsConfirmModalOpen(false);
+                    setIsProcessing(false);
+                    setSuccessMessage("Donor screened successfully!");
+                    setIsSuccess(true);
                 }
             } else if (eligibility === "unfit") {
                 const res = await failScreening(BigInt(donorId), BigInt(eventId));
@@ -54,8 +58,10 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
                     setIsProcessing(false);
                     setIsConfirmModalOpen(false);
                 } else {
-                    showToast("Donor marked as unfit.", "success");
-                    setTimeout(() => router.push(`/mp/events/${eventId}`), 1000);
+                    setIsConfirmModalOpen(false);
+                    setIsProcessing(false);
+                    setSuccessMessage("Donor marked as unfit.");
+                    setIsSuccess(true);
                 }
             }
         } catch (error) {
@@ -271,6 +277,31 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
                         </svg>
                     )}
                     <span className="text-[16px]">{toast.message}</span>
+                </div>
+            )}
+
+            {/* Screening Success Overlay */}
+            {isSuccess && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        <div className="bg-[#002940] p-6 text-white text-center">
+                            <h3 className="text-3xl font-bold font-['Montserrat']">Screening Complete</h3>
+                            <p className="text-blue-200 mt-2 font-medium">The donor's screening has been recorded</p>
+                        </div>
+
+                        <div className="p-6">
+                            <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
+                                <p className="text-xl font-bold text-[#002940]">{successMessage}</p>
+                            </div>
+
+                            <button
+                                onClick={() => router.push(`/mp/events/${eventId}`)}
+                                className="w-full px-6 py-4 rounded-xl bg-[#002940] text-white text-lg font-bold hover:bg-[#001f30] transition-colors shadow-md active:scale-[0.98] cursor-pointer"
+                            >
+                                Back to My Events
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
