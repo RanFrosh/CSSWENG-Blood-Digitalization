@@ -10,18 +10,8 @@ export default function HeaderLanding() {
         router.push('/landing'); 
     };
 
-    const goAbout = () => {
-        router.push('/about');
-    };
-
-    const goContact = () => {
-        router.push('/contact');
-    };
-
     const navLinks = [
         { name: 'Sign In', path: '/landing' },
-        { name: 'About Us', path: '/about' },
-        { name: 'Contact Us', path: '/contact' },
     ];
 
     const isActiveLink = (path: string) => {
@@ -50,10 +40,6 @@ export default function HeaderLanding() {
                             onClick={() => {
                                 if (link.path === '/') {
                                     goHome();
-                                } else if (link.path === '/about') {
-                                    goAbout();
-                                } else if (link.path === '/contact') {
-                                    goContact();
                                 }
                             }}
                         >
