@@ -68,7 +68,7 @@ export default async function EventAnalyticsDetailsPage({
 
                     <div className="mt-[0.25in] grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-[0.25in]">
                         <div className="bg-[#f9fdff] border-2 border-[#c0cad0] rounded-[14px] p-5">
-                            <p className="text-[18px] font-semibold text-[#002940]">Total Donors</p>
+                            <p className="text-[18px] font-semibold text-[#002940]">Total Visits</p>
                             <p className="mt-2 text-[36px] font-['Montserrat'] font-bold text-[#002940]">
                                 {selectedEvent.totalDonors}
                             </p>

@@ -324,23 +324,46 @@ export class ImpAnalyticsData implements AnalyticsData {
         .where(eq(event_log.id, eventId))
         .limit(1);
 
+        const visitorsResult = await orm.select({
+            realVisitors: count()
+        })
+        .from(donor_to_event)
+        .where(eq(donor_to_event.event_id, eventId));
+
         const exactBloodResult = await orm.select({
             totalML: sum(blood_bag.volume_ml),
             totalBags: count(blood_bag.id)
         })
         .from(blood_bag)
-        .where(eq(blood_bag.event_id, eventId));
+        .where(
+            and(
+                eq(blood_bag.event_id, eventId),
+                eq(blood_bag.outcome, 'Successful') 
+            )
+        );
 
         const bloodTypeResult = await orm.select({
             bloodType: blood_bag.blood_type,
             count: count()
         })
         .from(blood_bag)
-        .where(eq(blood_bag.event_id, eventId))
+        .where(
+            and(
+                eq(blood_bag.event_id, eventId),
+                eq(blood_bag.outcome, 'Successful')
+            )
+        )
         .groupBy(blood_bag.blood_type);
 
+        const realVisitors = Number(visitorsResult[0].realVisitors);
+        const realExtractions = Number(exactBloodResult[0]?.totalBags || 0);
+
         return {
-            eventRow: eventResult[0],
+            eventRow: {
+                ...eventResult[0],
+                visitors: realVisitors,
+                extractions: realExtractions
+            },
             totalML: exactBloodResult[0]?.totalML || 0,
             totalBags: exactBloodResult[0]?.totalBags || 0,
             bloodTypeDist: bloodTypeResult
@@ -411,10 +434,10 @@ export class ImpAnalyticsData implements AnalyticsData {
         let orderByClause;
         switch (sortBy) {
             case "highest_yield":
-                orderByClause = desc(event_log.produced_bags);
+                orderByClause = desc(sql`count(${blood_bag.id})`);
                 break;
             case "lowest_yield":
-                orderByClause = asc(event_log.produced_bags);
+                orderByClause = asc(sql`count(${blood_bag.id})`);
                 break;
             case "highest_goal":
                 orderByClause = desc(event_log.target_blood);
@@ -466,8 +489,7 @@ export class ImpAnalyticsData implements AnalyticsData {
         })();
 
         const eventMetricsRes = await orm.select({
-            totalTarget: sql<number>`sum(${event_log.target_blood})`,
-            totalExtractions: sql<number>`sum(${event_log.extractions})`, 
+            totalTarget: sql<number>`sum(${event_log.target_blood})`
         })
         .from(event_log)
         .leftJoin(city, eq(event_log.city_id, city.id))
@@ -482,6 +504,7 @@ export class ImpAnalyticsData implements AnalyticsData {
         .innerJoin(event_log, eq(blood_bag.event_id, event_log.id))
         .leftJoin(city, eq(event_log.city_id, city.id))
         .where(eventWhereClause);
+        
 
         // Blood Type per Bag Breakdown
         const bloodBagTypesRes = await orm.select({
@@ -521,7 +544,8 @@ export class ImpAnalyticsData implements AnalyticsData {
             bloodBagTypes: bloodBagTypesRes,
             genders: genderRes,
             metrics: {
-                ...eventMetricsRes[0], 
+                totalTarget: Number(eventMetricsRes[0]?.totalTarget || 0),
+                totalExtractions: Number(bloodBagMetricsRes[0]?.totalBags || 0), 
                 totalBags: Number(bloodBagMetricsRes[0]?.totalBags || 0),
                 totalML: Number(bloodBagMetricsRes[0]?.totalML || 0)
             },
