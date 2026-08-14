@@ -377,6 +377,13 @@ export class ImpLabStaffModel implements LabStaffData {
                             next_eligibility: nextEligibleDate.toISOString() 
                         })
                         .where(eq(donor.id, payload.donor_id));
+
+                    await tx.update(event_log) 
+                        .set({ 
+                            produced_bags: sql`${event_log.produced_bags} + 1`,
+                            extractions: sql`${event_log.extractions} + 1`
+                        })
+                        .where(eq(event_log.id, payload.event_id));
                 }
 
                 const existingRecord = await tx
