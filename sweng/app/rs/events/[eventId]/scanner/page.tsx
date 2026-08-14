@@ -123,10 +123,7 @@ export default function RSScannerPage() {
             );
 
             if (!result.success) {
-                showToast(
-                    result.message ?? "This donor cannot be checked in.", 
-                    "error"
-                );
+                setError(result.message ?? "This donor cannot be checked in.");
                 return;
             }
 
@@ -138,7 +135,7 @@ export default function RSScannerPage() {
             router.push(`/rs/events/${eventId}`);
         } catch (error) {
             console.error(error);
-            showToast("Failed to claim perk.", "error");
+            setError("Failed to claim perk.");
         }
     };
 
