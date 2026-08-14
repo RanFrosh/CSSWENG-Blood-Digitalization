@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { EventStatusType } from "@/db/enums/event_status";
 import { ViewEventsWithProvince } from "@/types/event_type";
 import Header from "@/components/headers/HeaderRS";
-import StaffDetails from "@/components/StaffDetails";
+import StaffDetails from "@/components/panels/StaffDetails";
 import RSClient from "./client";
 import { executeEventQueryStaff } from "../../../actions/event_action";
 

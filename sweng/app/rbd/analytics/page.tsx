@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Header from "@/components/headers/HeaderRBD";
-import StaffDetails from "@/components/StaffDetails";
+import StaffDetails from "@/components/panels/StaffDetails";
 
 export default async function AnalyticsPage() {
 

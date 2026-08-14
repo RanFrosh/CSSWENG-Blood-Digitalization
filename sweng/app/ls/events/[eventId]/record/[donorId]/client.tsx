@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Header from "@/components/headers/HeaderLS";
 import { retrieveDonor } from "@/actions/ls_action";
 import { ViewDonor } from "@/types/donor_type";
-import DonorDetails from "@/components/DonorDetails";
+import DonorDetails from "@/components/panels/DonorDetails";
 import { submitDonationRecordAction } from "@/actions/ls_action";
 
 export default function RecordClient() {

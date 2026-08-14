@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ViewDonor } from "@/types/donor_type";
 import { completeScreening, failScreening } from "@/actions/mp_action";
-import DonorDetails from "@/components/DonorDetails";
+import DonorDetails from "@/components/panels/DonorDetails";
 
 interface ScreeningClientProps {
     donor: ViewDonor;

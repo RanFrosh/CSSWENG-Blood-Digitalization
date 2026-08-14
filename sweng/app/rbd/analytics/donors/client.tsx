@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import DonorCard from "@/components/DonorCard";
+import DonorCard from "@/components/cards/DonorCard";
 
 interface DonorAnalyticsClientProps {
     initialDonors: any[]; 

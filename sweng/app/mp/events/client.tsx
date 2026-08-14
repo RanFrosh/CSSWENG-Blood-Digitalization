@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { EventStatusType } from "@/db/enums/event_status";
 import { ViewEvents } from "@/types/event_type";
 import { ViewEventsWithProvince } from "@/types/event_type";
-import { EventCard } from "@/components/EventCard";
+import { EventCard } from "@/components/cards/EventCard";
 
 type EventTab = EventStatusType | "All";
 

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { EventCard } from "@/components/EventCard";
+import { EventCard } from "@/components/cards/EventCard";
 import { ViewEvents } from "@/types/event_type";
-import JoinEventButton from "@/components/JoinEventButton";
+import JoinEventButton from "@/components/buttons/JoinEventButton";
 
 interface LSEventsClientProps {
     initialEvents: ViewEvents[];

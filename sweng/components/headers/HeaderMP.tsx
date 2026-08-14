@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, usePathname, useParams } from "next/navigation";
-import LogoutButton from "@/components/LogoutButton";
+import LogoutButton from "@/components/buttons/LogoutButton";
 
 export default function HeaderMP() {
     const router = useRouter();

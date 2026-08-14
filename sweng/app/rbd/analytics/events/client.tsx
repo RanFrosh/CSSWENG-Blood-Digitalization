@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ViewEvents } from "@/types/event_type";
-import { EventCard } from "@/components/EventCard";
+import { EventCard } from "@/components/cards/EventCard";
 
 interface SearchEventsClientProps {
     initialEvents: ViewEvents[];

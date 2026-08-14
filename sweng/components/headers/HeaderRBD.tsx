@@ -1,6 +1,6 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
-import LogoutButton from "@/components/LogoutButton";
+import LogoutButton from "@/components/buttons/LogoutButton";
 
 type NavLink = {
     name: string;

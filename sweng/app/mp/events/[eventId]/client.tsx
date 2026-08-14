@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Header from "@/components/headers/HeaderMP";
-import { EventDetailsPanel } from "@/components/EventDetailsPanel";
+import { EventDetailsPanel } from "@/components/panels/EventDetailsPanel";
 import { ViewEvents } from "@/types/event_type";
 import { acceptDonor } from "@/actions/ls_action";
 import { QueueEntryWithDonor, StaffWithStatus } from "@/types/queue_type";

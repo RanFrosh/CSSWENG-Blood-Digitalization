@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import AccessDenied from "@/components/AccessDenied";
+import AccessDenied from "@/components/utils/AccessDenied";
 import { getProfileAction } from "@/actions/profile_action";
 
 export default async function RoleChecker({

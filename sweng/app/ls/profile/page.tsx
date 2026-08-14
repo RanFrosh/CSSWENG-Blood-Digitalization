@@ -1,5 +1,5 @@
 import Header from "@/components/headers/HeaderLS";
-import StaffProfile from "@/components/StaffProfile";
+import StaffProfile from "@/components/utils/StaffProfile";
 import { getProfileAction } from "@/actions/profile_action";
 
 export default async function LabStaffProfilePage() {

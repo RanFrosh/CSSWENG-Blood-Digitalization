@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { assignStaffAction, removeStaffAction } from "@/actions/sa_action";
-import { EventDetailsPanel } from "@/components/EventDetailsPanel";
+import { EventDetailsPanel } from "@/components/panels/EventDetailsPanel";
 import { ViewEvents } from "@/types/event_type";
 
 export type StaffType = "onsite_admin" | "med_prof" | "lab_staff" | "recov_staff"

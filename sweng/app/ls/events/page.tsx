@@ -1,5 +1,5 @@
 import Header from "@/components/headers/HeaderLS";
-import StaffDetails from "@/components/StaffDetails";
+import StaffDetails from "@/components/panels/StaffDetails";
 import { getLabStaffEvents } from "@/actions/ls_action";
 import LSEventsClient from "./client";
 

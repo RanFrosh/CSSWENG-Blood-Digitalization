@@ -1,4 +1,4 @@
-import RoleChecker from "@/components/RoleChecker";
+import RoleChecker from "@/components/utils/RoleChecker";
 
 export default async function MedProfLayout({
     children,
