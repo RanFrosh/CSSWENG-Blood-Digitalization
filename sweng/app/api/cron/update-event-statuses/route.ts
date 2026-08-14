@@ -13,3 +13,5 @@ export async function GET(request: Request) {
 
     return NextResponse.json(result, { status: result.success ? 200 : 500 });
 }
+
+export const maxDuration = 60;
