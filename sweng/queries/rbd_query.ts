@@ -330,16 +330,14 @@ export class ImpAnalyticsData implements AnalyticsData {
         .from(donor_to_event)
         .where(eq(donor_to_event.event_id, eventId));
 
-        // 🚨 THE FIX: Separate Attempts, Successes, and ML using CASE WHEN
         const exactBloodResult = await orm.select({
             totalAttempts: sql<number>`count(${blood_bag.id})`,
             totalSuccessful: sql<number>`COALESCE(sum(CASE WHEN ${blood_bag.outcome} = 'Successful' THEN 1 ELSE 0 END), 0)`,
             totalML: sql<number>`COALESCE(sum(CASE WHEN ${blood_bag.outcome} = 'Successful' THEN ${blood_bag.volume_ml} ELSE 0 END), 0)`
         })
         .from(blood_bag)
-        .where(eq(blood_bag.event_id, eventId)); // Notice the strict 'Successful' filter is gone!
+        .where(eq(blood_bag.event_id, eventId)); 
 
-        // Keep this filtered so the pie chart only shows usable blood
         const bloodTypeResult = await orm.select({
             bloodType: blood_bag.blood_type,
             count: count()
@@ -355,7 +353,6 @@ export class ImpAnalyticsData implements AnalyticsData {
 
         const realVisitors = Number(visitorsResult[0]?.realVisitors || 0);
         
-        // 🚨 DENOMINATOR: Maps the Total Attempts to 'extractions' for the frontend
         const realExtractions = Number(exactBloodResult[0]?.totalAttempts || 0); 
 
         return {
@@ -366,7 +363,6 @@ export class ImpAnalyticsData implements AnalyticsData {
             },
             totalML: Number(exactBloodResult[0]?.totalML || 0),
             
-            // 🚨 NUMERATOR: Maps the Actual Wins to 'totalBags'
             totalBags: Number(exactBloodResult[0]?.totalSuccessful || 0), 
             
             bloodTypeDist: bloodTypeResult

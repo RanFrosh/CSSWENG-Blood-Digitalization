@@ -305,7 +305,7 @@ export class ImpAnalyticsManager implements AnalyticsController {
                 return {
                     bloodType: typeStr,
                     count: countVal,
-                    pct: totalPhysicalBags > 0 ? (countVal / totalPhysicalBags) * 100 : 0, 
+                    pct: totalDonorsCount > 0 ? (countVal / totalDonorsCount) * 100 : 0, 
                     color: colorMap[typeStr] || "#c0cad0" 
                 };
             });
