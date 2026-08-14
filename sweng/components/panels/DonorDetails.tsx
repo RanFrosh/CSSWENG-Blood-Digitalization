@@ -100,12 +100,12 @@ export default function DonorDetails({ donor }: { donor: DonorDetails }) {
 
                 <p>
                     <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Height: </span> 
-                    <span className="font-semibold text-[#002940]">{donor.height} cm</span>
+                    <span className="font-semibold text-[#002940]">{donor.height ? `${donor.height} cm` : "N/A"}</span>
                 </p>
 
                 <p>
                     <span className="font-semibold text-gray-500 text-sm uppercase block tracking-wider">Weight: </span> 
-                    <span className="font-semibold text-[#002940]">{donor.weight} kg</span>
+                    <span className="font-semibold text-[#002940]">{donor.weight ? `${donor.weight} kg` : "N/A"}</span>
                 </p>
 
 
