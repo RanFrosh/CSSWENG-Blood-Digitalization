@@ -190,7 +190,9 @@ export class ImpAnalyticsManager implements AnalyticsController {
 
             const visitors = Number(eventRow.visitors) || 0;
             const extractions = Number(eventRow.extractions) || 0;
-            const successRate = visitors > 0 ? Math.round((extractions / visitors) * 100) : 0;
+            const successfulBags = Number(totalBags) || 0;
+
+            const successRate = visitors > 0 ? Math.round((successfulBags / visitors) * 100) : 0;
 
             return {
                 success: true,
