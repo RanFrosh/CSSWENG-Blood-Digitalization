@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 
 import Header from "@/components/headers/HeaderSA";
 import { fetchSACurrentUser, editSACurrentUser } from "@/actions/sa_action";
+import { changeOwnPassword } from "@/actions/register_action";
 import { ReadProfile } from "@/types/profile_type";
 
 const roleNames: Record<string, string> = {
@@ -23,6 +24,13 @@ export default function StaffProfilePage() {
     const [profileImageInput, setProfileImageInput] = useState("");
     const [feedback, setFeedback] = useState<{ success: boolean; message: string } | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+
+    const [isPasswordOpen, setPasswordOpen] = useState(false);
+    const [passwordInput, setPasswordInput] = useState("");
+    const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [passwordFeedback, setPasswordFeedback] = useState<{ success: boolean; message: string } | null>(null);
+    const [isPasswordSaving, setIsPasswordSaving] = useState(false);
 
     useEffect(() => {
         const loadProfile = async () => {
@@ -86,6 +94,31 @@ export default function StaffProfilePage() {
         }
 
         setIsSaving(false);
+    };
+
+    const savePassword = async () => {
+        if (passwordInput.length < 6) {
+            setPasswordFeedback({ success: false, message: "Password must be at least 6 characters" });
+            return;
+        }
+        if (passwordInput !== confirmPasswordInput) {
+            setPasswordFeedback({ success: false, message: "Passwords do not match" });
+            return;
+        }
+
+        setIsPasswordSaving(true);
+        setPasswordFeedback(null);
+
+        const result = await changeOwnPassword(passwordInput);
+
+        if (result.success) {
+            setPasswordFeedback({ success: true, message: "Password updated successfully. Redirecting to login..." });
+            setTimeout(() => router.push("/landing"), 1200);
+        } else {
+            setPasswordFeedback({ success: false, message: result.message });
+        }
+
+        setIsPasswordSaving(false);
     };
 
     const goBack = () => {
@@ -221,6 +254,19 @@ export default function StaffProfilePage() {
                                     className="min-w-[1.8in] bg-[#002940] text-white px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:underline"
                                 >
                                     Edit Account Details
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setPasswordInput("");
+                                        setConfirmPasswordInput("");
+                                        setPasswordFeedback(null);
+                                        setPasswordOpen(true);
+                                    }}
+                                    className="min-w-[1.8in] bg-white text-[#002940] border-2 border-[#002940] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:bg-[#002940] hover:text-white"
+                                >
+                                    Change Password
                                 </button>
                             </div>
                         </div>

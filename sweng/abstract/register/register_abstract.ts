@@ -5,6 +5,7 @@ import { ReadProfile } from "@/types/profile_type";
 export interface RegisterData {
     createStaff(email: string, redirectTo: string): Promise<ApiResponse<string>>;
     setPassword(id: string, password: string): Promise<ApiResponse>;
+    changePassword(password: string): Promise<ApiResponse>;
     createProfile(id: string, role: AccessType, email: string): Promise<ApiResponse>;
     finishProfile(id: string, name: string): Promise<ApiResponse>;
     deleteStaff(id: string): Promise<ApiResponse>;
@@ -16,6 +17,8 @@ export interface RegisterData {
 export interface RegisterController {
     invokeCreateStaff(email:string, redirectTo: string): Promise<ApiResponse<string>>;
     invokeSetPassword(password: string): Promise<ApiResponse>;
+    invokeAdminSetPassword(id: string, password: string): Promise<ApiResponse>;
+    invokeChangeOwnPassword(password: string): Promise<ApiResponse>;
     invokeCreateProfile(id: string, role: AccessType, email: string): Promise<ApiResponse>;
     invokeFinishProfile(name: string): Promise<ApiResponse>;
     invokeDeleteStaff(id: string): Promise<ApiResponse>;

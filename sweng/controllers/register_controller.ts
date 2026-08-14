@@ -32,6 +32,18 @@ export class ImpRegisterManager implements RegisterController {
         return await this.registerModel.setPassword(res.data.id, password);        
     }
 
+    async invokeAdminSetPassword(id: string, password: string): Promise<ApiResponse> {
+        const res = await helpGateKeep(this.profileReader, 'register_user');        
+        if (!res.success) return { success: false, message: res.message };
+        return await this.registerModel.setPassword(id, password);        
+    }
+
+    async invokeChangeOwnPassword(password: string): Promise<ApiResponse> {
+        const res = await helpGateKeep(this.profileReader, 'edit_profile');        
+        if (!res.success) return { success: false, message: res.message };
+        return await this.registerModel.changePassword(password);        
+    }
+
     async invokeFinishProfile(name: string): Promise<ApiResponse> {
         const res = await helpGateKeep(this.profileReader, 'finish_registration');        
         if (!res.success || !res.data) return { success: false, message: res.message };

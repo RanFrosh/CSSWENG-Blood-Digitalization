@@ -6,14 +6,17 @@ import { AccessType } from "@/db/enums/access_level";
 import { authUsers, profiles } from "@/db/schemas/profiles";
 import { eq, sql } from "drizzle-orm";
 import { ReadProfile } from "@/types/profile_type";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export class ImpRegisterModel implements RegisterData {
     private access: typeof orm;
     private admin: typeof adminSupa;
+    private session: SupabaseClient;
 
-    constructor(injectAccess: typeof orm, injectAdmin: typeof adminSupa) {
+    constructor(injectAccess: typeof orm, injectAdmin: typeof adminSupa, injectSession: SupabaseClient) {
         this.access = injectAccess;
         this.admin = injectAdmin;
+        this.session = injectSession;
     }
 
     async createStaff(email: string, redirectTo: string): Promise<ApiResponse<string>> {
@@ -58,10 +61,20 @@ export class ImpRegisterModel implements RegisterData {
         try {
             const { error } = await this.admin.auth.admin.updateUserById(id, { password });
             if (error) return { success: false, message: error.message };
-            return { success: true, message: "Registration password set" }
+            return { success: true, message: "Password set" }
         } catch (err: any) {
             return { success: false, message: err.message }
         }     
+    }
+
+    async changePassword(password: string): Promise<ApiResponse> {
+        try {
+            const { error } = await this.session.auth.updateUser({ password });
+            if (error) return { success: false, message: error.message };
+            return { success: true, message: "Password set" };
+        } catch (err: any) {
+            return { success: false, message: err.message };
+        }
     }
 
     async finishProfile(id: string, name: string): Promise<ApiResponse> {

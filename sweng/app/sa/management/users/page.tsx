@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/headers/HeaderSA";
-import { prepareStaff, deleteStaffUser, staffToggler } from "@/actions/register_action";
+import { prepareStaff, deleteStaffUser, staffToggler, adminResetPassword } from "@/actions/register_action";
 import { AccessType } from "@/db/enums/access_level";
 import { StaffUser, StaffStatus } from "@/types/staff_type";
 import { getUsers } from "@/actions/users_action";
@@ -14,7 +14,7 @@ type SortOption =
     | "Date Joined: Latest"
     | "Role: A-Z"
     | "Status";
-type UserAction = "Deactivate" | "Reactivate" | "Delete";
+type UserAction = "Deactivate" | "Reactivate" | "Delete" | "Reset Password";
 
 export default function SAUsersPage() {
     const PAGE_SIZE = 8;
@@ -30,6 +30,9 @@ export default function SAUsersPage() {
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
     const [deleteError, setDeleteError] = useState("");
     const [deleteLoading, setDeleteLoading] = useState(false);
+
+    const [resetResult, setResetResult] = useState<{ name: string; password: string } | null>(null);
+    const [copiedPassword, setCopiedPassword] = useState(false);
     
     // Accepted HEAD changes: We are using the Modal approach
     const [selectedUser, setSelectedUser] = useState<StaffUser | null>(null);
@@ -183,6 +186,22 @@ export default function SAUsersPage() {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const copyPassword = async () => {
+        if (!resetResult) return;
+        try {
+            await navigator.clipboard.writeText(resetResult.password);
+        } catch {
+            const textarea = document.createElement("textarea");
+            textarea.value = resetResult.password;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand("copy");
+            document.body.removeChild(textarea);
+        }
+        setCopiedPassword(true);
+        setTimeout(() => setCopiedPassword(false), 2000);
+    };
+
     const openUserActionModal = (user: StaffUser, action: UserAction) => {
         setSelectedUser(user);
         setSelectedUserAction(action);
@@ -204,6 +223,22 @@ export default function SAUsersPage() {
         setDeleteError("");
         
         try {
+            if (selectedUserAction === "Reset Password") {
+                const result = await adminResetPassword(selectedUser.id);
+
+                if (!result.success) {
+                    setDeleteError(result.message);
+                    return;
+                }
+
+                setDeleteError("");
+                setResetResult({ name: selectedUser.name, password: result.data ?? "" });
+                setCopiedPassword(false);
+                setSelectedUser(null);
+                setSelectedUserAction(null);
+                return;
+            }
+
             if (selectedUserAction === "Delete") {
                 const result = await deleteStaffUser(selectedUser.id);
 
@@ -421,6 +456,13 @@ export default function SAUsersPage() {
                                             )}
                                             
                                             <button
+                                                onClick={() => openUserActionModal(user, "Reset Password")}
+                                                className="w-full sm:w-auto px-[16px] py-[8px] rounded-[10px] text-[15px] font-semibold bg-white text-[#002940] hover:bg-[#e6eef2] transition-colors cursor-pointer"
+                                            >
+                                                Reset Password
+                                            </button>
+
+                                            <button
                                                 onClick={() => openUserActionModal(user, "Delete")}
                                                 className="w-full sm:w-auto px-[16px] py-[8px] rounded-[10px] text-[15px] font-semibold bg-white text-[#a32626] hover:bg-[#fef2f2] transition-colors cursor-pointer"
                                             >
@@ -602,6 +644,8 @@ export default function SAUsersPage() {
                                 " This will mark the user as inactive without deleting the account."}
                             {selectedUserAction === "Reactivate" &&
                                 " This will restore the user's active status."}
+                            {selectedUserAction === "Reset Password" &&
+                                " This will generate a new temporary password and reset this user's password."}
                             {selectedUserAction === "Delete" &&
                                 " This action is permanent and cannot be undone."}
                         </p>
@@ -628,12 +672,60 @@ export default function SAUsersPage() {
                                 className={`px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold text-white cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed ${
                                     selectedUserAction === "Reactivate"
                                         ? "bg-[#1a7a3f]"
+                                        : selectedUserAction === "Reset Password"
+                                        ? "bg-[#002940]"
                                         : "bg-[#a32626]"
                                 }`}
                             >
                                 {deleteLoading
                                     ? "Processing..."
                                     : `Confirm ${selectedUserAction}`}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {resetResult && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-[0.35in] z-50">
+                    <div className="bg-white rounded-[16px] p-[0.35in] max-w-[5in] w-full shadow-lg">
+                        <h2 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                            Password Reset Successful
+                        </h2>
+
+                        <p className="mt-[0.15in] text-[16px] text-[#002940]">
+                            Share this temporary password with{" "}
+                            <span className="font-semibold">
+                                {resetResult.name}
+                            </span>
+                            . It is shown only once.
+                        </p>
+
+                        <input
+                            readOnly
+                            value={resetResult.password}
+                            onFocus={(event) => event.currentTarget.select()}
+                            className="mt-[0.2in] w-full border-2 border-[#1a7a3f] rounded-[10px] px-[12px] py-[8px] text-[16px] text-[#002940] bg-white outline-none"
+                        />
+
+                        <div className="mt-[0.2in] flex flex-row justify-end gap-[10px]">
+                            <button
+                                type="button"
+                                onClick={copyPassword}
+                                className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#1a7a3f] text-white cursor-pointer hover:opacity-90"
+                            >
+                                {copiedPassword ? "Copied!" : "Copy Password"}
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setResetResult(null);
+                                    loadUsers();
+                                }}
+                                className="px-[20px] py-[10px] rounded-[10px] text-[16px] font-semibold bg-[#002940] text-white cursor-pointer hover:opacity-90"
+                            >
+                                Done
                             </button>
                         </div>
                     </div>

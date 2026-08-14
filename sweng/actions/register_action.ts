@@ -10,10 +10,11 @@ import { AccessType } from "@/db/enums/access_level";
 import { orm } from "@/db/drizzle";
 import { ImpEventModel } from "../queries/event_query";
 import { ImpEventManager } from "@/controllers/event_controller";
+import { randomInt } from "crypto";
 
 export async function prepareStaff(email: string, role: AccessType): Promise<ApiResponse<string | null>> {
     const database = await serverSupa();
-    const model = new ImpRegisterModel(orm, adminSupa);
+    const model = new ImpRegisterModel(orm, adminSupa, database);
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpRegisterManager(model, profiler);
 
@@ -44,7 +45,7 @@ export async function finishRegistration(
     password: string
 ): Promise<ApiResponse> {
     const database = await serverSupa();
-    const model = new ImpRegisterModel(orm, adminSupa);
+    const model = new ImpRegisterModel(orm, adminSupa, database);
     const profiler = new ImpProfileGetter(database);
 
     const current = await profiler.getCurrentUser();
@@ -68,7 +69,7 @@ export async function finishRegistration(
 
 export async function deleteStaffUser(id: string): Promise<ApiResponse> {
     const database = await serverSupa();
-    const model = new ImpRegisterModel(orm, adminSupa);
+    const model = new ImpRegisterModel(orm, adminSupa, database);
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpRegisterManager(model, profiler);
     const eventModel = new ImpEventModel(orm);
@@ -85,7 +86,7 @@ export async function deleteStaffUser(id: string): Promise<ApiResponse> {
 
 export async function staffToggler(id: string): Promise<ApiResponse<boolean>> {
     const database = await serverSupa();
-    const model = new ImpRegisterModel(orm, adminSupa);
+    const model = new ImpRegisterModel(orm, adminSupa, database);
     const profiler = new ImpProfileGetter(database);
     const controller = new ImpRegisterManager(model, profiler);
     const eventModel = new ImpEventModel(orm);
@@ -138,4 +139,31 @@ export async function hasInviteSession(): Promise<ApiResponse<string>> {
     }
 
     return { success: true, message: "Invite session active", data: current.data.id };
+}
+
+export async function adminResetPassword(id: string): Promise<ApiResponse<string | null>> {
+    const database = await serverSupa();
+    const model = new ImpRegisterModel(orm, adminSupa, database);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpRegisterManager(model, profiler);
+
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const password = Array.from({ length: 12 }, () => charset[randomInt(charset.length)]).join("");
+
+    const res = await controller.invokeAdminSetPassword(id, password);
+    if (!res.success) return { success: false, message: res.message, data: null };
+    return { success: true, message: res.message, data: password };
+}
+
+export async function changeOwnPassword(password: string): Promise<ApiResponse> {
+    if (!password || password.length < 6) {
+        return { success: false, message: "Password must be at least 6 characters" };
+    }
+
+    const database = await serverSupa();
+    const model = new ImpRegisterModel(orm, adminSupa, database);
+    const profiler = new ImpProfileGetter(database);
+    const controller = new ImpRegisterManager(model, profiler);
+
+    return await controller.invokeChangeOwnPassword(password);
 }
