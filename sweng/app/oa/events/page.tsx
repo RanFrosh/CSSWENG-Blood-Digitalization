@@ -6,7 +6,7 @@ import { ReadProfile } from "@/types/profile_type";
 import Header from "@/components/HeaderOA";
 import OAEventsClient from "./client";
 import { executeEventQueryStaff } from "../../event_records/event_action";
-import { fetchOACurrentUser } from "../oa_action";
+import { fetchOACurrentUser } from "../../../actions/oa_action";
 
 type EventTab = EventStatusType | "All";
 

@@ -7,6 +7,7 @@ import { EventDetailsPanel } from "@/components/EventDetailsPanel";
 import { ViewEvents } from "@/types/event_type";
 import { acceptDonor } from "@/actions/ls_action";
 import { QueueEntryWithDonor, StaffWithStatus } from "@/types/queue_type";
+import QueueListener from "@/components/QueueListener";
 
 interface LSEventClientProps {
     eventId: string;
@@ -35,23 +36,35 @@ export default function LSEventClient({
     const latestAddition = initialWaitlist.length > 0 ? initialWaitlist[initialWaitlist.length - 1] : null;
     const nextDonor = initialWaitlist.length > 0 ? initialWaitlist[0] : null;
 
+    const [toast, setToast] = useState({ visible: false, message: "", type: "error" });
+
+    const showToast = (message: string, type: "success" | "error" = "error") => {
+        setToast({ visible: true, message, type });
+        setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000);
+    };
+
     const goBack = () => {
         router.push("/ls/events");
     };
 
     const handleConfirm = async () => {
-        if (!nextDonor) return;
+        if (!nextDonor) 
+            return;
 
         setIsProcessing(true);
         const res = await acceptDonor(nextDonor.id.toString(), eventId);
         
         if (res?.success) {
-            router.push(`/ls/events/${eventId}/record/${nextDonor.donor_id}`);
+            showToast("Donor accepted from queue!", "success");
+            
+            setTimeout(() => {
+                router.push(`/ls/events/${eventId}/record/${nextDonor.donor_id}`);
+            }, 1000);
         } else {
-            alert(res?.message); 
+            showToast(res?.message || "Failed to accept donor.", "error");
             setIsProcessing(false);
             setShowAcceptModal(false);
-            router.refresh(); // Syncs the client with the server if something failed
+            router.refresh();
         }
     };
 
@@ -90,7 +103,11 @@ export default function LSEventClient({
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black relative">
+
+            <QueueListener eventId={eventId} />
+
             <Header />
+            
             <div className="flex-1 p-[0.35in]">
                 {/* Event Details Panel */}
                 <EventDetailsPanel event={selectedEvent} />
@@ -280,6 +297,25 @@ export default function LSEventClient({
                             </div>
                         </div>
                     </div>
+                </div>
+            )}
+
+            {toast.visible && (
+                <div 
+                    className={`fixed bottom-[0.35in] left-1/2 -translate-x-1/2 px-[24px] py-[12px] rounded-full shadow-lg text-white font-semibold font-['Montserrat'] flex items-center gap-[10px] z-[100] animate-in fade-in slide-in-from-bottom-5 duration-300 ${
+                        toast.type === "error" ? "bg-[#fd5448]" : "bg-[#002940]"
+                    }`}
+                >
+                    {toast.type === "error" ? (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    ) : (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                    )}
+                    <span className="text-[16px]">{toast.message}</span>
                 </div>
             )}
         </main>

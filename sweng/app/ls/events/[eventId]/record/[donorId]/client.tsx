@@ -28,6 +28,13 @@ export default function RecordClient() {
 
     const [showModal, setShowModal] = useState(false);
 
+    const [toast, setToast] = useState({ visible: false, message: "", type: "error" });
+
+    const showToast = (message: string, type: "success" | "error" = "error") => {
+        setToast({ visible: true, message, type });
+        setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000);
+    };
+
     useEffect(() => {
         const fetchDonor = async () => {
 
@@ -65,14 +72,14 @@ export default function RecordClient() {
 
     const handleConfirmRecord = async () => {
 
+        if (Number(volumeCollected) > 450) {
+            showToast("Donation volume cannot exceed 450 mL.", "error");
+            return; 
+        }
+
         setIsSubmitting(true);
 
         const exactDate = new Date();
-                
-        if (Number(volumeCollected) > 450) {
-            alert("Donation volume cannot exceed 450 mL.");
-            return; 
-        }
 
         try {
             const payload = {
@@ -89,15 +96,18 @@ export default function RecordClient() {
             const res = await submitDonationRecordAction(payload);
             
             if (res.success) {
+                showToast("Donation record saved successfully!", "success");
                 setShowModal(false);
-                router.push(`/ls/events/${eventId}`);
+                setTimeout(() => {
+                    router.push(`/ls/events/${eventId}`);
+                }, 1000);
             } else {
-                alert(res.message);
+                showToast(res.message || "Failed to save record.", "error");
             }
 
         } catch (error) {
             console.error("Failed to submit record:", error);
-            alert("An unexpected error occurred. Please try again.");
+            showToast("An unexpected error occurred. Please try again.", "error");
         } finally {
             setIsSubmitting(false);
         }
@@ -127,6 +137,7 @@ export default function RecordClient() {
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black relative">
+
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">
