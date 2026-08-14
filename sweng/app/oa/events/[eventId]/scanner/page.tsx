@@ -22,6 +22,13 @@ export default function ScannerPage() {
 
     const scannerRef = useRef<Html5Qrcode | null>(null);
 
+    const [toast, setToast] = useState({ visible: false, message: "", type: "error" });
+    
+    const showToast = (message: string, type: "success" | "error" = "error") => {
+        setToast({ visible: true, message, type });
+        setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000);
+    };
+
     const startScanner = async () => {
         if (scannerRef.current) return;
 
@@ -115,22 +122,21 @@ export default function ScannerPage() {
             );
 
             if (!result.success) {
-                setError(
-                    result.message ??
-                    "This donor cannot be checked in."
+                showToast(
+                    result.message ?? "This donor cannot be checked in.", 
+                    "error"
                 );
                 return;
             }
 
-            setError("");
-            alert("Donor successfully checked in!");
+            showToast("Donor successfully checked in!", "success");
 
             setDonor(null);
 
             router.push(`/oa/events/${eventId}`);
         } catch (error) {
             console.error(error);
-            setError("Failed to check in donor.");
+            showToast("Failed to check in donor.", "error");
         }
     };
 
@@ -231,6 +237,25 @@ export default function ScannerPage() {
                     </button>
                 </section>
 
+                {toast.visible && (
+                    <div 
+                        className={`fixed bottom-[0.35in] left-1/2 -translate-x-1/2 px-[24px] py-[12px] rounded-full shadow-lg text-white font-semibold font-['Montserrat'] flex items-center gap-[10px] z-[100] animate-in fade-in slide-in-from-bottom-5 duration-300 ${
+                            toast.type === "error" ? "bg-[#fd5448]" : "bg-[#002940]"
+                        }`}
+                    >
+                        {toast.type === "error" ? (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        ) : (
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                            </svg>
+                        )}
+                        <span className="text-[16px]">{toast.message}</span>
+                    </div>
+                )}
+
                 {/* Donor Information */}
                 {donor && (
                     <section className="mt-8 bg-white border-2 border-[#c0cad0] rounded-[18px] p-5 shadow-sm">
@@ -283,6 +308,8 @@ export default function ScannerPage() {
                         </div>
                     </section>
                 )}
+
+                
             </div>
         </main>
     );

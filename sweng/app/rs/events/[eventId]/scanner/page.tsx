@@ -23,6 +23,13 @@ export default function RSScannerPage() {
 
     const scannerRef = useRef<Html5Qrcode | null>(null);
 
+    const [toast, setToast] = useState({ visible: false, message: "", type: "error" });
+    
+    const showToast = (message: string, type: "success" | "error" = "error") => {
+        setToast({ visible: true, message, type });
+        setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000);
+    };
+
     const startScanner = async () => {
         if (scannerRef.current) return;
 
@@ -116,11 +123,14 @@ export default function RSScannerPage() {
             );
 
             if (!result.success) {
-                setError(result.message ?? "Failed to claim perk.");
+                showToast(
+                    result.message ?? "This donor cannot be checked in.", 
+                    "error"
+                );
                 return;
             }
 
-            alert("Perk successfully claimed!");
+            showToast("Perk successfully claimed!", "success");
 
             setError("");
             setDonor(null);
@@ -128,7 +138,7 @@ export default function RSScannerPage() {
             router.push(`/rs/events/${eventId}`);
         } catch (error) {
             console.error(error);
-            setError("Failed to claim perk.");
+            showToast("Failed to claim perk.", "error");
         }
     };
 
