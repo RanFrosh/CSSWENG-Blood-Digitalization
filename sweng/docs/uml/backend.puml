@@ -1,0 +1,724 @@
+﻿@startuml backend
+
+title CSSWENG Blood Digitalization - Backend Class Diagram
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+' ==============================
+' Interfaces
+' ==============================
+
+interface LoginControl
+interface RegisterData
+interface AssignedStaffController
+interface QueueData
+interface DonorController
+interface ProfilesData
+interface LoginProvider
+interface LabStaffData
+interface AssignedStaffData
+interface ProfileSessionProvider
+interface AnalyticsController
+interface SeedUser
+interface DonorData
+interface ProfilesController
+interface SuperAdminData
+interface EventController
+interface LogoutControl
+interface EventData
+interface SubmitDonationPayload
+interface MPData
+interface SuperAdminController
+interface QueueController
+interface LabStaffController
+interface AnalyticsData
+interface LogoutProvider
+interface RegisterController
+interface MPController
+
+' ==============================
+' Classes
+' ==============================
+
+class ImpProfileGetter {
+    - profile_image_url: data.profile_image_url,
+    - success: true,
+    - message: 'Profile successfully updated.'
+    - database: SupabaseClient
+    - name: data.name,
+    - email: data.email,
+    + updateProfile(userId: string, data: name: string, email: string, profile_image_url: string / null): void
+    + getCurrentUser(): Promise[ApiResponse[ReadProfile]]
+    + constructor(injectDatabase: SupabaseClient): void
+}
+
+class ImpLoginProvider {
+    - provider: SupabaseClient
+    + provideLogin(email: string, password: string): Promise[ApiResponse]
+    + constructor(injectDatabase: SupabaseClient): void
+}
+
+class ImpRegisterManager {
+    - profileReader: ProfileSessionProvider
+    - registerModel: RegisterData
+    + invokeFindStaffByEmail(email: string): Promise[ApiResponse[string / null]]
+    + invokeDeleteStaff(id: string): Promise[ApiResponse]
+    + invokeToggleStaff(id: string): Promise[ApiResponse[boolean]]
+    + invokeIsProfileComplete(id: string): Promise[ApiResponse[ReadProfile]]
+    + invokeFinishProfile(name: string): Promise[ApiResponse]
+    + invokeCreateStaff(email: string, redirectTo: string): Promise[ApiResponse[string]]
+    + constructor(injectRegisterModel: RegisterData, injectProfileReader: ProfileSessionProvider): void
+    + invokeSetPassword(password: string): Promise[ApiResponse]
+    + invokeCreateProfile(id: string, role: AccessType, email: string): Promise[ApiResponse]
+}
+
+class ImpMPManager {
+    - id: queueId,
+    - station: 'lab_queue',
+    - currentDonorId: isBusy ? Number(myData.queue!.donor_id) : null,
+    - isBusy: isBusy,
+    - queueEntryId: isBusy ? Number(myData.queue!.id) : null,
+    - action: 'deferral',
+    - time: new Date().toTimeString().slice(0, 8),
+    - donor_id: donorId,
+    - staff_id: null,
+    - event_log_id: eventId,
+    - role: myData.profile.role,
+    - message: 'Access verified',
+    - data: eventDetails
+    - success: true,
+    - mpModel: MPData
+    - profileReader: ProfileSessionProvider
+    - profiles_id: myData.profile.id,
+    - name: myData.profile.name,
+    - queue: formattedQueue
+    - donor_profile: row.donor // null
+    - eventName: event.name,
+    + invokeCompleteScreening(donorId: bigint, eventId: bigint): void
+    + invokeUpdateQueueStation(queueTarget: UpdateQueue): void
+    + invokeFailScreening(donorId: bigint, eventId: bigint): void
+    + invokeDeleteQueue(donorTarget: DeleteQueue): void
+    + invokeVerifyEventAccess(eventIdStr: string): void
+    + constructor(injectLabStaffModel: MPData, injectProfileReader: ProfileSessionProvider): void
+    + invokeGetStaffStatus(eventIdStr: string): void
+    + invokeGetQueue(eventIdStr: string, station?: string / null): void
+}
+
+class ImpProfilesModel {
+    - role: profiles.role,
+    - email: authUsers.email,
+    - active: profiles.active
+    - dateJoined: profiles.created_at,
+    - admin: typeof adminSupa
+    - access: typeof orm
+    - name: profiles.name,
+    - id: profiles.id,
+    + editProfileName(id: string, name: string): Promise[ApiResponse]
+    + editProfileEmail(id: string, email: string): Promise[ApiResponse]
+    + editProfileImage(id: string, profileImageUrl: string / null): Promise[ApiResponse]
+    + getStaffUsers(): Promise[ApiResponse[StaffUserRow[]]]
+    + constructor(injectAccess: typeof orm, injectAdmin: typeof adminSupa): void
+    + getProfiles(ids: string[]): Promise[ApiResponse[ReadProfile[]]]
+    + getAllProfiles(): Promise[ApiResponse[ReadProfile[]]]
+}
+
+class ImpSuperAdminManager {
+    - eventId: req.event_id ? String(req.event_id) : null,
+    - staffId: req.staff_id,
+    - donorId: req.donor_id ? String(req.donor_id) : null,
+    - data: assignedStaff, availableStaff ,
+    - bloodBagSerial: req.blood_bag_serial,
+    - status: req.status,
+    - admin_remarks: req.admin_remarks // undefined,
+    - createdAt: req.created_at ?? new Date(),
+    - staffName: '$req.staff_name // 'Unknown''.trim(),
+    - payload: req.payload,
+    - message: 'Event summary retrieved',
+    - id: String(event.id),
+    - name: event.name,
+    - success: true,
+    - saModel: ImpSuperAdminModel
+    - profileReader: ProfileSessionProvider
+    - start_time: event.start_time // null,
+    - end_time: event.end_time // null
+    - event_date: event.event_date // '',
+    - partner: event.partner,
+    - city: event.city_name // 'Unknown',
+    + invokeFetchEditRequests(): void
+    + invokeRemoveStaffFromEvent(eventId: string, staffIds: string[]): void
+    + invokeApproveEditRequest(requestId: string, adminId: string, remarks?: string): void
+    + invokeRejectEditRequest(requestId: string, adminId: string, remarks: string): void
+    + invokeFetchEventSummary(eventId: string): void
+    + constructor(injectSuperAdminModel: ImpSuperAdminModel, injectProfileReader: ProfileSessionProvider): void
+    + invokeAssignStaffToEvent(eventId: string, staffIds: string[]): void
+    + invokeFetchEventStaffLists(eventId: string): void
+}
+
+class ImpQueueModel {
+    - staff_id: queueTarget.staff_id
+    - station: queueTarget.station,
+    - access: typeof orm
+    + updateQueueStation(queueTarget: UpdateQueue): Promise[ApiResponse]
+    + addToQueue(queueTarget: CreateQueue): Promise[ApiResponse]
+    + getNullStations(event_guy: bigint): Promise[ApiResponse[ViewQueue[]]]
+    + isNull(event_queue.station): void
+    + and(eq(event_queue.event_log_id, event_guy): void
+    + deleteQueue(donorTarget: DeleteQueue): Promise[ApiResponse]
+    + queryQueue(filterer: ViewQueueFilters): Promise[ApiResponse[ViewQueue[]]]
+    + constructor(injectAccess: typeof orm): void
+    + and(eq(assigned_staff.staff_id, filterer.staff_id): void
+    + and(eq(event_log.id, filterer.event_log_id): void
+    + eq(assigned_staff.event_log_id, filterer.event_log_id): void
+}
+
+class ImpLabStaffModel {
+    - updated_at: new Date(),
+    - blood_amount: payload.volume,
+    - sex: donor.sex,
+    - location: city.name,
+    - bloodType: donor.blood,
+    - is_success: payload.outcome
+    - quality: payload.quality,
+    - outcome: payload.outcome,
+    - observations: payload.observations,
+    - next_eligibility: nextEligibleDate.toISOString()
+    - collection_date: payload.collection_date,
+    - volumeCollected: blood_bag.volume_ml,
+    - bloodBagId: blood_bag.serial_number,
+    - completionTime: blood_bag.created_at,
+    - payload: any
+    - blood_bag_serial: string
+    - event_log_id: BigInt(eventId),
+    - age: donor.age,
+    - image: profiles.profile_image_url,
+    - success: true,
+    - data: formattedDonors
+    - message: 'Donors retrieved successfully.',
+    - volume_ml: payload.volume,
+    - status: event_log.status,
+    - name: event_log.name,
+    - event_date: event_log.event_date,
+    - end_time: event_log.end_time,
+    - start_time: event_log.start_time,
+    - id: event_log.id,
+    - partner: string
+    - search: string
+    - selectedCity: string
+    - default: orderLogic
+    - sortBy: string
+    - donor_id: payload.donor_id,
+    - staff_id: staffProfileId
+    - event_id: payload.event_id,
+    - blood_type: payload.blood_type,
+    - serial_number: 'Pending',
+    - profile: profiles,
+    - target_blood: event_log.target_blood,
+    - street: event_log.street,
+    - city: city.name
+    - donor: donor
+    - queue: event_queue,
+    + and(eq(donor_to_event.donor_id, payload.donor_id): void
+    + eq(event_queue.event_log_id, payload.event_id): void
+    + getEventDonors(eventId: string, filters?: DonorFilters): void
+    + eq(donor_to_event.event_id, payload.event_id): void
+    + and(eq(event_queue.donor_id, payload.donor_id): void
+    + ne(event_queue.donor_id, donorId): void
+    + and(eq(event_queue.staff_id, staffId): void
+    + submitDonationRecord(payload: SubmitDonationPayload): void
+    + and(eq(event_queue.donor_id, donorId): void
+    + eq(donor_to_event.event_id, BigInt(eventId): void
+    + and(eq(donor_to_event.event_id, BigInt(eventId): void
+    + eq(blood_bag.event_id, BigInt(eventId): void
+    + submitEditRequest(params: blood_bag_serial: string, donor_id: string, event_id: string, payload: any, , staffId: string): void
+    + eq(donor_to_event.donor_id, BigInt(donorId): void
+    + and(eq(blood_bag.donor_id, donor.id): void
+    + or(sql'$donor.next_eligibility IS NULL', sql'$donor.next_eligibility [): void
+    + or(ilike(profiles.name, searchString): void
+    + getDonorEventRecord(eventId: string, donorId: string): void
+    + joinEvent(eventId: string, staffId: string): void
+    + and(eq(event_log.id, eventId): void
+    + verifyAccess(staffId: string, eventId: bigint): void
+    + eq(event_queue.event_log_id, eventId): void
+    + getEventQueueWithDonors(eventId: bigint, stationFilter?: string / null): void
+    + ilike(city.name, searchPattern): void
+    + eq(assigned_staff.staff_id, staffId): void
+    + getStaffEvents(staffId: string, filters: search?: string, partner?: string, selectedCity?: string, sortBy?: string, =): void
+    + ilike(event_log.partner, searchPattern): void
+    + or(ilike(event_log.name, searchPattern): void
+    + isNull(event_queue.staff_id): void
+    + validateExtractionAccess(staffId: string, eventId: bigint, donorId: bigint): void
+    + getSingleDonor(filter: ViewDonorPartial): void
+    + eq(assigned_staff.event_log_id, eventId): void
+    + and(eq(assigned_staff.staff_id, staffId): void
+    + and(eq(event_queue.id, queueId): void
+    + eq(event_queue.staff_id, profiles.id): void
+    + getStaffStatusForEvent(eventId: bigint, staffId: string): void
+    + acceptDonor(queueId: bigint, staffProfileId: string): void
+    + and(eq(assigned_staff.event_log_id, eventId): void
+}
+
+class ImpEventManager {
+    - success: true,
+    - image: event.image_url // '/images/event.png',
+    - details: event.description // 'Join us for our upcoming blood donation drive. Your contribution saves lives.',
+    - message: 'Landing events fetched successfully',
+    - staff_id: res.data.id
+    - ref_profile_id: res.data.id
+    - data: formattedEvents
+    - id: bigint / number
+    - profileReader: ProfileSessionProvider
+    - eventModel: EventData
+    - name: string / null
+    - title: event.name // 'Blood Drive Event',
+    - image_url: string / null
+    - description: string / null
+    + invokeGetCity(cityName: string): Promise[ApiResponse[bigint]]
+    + invokeGetAllCities(): Promise[ApiResponse[ViewCities[]]]
+    + invokeIsStaffOnOngoingEvent(staff_id: string): Promise[ApiResponse[boolean]]
+    + invokeGetProvince(provinceName: string): Promise[ApiResponse[bigint]]
+    + invokeUpdateEvent(id: bigint, data: UpdateEvents): Promise[ApiResponse]
+    + invokeLogEvent(data: Omit[CreateEventRecords, 'staff_id']): Promise[ApiResponse]
+    + invokeQueryEventRecords(event_log_id: bigint): Promise[ApiResponse[ViewEventRecords[]]]
+    + invokeDeleteEvent(id: bigint): Promise[ApiResponse]
+    + invokeUpdateEventStatuses(): Promise[ApiResponse[number]]
+    + invokeQueryAllEvents(): Promise[ApiResponse[ViewEventsWithProvince[]]]
+    + invokeFetchLandingEvents(): Promise[ApiResponse[any]]
+    + constructor(injectEventModel: EventData, injectProfileReader: ProfileSessionProvider): void
+    + invokeQueryEvent(data: ViewEventFilters, sort: Sorter[ViewEvents]): Promise[ApiResponse[ViewEvents[]]]
+    + invokeCreateEvent(data: CreateEvents): Promise[ApiResponse]
+    + invokeQueryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise[ApiResponse[ViewEventsWithProvince[]]]
+    + invokeVerifyEventAccess(event_log_id: bigint): Promise[ApiResponse[ViewEventsWithProvince]]
+    + invokeQueryCorrection(data: ViewCorrectionFilters, sort: Sorter[ViewCorrections]): Promise[ApiResponse[ViewCorrections[]]]
+    + invokeCreateCorrection(data: Omit[CreateCorrections, 'ref_profile_id']): Promise[ApiResponse]
+}
+
+class ImpQueueManager {
+    - event_log_id: queueTarget.event_log_id,
+    - event_id: appendedFilterer.event_log_id,
+    - id: nextDonor.id,
+    - donor_id: queueTarget.donor_id,
+    - profileReader: ProfileSessionProvider
+    - queueModel: QueueData
+    - station: getQueueStation(res.data.role)
+    - staff_id: res.data.id,
+    + invokePickNextQueue(event_guy: bigint): Promise[ApiResponse[ViewQueue]]
+    + invokeUpdateQueueStation(queueTarget: UpdateQueue): Promise[ApiResponse]
+    + invokeGetNullStations(event_guy: bigint): Promise[ApiResponse[ViewQueue[]]]
+    + invokePeekNextQueue(event_guy: bigint): Promise[ApiResponse[ViewQueue]]
+    + invokeQueryQueue(filterer: ViewQueueFilters): Promise[ApiResponse[ViewQueue[]]]
+    + constructor(injectQueueModel: QueueData, injectProfileReader: ProfileSessionProvider): void
+    + invokeAddToQueue(queueTarget: CreateQueue): Promise[ApiResponse]
+    + invokeDeleteQueue(donorTarget: DeleteQueue): Promise[ApiResponse]
+}
+
+class ImpRegisterModel {
+    - options: redirectTo ,
+    - name: '',
+    - active: false
+    - access: typeof orm
+    - admin: typeof adminSupa
+    - type: 'invite',
+    + findStaffByEmail(email: string): Promise[ApiResponse[string / null]]
+    + deleteStaff(id: string): Promise[ApiResponse]
+    + toggleStaff(id: string): Promise[ApiResponse[boolean]]
+    + isProfileComplete(id: string): Promise[ApiResponse[ReadProfile]]
+    + finishProfile(id: string, name: string): Promise[ApiResponse]
+    + createStaff(email: string, redirectTo: string): Promise[ApiResponse[string]]
+    + constructor(injectAccess: typeof orm, injectAdmin: typeof adminSupa): void
+    + setPassword(id: string, password: string): Promise[ApiResponse]
+    + createProfile(id: string, role: AccessType, email: string): Promise[ApiResponse]
+}
+
+class ImpSuperAdminModel {
+    - staff_name: profiles.name,
+    - status: edit_requests.status,
+    - event_id: edit_requests.event_id,
+    - blood_bag_serial: edit_requests.blood_bag_serial,
+    - donor_id: edit_requests.donor_id,
+    - admin_id: adminId,
+    - updated_at: new Date()
+    - admin_remarks: edit_requests.admin_remarks
+    - payload: edit_requests.payload,
+    - created_at: edit_requests.created_at,
+    - staff_id: staffId
+    - event_date: event_log.event_date,
+    - city_name: city.name,
+    - partner: event_log.partner,
+    - id: event_log.id,
+    - name: event_log.name,
+    - staffType: profiles.role,
+    - event_log_id: BigInt(eventId),
+    - email: profiles.email,
+    - start_time: event_log.start_time,
+    - end_time: event_log.end_time
+    + getEditRequests(): void
+    + inArray(assigned_staff.staff_id, staffIds): void
+    + and(eq(assigned_staff.event_log_id, BigInt(eventId): void
+    + approveEditRequest(requestId: string, adminId: string, bloodBagSerial: string, payload: any, remarks?: string): void
+    + rejectEditRequest(requestId: string, adminId: string, remarks: string): void
+    + getEditRequestById(requestId: string): void
+    + inArray(profiles.role, [ 'onsite_admin', 'med_prof', 'lab_staff', 'recov_staff' ] as any): void
+    + getEligibleStaff(): void
+    + getEventById(eventId: string): void
+    + deleteEventStaff(eventId: string, staffIds: string[]): void
+    + insertEventStaff(eventId: string, staffIds: string[]): void
+    + getAssignedStaffIdsForEvent(eventId: string): void
+}
+
+class ImpEventModel {
+    - donor_first_name: donor.first_name,
+    - staff_role: profiles.role,
+    - staff_name: profiles.name,
+    - time: event_record.time,
+    - action: event_record.action,
+    - donor_last_name: donor.last_name,
+    - event_name: event_log.name,
+    - name: event_log.name,
+    - id: event_log.id,
+    - access: typeof orm
+    - event_log_id: event_record.event_log_id,
+    - date: event_log.event_date,
+    - image_url: event_log.img_url,
+    + getCity(cityName: string): Promise[ApiResponse[bigint]]
+    + getAllCities(): Promise[ApiResponse[ViewCities[]]]
+    + isStaffOnOngoingEvent(staff_id: string): Promise[ApiResponse[boolean]]
+    + getProvince(provinceName: string): Promise[ApiResponse[bigint]]
+    + updateEvent(id: bigint, data: UpdateEvents): Promise[ApiResponse]
+    + logEvent(data: CreateEventRecords): Promise[ApiResponse]
+    + queryEventRecords(event_log_id: bigint): Promise[ApiResponse[ViewEventRecords[]]]
+    + deleteEvent(id: bigint): Promise[ApiResponse]
+    + updateEventStatuses(): Promise[ApiResponse[number]]
+    + queryAllEvents(): Promise[ApiResponse[ViewEventsWithProvince[]]]
+    + getLandingPageEvents(): void
+    + constructor(injectAccess: typeof orm): void
+    + queryEvent(data: ViewEventFilters, sort: Sorter[ViewEvents]): Promise[ApiResponse[ViewEvents[]]]
+    + createEvent(data: CreateEvents): Promise[ApiResponse]
+    + queryEventStaff(data: ViewEventFilters, staff: ViewAssignedStaffFilter): Promise[ApiResponse[ViewEventsWithProvince[]]]
+    + queryEventById(id: bigint): Promise[ApiResponse[ViewEventsWithProvince]]
+    + queryCorrection(data: ViewCorrectionFilters, sort: Sorter[ViewCorrections]): Promise[ApiResponse[ViewCorrections[]]]
+    + createCorrection(data: CreateCorrections): Promise[ApiResponse]
+}
+
+class ImpLogoutProvider {
+    - database: SupabaseClient
+    + provideLogout(): Promise[ApiResponse]
+    + constructor(injectDatabase: SupabaseClient): void
+}
+
+class ImpLabStaffManager {
+    - isBusy: isBusy,
+    - queueEntryId: isBusy ? Number(myData.queue!.id) : null,
+    - role: myData.profile.role,
+    - profiles_id: myData.profile.id,
+    - name: myData.profile.name,
+    - currentDonorId: isBusy ? Number(myData.queue!.donor_id) : null,
+    - event_id: string
+    - payload: any
+    - donor_id: string
+    - staff_id: auth.data.id
+    - blood_bag_serial: string
+    - queue: formattedQueue
+    - partner: string
+    - selectedCity: string
+    - search: string
+    - labStaffModel: LabStaffData
+    - profileReader: ProfileSessionProvider
+    - sortBy: string
+    - donor_profile: row.donor // null
+    - eventName: event.name,
+    - data: events
+    - success: true,
+    - message: 'Events retrieved',
+    + invokeGetEventDonors(eventId: string, filters?: any): void
+    + invokeSubmitDonationRecord(payload: Omit[SubmitDonationPayload, 'staff_id']): void
+    + invokeValidateExtractionAccess(staffId: string, eventId: bigint, donorId: bigint): void
+    + invokeSubmitEditRequest(params: blood_bag_serial: string, donor_id: string, event_id: string, payload: any,): void
+    + invokeGetDonorRecord(eventId: string, donorId: string): void
+    + invokeJoinEvent(eventId: string): void
+    + invokeGetSingleDonor(filter: ViewDonorPartial): void
+    + invokeVerifyEventAccess(eventIdStr: string): void
+    + invokeGetStaffEvents(filters: search?: string, partner?: string, selectedCity?: string, sortBy?: string, =): void
+    + constructor(injectLabStaffModel: LabStaffData, injectProfileReader: ProfileSessionProvider): void
+    + invokeAcceptDonor(queueIdStr: string, eventIdStr: string): void
+    + invokeGetStaffStatus(eventIdStr: string): void
+    + invokeGetQueue(eventIdStr: string, station?: string / null): void
+}
+
+class ImpAnalyticsManager {
+    - end_time: e.end_time,
+    - city: e.city,
+    - street: e.street,
+    - start_time: e.start_time,
+    - totalDonors: visitors,
+    - totalBagsProduced: Number(totalBags) // 0,
+    - target_blood: e.target_blood,
+    - produced_bags: e.produced_bags
+    - bloodBagsFilled: metrics.successfulDonations,
+    - recentVisitEvent: recentVisitEvent,
+    - deferredVisits: safeDeferredVisits,
+    - bloodDonated: '$(metrics.bloodDonatedML // 0).toLocaleString() mL',
+    - selectedCity: string
+    - event_date: e.event_date,
+    - recentVisitDate: recentVisitDate,
+    - partner: string
+    - extractionProgress: progressPercent,
+    - malePct: malePercent,
+    - date: c.event_date,
+    - extractionSuccessRate: '$successRate.toFixed(1)%',
+    - bloodBags: parsedBagBloodTypes,
+    - campaignEvents: formattedCampaigns,
+    - femalePct: femalePercent,
+    - activeEngagementRate: calculatedEngagementRate,
+    - bloodTypes: bloodTypeDist.map((bt: any)
+    - count: Number(bt.count) // 0
+    - successRate: '$successRate%',
+    - extractionGoal: Number(eventRow.target_blood) // 0,
+    - pct: baseTotalBags ] 0 ? (countVal / totalDonorsCount) * 100 : 0,
+    - color: colorMap[typeStr] // '#c0cad0' // Fallback gray
+    - startDate: string
+    - endDate: string
+    - successfulDonations: metrics.successfulDonations,
+    - last_name: d.last_name,
+    - email: d.email,
+    - id: d.id,
+    - first_name: d.first_name,
+    - sex: d.sex,
+    - blood: d.blood // 'Unknown',
+    - mobile: d.mobile_no,
+    - age: d.age,
+    - search: string
+    - bloodFilter: string
+    - analyticsModel: AnalyticsData
+    - profileReader: ProfileSessionProvider
+    - sortBy: string
+    - displayId: 'DNR-$String(d.id).padStart(4, '0')',
+    - sexFilter: string
+    - eligibilityFilter: string
+    - location: '$dbDonor.street, $dbDonor.zip_code',
+    - active: dbDonor.active,
+    - bloodType: dbDonor.blood,
+    - mobile_no: dbDonor.mobile_no,
+    - assessment_status: dbDonor.assessment_status,
+    - totalVisits: safeTotalVisits,
+    - height: dbDonor.height,
+    - weight: dbDonor.weight,
+    - assessmentStatus: d.assessment_status,
+    - nextEligibleDate: d.nextEligibleDate
+    - verifiedBlood: d.verifiedBlood,
+    - status: d.active ? 'Active' : 'Inactive',
+    - data: formattedDonors
+    - name: '$dbDonor.first_name $dbDonor.last_name',
+    - success: true,
+    - message: 'Donors successfully retrieved',
+    + invokeGetFilteredEvents(filters: search?: string, status?: string, partner?: string, selectedCity?: string, sortBy?: string, =): void
+    + invokeGetEventAnalytics(eventIdStr: string): Promise[ApiResponse[any]]
+    + invokeGetOverallAnalytics(filters: startDate?: string, endDate?: string, partner?: string, selectedCity?: string, sortBy?: string, =): void
+    + constructor(injectAnalyticsModel: AnalyticsData, injectProfileReader: ProfileSessionProvider): void
+    + invokeGetFilteredDonors(filters: search?: string, bloodFilter?: string, sexFilter?: string, eligibilityFilter?: string, sortBy?: string, =): void
+    + invokeGetDonorAnalytics(donorIdStr: string): void
+}
+
+class ImpLoginController {
+    - profileReader: ProfileSessionProvider
+    - provider: LoginProvider
+    + invokeLogin(email: string, password: string): Promise[ApiResponse[ReadProfile]]
+    + constructor(injectProvider: LoginProvider, injectProfileReader: ProfileSessionProvider): void
+}
+
+class ImpAnalyticsData {
+    - street: event_log.street,
+    - city: city.name
+    - produced_bags: sql[number]'count($blood_bag.id)',
+    - visitors: event_log.visitors,
+    - totalBags: count(blood_bag.id)
+    - totalML: sum(blood_bag.volume_ml),
+    - extractions: event_log.extractions,
+    - name: event_log.name,
+    - selectedCity: string
+    - partner: string
+    - event_date: event_log.event_date,
+    - target_blood: event_log.target_blood,
+    - end_time: event_log.end_time,
+    - start_time: event_log.start_time,
+    - bloodType: blood_bag.blood_type,
+    - bloodBagTypes: bloodBagTypesRes,
+    - bloodTypes: donorBloodTypes,
+    - totalExtractions: sql[number]'sum($event_log.extractions)',
+    - genders: genderRes,
+    - activeDonorsLastYear: Number(activeDonorsLastYearRes[0]?.count // 0)
+    - totalCampaigns: Number(totalCampaignsRes[0]?.count // 0),
+    - campaigns: campaignsRes,
+    - bloodTypeDist: bloodTypeResult
+    - eventRow: eventResult[0],
+    - count: count()
+    - blood_type: donor.blood,
+    - totalTarget: sql[number]'sum($event_log.target_blood)',
+    - endDate: string
+    - startDate: string
+    - status: string
+    - first_name: donor.first_name,
+    - id: donor.id,
+    - default: orderLogic
+    - last_name: donor.last_name,
+    - active: donor.active,
+    - mobile_no: donor.mobile_no,
+    - email: donor.email,
+    - sexFilter: string
+    - bloodFilter: string
+    - search: string
+    - eligibilityFilter: string
+    - last_date: sql[string]'MAX($event_log.event_date)'.as('last_date')
+    - donor_id: donor_to_event.donor_id,
+    - sortBy: string
+    - age: donor.age,
+    - successCount: count(blood_bag.id),
+    - value: count()
+    - isSuccess: donor_to_event.is_success
+    - totalBlood: sum(blood_bag.volume_ml),
+    - bloodDonatedML: Number(successStatsRes[0]?.totalBlood) // 0,
+    - successfulDonations: successStatsRes[0]?.successCount // 0,
+    - totalVisits: totalVisitsRes[0]?.value // 0,
+    - verifiedBlood: donor.verifiedBlood,
+    - sex: donor.sex,
+    - blood: donor.blood,
+    - last_donation_date: latestSuccessSq.last_date,
+    - date: event_log.event_date,
+    - eventName: event_log.name,
+    - next_eligiblilty: donor.next_eligibility
+    + or(ilike(event_log.name, '%$search%'): void
+    + ilike(event_log.partner, '%$search%'): void
+    + getFilteredEvents(filters: search?: string, status?: string, partner?: string, selectedCity?: string, sortBy?: string, =): void
+    + getDonorMetrics(numericId: bigint): void
+    + getEventById(numericId: bigint): void
+    + getDonorBloodTypeBreakdown(eventWhereClause?: any): Promise[any[]]
+    + getOverallAnalytics(filters: startDate?: string, endDate?: string, partner?: string, selectedCity?: string, sortBy?: string, =): void
+    + countActiveDonors(eventWhereClause?: any): Promise[number]
+    + ilike(city.name, '%$search%'): void
+    + getEventAnalyticsData(eventIdStr: string): void
+    + getLatestVisit(numericId: bigint): void
+    + ilike(donor.first_name, '%$search%'): void
+    + ilike(donor.last_name, '%$search%'): void
+    + or(isNumeric ? eq(donor.id, BigInt(search.trim(): void
+    + getDonorById(numericId: bigint): void
+    + getFilteredDonors(filters: search?: string, bloodFilter?: string, sexFilter?: string, eligibilityFilter?: string, sortBy?: string, =): void
+    + lte(donor.next_eligibility, nowStr): void
+    + gt(donor.next_eligibility, nowStr): void
+    + or(isNull(donor.next_eligibility): void
+    + ilike(donor.email, '%$search%'): void
+    + and(eq(donor.active, true): void
+}
+
+class ImpMPModel {
+    - donor: donor
+    - queue: event_queue,
+    - city: city.name
+    - staff_id: queueTarget.staff_id
+    - station: queueTarget.station,
+    - profile: profiles,
+    - end_time: event_log.end_time,
+    - status: event_log.status,
+    - name: event_log.name,
+    - id: event_log.id,
+    - start_time: event_log.start_time,
+    - event_date: event_log.event_date,
+    - partner: event_log.partner,
+    + and(eq(event_queue.staff_id, staffId): void
+    + ne(event_queue.donor_id, donorId): void
+    + and(eq(assigned_staff.staff_id, staffId): void
+    + eq(assigned_staff.event_log_id, eventId): void
+    + and(eq(event_queue.donor_id, donorId): void
+    + eq(event_queue.station, station as any): void
+    + deleteQueue(donorTarget: DeleteQueue): void
+    + updateQueueStation(queueTarget: UpdateQueue): void
+    + getActiveQueueByDonorAndEvent(donorId: bigint, eventId: bigint, station: string): void
+    + validateExtractionAccess(staffId: string, eventId: bigint, donorId: bigint): void
+    + eq(assigned_staff.staff_id, staffId): void
+    + getEventQueueWithDonors(eventId: bigint, stationFilter?: string / null): void
+    + verifyAccess(staffId: string, eventId: bigint): void
+    + and(eq(event_log.id, eventId): void
+    + eq(event_queue.event_log_id, eventId): void
+    + eq(event_queue.staff_id, profiles.id): void
+    + and(eq(assigned_staff.event_log_id, eventId): void
+    + isNull(event_queue.staff_id): void
+    + getStaffStatusForEvent(eventId: bigint, staffId: string): void
+}
+
+class ImpProfilesManager {
+    - profileReader: ProfileSessionProvider
+    - profilesModel: ProfilesData
+    + invokeEditProfileEmail(email: string): Promise[ApiResponse]
+    + invokeEditProfileName(name: string): Promise[ApiResponse]
+    + invokeUpdateProfile(data: name: string, email: string, profile_image_url: string / null): void
+    + invokeEditProfileImage(profileImageUrl: string / null): Promise[ApiResponse]
+    + invokeGetProfiles(ids: string[]): Promise[ApiResponse[ReadProfile[]]]
+    + constructor(injectProfilesModel: ProfilesData, injectProfileReader: ProfileSessionProvider): void
+    + invokeGetStaffUsers(): Promise[ApiResponse[StaffUserRow[]]]
+    + invokeGetAllProfiles(): Promise[ApiResponse[ReadProfile[]]]
+}
+
+class ImpAssignedStaffManager {
+    - profileReader: ProfileSessionProvider
+    - staffModel: AssignedStaffData
+    + invokeGetStaff(event_id: bigint): Promise[ApiResponse[ViewAssignedStaff[]]]
+    + constructor(injectStaffModel: AssignedStaffData, injectProfileReader: ProfileSessionProvider): void
+}
+
+class ImpDonorModel {
+    - access: typeof orm
+    + getDonorsByIds(ids: bigint[]): Promise[ApiResponse[ViewDonor[]]]
+    + getSingleDonor(filterer: ViewDonorPartial): Promise[ApiResponse[ViewDonor]]
+    + constructor(injectAccess: typeof orm): void
+}
+
+class ImpLogoutController {
+    - provider: LogoutProvider
+    + invokeLogout(): Promise[ApiResponse]
+    + constructor(injectProvider: LogoutProvider): void
+}
+
+class ImpAssignedStaffModel {
+    - access: typeof orm
+    + getStaff(event_id: bigint): Promise[ApiResponse[ViewAssignedStaff[]]]
+    + constructor(injectAccess: typeof orm): void
+}
+
+class ImpDonorManager {
+    - profileReader: ProfileSessionProvider
+    - donorModel: DonorData
+    + invokeGetDonorsByIds(ids: bigint[]): Promise[ApiResponse[ViewDonor[]]]
+    + invokeGetSingleDonor(filterer: ViewDonorPartial): Promise[ApiResponse[ViewDonor]]
+    + constructor(injectDonorModel: DonorData, injectProfileReader: ProfileSessionProvider): void
+}
+
+' ==============================
+' Relationships
+' ==============================
+
+ImpAnalyticsData ..|> AnalyticsData
+ImpAnalyticsManager ..|> AnalyticsController
+ImpAssignedStaffManager ..|> AssignedStaffController
+ImpAssignedStaffModel ..|> AssignedStaffData
+ImpDonorManager ..|> DonorController
+ImpDonorModel ..|> DonorData
+ImpEventManager ..|> EventController
+ImpEventModel ..|> EventData
+ImpLabStaffManager ..|> LabStaffController
+ImpLabStaffModel ..|> LabStaffData
+ImpLoginController ..|> LoginControl
+ImpLoginProvider ..|> LoginProvider
+ImpLogoutController ..|> LogoutControl
+ImpLogoutProvider ..|> LogoutProvider
+ImpMPManager ..|> MPController
+ImpMPModel ..|> MPData
+ImpProfileGetter ..|> ProfileSessionProvider
+ImpProfilesManager ..|> ProfilesController
+ImpProfilesModel ..|> ProfilesData
+ImpQueueManager ..|> QueueController
+ImpQueueModel ..|> QueueData
+ImpRegisterManager ..|> RegisterController
+ImpRegisterModel ..|> RegisterData
+ImpSuperAdminManager ..|> SuperAdminController
+ImpSuperAdminModel ..|> SuperAdminData
+
+@enduml
