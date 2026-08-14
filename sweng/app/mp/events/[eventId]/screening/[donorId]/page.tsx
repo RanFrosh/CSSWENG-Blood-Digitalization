@@ -1,5 +1,6 @@
 import Header from "@/components/headers/HeaderMP";
 import { retrieveDonor } from "@/app/queue/queue_action";
+import { verifyMPEventAccess } from "@/actions/mp_action";
 import ScreeningClient from "./client";
 
 export default async function ScreeningPage({
@@ -9,6 +10,32 @@ export default async function ScreeningPage({
 }) {
     const resolvedParams = await params;
     const { donorId, eventId } = resolvedParams;
+
+    const eventRes = await verifyMPEventAccess(eventId);
+
+    if (!eventRes.success || !eventRes.data) {
+        return (
+            <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+                <Header />
+                <div className="flex-1 flex items-center justify-center p-[0.35in]">
+                    <div className="bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.5in] text-center shadow-sm max-w-lg w-full">
+                        <p className="text-[24px] font-bold text-red-500 font-['Montserrat']">
+                            Access Denied
+                        </p>
+                        <p className="mt-2 text-[18px] font-semibold text-[#002940]">
+                            {eventRes.message || "Event not found or not assigned to you."}
+                        </p>
+                        <a
+                            href="/mp/events"
+                            className="inline-block mt-[0.3in] px-[18px] py-[10px] rounded-[10px] bg-[#002940] text-white text-[18px] font-semibold cursor-pointer hover:underline"
+                        >
+                            Back to Events
+                        </a>
+                    </div>
+                </div>
+            </main>
+        );
+    }
 
     const result = await retrieveDonor(BigInt(donorId));
 
