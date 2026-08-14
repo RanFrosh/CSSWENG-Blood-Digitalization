@@ -1,4 +1,4 @@
-import { verifyEventAccess } from "@/app/event_records/event_action";
+import { verifyEventAccess } from "@/actions/event_action";
 import RSEventClient from "./client";
 
 export default async function Page({

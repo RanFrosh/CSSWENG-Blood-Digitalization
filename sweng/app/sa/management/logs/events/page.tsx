@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "@/components/HeaderSA";
-import { executeQueryAllEvents } from "@/app/event_records/event_action";
+import Header from "@/components/headers/HeaderSA";
+import { executeQueryAllEvents } from "@/actions/event_action";
 import { ViewEventsWithProvince } from "@/types/event_type";
 
 type TabFilter = "All" | ViewEventsWithProvince["status"];

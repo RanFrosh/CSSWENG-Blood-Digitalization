@@ -1,4 +1,4 @@
-import { ImpDonorModel } from "@/app/donoring/imp_donor_data";
+import { ImpDonorModel } from "@/queries/donor_query";
 
 describe("ImpDonorModel", () => {
     describe("getSingleDonor", () => {

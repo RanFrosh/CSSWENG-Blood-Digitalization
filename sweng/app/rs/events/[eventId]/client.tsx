@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import Header from "@/components/HeaderRS";
+import Header from "@/components/headers/HeaderRS";
 import { ViewEventsWithProvince } from "@/types/event_type";
 
 type Props = {

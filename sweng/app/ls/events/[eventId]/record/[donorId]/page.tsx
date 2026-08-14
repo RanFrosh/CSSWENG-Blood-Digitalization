@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { checkExtractionAccessAction } from "@/actions/ls_action";
 import RecordClient from "./client";
-import Header from "@/components/HeaderLS";
+import Header from "@/components/headers/HeaderLS";
 
 export default async function RecordPage({
     params,

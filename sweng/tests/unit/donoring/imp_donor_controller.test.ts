@@ -1,4 +1,4 @@
-import { ImpDonorManager } from "@/app/donoring/imp_donor_controller";
+import { ImpDonorManager } from "@/controllers/donor_controller";
 import { DonorData } from "@/abstract/donor/donor_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
 import { helpGateKeep } from "@/utils/access/bouncer";

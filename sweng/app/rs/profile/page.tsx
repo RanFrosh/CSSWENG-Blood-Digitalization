@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "@/components/HeaderRS";
+import Header from "@/components/headers/HeaderRS";
 import { fetchRSCurrentUser, editRSCurrentUser } from "@/app/rs/rs_action";
 import { ReadProfile } from "@/types/profile_type";
 

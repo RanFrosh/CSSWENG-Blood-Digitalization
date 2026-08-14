@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import Header from "@/components/HeaderRS";
+import Header from "@/components/headers/HeaderRS";
 import StaffDetails from "@/components/StaffDetails";
 import { ViewEventsWithProvince } from "@/types/event_type";
 import { EventStatusType } from "@/db/enums/event_status";

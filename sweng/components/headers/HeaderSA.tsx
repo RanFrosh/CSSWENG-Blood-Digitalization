@@ -1,0 +1,153 @@
+"use client";
+import { useRouter, usePathname, useParams } from "next/navigation";
+import LogoutButton from "@/components/LogoutButton";
+
+type NavLink = {
+    name: string;
+    path: string;
+    onClick: () => void;
+};
+
+export default function HeaderSA() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const params = useParams();
+
+    const eventId = params?.eventId as string | undefined;
+
+    const goHome = () => {
+        router.push("/sa/management");
+    };
+
+    const goMyProfile = () => {
+        router.push("/sa/profile");
+    };
+
+    const goEventMng = () => {
+        router.push("/sa/management/events");
+    };
+
+    const goEventStaff = () => {
+        if (eventId) router.push(`/sa/management/events/${eventId}/staff`);
+    };
+
+    const goUserMng = () => {
+        router.push("/sa/management/users");
+    };
+
+    const goEventLog = () => {
+        router.push("/sa/management/logs/events");
+    };
+
+    const goRequests = () => {
+        router.push("/sa/management/requests");
+    };
+
+    const navLinks: NavLink[] = eventId
+        ? [
+              {
+                  name: "Home",
+                  path: "/sa/management",
+                  onClick: goHome,
+              },
+              {
+                  name: "Profile",
+                  path: "/sa/profile",
+                  onClick: goMyProfile,
+              },
+              {
+                  name: "Event Management",
+                  path: "/sa/management/events",
+                  onClick: goEventMng,
+              },
+              {
+                  name: "Event Staff Management",
+                  path: `/sa/management/events/${eventId}/staff`,
+                  onClick: goEventStaff,
+              },
+              {
+                  name: "User Management",
+                  path: "/sa/management/users",
+                  onClick: goUserMng,
+              },
+              {
+                  name: "Event Logs",
+                  path: "/sa/management/logs/events",
+                  onClick: goEventLog,
+              },
+              {
+                  name: "Requests",
+                  path: "/sa/management/requests",
+                  onClick: goRequests,
+              },
+          ]
+        : [
+              {
+                  name: "Home",
+                  path: "/sa/management",
+                  onClick: goHome,
+              },
+              {
+                  name: "Profile",
+                  path: "/sa/profile",
+                  onClick: goMyProfile,
+              },
+              {
+                  name: "Event Management",
+                  path: "/sa/management/events",
+                  onClick: goEventMng,
+              },
+              {
+                  name: "User Management",
+                  path: "/sa/management/users",
+                  onClick: goUserMng,
+              },
+              {
+                  name: "Event Logs",
+                  path: "/sa/management/logs/events",
+                  onClick: goEventLog,
+              },
+              {
+                  name: "Requests",
+                  path: "/sa/management/requests",
+                  onClick: goRequests,
+              },
+          ];
+
+    const isActiveLink = (path: string) => {
+        return pathname === path;
+    };
+
+    return (
+        <div className="h-[0.75in] border-b-[5px] bg-[#fd5448] border-[#fd5448]">
+            <div className="p-[0.125in] gap-[0.5in] flex flex-row items-center justify-between">
+                <div className="flex flex-row items-center gap-[0.5in]">
+                    <img
+                        className="h-[0.5in] w-auto cursor-pointer pl-[0.25in]"
+                        src="/images/redbank_onred.png"
+                        onClick={goHome}
+                        alt="RedBank Logo"
+                    />
+
+                    <div className="text-[18px] text-white flex flex-row items-center gap-[0.25in] font-[Montserrat]">
+                        {navLinks.map((link) => (
+                            <p
+                                key={link.path}
+                                className={`cursor-pointer hover:text-[#1b4054] ${
+                                    isActiveLink(link.path)
+                                        ? "font-bold"
+                                        : "font-normal"
+                                }`}
+                                onClick={link.onClick}
+                            >
+                                {link.name}
+                            </p>
+                        ))}
+                    </div>
+                </div>
+
+                <LogoutButton />
+            </div>
+        </div>
+    );
+}

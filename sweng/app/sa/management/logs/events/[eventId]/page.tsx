@@ -10,11 +10,11 @@ import {
     ChevronRight,
 } from "lucide-react";
 
-import Header from "@/components/HeaderSA";
-import { executeQueryEventRecords } from "@/app/event_records/event_action";
-import { ViewEventRecords } from "@/types/event_type";
+import Header from "@/components/headers/HeaderSA";
+import { executeQueryEventRecords } from "@/actions/event_action";
 import { AccessType } from "@/db/enums/access_level";
 import { EventRecordAction } from "@/db/enums/event_action";
+import EventRecordListener from "@/components/listeners/EventRecordListener";
 
 type OnsiteLog = {
     id: string;
@@ -291,6 +291,9 @@ export default function SAOnsiteLogsPage() {
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
+
+            <EventRecordListener eventId={eventId} />
+
             <Header />
 
             <div className="flex-1 bg-[#f9fdff] p-[0.35in]">

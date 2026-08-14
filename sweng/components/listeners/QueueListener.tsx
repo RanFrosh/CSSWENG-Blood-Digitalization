@@ -25,7 +25,7 @@ export default function QueueListener({ eventId }: { eventId: string }) {
                     filter: `event_log_id=eq.${eventId}`
                 },
                 (payload) => {
-                    console.log("New donor entered the queue!", payload);
+                    console.log("Event queue updated", payload);
                     router.refresh(); 
                 }
             )

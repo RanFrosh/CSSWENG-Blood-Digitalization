@@ -3,7 +3,7 @@ import { CreateCorrections, CreateEventRecords, CreateEvents, UpdateEvents, View
 import { Sorter } from "@/types/sort_type";
 import { EventController, EventData } from "@/abstract/events/event_abstract";
 import { ProfileSessionProvider } from "@/abstract/auth/query_abstract";
-import { helpGateKeep } from "../../utils/access/bouncer";
+import { helpGateKeep } from "@/utils/access/bouncer";
 import { ViewAssignedStaffFilter } from "@/types/assigned_staff_type";
 
 export class ImpEventManager implements EventController {

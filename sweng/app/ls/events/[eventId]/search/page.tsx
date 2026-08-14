@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderLS";
+import Header from "@/components/headers/HeaderLS";
 import DonorSearchClient from "./client";
 import { getEventDonorsAction } from "@/actions/ls_action";
 

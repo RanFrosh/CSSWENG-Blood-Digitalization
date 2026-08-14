@@ -9,14 +9,14 @@ import { ImpQueueManager } from "@/app/queue/imp_queue_controller";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { serverSupa } from "@/db/supaserver";
 import { adminSupa } from "@/db/supaadmin";
-import { bigintToStr } from "../../utils/serialize/serial";
+import { bigintToStr } from "@/utils/serialize/serial";
 import { StaffWithStatus } from "@/types/queue_type";
-import { ImpDonorModel } from "../donoring/imp_donor_data";
-import { ImpDonorManager } from "../donoring/imp_donor_controller";
+import { ImpDonorModel } from "@/queries/donor_query";
+import { ImpDonorManager } from "@/controllers/donor_controller";
 import { ImpProfilesManager } from "../profiles/imp_profiles_controller";
 import { ImpProfilesModel } from "../profiles/imp_profiles_data";
-import { ImpAssignedStaffManager } from "../assigned_staff/imp_assigned_staff_controller";
-import { ImpAssignedStaffModel } from "../assigned_staff/imp_assigned_staff_data";
+import { ImpAssignedStaffManager } from "@/controllers/assigned_staff_controller";
+import { ImpAssignedStaffModel } from "@/queries/assigned_staff_query";
 
 export async function retrieveDonor(donor_info: bigint): Promise<ApiResponse<ViewDonor>> {
     const database = await serverSupa();

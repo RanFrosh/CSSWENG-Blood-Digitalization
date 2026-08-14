@@ -1,4 +1,4 @@
-import { ImpAssignedStaffModel } from "@/app/assigned_staff/imp_assigned_staff_data";
+import { ImpAssignedStaffModel } from "@/queries/assigned_staff_query";
 
 describe("ImpAssignedStaffModel", () => {
     describe("getStaff", () => {

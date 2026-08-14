@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Header from "@/components/HeaderLS";
+import Header from "@/components/headers/HeaderLS";
 import { retrieveDonor } from "@/actions/ls_action";
 import { ViewDonor } from "@/types/donor_type";
 import DonorDetails from "@/components/DonorDetails";

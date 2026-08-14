@@ -4,12 +4,12 @@ import { ApiResponse } from "@/types/api_res_type";
 import { adminSupa } from "@/db/supaadmin";
 import { serverSupa } from "@/db/supaserver";
 import { ImpProfileGetter } from "@/queries/profile_query";
-import { ImpRegisterModel } from "./imp_register_data";
-import { ImpRegisterManager } from "./imp_register_controller";
+import { ImpRegisterModel } from "@/queries/register_query";
+import { ImpRegisterManager } from "@/controllers/register_controller";
 import { AccessType } from "@/db/enums/access_level";
 import { orm } from "@/db/drizzle";
-import { ImpEventModel } from "../event_records/imp_event_data";
-import { ImpEventManager } from "../event_records/imp_event_controller";
+import { ImpEventModel } from "../queries/event_query";
+import { ImpEventManager } from "@/controllers/event_controller";
 
 export async function prepareStaff(email: string, role: AccessType): Promise<ApiResponse<string | null>> {
     const database = await serverSupa();

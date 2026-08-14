@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Header from "@/components/HeaderRBD";
+import Header from "@/components/headers/HeaderRBD";
 import { fetchEventAnalytics } from "@/actions/rbd_action";
 import { EventDetailsPanel } from "@/components/EventDetailsPanel";
 

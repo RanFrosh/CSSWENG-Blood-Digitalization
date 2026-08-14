@@ -1,6 +1,6 @@
-import Header from "@/components/HeaderMP";
+import Header from "@/components/headers/HeaderMP";
 import StaffDetails from "@/components/StaffDetails";
-import { executeEventQueryStaff } from "../../event_records/event_action";
+import { executeEventQueryStaff } from "../../../actions/event_action";
 import MPEventsClient from "./client";
 import { EventStatusType } from "@/db/enums/event_status";
 

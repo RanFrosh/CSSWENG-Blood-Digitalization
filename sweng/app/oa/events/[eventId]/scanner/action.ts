@@ -6,7 +6,7 @@ import { orm } from "@/db/drizzle";
 import { donor } from "@/db/schemas/donor";
 import { event_log } from "@/db/schemas/event_log";
 import { donor_to_event } from "@/db/schemas/donor_to_event";
-import { executeLogEvent } from "@/app/event_records/event_action";
+import { executeLogEvent } from "@/actions/event_action";
 import { serverSupa } from "@/db/supaserver";
 import { ImpQueueModel } from "@/app/queue/imp_queue_data";
 import { ImpQueueManager } from "@/app/queue/imp_queue_controller";

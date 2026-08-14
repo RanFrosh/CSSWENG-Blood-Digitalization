@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { fetchDonorAnalytics } from "@/actions/rbd_action";
-import Header from "@/components/HeaderRBD";
+import Header from "@/components/headers/HeaderRBD";
 import DonorAnalyticsClient from "./client";
 
 export default async function DonorAnalyticsDetailsPage({

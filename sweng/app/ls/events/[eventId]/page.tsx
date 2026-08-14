@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderLS";
+import Header from "@/components/headers/HeaderLS";
 import { verifyLabStaffEventAccess, getLabStaffQueue, getStaffStatus } from "@/actions/ls_action";
 import LSEventClient from "./client";
 

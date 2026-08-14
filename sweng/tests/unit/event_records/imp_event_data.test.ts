@@ -2,7 +2,7 @@
 // the model builds and runs DB queries using the injected ORM. The tests mock the ORM to verify that the model behaves correctly.
 // we mock the ORM so no real database connection is needed.
 
-import { ImpEventModel } from "@/app/event_records/imp_event_data";
+import { ImpEventModel } from "@/queries/event_query";
 import { CreateEvents, CreateCorrections, ViewEventFilters, ViewCorrectionFilters, ViewEvents, ViewCorrections } from "@/types/event_type";
 import { Sorter } from "@/types/sort_type";
 

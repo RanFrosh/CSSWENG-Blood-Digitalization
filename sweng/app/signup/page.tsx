@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { finishRegistration, establishInviteSession, hasInviteSession } from "../register/register_action";
+import { finishRegistration, establishInviteSession, hasInviteSession } from "../../actions/register_action";
 import { useEffect } from "react";
 
 export default function SignUpPage() {    

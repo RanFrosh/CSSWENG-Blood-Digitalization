@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Header from "@/components/HeaderRBD";
+import Header from "@/components/headers/HeaderRBD";
 import StaffDetails from "@/components/StaffDetails";
 
 export default async function AnalyticsPage() {

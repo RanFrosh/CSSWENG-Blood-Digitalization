@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Header from "@/components/HeaderSA";
-import { executeQueryAllEvents, executeCreateEvent, executeDeleteEvent, executeGetAllCities, executeUpdateEvent } from "@/app/event_records/event_action";
+import Header from "@/components/headers/HeaderSA";
+import { executeQueryAllEvents, executeCreateEvent, executeDeleteEvent, executeGetAllCities, executeUpdateEvent } from "@/actions/event_action";
 import { ViewEventsWithProvince } from "@/types/event_type";
 
 const formatEventId = (event: ViewEventsWithProvince): string => {
