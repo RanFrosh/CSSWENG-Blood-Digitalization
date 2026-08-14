@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "@/components/HeaderSA";
+import Header from "@/components/headers/HeaderSA";
 import { fetchSACurrentUser, editSACurrentUser } from "@/actions/sa_action";
 import { ReadProfile } from "@/types/profile_type";
 

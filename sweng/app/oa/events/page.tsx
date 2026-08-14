@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { EventStatusType } from "@/db/enums/event_status";
 import { ViewEventsWithProvince } from "@/types/event_type";
 import { ReadProfile } from "@/types/profile_type";
-import Header from "@/components/HeaderOA";
+import Header from "@/components/headers/HeaderOA";
 import OAEventsClient from "./client";
 import { executeEventQueryStaff } from "../../../actions/event_action";
 import { fetchOACurrentUser } from "../../../actions/oa_action";

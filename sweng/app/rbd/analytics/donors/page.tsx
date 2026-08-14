@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderRBD";
+import Header from "@/components/headers/HeaderRBD";
 import { fetchFilteredDonors } from "@/actions/rbd_action";
 import DonorAnalyticsClient from "./client";
 

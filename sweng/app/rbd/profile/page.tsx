@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderRBD";
+import Header from "@/components/headers/HeaderRBD";
 import StaffProfile from "@/components/StaffProfile";
 import { getProfileAction } from "@/actions/profile_action";
 

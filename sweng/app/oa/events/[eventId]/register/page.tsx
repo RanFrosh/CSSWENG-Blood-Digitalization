@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderOA";
+import Header from "@/components/headers/HeaderOA";
 import { executeGetAllCities } from "@/actions/event_action";
 import RegistrationForm from "./registration-form";
 import { checkAuthentication } from "../../action";

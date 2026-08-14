@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderLS";
+import Header from "@/components/headers/HeaderLS";
 import EditPageClient from "./client";
 import { getDonorEventRecord } from "@/actions/ls_action"; 
 

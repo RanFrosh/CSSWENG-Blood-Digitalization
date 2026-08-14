@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Header from "@/components/HeaderLanding";
+import Header from "@/components/headers/HeaderLanding";
 import { executeLogin } from "../login/login_action";
 
 export type LandingEvent = {

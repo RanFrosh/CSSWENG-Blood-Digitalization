@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import Header from "@/components/HeaderOA";
+import Header from "@/components/headers/HeaderOA";
 
 import { ViewEventsWithProvince } from "@/types/event_type";
 

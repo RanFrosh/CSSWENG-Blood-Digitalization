@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "@/components/HeaderMP";
+import Header from "@/components/headers/HeaderMP";
 import { fetchMPCurrentUser, editMPCurrentUser } from "@/actions/mp_action";
 import { ReadProfile } from "@/types/profile_type";
 

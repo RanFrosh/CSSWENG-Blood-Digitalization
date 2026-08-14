@@ -2,12 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Header from "@/components/HeaderLS";
+import Header from "@/components/headers/HeaderLS";
 import { EventDetailsPanel } from "@/components/EventDetailsPanel";
 import { ViewEvents } from "@/types/event_type";
 import { acceptDonor } from "@/actions/ls_action";
 import { QueueEntryWithDonor, StaffWithStatus } from "@/types/queue_type";
-import QueueListener from "@/components/QueueListener";
+import QueueListener from "@/components/listeners/QueueListener";
 
 interface LSEventClientProps {
     eventId: string;

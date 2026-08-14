@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderMP";
+import Header from "@/components/headers/HeaderMP";
 import { retrieveDonor } from "@/app/queue/queue_action";
 import ScreeningClient from "./client";
 

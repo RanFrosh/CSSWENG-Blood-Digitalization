@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Html5Qrcode } from "html5-qrcode";
 
-import Header from "@/components/HeaderOA";
+import Header from "@/components/headers/HeaderOA";
 
 import { verifyDonorAction } from "@/utils/donor_verification";
 import { checkInDonorAction } from "@/app/oa/events/[eventId]/scanner/action";

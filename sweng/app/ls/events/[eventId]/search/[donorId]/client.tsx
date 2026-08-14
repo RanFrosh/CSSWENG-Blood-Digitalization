@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Header from "@/components/HeaderLS";
+import Header from "@/components/headers/HeaderLS";
 import { submitEditRequestAction } from "@/actions/ls_action";
 
 type RealDonorRecord = {

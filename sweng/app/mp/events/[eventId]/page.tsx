@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderMP";
+import Header from "@/components/headers/HeaderMP";
 import { getMPQueue, verifyMPEventAccess, getStaffStatus } from "@/actions/mp_action";
 import MPEventClient from "./client";
 

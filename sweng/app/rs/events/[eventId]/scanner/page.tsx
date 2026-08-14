@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Html5Qrcode } from "html5-qrcode";
 
-import Header from "@/components/HeaderRS";
+import Header from "@/components/headers/HeaderRS";
 
 import { verifyDonorAction } from "@/utils/donor_verification";
 import { claimPerkAction } from "@/app/rs/events/[eventId]/scanner/action";

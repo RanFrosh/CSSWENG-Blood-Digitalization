@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderSA";
+import Header from "@/components/headers/HeaderSA";
 import RequestsClient from "./client";
 import { redirect } from "next/navigation";
 import { getEditRequestsAction } from "@/actions/sa_action";

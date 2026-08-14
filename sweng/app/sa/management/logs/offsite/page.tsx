@@ -9,7 +9,7 @@ import {
     ListFilter,
 } from "lucide-react";
 
-import Header from "@/components/HeaderSA";
+import Header from "@/components/headers/HeaderSA";
 
 type LogCategory = "Donor Registration" | "Staff Admin Registration" | "Event Update";
 type LogAction = "Created" | "Updated" | "Approved" | "Rejected" | "Deleted";

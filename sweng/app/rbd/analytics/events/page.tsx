@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderRBD";
+import Header from "@/components/headers/HeaderRBD";
 import { fetchFilteredEvents } from "@/actions/rbd_action";
 import SearchEventsClient from "./client";
 

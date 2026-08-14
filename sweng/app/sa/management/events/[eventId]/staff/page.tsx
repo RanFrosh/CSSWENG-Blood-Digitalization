@@ -1,4 +1,4 @@
-import Header from "@/components/HeaderSA";
+import Header from "@/components/headers/HeaderSA";
 import EventStaffClient from "./client";
 import { getEventSummaryAction, getEventStaffAction } from "@/actions/sa_action"
 
