@@ -1,7 +1,7 @@
 import Header from "@/components/headers/HeaderOA";
 import { executeGetAllCities } from "@/actions/event_action";
 import RegistrationForm from "./registration-form";
-import { checkAuthentication } from "../../action";
+import { authenticate } from "@/utils/access/authenticate";
 
 export default async function RegisterPage({
     params,
@@ -9,7 +9,7 @@ export default async function RegisterPage({
     params: Promise<{ eventId: string }>;
 }) {
 
-    const auth = await checkAuthentication();
+    const auth = await authenticate('access_oa_page', async () => ({ success: true, message: "Authenticated" }));
 
     if (!auth.success) {
         return (
