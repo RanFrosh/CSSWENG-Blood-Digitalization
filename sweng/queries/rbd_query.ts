@@ -497,8 +497,9 @@ export class ImpAnalyticsData implements AnalyticsData {
 
         // Blood Bag Metrics
         const bloodBagMetricsRes = await orm.select({
-            totalBags: sql<number>`count(${blood_bag.id})`,
-            totalML: sql<number>`sum(${blood_bag.volume_ml})`
+            totalAttempts: sql<number>`count(${blood_bag.id})`,
+            totalSuccessful: sql<number>`COALESCE(sum(CASE WHEN ${blood_bag.outcome} = 'Successful' THEN 1 ELSE 0 END), 0)`,
+            totalML: sql<number>`COALESCE(sum(CASE WHEN ${blood_bag.outcome} = 'Successful' THEN ${blood_bag.volume_ml} ELSE 0 END), 0)`
         })
         .from(blood_bag)
         .innerJoin(event_log, eq(blood_bag.event_id, event_log.id))
@@ -514,7 +515,12 @@ export class ImpAnalyticsData implements AnalyticsData {
         .from(blood_bag)
         .innerJoin(event_log, eq(blood_bag.event_id, event_log.id))
         .leftJoin(city, eq(event_log.city_id, city.id))
-        .where(eventWhereClause)
+        .where(
+            and(
+                eq(blood_bag.outcome, 'Successful'),
+                eventWhereClause
+            )
+        )
         .groupBy(blood_bag.blood_type);
 
         const campaignsRes = await orm.select({
@@ -528,7 +534,10 @@ export class ImpAnalyticsData implements AnalyticsData {
         })
         .from(event_log)
         .leftJoin(city, eq(event_log.city_id, city.id))
-        .leftJoin(blood_bag, eq(event_log.id, blood_bag.event_id))
+        .leftJoin(blood_bag, and(
+            eq(event_log.id, blood_bag.event_id),
+            eq(blood_bag.outcome, 'Successful')
+        ))
         .where(eventWhereClause)
         .groupBy(event_log.id, city.name)
         .orderBy(orderByClause);
@@ -545,8 +554,8 @@ export class ImpAnalyticsData implements AnalyticsData {
             genders: genderRes,
             metrics: {
                 totalTarget: Number(eventMetricsRes[0]?.totalTarget || 0),
-                totalExtractions: Number(bloodBagMetricsRes[0]?.totalBags || 0), 
-                totalBags: Number(bloodBagMetricsRes[0]?.totalBags || 0),
+                totalExtractions: Number(bloodBagMetricsRes[0]?.totalAttempts || 0),
+                totalBags: Number(bloodBagMetricsRes[0]?.totalSuccessful || 0), 
                 totalML: Number(bloodBagMetricsRes[0]?.totalML || 0)
             },
             campaigns: campaignsRes,
