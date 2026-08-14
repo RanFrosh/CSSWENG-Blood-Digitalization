@@ -114,7 +114,7 @@ export async function executeCreateEvent(data: {
         zip_code: null,
         city_id: cityRes.data,
         event_date: data.eventDate,
-        start_time: "10:00:00",   
+        start_time: "9:59:50",   
         end_time: "16:00:00",    
         status: computeEventStatus(data.eventDate),
         visitors: BigInt(0),
