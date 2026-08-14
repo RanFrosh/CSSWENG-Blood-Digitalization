@@ -6,7 +6,7 @@ export default async function MedProfLayout({
     children: React.ReactNode;
 }) {
      return (
-        <RoleChecker requiredRole="director" displayRoleName="Director">
+        <RoleChecker requiredRole="med_prof" displayRoleName="Med Prof">
             {children}
         </RoleChecker>
     );

@@ -13,40 +13,55 @@ interface ScreeningClientProps {
 }
 
 export default function ScreeningClient({ donor, eventId, donorId }: ScreeningClientProps) {
+
     const router = useRouter();
     const [eligibility, setEligibility] = useState<"fit" | "unfit" | null>(null);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [toast, setToast] = useState({ visible: false, message: "", type: "error" });
 
-    const screenDonor = async () => {
+    const showToast = (message: string, type: "success" | "error" = "error") => {
+        setToast({ visible: true, message, type });
+        setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000);
+    };
+
+    const handleInitialSubmit = () => {
         if (!eligibility) {
-            alert("Please select FIT or UNFIT before submitting.");
+            showToast("Please select FIT or UNFIT before submitting.", "error");
             return;
         }
+        setIsConfirmModalOpen(true);
+    };
+
+    const executeScreening = async () => {
+        setIsProcessing(true);
         
-        const isConfirmed = confirm(
-            `Donor ID: ${donor.id}\nName: ${donor.first_name} ${donor.last_name}\n\nConfirm screening status ${eligibility}?`
-        );
-
-        if (isConfirmed) {
+        try {
             if (eligibility === "fit") {
-
                 const res = await completeScreening(BigInt(donorId), BigInt(eventId));
-
                 if (!res.success) {
-                    alert(res.message);
+                    showToast(res.message, "error");
+                    setIsProcessing(false);
+                    setIsConfirmModalOpen(false);
                 } else {
-                    alert(`Donor screened successfully!\nPlease direct them to the lab area.`);
-                    router.push(`/mp/events/${eventId}`);
+                    showToast("Donor screened successfully!", "success");
+                    setTimeout(() => router.push(`/mp/events/${eventId}`), 1000);
                 }
             } else if (eligibility === "unfit") {
-
                 const res = await failScreening(BigInt(donorId), BigInt(eventId));
                 if (!res.success) {
-                    alert(res.message);
+                    showToast(res.message, "error");
+                    setIsProcessing(false);
+                    setIsConfirmModalOpen(false);
                 } else {
-                    alert("Donor marked as unfit.");
-                    router.push(`/mp/events/${eventId}`);
+                    showToast("Donor marked as unfit.", "success");
+                    setTimeout(() => router.push(`/mp/events/${eventId}`), 1000);
                 }
-            } 
+            }
+        } catch (error) {
+            showToast("An unexpected error occurred.", "error");
+            setIsProcessing(false);
+            setIsConfirmModalOpen(false);
         }
     };
 
@@ -181,7 +196,7 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
                     <div className="mt-[0.35in] flex justify-end">
                         <button
                             type="button"
-                            onClick={screenDonor}
+                            onClick={handleInitialSubmit}
                             className="min-w-[1.5in] bg-[#002940] text-white px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:bg-[#001f30] transition-colors"
                         >
                             Submit
@@ -189,6 +204,75 @@ export default function ScreeningClient({ donor, eventId, donorId }: ScreeningCl
                     </div>
                 </section>
             </form>
+
+            {/* Upgraded Confirmation Modal */}
+            {isConfirmModalOpen && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                        
+                        {/* Header */}
+                        <div className="bg-[#002940] p-6 text-white text-center">
+                            <h3 className="text-3xl font-bold font-['Montserrat']">Confirm Screening</h3>
+                            <p className="text-blue-200 mt-2 font-medium">Verify details before proceeding</p>
+                        </div>
+                        
+                        <div className="p-6">
+                            {/* Data Grid */}
+                            <div className="mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200 grid grid-cols-2 gap-y-4 gap-x-2">
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-semibold">Donor ID</p>
+                                    <p className="font-bold text-[18px] text-[#002940]">{donor.id}</p>
+                                </div>
+
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase font-semibold">Screening Status</p>
+                                    <p className={`font-bold text-[18px] uppercase ${eligibility === "fit" ? "text-green-600" : "text-[#fd5448]"}`}>
+                                        {eligibility}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {/* Buttons block */}
+                            <div className="flex gap-4">
+                                <button 
+                                    disabled={isProcessing}
+                                    onClick={() => setIsConfirmModalOpen(false)}
+                                    className="flex-1 px-6 py-4 rounded-xl border-2 border-slate-200 text-lg font-bold text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50 cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    disabled={isProcessing}
+                                    onClick={executeScreening}
+                                    className="flex-1 px-6 py-4 rounded-xl bg-[#002940] text-white text-lg font-bold hover:bg-[#001f30] transition-colors shadow-md active:scale-[0.98] disabled:opacity-50 flex justify-center items-center cursor-pointer"
+                                >
+                                    {isProcessing ? "Processing..." : "Confirm & Submit"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Custom Toast Notification */}
+            {toast.visible && (
+                <div 
+                    className={`fixed bottom-[0.35in] left-1/2 -translate-x-1/2 px-[24px] py-[12px] rounded-full shadow-lg text-white font-semibold font-['Montserrat'] flex items-center gap-[10px] z-[100] animate-in fade-in slide-in-from-bottom-5 duration-300 ${
+                        toast.type === "error" ? "bg-[#fd5448]" : "bg-[#002940]"
+                    }`}
+                >
+                    {toast.type === "error" ? (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    ) : (
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                    )}
+                    <span className="text-[16px]">{toast.message}</span>
+                </div>
+            )}
         </div>
     );
 }

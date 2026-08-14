@@ -7,6 +7,7 @@ import { EventDetailsPanel } from "@/components/EventDetailsPanel";
 import { ViewEvents } from "@/types/event_type";
 import { acceptDonor } from "@/actions/ls_action";
 import { QueueEntryWithDonor, StaffWithStatus } from "@/types/queue_type";
+import QueueListener from "@/components/QueueListener";
 
 interface MPEventClientProps {
     eventId: string;
@@ -35,8 +36,15 @@ export default function MPEventClient({
     const latestAddition = initialWaitlist.length > 0 ? initialWaitlist[initialWaitlist.length - 1] : null;
     const nextDonor = initialWaitlist.length > 0 ? initialWaitlist[0] : null;
 
+    const [toast, setToast] = useState({ visible: false, message: "", type: "error" });
+
     const goBack = () => {
         router.push("/mp/events");
+    };
+
+    const showToast = (message: string, type: "success" | "error" = "error") => {
+        setToast({ visible: true, message, type });
+        setTimeout(() => setToast((prev) => ({ ...prev, visible: false })), 3000);
     };
 
     const handleConfirm = async () => {
@@ -47,9 +55,14 @@ export default function MPEventClient({
         const res = await acceptDonor(nextDonor.id.toString(), eventId);
         
         if (res?.success) {
-            router.push(`/mp/events/${eventId}/screening/${nextDonor.donor_id}`);
-        } else {
-            alert(res?.message); 
+            showToast("Donor accepted successfully!", "success");
+            setTimeout(() => {
+                router.push(`/mp/events/${eventId}/screening/${nextDonor.donor_id}`);
+            }, 1000);
+        } 
+        
+        else {
+            showToast(res?.message || "Failed to accept donor.", "error");
             setIsProcessing(false);
             setShowAcceptModal(false);
             router.refresh();
@@ -91,7 +104,11 @@ export default function MPEventClient({
 
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black relative">
+
+            <QueueListener eventId={eventId} />
+
             <Header />
+
             <div className="flex-1 p-[0.35in]">
                 {/* Event Details Panel */}
                 <EventDetailsPanel event={selectedEvent} />
