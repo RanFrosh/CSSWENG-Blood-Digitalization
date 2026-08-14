@@ -12,6 +12,7 @@ import { city } from "@/db/schemas/city";
 import { edit_requests } from "@/db/schemas/event_request";
 import { ViewDonorPartial } from "@/types/donor_type";
 import { SubmitDonationPayload } from "@/abstract/ls/ls_abstract";
+import { revalidatePath } from "next/cache";
 
 export type DonorFilters = {
     search?: string;
@@ -334,6 +335,9 @@ export class ImpLabStaffModel implements LabStaffData {
 
         try {
 
+            const strictDonorId = BigInt(payload.donor_id);
+            const strictEventId = BigInt(payload.event_id);
+
             await orm.transaction(async (tx: any) => {
                 
                 const [newBag] = await tx.insert(blood_bag).values({
@@ -417,6 +421,9 @@ export class ImpLabStaffModel implements LabStaffData {
                         });
                 }
             });
+
+            revalidatePath(`/la/events/${payload.event_id}`);
+            revalidatePath(`/la/events/${payload.event_id}/search/${payload.donor_id}`);
 
             return { success: true, message: "Donation record saved successfully." };
         } catch (err: any) {
@@ -560,7 +567,7 @@ export class ImpLabStaffModel implements LabStaffData {
                 })
                 .from(donor_to_event)
                 .innerJoin(donor, eq(donor_to_event.donor_id, donor.id))
-                .innerJoin(
+                .leftJoin(
                     blood_bag, 
                     and(
                         eq(blood_bag.donor_id, donor.id),
@@ -574,6 +581,8 @@ export class ImpLabStaffModel implements LabStaffData {
                     )
                 )
                 .limit(1);
+
+                console.log("X-RAY RESULT:", res);
 
             if (!res.length) return { success: false, message: "Record not found or no blood bag assigned yet." };
 
