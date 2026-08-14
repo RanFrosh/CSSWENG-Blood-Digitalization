@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Header from "@/components/HeaderSA";
-import { prepareStaff, deleteStaffUser, staffToggler } from "@/app/register/register_action";
+import { prepareStaff, deleteStaffUser, staffToggler } from "@/actions/register_action";
 import { AccessType } from "@/db/enums/access_level";
 import { StaffUser, StaffStatus } from "@/types/staff_type";
 import { getUsers } from "@/actions/users_action";
