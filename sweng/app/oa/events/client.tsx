@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/headers/HeaderOA";
 import StaffDetails from "@/components/StaffDetails";
@@ -23,6 +24,12 @@ export default function OAEventsClient({
     onTabChange,
 }: Props) {
     const router = useRouter();
+
+    const [eventSearch, setEventSearch] = useState("");
+    const [eventSort, setEventSort] = useState<"newest" | "oldest">("newest");
+    const [eventPage, setEventPage] = useState(1);
+
+    const resultsPerPage = 5;
 
     const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
 
@@ -59,6 +66,39 @@ export default function OAEventsClient({
         );
     };
 
+    const filteredEvents = [...assignedEvents]
+    .filter((event) => {
+        if (eventSearch.trim() === "") return true;
+
+        const query = eventSearch.trim().toLowerCase();
+
+        return (
+            event.name.toLowerCase().includes(query) ||
+            event.partner.toLowerCase().includes(query) ||
+            event.city.toLowerCase().includes(query) ||
+            event.province.toLowerCase().includes(query)
+        );
+    })
+    .sort((a, b) => {
+        const dateA = new Date(a.event_date).getTime();
+        const dateB = new Date(b.event_date).getTime();
+
+        return eventSort === "newest"
+            ? dateB - dateA
+            : dateA - dateB;
+    });
+
+    const totalPages = Math.max(
+        1,
+        Math.ceil(filteredEvents.length / resultsPerPage)
+    );
+
+    const safePage = Math.min(eventPage, totalPages);
+
+    const eventsToDisplay = filteredEvents.slice(
+        (safePage - 1) * resultsPerPage,
+        safePage * resultsPerPage
+    );
     return (
         <main className="flex flex-col min-h-screen bg-[#f9fdff] text-black">
             <Header />
@@ -80,19 +120,75 @@ export default function OAEventsClient({
 
                         <div className="flex flex-row flex-wrap gap-[10px] items-center">
                             {tabs.map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => onTabChange(tab)}
-                                    className={getTab(tab)}
-                                    >
-                                    {tab}
-                                </button>
-                            ))}
+                            <button
+                                key={tab}
+                                onClick={() => {
+                                    onTabChange(tab);
+                                    setEventSearch("");
+                                    setEventSort("newest");
+                                    setEventPage(1);
+                                }}
+                                className={getTab(tab)}
+                            >
+                                {tab}
+                            </button>
+                        ))}
                         </div>
                     </div>
 
+                    <div className="mt-[0.25in] border-2 border-[#c0cad0] rounded-[14px] p-[0.2in] bg-[#f9fdff]">
+                        <h3 className="text-[20px] font-['Montserrat'] font-bold text-[#002940] mb-[0.15in]">
+                            Filters
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-[0.2in]">
+                            <div>
+                                <label className="block text-[14px] font-semibold text-[#002940] mb-[6px]">
+                                    Search Events
+                                </label>
+
+                                <input
+                                    type="text"
+                                    value={eventSearch}
+                                    onChange={(e) => {
+                                        setEventSearch(e.target.value);
+                                        setEventPage(1);
+                                    }}
+                                    placeholder="Input event name, partner, or location"
+                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[16px] py-[10px] text-[16px] outline-none bg-white focus:border-[#002940]"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-[14px] font-semibold text-[#002940] mb-[6px]">
+                                    Sort by Date
+                                </label>
+
+                                <select
+                                    value={eventSort}
+                                    onChange={(e) => {
+                                        setEventSort(
+                                            e.target.value as "newest" | "oldest"
+                                        );
+                                        setEventPage(1);
+                                    }}
+                                    className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[16px] py-[10px] text-[16px] outline-none bg-white cursor-pointer focus:border-[#002940]"
+                                >
+                                    <option value="newest">Newest First</option>
+                                    <option value="oldest">Oldest First</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mt-[0.15in]">
+                        <p className="text-[16px] text-[#002940]">
+                            Showing {filteredEvents.length} result/s
+                        </p>
+                    </div>
+
                     <div className="mt-[0.35in] flex flex-col gap-[0.25in]">
-                        {assignedEvents.map((event) => (
+                        {eventsToDisplay.map((event) => (
                             <div
                                 key={event.id}
                                 className="bg-white border-2 border-[#002940] rounded-[16px] overflow-hidden shadow-sm"
@@ -145,11 +241,49 @@ export default function OAEventsClient({
                             </div>
                         ))}
 
-                        {assignedEvents.length === 0 && (
+                        {filteredEvents.length === 0 && (
                             <div className="p-10 flex flex-col items-center justify-center text-center border-2 border-dashed border-[#c0cad0] rounded-[16px] bg-[#f9fdff]">
                                 <p className="text-[20px] font-semibold text-[#002940] mb-2">No events found</p>
                             </div>
                         )}
+                    </div>
+
+                    <div className="mt-5 flex flex-row items-center justify-between gap-5">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setEventPage((prev) => Math.max(1, prev - 1))
+                            }
+                            disabled={safePage === 1}
+                            className={`px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[18px] font-semibold transition ${
+                                safePage === 1
+                                    ? "text-[#c0cad0] cursor-not-allowed"
+                                    : "text-[#002940] cursor-pointer hover:underline hover:text-[#fd5448]"
+                            }`}
+                        >
+                            Previous
+                        </button>
+
+                        <p className="text-[18px] text-[#002940] font-semibold">
+                            Page {safePage} of {totalPages}
+                        </p>
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setEventPage((prev) =>
+                                    Math.min(totalPages, prev + 1)
+                                )
+                            }
+                            disabled={safePage === totalPages}
+                            className={`px-[5px] py-[5px] w-[1in] rounded-[10px] bg-white text-[18px] font-semibold transition ${
+                                safePage === totalPages
+                                    ? "text-[#c0cad0] cursor-not-allowed"
+                                    : "text-[#002940] cursor-pointer hover:underline hover:text-[#fd5448]"
+                            }`}
+                        >
+                            Next
+                        </button>
                     </div>
                 </section>
             </div>
