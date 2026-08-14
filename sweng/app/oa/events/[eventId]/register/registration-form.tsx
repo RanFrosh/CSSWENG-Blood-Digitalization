@@ -27,6 +27,7 @@ export default function RegistrationForm({
     const [selectedCity, setSelectedCity] = useState("");
     const [citySearch, setCitySearch] = useState("");
     const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+    const [ageError, setAgeError] = useState("");
 
     const selectedCityName = cities.find(c => c.id.toString() === selectedCity)?.name || "";
     const isPristine = citySearch === selectedCityName;
@@ -46,7 +47,20 @@ export default function RegistrationForm({
     );
 
     return (
-        <form action={formAction} className="mt-[0.35in] flex flex-col gap-[0.35in]">
+        <form
+            action={formAction}
+            onSubmit={(e) => {
+                const form = e.currentTarget;
+                const age = Number(new FormData(form).get("age"));
+                if (age < 0) {
+                    e.preventDefault();
+                    setAgeError("Age cannot be negative.");
+                } else {
+                    setAgeError("");
+                }
+            }}
+            className="mt-[0.35in] flex flex-col gap-[0.35in]"
+        >
             <input type="hidden" name="eventId" value={eventId} />
 
             {/* Basic Information Fields */}
@@ -95,9 +109,16 @@ export default function RegistrationForm({
                             id="age"
                             name="age"
                             type="number"
+                            min="0"
+                            onChange={() => setAgeError("")}
                             className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] text-[18px] outline-none focus:border-[#002940] transition-colors"
                             required
                         />
+                        {ageError !== "" && (
+                            <div className="bg-[#fef2f2] border-2 border-[#fd5448] text-[#fd5448] px-[12px] py-[8px] rounded-[10px]">
+                                <p className="text-[14px] font-semibold">{ageError}</p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex flex-col gap-[5px]">
