@@ -1,0 +1,332 @@
+@startuml
+title Blood Drive Digitalization System - UML Class Diagram
+
+left to right direction
+skinparam linetype ortho
+hide methods
+skinparam classAttributeIconSize 0
+
+' =========================================================
+' ENUMS
+' =========================================================
+
+enum AccessLevel {
+    donor
+    onsite_admin
+    med_prof
+    director
+    super_admin
+    lab_staff
+    recov_staff
+}
+
+enum AssessmentStatus {
+    Pending
+    Passed
+    Failed
+    "For Review"
+}
+
+enum BiologicalSex {
+    Male
+    Female
+}
+
+enum BloodType {
+    A+
+    A-
+    B+
+    B-
+    AB+
+    AB-
+    O+
+    O-
+}
+
+enum EventStatus {
+    Ongoing
+    Upcoming
+    Completed
+}
+
+enum EventRecordAction {
+    register
+    check_in
+    deferral
+    perk_claim
+    donate_success
+    donate_fail
+}
+
+enum QueueStation {
+    med_queue
+    lab_queue
+}
+
+enum RequestStatus {
+    pending
+    approved
+    rejected
+}
+
+
+' =========================================================
+' AUTHENTICATION / USER
+' =========================================================
+
+class AuthUser {
+    +id : UUID <<PK>>
+    +email : text
+}
+
+class Profile {
+    +id : UUID <<PK, FK>>
+    +name : text
+    +email : text
+    +profile_image_url : text
+    +role : AccessLevel
+    +active : boolean
+    +created_at : timestamp
+}
+
+
+' =========================================================
+' LOCATION
+' =========================================================
+
+class Province {
+    +id : bigint <<PK>>
+    +name : text
+}
+
+class City {
+    +id : bigint <<PK>>
+    +name : text
+    +province_id : bigint <<FK>>
+}
+
+
+' =========================================================
+' DONOR
+' =========================================================
+
+class Donor {
+    +id : bigint <<PK>>
+    +profile_id : UUID <<FK>>
+    +first_name : text
+    +last_name : text
+    +middle_name : text
+    +blood : BloodType
+    +birthdate : date
+    +age : integer
+    +sex : BiologicalSex
+    +height : double
+    +weight : double
+    +city_id : bigint <<FK>>
+    +zip_code : text
+    +email : text
+    +mobile_no : text
+    +active : boolean
+    +verifiedBlood : boolean
+    +medicalNote : text
+    +assessment_status : AssessmentStatus
+    +next_eligibility : date
+    +qr_token : UUID
+    +created_at : timestamp
+    +delete_datetime : timestamp
+    +delete_reason : text
+    +deleted_by : bigint
+}
+
+
+' =========================================================
+' BLOOD DRIVE EVENT
+' =========================================================
+
+class Event {
+    +id : bigint <<PK>>
+    +name : text
+    +partner : text
+    +street : text
+    +zip_code : text
+    +city_id : bigint <<FK>>
+    +event_date : date
+    +start_time : time
+    +end_time : time
+    +status : EventStatus
+    +visitors : bigint
+    +extractions : bigint
+    +produced_bags : bigint
+    +target_blood : bigint
+    +perk_claims : bigint
+    +created_at : timestamp
+    +img_url : text
+}
+
+
+' =========================================================
+' DONOR ↔ EVENT
+' =========================================================
+
+class DonorToEvent {
+    +id : bigint <<PK>>
+    +donor_id : bigint <<FK>>
+    +event_id : bigint <<FK>>
+    +is_success : boolean
+    +blood_amount : integer
+    +perk_claimed : boolean
+    +created_at : timestamp
+    +updated_at : timestamp
+}
+
+
+' =========================================================
+' STAFF ASSIGNMENT
+' =========================================================
+
+class AssignedStaff {
+    +id : bigint <<PK>>
+    +staff_id : UUID <<FK>>
+    +event_log_id : bigint <<FK>>
+}
+
+
+' =========================================================
+' EVENT QUEUE
+' =========================================================
+
+class EventQueue {
+    +id : bigint <<PK>>
+    +event_log_id : bigint <<FK>>
+    +donor_id : bigint <<FK>>
+    +staff_id : UUID <<FK>>
+    +station : QueueStation
+    +created_at : timestamp
+}
+
+
+' =========================================================
+' EVENT RECORD / AUDIT LOG
+' =========================================================
+
+class EventRecord {
+    +id : bigint <<PK>>
+    +event_log_id : bigint <<FK>>
+    +donor_id : bigint <<FK>>
+    +action : EventRecordAction
+    +time : time
+    +staff_id : UUID <<FK>>
+}
+
+
+' =========================================================
+' BLOOD BAG
+' =========================================================
+
+class BloodBag {
+    +id : bigint <<PK>>
+    +serial_number : varchar <<UNIQUE>>
+    +donor_id : bigint <<FK>>
+    +event_id : bigint <<FK>>
+    +staff_id : UUID <<FK>>
+    +blood_type : varchar
+    +volume_ml : integer
+    +collection_date : date
+    +outcome : varchar
+    +quality : varchar
+    +observations : text
+    +created_at : timestamp
+}
+
+
+' =========================================================
+' EDIT REQUEST
+' =========================================================
+
+class EditRequest {
+    +id : bigint <<PK>>
+    +blood_bag_serial : varchar <<FK>>
+    +donor_id : bigint <<FK>>
+    +event_id : bigint <<FK>>
+    +staff_id : UUID <<FK>>
+    +admin_id : UUID <<FK>>
+    +payload : jsonb
+    +status : RequestStatus
+    +admin_remarks : text
+    +created_at : timestamp
+    +updated_at : timestamp
+}
+
+
+' =========================================================
+' CORRECTED EVENT
+' =========================================================
+
+class CorrectedEvent {
+    +id : bigint <<PK>>
+    +created_at : timestamp
+    +visitors : bigint
+    +extractions : bigint
+    +produced_bags : bigint
+    +target_blood : bigint
+    +perk_claims : bigint
+    +name : text
+    +city_id : bigint <<FK>>
+    +zip_code : text
+    +street : text
+    +ref_event_id : bigint <<FK>>
+    +ref_profile_id : UUID <<FK>>
+}
+
+
+' =========================================================
+' RELATIONSHIPS
+' =========================================================
+
+' Authentication
+AuthUser "1" -- "0..1" Profile : has
+
+' Location
+Province "1" -- "0..*" City : contains
+City "1" -- "0..*" Donor : located in
+City "1" -- "0..*" Event : located in
+City "1" -- "0..*" CorrectedEvent : location
+
+' Donor profile
+Profile "1" -- "0..*" Donor : profile
+
+' Donor ↔ Event
+Donor "1" -- "0..*" DonorToEvent : participates
+Event "1" -- "0..*" DonorToEvent : includes
+
+' Staff assignment
+Profile "1" -- "0..*" AssignedStaff : assigned
+Event "1" -- "0..*" AssignedStaff : has staff
+
+' Event queue
+Event "1" -- "0..*" EventQueue : contains
+Donor "1" -- "0..*" EventQueue : enters
+Profile "1" -- "0..*" EventQueue : handled by
+
+' Event records
+Event "1" -- "0..*" EventRecord : records
+Donor "1" -- "0..*" EventRecord : subject
+Profile "1" -- "0..*" EventRecord : performed by
+
+' Blood bags
+Donor "1" -- "0..*" BloodBag : donates
+Event "1" -- "0..*" BloodBag : produces
+Profile "1" -- "0..*" BloodBag : processed by
+
+' Edit requests
+BloodBag "1" -- "0..*" EditRequest : correction request
+Donor "1" -- "0..*" EditRequest : related donor
+Event "1" -- "0..*" EditRequest : related event
+Profile "1" -- "0..*" EditRequest : submitted by
+Profile "1" -- "0..*" EditRequest : reviewed by
+
+' Corrected event
+Event "1" -- "0..*" CorrectedEvent : corrected event
+Profile "1" -- "0..*" CorrectedEvent : corrected by
+
+@enduml
