@@ -5,6 +5,7 @@ import { ReadProfile } from "@/types/profile_type";
 import { serverSupa } from "@/db/supaserver";
 import { adminSupa } from "@/db/supaadmin";
 import { orm } from "@/db/drizzle";
+import { donor } from "@/db/schemas/donor";
 import { ImpProfileGetter } from "@/queries/profile_query";
 import { helpGateKeep } from "@/utils/access/bouncer";
 import { ImpProfilesModel } from "@/app/profiles/imp_profiles_data";
@@ -80,4 +81,28 @@ export async function editOACurrentUser(input: {
     }
 
     return { success: false, message: "Please input at least one of the fields" };
+}
+
+export async function register_new_donor(formData: any) {
+    try {
+        const [newDonor] = await orm.insert(donor).values({
+            first_name: formData.fname,
+            middle_name: formData.mname,
+            last_name: formData.lname,
+            age: formData.age,
+            sex: formData.sex,
+            blood: formData.blood,
+            email: formData.email,
+            mobile_no: formData.mobile,
+            zip_code: formData.zip,
+            city_id: BigInt(3),
+            active: true, 
+            verifiedBlood: false 
+        }).returning({ id: donor.id });
+
+        return { success: true, newId: newDonor.id };
+    } catch (error: any) {
+        console.error("DONOR INSERT ERROR:", error);
+        return { success: false, message: error.message };
+    }
 }

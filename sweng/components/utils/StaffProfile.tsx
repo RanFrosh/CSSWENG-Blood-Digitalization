@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateProfileAction } from "@/actions/profile_action";
+import { changeOwnPassword } from "@/actions/register_action";
 
 export type UserProfile = {
     id: string;
@@ -29,6 +30,13 @@ export default function SharedProfile({ initialProfile }: SharedProfileProps) {
         profile_image_url: initialProfile.profile_image_url,
     });
     const [isSaving, setIsSaving] = useState(false);
+
+    const [isPasswordOpen, setPasswordOpen] = useState(false);
+    const [passwordInput, setPasswordInput] = useState("");
+    const [confirmPasswordInput, setConfirmPasswordInput] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [passwordFeedback, setPasswordFeedback] = useState<{ success: boolean; message: string } | null>(null);
+    const [isPasswordSaving, setIsPasswordSaving] = useState(false);
 
     const openEditModal = () => setEditModal(true);
     
@@ -60,6 +68,31 @@ export default function SharedProfile({ initialProfile }: SharedProfileProps) {
         } else {
             setErrorMsg(result.message);
         }
+    };
+
+    const savePassword = async () => {
+        if (passwordInput.length < 6) {
+            setPasswordFeedback({ success: false, message: "Password must be at least 6 characters" });
+            return;
+        }
+        if (passwordInput !== confirmPasswordInput) {
+            setPasswordFeedback({ success: false, message: "Passwords do not match" });
+            return;
+        }
+
+        setIsPasswordSaving(true);
+        setPasswordFeedback(null);
+
+        const result = await changeOwnPassword(passwordInput);
+
+        if (result.success) {
+            setPasswordFeedback({ success: true, message: "Password updated successfully. Redirecting to login..." });
+            setTimeout(() => router.push("/landing"), 1200);
+        } else {
+            setPasswordFeedback({ success: false, message: result.message });
+        }
+
+        setIsPasswordSaving(false);
     };
 
     const goBack = () => router.back();
@@ -152,6 +185,18 @@ export default function SharedProfile({ initialProfile }: SharedProfileProps) {
                             >
                                 Edit Account Details
                             </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setPasswordInput("");
+                                    setConfirmPasswordInput("");
+                                    setPasswordFeedback(null);
+                                    setPasswordOpen(true);
+                                }}
+                                className="min-w-[1.8in] bg-white text-[#002940] border-2 border-[#002940] px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold cursor-pointer hover:bg-[#002940] hover:text-white transition-colors"
+                            >
+                                Change Password
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -243,6 +288,111 @@ export default function SharedProfile({ initialProfile }: SharedProfileProps) {
                                 className="px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold bg-[#002940] text-white cursor-pointer hover:bg-[#013a5a] transition-colors disabled:opacity-50 flex items-center justify-center min-w-[150px]"
                             >
                                 {isSaving ? "Saving..." : "Save Changes"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {isPasswordOpen && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-[0.35in] z-50">
+                    <div className="bg-white rounded-[16px] p-[0.35in] max-w-[5in] w-full shadow-lg">
+                        <h2 className="text-[24px] font-['Montserrat'] font-bold text-[#002940]">
+                            Change Password
+                        </h2>
+
+                        {passwordFeedback && (
+                            <p className={`mt-[0.15in] text-[16px] font-semibold ${passwordFeedback.success ? "text-green-600" : "text-red-500"}`}>
+                                {passwordFeedback.message}
+                            </p>
+                        )}
+
+                        <div className="mt-[0.25in] flex flex-col gap-5">
+                            <div>
+                                <label className="block text-[18px] font-semibold text-[#002940] mb-1">
+                                    New Password
+                                </label>
+                                <div className="relative w-full">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        minLength={6}
+                                        value={passwordInput}
+                                        onChange={(e) => setPasswordInput(e.target.value)}
+                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] pr-[44px] text-[18px] outline-none focus:border-[#002940]"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword((prev) => !prev)}
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                        className="absolute right-[14px] top-1/2 -translate-y-1/2 cursor-pointer text-[#002940] hover:text-[#fd5448] transition"
+                                    >
+                                        {showPassword ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                                                <line x1="1" y1="1" x2="23" y2="23" />
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-[18px] font-semibold text-[#002940] mb-1">
+                                    Confirm New Password
+                                </label>
+                                <div className="relative w-full">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        minLength={6}
+                                        value={confirmPasswordInput}
+                                        onChange={(e) => setConfirmPasswordInput(e.target.value)}
+                                        className="w-full border-2 border-[#c0cad0] rounded-[10px] px-[12px] py-[8px] pr-[44px] text-[18px] outline-none focus:border-[#002940]"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword((prev) => !prev)}
+                                        aria-label={showPassword ? "Hide password" : "Show password"}
+                                        className="absolute right-[14px] top-1/2 -translate-y-1/2 cursor-pointer text-[#002940] hover:text-[#fd5448] transition"
+                                    >
+                                        {showPassword ? (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                                                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                                                <line x1="1" y1="1" x2="23" y2="23" />
+                                            </svg>
+                                        ) : (
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                                <circle cx="12" cy="12" r="3" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-[0.35in] flex flex-row justify-end gap-[10px]">
+                            <button
+                                type="button"
+                                onClick={() => setPasswordOpen(false)}
+                                disabled={isPasswordSaving}
+                                className="px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold bg-white border-2 border-[#002940] text-[#002940] cursor-pointer hover:bg-[#002940] hover:text-white transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={savePassword}
+                                disabled={isPasswordSaving}
+                                className="px-[20px] py-[10px] rounded-[10px] text-[18px] font-semibold bg-[#002940] text-white cursor-pointer hover:bg-[#013a5a] transition-colors disabled:opacity-50 flex items-center justify-center min-w-[150px]"
+                            >
+                                {isPasswordSaving ? "Saving..." : "Change Password"}
                             </button>
                         </div>
                     </div>
