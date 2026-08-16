@@ -67,8 +67,8 @@ export default function StaffProfilePage() {
         const email = emailInput.trim();
         const profile_image_url = profileImageInput.trim();
 
-        if (!name && !email && !profile_image_url) {
-            setFeedback({ success: false, message: "Please input at least one of the fields" });
+        if (!name || !email) {
+            setFeedback({ success: false, message: "Name and Email are required. Leave a field as-is to keep its current value." });
             return;
         }
 
@@ -76,16 +76,16 @@ export default function StaffProfilePage() {
         setFeedback(null);
 
         const result = await editOACurrentUser({
-            name: name || undefined,
-            email: email || undefined,
+            name,
+            email,
             profile_image_url,
         });
 
         if (result.success) {
             setProfile({
                 ...profile,
-                name: name || profile.name,
-                email: email || profile.email,
+                name,
+                email,
                 profile_image_url: profile_image_url || null,
             });
             setFeedback({ success: true, message: "Account details updated successfully!" });

@@ -53,11 +53,20 @@ export default function SharedProfile({ initialProfile }: SharedProfileProps) {
 
     const handleSave = async () => {
         setErrorMsg("");
+
+        const name = editForm.name.trim();
+        const email = editForm.email.trim();
+
+        if (!name || !email) {
+            setErrorMsg("Name and Email are required. Leave a field as-is to keep its current value.");
+            return;
+        }
+
         setIsSaving(true);
-        
+
         const result = await updateProfileAction({
-            name: editForm.name,
-            email: editForm.email,
+            name,
+            email,
             profile_image_url: editForm.profile_image_url || null,
         });
 
