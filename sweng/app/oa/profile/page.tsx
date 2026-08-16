@@ -72,6 +72,11 @@ export default function StaffProfilePage() {
             return;
         }
 
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setFeedback({ success: false, message: "Please enter a valid email address." });
+            return;
+        }
+
         setIsSaving(true);
         setFeedback(null);
 

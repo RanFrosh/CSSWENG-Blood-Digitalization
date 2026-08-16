@@ -62,6 +62,11 @@ export default function SharedProfile({ initialProfile }: SharedProfileProps) {
             return;
         }
 
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            setErrorMsg("Please enter a valid email address.");
+            return;
+        }
+
         setIsSaving(true);
 
         const result = await updateProfileAction({
