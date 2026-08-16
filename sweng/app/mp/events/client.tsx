@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EventStatusType } from "@/db/enums/event_status";
 import { ViewEvents } from "@/types/event_type";
@@ -35,25 +35,63 @@ export default function MPEventsClient({
     const searchParams = useSearchParams();
 
     const [searchInput, setSearchInput] = useState(currentSearch);
-
-    // Pagination
     const [currentPage, setCurrentPage] = useState(1);
+    
+    const filteredAndSortedEvents = useMemo(() => {
+        let result = [...initialEvents];
+
+        if (currentSearch) {
+            const lowerSearch = currentSearch.toLowerCase();
+            result = result.filter(e => 
+                (e.name && e.name.toLowerCase().includes(lowerSearch)) ||
+                (e.partner && e.partner.toLowerCase().includes(lowerSearch))
+            );
+        }
+
+        if (currentPartner && currentPartner !== "All Partners") {
+            result = result.filter(e => e.partner === currentPartner);
+        }
+        if (currentCity && currentCity !== "All Cities") {
+            result = result.filter(e => e.city === currentCity);
+        }
+
+        result.sort((a, b) => {
+            switch (currentSort) {
+                case "ID (Descending)":
+                    return Number(b.id) - Number(a.id);
+                case "Date (Earliest)":
+                    return new Date(a.event_date as string).getTime() - new Date(b.event_date as string).getTime();
+                case "Date (Oldest)":
+                    return new Date(b.event_date as string).getTime() - new Date(a.event_date as string).getTime();
+                case "Partner (A-Z)":
+                    return (a.partner || "").localeCompare(b.partner || "");
+                case "Partner (Z-A)":
+                    return (b.partner || "").localeCompare(a.partner || "");
+                case "Default":
+                default:
+                    return Number(a.id) - Number(b.id);
+            }
+        });
+
+        return result;
+    }, [initialEvents, currentSearch, currentPartner, currentCity, currentSort]);
+
     const itemsPerPage = 5;
-    const totalPages = Math.ceil(initialEvents.length / itemsPerPage);
+    const totalPages = Math.max(1, Math.ceil(filteredAndSortedEvents.length / itemsPerPage));
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentEvents = initialEvents.slice(startIndex, startIndex + itemsPerPage);
+    const currentEvents = filteredAndSortedEvents.slice(startIndex, startIndex + itemsPerPage);
 
     const tabs: EventTab[] = ["Ongoing", "Upcoming", "Completed", "All"];
 
     const updateFilter = (key: string, value: string) => {
         const params = new URLSearchParams(searchParams.toString());
-        
+
         if (value && value !== "All Cities" && value !== "All Partners" && value !== "Default") {
             params.set(key, value);
         } else {
             params.delete(key);
         }
-        
+
         setCurrentPage(1); // Reset page on filter change
         router.push(`?${params.toString()}`);
     };
@@ -102,7 +140,7 @@ export default function MPEventsClient({
 
     return (
         <section className="mt-[0.35in] bg-white border-2 border-[#c0cad0] rounded-[16px] p-[0.25in] shadow-sm">
-            
+
             {/* Header & Tabs */}
             <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-[1rem]">
                 <h2 className="text-[32px] font-['Montserrat'] font-bold text-[#002940]">
@@ -147,7 +185,7 @@ export default function MPEventsClient({
                     <select 
                         value={currentPartner}
                         onChange={(e) => updateFilter('partner', e.target.value)}
-                        className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                        className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer"
                     >
                         <option value="All Partners">All Partners</option>
                         {availablePartners.map((partnerName) => (
@@ -161,7 +199,7 @@ export default function MPEventsClient({
                     <select 
                         value={currentCity}
                         onChange={(e) => updateFilter('city', e.target.value)}
-                        className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white"
+                        className="w-full h-[54px] border-2 border-[#c0cad0] rounded-[10px] px-4 text-[18px] outline-none focus:border-[#002940] bg-white cursor-pointer"
                     >
                         <option value="All Cities">All Cities</option>
                         {availableCities.map((cityName) => (
@@ -193,13 +231,13 @@ export default function MPEventsClient({
                     Results
                 </h3>
                 <span className="bg-[#e2e8ec] text-[#002940] px-4 py-1 rounded-full text-[16px] font-semibold">
-                    Showing {initialEvents.length} {initialEvents.length === 1 ? 'event' : 'events'}
+                    Showing {filteredAndSortedEvents.length} {filteredAndSortedEvents.length === 1 ? 'event' : 'events'}
                 </span>
             </div>
 
             {/* Event Cards List */}
             <div className="mt-[0.25in] flex flex-col gap-[0.25in]">
-                {initialEvents.length === 0 ? (
+                {filteredAndSortedEvents.length === 0 ? (
                     <div className="bg-[#f9fdff] border-2 border-dashed border-[#c0cad0] rounded-[16px] py-[0.5in] text-center">
                         <p className="text-[18px] font-semibold text-[#002940]">
                             No events match your criteria.
@@ -219,7 +257,7 @@ export default function MPEventsClient({
             </div>
 
             {/* Pagination */}
-            {initialEvents.length > 0 && (
+            {filteredAndSortedEvents.length > 0 && (
                 <div className="mt-5 flex flex-row items-center justify-between gap-5 border-t-2 border-[#c0cad0] pt-4">
                     <button
                         type="button"
@@ -230,7 +268,7 @@ export default function MPEventsClient({
                         Previous
                     </button>
                     <p className="text-[18px] text-[#002940] font-semibold">
-                        Page {currentPage} of {totalPages || 1}
+                        Page {currentPage} of {totalPages}
                     </p>
                     <button
                         type="button"
