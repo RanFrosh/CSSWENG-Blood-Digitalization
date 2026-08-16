@@ -74,6 +74,12 @@ export default function SharedProfile({ initialProfile }: SharedProfileProps) {
         
         if (result.success) {
             setEditModal(false);
+            setEditForm({
+                name,
+                email,
+                profile_image_url: editForm.profile_image_url || "",
+            });
+            router.refresh();
         } else {
             setErrorMsg(result.message);
         }
